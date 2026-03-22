@@ -1,0 +1,86 @@
+# ==================== PyCharm ====================
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# ==================== Python ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==================== Виртуальное окружение ====================
+venv/
+ENV/
+env/
+.venv/
+
+# ==================== Environment variables ====================
+.env
+.env.local
+.env.*.local
+
+# ==================== Node.js (если используется) ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==================== Сборка статического сайта ====================
+dist/
+build/
+_site/
+public/
+*.log
+
+# ==================== Системные файлы ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ==================== Редакторы ====================
+*.swp
+*.swo
+*~
+.vscode/
+
+# ==================== Логи и временные файлы ====================
+*.log
+logs/
+tmp/
+temp/
+.cache/
+
+# ==================== Конфиденциальные данные ====================
+*.key
+*.pem
+*.crt
+secrets/
+config.local.*
+
+# ==================== Архивы ====================
+*.zip
+*.tar.gz
+*.rar
