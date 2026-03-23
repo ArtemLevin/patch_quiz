@@ -251,10 +251,6 @@
             transition:transform .05s ease, opacity .2s ease;
         }
         button:active{transform:translateY(1px)}
-        button:disabled{
-            opacity:.65;
-            cursor:not-allowed;
-        }
         .primary{background:var(--accent); color:#fff}
         .secondary{background:#eef3f8; color:var(--accent)}
         .name-row{
@@ -326,18 +322,6 @@
         .muted{color:var(--muted)}
         .center{
             text-align:center;
-        }
-        .send-status{
-            margin-top:14px;
-            text-align:center;
-            font-size:.95rem;
-            min-height:24px;
-        }
-        .send-status.ok{
-            color:var(--ok);
-        }
-        .send-status.bad{
-            color:var(--bad);
         }
         @media (max-width:680px){
             .wrap{padding:18px 14px 56px}
@@ -575,10 +559,9 @@
             <input id="studentName" type="text" placeholder="Введите имя и фамилию" />
         </div>
         <div class="actions">
-            <button class="primary" id="finishBtn" type="button">Завершить тестирование</button>
+            <button class="primary" id="finishBtn">Завершить тестирование</button>
             <button class="secondary" id="resetBtn" type="button">Сбросить ответы</button>
         </div>
-        <div id="sendStatus" class="send-status"></div>
     </section>
 
     <section class="card answer-box">
@@ -617,9 +600,6 @@
 </div>
 
 <script>
-    // Сюда вставьте ваш адрес Formspree
-    const FORMSPREE_ENDPOINT = "https://formspree.io/f/ВАШ_ID";
-
     const optionSets = {
         1: [
             "арифметическую последовательность",
@@ -674,7 +654,6 @@
     const scoreValue = document.getElementById('scoreValue');
     const scorePercent = document.getElementById('scorePercent');
     const studentNameInput = document.getElementById('studentName');
-    const sendStatus = document.getElementById('sendStatus');
 
     function shuffle(arr){
         const a = [...arr];
@@ -708,59 +687,30 @@
         progressText.textContent = `Выполнено: ${done} из ${total} вопросов`;
     }
 
-    function escapeHtml(str){
-        return String(str)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
-    }
-
-    function collectResults(){
+    function buildResults(){
         let score = 0;
-        const answers = [];
+        resultsTableBody.innerHTML = '';
 
         selects.forEach(select => {
-            const id = Number(select.dataset.id);
+            const id = select.dataset.id;
             const userAnswer = select.value || '—';
             const correct = select.dataset.correct;
             const ok = userAnswer === correct;
             if(ok) score++;
 
-            answers.push({
-                question: id,
-                userAnswer,
-                correctAnswer: correct,
-                isCorrect: ok
-            });
-        });
-
-        const percent = Math.round(score / total * 100);
-
-        return {
-            score,
-            percent,
-            answers
-        };
-    }
-
-    function renderResults(resultData){
-        resultsTableBody.innerHTML = '';
-
-        resultData.answers.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${item.question}</td>
-                <td>${escapeHtml(item.userAnswer)}</td>
-                <td>${escapeHtml(item.correctAnswer)}</td>
-                <td class="${item.isCorrect ? 'ok' : 'bad'}">${item.isCorrect ? 'Верно' : 'Ошибка'}</td>
-            `;
+          <td>${id}</td>
+          <td>${escapeHtml(userAnswer)}</td>
+          <td>${escapeHtml(correct)}</td>
+          <td class="${ok ? 'ok' : 'bad'}">${ok ? 'Верно' : 'Ошибка'}</td>
+        `;
             resultsTableBody.appendChild(tr);
         });
 
-        scoreValue.textContent = `${resultData.score}/${total}`;
-        scorePercent.textContent = `${resultData.percent}%`;
+        const percent = Math.round(score / total * 100);
+        scoreValue.textContent = `${score}/${total}`;
+        scorePercent.textContent = `${percent}%`;
         resultsBlock.style.display = 'block';
 
         if (window.MathJax && window.MathJax.typesetPromise) {
@@ -772,99 +722,32 @@
         }
     }
 
-    function formatAnswersForEmail(answers){
-        return answers.map(item => {
-            return [
-                `Вопрос №${item.question}`,
-                `Ответ ученика: ${item.userAnswer}`,
-                `Правильный ответ: ${item.correctAnswer}`,
-                `Статус: ${item.isCorrect ? 'Верно' : 'Ошибка'}`
-            ].join('\n');
-        }).join('\n\n--------------------\n\n');
-    }
-
-    async function sendResultsToFormspree(payload){
-        const formData = new FormData();
-
-        // Обычные поля — так их удобно смотреть в письме
-        formData.append('student_name', payload.studentName);
-        formData.append('score', `${payload.score}/${payload.total}`);
-        formData.append('percent', `${payload.percent}%`);
-        formData.append('quiz_title', payload.quizTitle);
-        formData.append('submitted_at', payload.submittedAt);
-        formData.append('answers_text', payload.answersText);
-
-        // Дополнительно отправляем JSON целиком — пригодится для хранения
-        formData.append('answers_json', JSON.stringify(payload.answers, null, 2));
-
-        // Тема письма в Formspree
-        formData.append('_subject', `Результат теста: ${payload.studentName} — ${payload.score}/${payload.total}`);
-
-        const response = await fetch(FORMSPREE_ENDPOINT, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Не удалось отправить результаты.');
-        }
-
-        return response.json().catch(() => ({}));
+    function escapeHtml(str){
+        return String(str)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
     }
 
     selects.forEach(select => {
         select.addEventListener('change', updateProgress);
     });
 
-    finishBtn.addEventListener('click', async () => {
+    finishBtn.addEventListener('click', () => {
         const name = studentNameInput.value.trim();
-
         if(!name){
             alert('Пожалуйста, укажите имя перед завершением тестирования.');
             studentNameInput.focus();
             return;
         }
-
-        const resultData = collectResults();
-        renderResults(resultData);
-
-        const payload = {
-            studentName: name,
-            score: resultData.score,
-            total,
-            percent: resultData.percent,
-            quizTitle: document.title,
-            submittedAt: new Date().toLocaleString('ru-RU'),
-            answers: resultData.answers,
-            answersText: formatAnswersForEmail(resultData.answers)
-        };
-
-        sendStatus.textContent = 'Идёт отправка результатов...';
-        sendStatus.className = 'send-status';
-        finishBtn.disabled = true;
-
-        try {
-            await sendResultsToFormspree(payload);
-            sendStatus.textContent = 'Результаты успешно отправлены.';
-            sendStatus.className = 'send-status ok';
-        } catch (error) {
-            console.error(error);
-            sendStatus.textContent = 'Не удалось отправить результаты. Проверьте настройки Formspree.';
-            sendStatus.className = 'send-status bad';
-        } finally {
-            finishBtn.disabled = false;
-        }
+        buildResults();
     });
 
     resetBtn.addEventListener('click', () => {
         selects.forEach(s => s.value = '');
         resultsBlock.style.display = 'none';
-        sendStatus.textContent = '';
-        sendStatus.className = 'send-status';
-        studentNameInput.value = '';
         updateProgress();
         window.scrollTo({top:0, behavior:'smooth'});
     });
