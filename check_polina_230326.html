@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тест: метод координат в стереометрии</title>
+    <style>
+        :root {
+            --bg: #f6fbfb;
+            --card: #ffffff;
+            --accent: #0b7a7a;
+            --accent-dark: #075555;
+            --text: #1f2a2a;
+            --muted: #5d6b6b;
+            --border: #d7e7e7;
+            --ok: #1b8f4d;
+            --bad: #c03b3b;
+            --warn: #9a6b00;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(180deg, #f8fcfc 0%, #eef7f7 100%);
+            color: var(--text);
+            line-height: 1.55;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 32px 16px 48px;
+        }
+
+        .hero {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            margin: 0 0 8px;
+            color: var(--accent-dark);
+            font-size: 32px;
+        }
+
+        .hero p {
+            margin: 8px 0;
+            color: var(--muted);
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+            justify-content: center;
+        }
+
+        .chip {
+            background: #eef9f9;
+            border: 1px solid #cae7e7;
+            color: var(--accent-dark);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.035);
+            margin-bottom: 18px;
+        }
+
+        .question {
+            margin-bottom: 28px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid #e8f0f0;
+        }
+
+        .question:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .q-head {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .q-num {
+            min-width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .q-title {
+            font-size: 19px;
+            font-weight: bold;
+            color: var(--accent-dark);
+            margin-top: 3px;
+        }
+
+        .q-text {
+            margin: 10px 0 12px;
+        }
+
+        .formula {
+            background: #f3f8f8;
+            border: 1px solid #ddeaea;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin: 12px auto;
+            text-align: center;
+            font-family: "Courier New", monospace;
+            white-space: pre-wrap;
+            max-width: 520px;
+        }
+
+        .answers {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        label.option {
+            display: block;
+            border: 1px solid var(--border);
+            background: #fcfefe;
+            border-radius: 14px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+
+        label.option:hover {
+            border-color: #a8d5d5;
+            background: #f4fbfb;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: translateY(1px);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 26px;
+            justify-content: center;
+        }
+
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.18s ease;
+        }
+
+        .primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .primary:hover {
+            background: var(--accent-dark);
+        }
+
+        .secondary {
+            background: #edf5f5;
+            color: var(--accent-dark);
+            border: 1px solid var(--border);
+        }
+
+        .secondary:hover {
+            background: #e3efef;
+        }
+
+        .result {
+            margin-top: 24px;
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: #fbfefe;
+            display: none;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-dark);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .summary {
+            margin: 8px 0 0;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .review {
+            margin-top: 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .review-item {
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            background: white;
+        }
+
+        .review-item.ok {
+            border-left: 6px solid var(--ok);
+        }
+
+        .review-item.bad {
+            border-left: 6px solid var(--bad);
+        }
+
+        .review-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .explain {
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .note {
+            color: var(--warn);
+            font-size: 14px;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .copy-wrap {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .copy-status {
+            text-align: center;
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 26px;
+            }
+
+            .q-title {
+                font-size: 17px;
+            }
+
+            .container {
+                padding-top: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <section class="hero">
+        <h1>Тест по теме «Метод координат в стереометрии»</h1>
+        <p>Задания составлены по чек-листу: координаты точек и векторов, деление отрезка, коллинеарность, скалярное произведение, угол между прямыми, уравнение плоскости.</p>
+        <p>Уровень: <strong>средний</strong>. Формат: 10 тестовых вопросов с одним правильным ответом.</p>
+        <div class="meta">
+            <div class="chip">10 вопросов</div>
+            <div class="chip">1 правильный ответ</div>
+            <div class="chip">автоматическая проверка</div>
+            <div class="chip">разбор после завершения</div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <form id="quizForm">
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">1</div>
+                    <div class="q-title">Координаты вектора</div>
+                </div>
+                <div class="q-text">
+                    Даны точки <strong>A(1, -2, 4)</strong> и <strong>B(5, 1, -3)</strong>.
+                    Чему равны координаты <strong>вектора AB</strong>?
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q1" value="a"> (-4, -3, 7)</label>
+                    <label class="option"><input type="radio" name="q1" value="b"> (4, 3, -7)</label>
+                    <label class="option"><input type="radio" name="q1" value="c"> (6, -1, 1)</label>
+                    <label class="option"><input type="radio" name="q1" value="d"> (4, -3, -7)</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">2</div>
+                    <div class="q-title">Длина вектора</div>
+                </div>
+                <div class="q-text">
+                    Для вектора <strong>a = (2, -3, 6)</strong> найдите его длину.
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q2" value="a"> 5</label>
+                    <label class="option"><input type="radio" name="q2" value="b"> √41</label>
+                    <label class="option"><input type="radio" name="q2" value="c"> 7,5</label>
+                    <label class="option"><input type="radio" name="q2" value="d"> 7</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">3</div>
+                    <div class="q-title">Середина отрезка</div>
+                </div>
+                <div class="q-text">
+                    Найдите координаты середины отрезка с концами
+                    <strong>A(-2, 4, 6)</strong> и <strong>B(8, -2, 0)</strong>.
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q3" value="a"> (5, 2, 6)</label>
+                    <label class="option"><input type="radio" name="q3" value="b"> (3, -1, 3)</label>
+                    <label class="option"><input type="radio" name="q3" value="c"> (3, 1, 3)</label>
+                    <label class="option"><input type="radio" name="q3" value="d"> (6, 1, 3)</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">4</div>
+                    <div class="q-title">Деление отрезка в отношении</div>
+                </div>
+                <div class="q-text">
+                    Точка <strong>M</strong> делит отрезок <strong>AB</strong> в отношении
+                    <strong>AM : MB = 2 : 3</strong>, где
+                    <strong>A(1, 2, 5)</strong>, <strong>B(6, 7, 0)</strong>.
+                    Найдите координаты точки <strong>M</strong>.
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q4" value="a"> (5, 6, 1)</label>
+                    <label class="option"><input type="radio" name="q4" value="b"> (2, 3, 4)</label>
+                    <label class="option"><input type="radio" name="q4" value="c"> (3, 4, 3)</label>
+                    <label class="option"><input type="radio" name="q4" value="d"> (4, 5, 2)</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">5</div>
+                    <div class="q-title">Коллинеарность векторов</div>
+                </div>
+                <div class="q-text">Какие из векторов коллинеарны?</div>
+                <div class="formula">(1) (2, -4, 6)
+                    (2) (-1, 2, -3)
+                    (3) (2, 4, 6)
+                    (4) (0, 2, 3)</div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q5" value="a"> Только (2) и (4)</label>
+                    <label class="option"><input type="radio" name="q5" value="b"> Только (1) и (3)</label>
+                    <label class="option"><input type="radio" name="q5" value="c"> Только (1) и (2)</label>
+                    <label class="option"><input type="radio" name="q5" value="d"> Только (3) и (4)</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">6</div>
+                    <div class="q-title">Скалярное произведение</div>
+                </div>
+                <div class="q-text">
+                    Найдите скалярное произведение векторов
+                    <strong>a = (1, 3, -2)</strong> и
+                    <strong>b = (4, -1, 5)</strong>.
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q6" value="a"> 9</label>
+                    <label class="option"><input type="radio" name="q6" value="b"> 6</label>
+                    <label class="option"><input type="radio" name="q6" value="c"> -9</label>
+                    <label class="option"><input type="radio" name="q6" value="d"> -6</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">7</div>
+                    <div class="q-title">Косинус угла между векторами</div>
+                </div>
+                <div class="q-text">
+                    Найдите <strong>cos φ</strong> между векторами
+                    <strong>a = (1, 2, 2)</strong> и
+                    <strong>b = (2, 1, 2)</strong>.
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q7" value="a"> 5/9</label>
+                    <label class="option"><input type="radio" name="q7" value="b"> 8/9</label>
+                    <label class="option"><input type="radio" name="q7" value="c"> 1/9</label>
+                    <label class="option"><input type="radio" name="q7" value="d"> 7/9</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">8</div>
+                    <div class="q-title">Угол между скрещивающимися прямыми</div>
+                </div>
+                <div class="q-text">
+                    Две скрещивающиеся прямые имеют направляющие векторы
+                    <strong>(1, 0, 1)</strong> и <strong>(1, 1, 0)</strong>.
+                    Чему равен косинус угла между этими прямыми?
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q8" value="a"> √2/2</label>
+                    <label class="option"><input type="radio" name="q8" value="b"> 1/3</label>
+                    <label class="option"><input type="radio" name="q8" value="c"> 0</label>
+                    <label class="option"><input type="radio" name="q8" value="d"> 1/2</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">9</div>
+                    <div class="q-title">Уравнение плоскости</div>
+                </div>
+                <div class="q-text">
+                    Какая из плоскостей проходит через точки
+                    <strong>A(0, 0, 0)</strong>, <strong>B(2, 0, 0)</strong>, <strong>C(0, 3, 0)</strong>?
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q9" value="a"> x + y + z = 0</label>
+                    <label class="option"><input type="radio" name="q9" value="b"> x = 0</label>
+                    <label class="option"><input type="radio" name="q9" value="c"> z = 0</label>
+                    <label class="option"><input type="radio" name="q9" value="d"> y = 0</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="q-head">
+                    <div class="q-num">10</div>
+                    <div class="q-title">Нормаль к плоскости</div>
+                </div>
+                <div class="q-text">
+                    Для плоскости <strong>2x - 3y + 6z - 5 = 0</strong> выберите координаты одного из её векторов нормали.
+                </div>
+                <div class="answers">
+                    <label class="option"><input type="radio" name="q10" value="a"> (-5, 2, -3)</label>
+                    <label class="option"><input type="radio" name="q10" value="b"> (1, 1, 1)</label>
+                    <label class="option"><input type="radio" name="q10" value="c"> (2, -3, -5)</label>
+                    <label class="option"><input type="radio" name="q10" value="d"> (2, -3, 6)</label>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="primary" id="checkBtn">Проверить</button>
+                <button type="button" class="secondary" id="resetBtn">Сбросить ответы</button>
+            </div>
+
+            <div class="note">
+                Чтобы получить полный разбор, нажмите «Проверить».
+            </div>
+        </form>
+    </section>
+
+    <section class="result panel" id="resultBox">
+        <div class="score" id="scoreText"></div>
+        <div class="summary" id="summaryText"></div>
+        <div class="review" id="review"></div>
+        <div class="copy-wrap">
+            <button type="button" class="secondary" id="copyBtn">Скопировать результаты</button>
+        </div>
+        <div class="copy-status" id="copyStatus"></div>
+    </section>
+</div>
+
+<script>
+    const quizData = [
+        {
+            name: "q1",
+            correct: "b",
+            title: "1. Координаты вектора",
+            explanation: "Вектор AB = B - A = (5 - 1, 1 - (-2), -3 - 4) = (4, 3, -7)."
+        },
+        {
+            name: "q2",
+            correct: "d",
+            title: "2. Длина вектора",
+            explanation: "|a| = √(2² + (-3)² + 6²) = √(4 + 9 + 36) = √49 = 7."
+        },
+        {
+            name: "q3",
+            correct: "c",
+            title: "3. Середина отрезка",
+            explanation: "Середина: ((-2 + 8)/2, (4 + (-2))/2, (6 + 0)/2) = (3, 1, 3)."
+        },
+        {
+            name: "q4",
+            correct: "c",
+            title: "4. Деление отрезка в отношении",
+            explanation: "Если AM : MB = 2 : 3, то M = (3A + 2B) / 5. Получаем ((3·1 + 2·6)/5, (3·2 + 2·7)/5, (3·5 + 2·0)/5) = (3, 4, 3)."
+        },
+        {
+            name: "q5",
+            correct: "c",
+            title: "5. Коллинеарность",
+            explanation: "(-1, 2, -3) = (-1/2)·(2, -4, 6), значит векторы (1) и (2) коллинеарны."
+        },
+        {
+            name: "q6",
+            correct: "c",
+            title: "6. Скалярное произведение",
+            explanation: "(1, 3, -2)·(4, -1, 5) = 1·4 + 3·(-1) + (-2)·5 = 4 - 3 - 10 = -9."
+        },
+        {
+            name: "q7",
+            correct: "b",
+            title: "7. Косинус угла между векторами",
+            explanation: "Скалярное произведение равно 1·2 + 2·1 + 2·2 = 8. Длины обоих векторов равны 3, поэтому cos φ = 8 / (3·3) = 8/9."
+        },
+        {
+            name: "q8",
+            correct: "d",
+            title: "8. Угол между скрещивающимися прямыми",
+            explanation: "Угол между скрещивающимися прямыми ищем по направляющим векторам. cos = (1·1 + 0·1 + 1·0) / (√2 · √2) = 1/2."
+        },
+        {
+            name: "q9",
+            correct: "c",
+            title: "9. Уравнение плоскости",
+            explanation: "У всех трёх точек координата z равна 0, значит они лежат в плоскости z = 0."
+        },
+        {
+            name: "q10",
+            correct: "d",
+            title: "10. Нормаль к плоскости",
+            explanation: "Для плоскости Ax + By + Cz + D = 0 вектор нормали имеет координаты (A, B, C). Здесь это (2, -3, 6)."
+        }
+    ];
+
+    const checkBtn = document.getElementById("checkBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const resultBox = document.getElementById("resultBox");
+    const scoreText = document.getElementById("scoreText");
+    const summaryText = document.getElementById("summaryText");
+    const review = document.getElementById("review");
+    const copyStatus = document.getElementById("copyStatus");
+    const form = document.getElementById("quizForm");
+
+    let latestReportText = "";
+
+    function getSelectedValue(name) {
+        const checked = document.querySelector(`input[name="${name}"]:checked`);
+        return checked ? checked.value : null;
+    }
+
+    function optionLetterToText(letter) {
+        return letter ? letter.toUpperCase() : "—";
+    }
+
+    function buildSummary(score, total) {
+        if (score === total) {
+            return "Отличный результат. Тема усвоена очень уверенно.";
+        }
+        if (score >= 8) {
+            return "Очень хороший результат. Есть отдельные моменты для шлифовки.";
+        }
+        if (score >= 6) {
+            return "Хорошая база есть, но стоит повторить формулы деления отрезка, скалярное произведение и плоскости.";
+        }
+        if (score >= 4) {
+            return "Средний результат. Нужна повторная тренировка ключевых алгоритмов.";
+        }
+        return "Пока тема усвоена слабо. Лучше ещё раз пройти чек-лист и решить похожие задачи.";
+    }
+
+    function buildReportText(score, total) {
+        const lines = [];
+        lines.push("Результаты теста по теме «Метод координат в стереометрии»");
+        lines.push(`Итог: ${score} из ${total}`);
+        lines.push(buildSummary(score, total));
+        lines.push("");
+
+        quizData.forEach((item) => {
+            const userAnswer = getSelectedValue(item.name);
+            const isCorrect = userAnswer === item.correct;
+            lines.push(item.title);
+            lines.push(`Ваш ответ: ${optionLetterToText(userAnswer)}`);
+            lines.push(`Правильный ответ: ${optionLetterToText(item.correct)}`);
+            lines.push(`Статус: ${isCorrect ? "верно" : "неверно"}`);
+            lines.push(`Пояснение: ${item.explanation}`);
+            lines.push("");
+        });
+
+        return lines.join("\n");
+    }
+
+    checkBtn.addEventListener("click", () => {
+        let score = 0;
+        review.innerHTML = "";
+        copyStatus.textContent = "";
+
+        quizData.forEach((item) => {
+            const userAnswer = getSelectedValue(item.name);
+            const isCorrect = userAnswer === item.correct;
+
+            if (isCorrect) {
+                score++;
+            }
+
+            const block = document.createElement("div");
+            block.className = `review-item ${isCorrect ? "ok" : "bad"}`;
+
+            const chosenText = userAnswer
+            ? `Ваш ответ: ${userAnswer.toUpperCase()}`
+            : "Ваш ответ: не выбран";
+
+            const correctText = `Правильный ответ: ${item.correct.toUpperCase()}`;
+
+            block.innerHTML = `
+          <div class="review-title">${item.title}</div>
+          <div>${chosenText}</div>
+          <div>${correctText}</div>
+          <div class="explain">${item.explanation}</div>
+        `;
+
+            review.appendChild(block);
+        });
+
+        resultBox.style.display = "block";
+        scoreText.textContent = `Результат: ${score} из ${quizData.length}`;
+        summaryText.textContent = buildSummary(score, quizData.length);
+        latestReportText = buildReportText(score, quizData.length);
+
+        resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    resetBtn.addEventListener("click", () => {
+        form.reset();
+        resultBox.style.display = "none";
+        review.innerHTML = "";
+        scoreText.textContent = "";
+        summaryText.textContent = "";
+        copyStatus.textContent = "";
+        latestReportText = "";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    copyBtn.addEventListener("click", async () => {
+        if (!latestReportText) {
+            copyStatus.textContent = "Сначала проверьте тест, чтобы сформировать результаты для копирования.";
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(latestReportText);
+            copyStatus.textContent = "Результаты скопированы в буфер обмена.";
+        } catch (error) {
+            copyStatus.textContent = "Не удалось автоматически скопировать результаты. Попробуйте ещё раз в браузере с поддержкой буфера обмена.";
+        }
+    });
+</script>
+</body>
+</html>
