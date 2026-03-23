@@ -1,1272 +1,882 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            background-color: white; /* Ensure the iframe has a white background */
-        }
-
-
-    </style>
-</head>
-<body>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patch Quiz: Планиметрия</title>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patch Quiz: Кредит с поэтапным начислением процентов</title>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
     <style>
-        :root {
-            --accent: #008080;
-            --dark-accent: #004D4D;
-            --text-gray: #333333;
-            --light-gray: #F5F5F5;
-            --success: #28a745;
-            --error: #dc3545;
-            --bg-color: #ffffff;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: var(--text-gray);
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: var(--bg-color);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            min-height: 100vh;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 1rem;
-        }
-
-        h1 {
-            color: var(--dark-accent);
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        h2 {
-            color: var(--accent);
-            border-left: 5px solid var(--accent);
-            padding-left: 1rem;
-            margin-top: 2rem;
-        }
-
-        h3 {
-            color: var(--text-gray);
-            font-weight: bold;
-            margin-top: 1.5rem;
-        }
-
-        p, li {
-            font-size: 1.1rem;
-        }
-
-        .diagram-container {
-            text-align: center;
-            margin: 2rem 0;
-            background: #fff;
-            padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        .diagram-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-
-        .quiz-item {
-            background-color: var(--light-gray);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .quiz-item.correct {
-            border-left-color: var(--success);
-            background-color: #e8f5e9;
-        }
-
-        .quiz-item.incorrect {
-            border-left-color: var(--error);
-            background-color: #ffebee;
-        }
-
-        .quiz-item.pending {
-            border-left-color: #ccc;
-        }
-
-        select {
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            background-color: white;
-            cursor: pointer;
-            transition: border-color 0.2s;
-            margin: 0.5rem 0;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        select:disabled {
-            background-color: #e0e0e0;
-            cursor: not-allowed;
-        }
-
-        .math-block {
-            margin: 1rem 0;
-            overflow-x: auto;
-        }
-
-        .feedback {
-            margin-top: 0.5rem;
-            font-weight: bold;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .feedback.show {
-            display: block;
-        }
-
-        .feedback.success {
-            color: var(--success);
-        }
-
-        .feedback.error {
-            color: var(--error);
-        }
-
-        .intro-box {
-            background-color: #e0f2f1;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            border: 1px solid var(--accent);
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 1rem 0;
-            z-index: 100;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 2rem;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 12px;
-            background-color: #e0e0e0;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--dark-accent));
-            width: 0%;
-            transition: width 0.3s ease;
-            border-radius: 6px;
-        }
-
-        .progress-text {
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-gray);
-        }
-
-        /* Submit Button */
-        .submit-section {
-            text-align: center;
-            margin: 3rem 0;
-            padding: 2rem;
-            background: linear-gradient(135deg, var(--light-gray), #fff);
-            border-radius: 12px;
-            border: 2px solid var(--accent);
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, var(--accent), var(--dark-accent));
-            color: white;
-            border: none;
-            padding: 1rem 3rem;
-            font-size: 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-weight: bold;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 128, 128, 0.4);
-        }
-
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .submit-info {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 12px;
-            max-width: 700px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 2rem;
-            position: relative;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-            transition: color 0.2s;
-        }
-
-        .modal-close:hover {
-            color: var(--error);
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--accent);
-        }
-
-        .modal-header img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 1rem;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            border: none;
-            padding: 0;
-        }
-
-        .score-display {
-            text-align: center;
-            margin: 1.5rem 0;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--light-gray), #fff);
-            border-radius: 8px;
-            border: 2px solid var(--accent);
-        }
-
-        .score-number {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--dark-accent);
-        }
-
-        .score-label {
-            font-size: 1.1rem;
-            color: #666;
-        }
-
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
-        }
-
-        .results-table th,
-        .results-table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .results-table th {
-            background-color: var(--light-gray);
-            color: var(--dark-accent);
-        }
-
-        .results-table tr.correct {
-            background-color: #e8f5e9;
-        }
-
-        .results-table tr.incorrect {
-            background-color: #ffebee;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 1.5rem;
-        }
-
-        .action-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .action-btn.email {
-            background: var(--accent);
-            color: white;
-        }
-
-        .action-btn.copy {
-            background: var(--text-gray);
-            color: white;
-        }
-
-        .action-btn.print {
-            background: #666;
-            color: white;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .student-info {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: var(--light-gray);
-            border-radius: 8px;
-        }
-
-        .student-info label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-
-        .student-info input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .student-info input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        /* Hidden textarea for copy */
-        #copyTextarea {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-            opacity: 0;
-        }
-
-        /* Toast notification */
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--dark-accent);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            z-index: 2000;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            opacity: 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background: var(--success);
-        }
-
-        .toast.error {
-            background: var(--error);
-        }
-
-        footer {
-            margin-top: 4rem;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #777;
-            border-top: 1px solid #eee;
-            padding-top: 1rem;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 1rem;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-            select {
-                width: 100%;
-            }
-            .action-buttons {
-                flex-direction: column;
-            }
-            .action-btn {
-                justify-content: center;
-            }
-        }
-
-        @media print {
-            .submit-section,
-            .progress-container,
-            .action-buttons,
-            .modal-close,
-            .toast {
-                display: none !important;
-            }
-            .modal-overlay {
-                position: static;
-                background: none;
-                display: block !important;
-            }
-            .modal {
-                box-shadow: none;
-                max-height: none;
-                overflow: visible;
-            }
+        :root{
+            --card:#ffffff;
+            --text:#1f2937;
+            --muted:#6b7280;
+            --line:#d7dee8;
+            --accent:#345e8c;
+            --accent-soft:#eef4fa;
+            --ok:#1f7a45;
+            --bad:#b23a3a;
+            --shadow:0 10px 30px rgba(31,41,55,.08);
+            --radius:18px;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+            color:var(--text);
+            background:linear-gradient(180deg,#f7f9fc 0%, #eef3f8 100%);
+            line-height:1.7;
+        }
+        .wrap{
+            max-width:980px;
+            margin:0 auto;
+            padding:32px 20px 80px;
+        }
+        .hero,.card{
+            background:var(--card);
+            border:1px solid rgba(52,94,140,.10);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+        }
+        .hero{
+            padding:32px 28px 22px;
+            margin-bottom:20px;
+            position:relative;
+            overflow:hidden;
+            text-align:center;
+        }
+        .hero::before{
+            content:"";
+            position:absolute;
+            left:0; top:0; bottom:0;
+            width:6px;
+            background:linear-gradient(180deg,var(--accent),#5d83ae);
+        }
+        h1,h2,h3{
+            margin:0 0 12px;
+            color:var(--accent);
+            font-weight:700;
+            letter-spacing:.1px;
+        }
+        h1{font-size:2rem}
+        h2{font-size:1.35rem}
+        h3{font-size:1.08rem}
+        .section-title{
+            text-align:center;
+        }
+        .subtitle{
+            font-size:1.02rem;
+            margin-bottom:12px;
+        }
+        .meta{
+            color:var(--muted);
+            font-size:.96rem;
+            margin-bottom:10px;
+        }
+        .progress-line{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            margin-top:18px;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+        .progress-bar{
+            flex:1 1 260px;
+            max-width:520px;
+            height:10px;
+            border-radius:999px;
+            background:#e7edf5;
+            overflow:hidden;
+        }
+        .progress-fill{
+            height:100%;
+            width:0%;
+            background:linear-gradient(90deg,var(--accent),#6f93bb);
+            transition:width .25s ease;
+        }
+        .progress-text{
+            font-size:.95rem;
+            color:var(--muted);
+            white-space:nowrap;
+        }
+        .card{
+            padding:24px 24px 18px;
+            margin-bottom:18px;
+        }
+        .lead{
+            margin:0 0 8px;
+        }
+        .note{
+            background:var(--accent-soft);
+            border-left:4px solid var(--accent);
+            padding:12px 14px;
+            border-radius:12px;
+            color:#274868;
+            margin-top:14px;
+            text-align:center;
+        }
+        .task-text ul{
+            margin-top:10px;
+            margin-bottom:10px;
+        }
+        .draw-box{
+            background:#fbfcff;
+            border:1px solid var(--line);
+            border-radius:18px;
+            padding:18px;
+            overflow:auto;
+        }
+        .schema-line{
+            display:flex;
+            gap:18px;
+            align-items:center;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:10px;
+        }
+        .node{
+            flex:1 1 120px;
+            max-width:140px;
+            min-width:120px;
+            text-align:center;
+            position:relative;
+            padding:8px 6px;
+        }
+        .node:not(:last-child)::after{
+            content:"";
+            position:absolute;
+            top:37px;
+            right:-9px;
+            width:18px;
+            border-top:2px solid #8aa7c6;
+        }
+        .year{
+            font-size:.92rem;
+            color:var(--muted);
+            margin-bottom:8px;
+            text-align:center;
+        }
+        .debt{
+            font-weight:700;
+            color:var(--accent);
+            font-size:1rem;
+            text-align:center;
+        }
+        .arrow-note{
+            margin-top:12px;
+            color:var(--muted);
+            font-size:.93rem;
+            text-align:center;
+        }
+        .solution-step{
+            margin:0 0 18px;
+            padding:16px 18px;
+            border:1px solid var(--line);
+            border-radius:14px;
+            background:#fcfdff;
+        }
+        .step-label{
+            color:var(--accent);
+            font-weight:700;
+            margin-bottom:8px;
+            text-align:center;
+        }
+        .center-formula{
+            text-align:center;
+            margin:10px 0;
+        }
+        select.patch{
+            appearance:none;
+            -webkit-appearance:none;
+            -moz-appearance:none;
+            border:1px solid #bfd0e2;
+            background:
+            linear-gradient(180deg,#fff,#f7fbff) padding-box,
+            linear-gradient(180deg,#dbe7f3,#bfd0e2) border-box;
+            color:var(--text);
+            border-radius:10px;
+            padding:8px 38px 8px 12px;
+            font-size:.98rem;
+            min-width:240px;
+            vertical-align:middle;
+            margin:0 6px;
+            background-image:
+            linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+            linear-gradient(135deg, var(--accent) 50%, transparent 50%),
+            linear-gradient(to right, transparent, transparent);
+            background-position:
+            calc(100% - 18px) calc(50% - 3px),
+            calc(100% - 12px) calc(50% - 3px),
+            100% 0;
+            background-size:6px 6px, 6px 6px, 2.5em 2.5em;
+            background-repeat:no-repeat;
+        }
+        .answer-box{
+            background:linear-gradient(180deg,#fbfdff,#f2f7fc);
+            border:1px solid #d6e3f0;
+            border-radius:16px;
+            padding:18px;
+            text-align:center;
+        }
+        .actions{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:14px;
+        }
+        button{
+            border:none;
+            border-radius:12px;
+            padding:12px 18px;
+            font-size:.98rem;
+            font-weight:700;
+            cursor:pointer;
+            transition:transform .05s ease, opacity .2s ease;
+        }
+        button:active{transform:translateY(1px)}
+        button:disabled{
+            opacity:.65;
+            cursor:not-allowed;
+        }
+        .primary{background:var(--accent); color:#fff}
+        .secondary{background:#eef3f8; color:var(--accent)}
+        .name-row{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:10px;
+            text-align:center;
+        }
+        input[type="text"]{
+            width:min(420px,100%);
+            padding:11px 12px;
+            border-radius:12px;
+            border:1px solid #cdd9e5;
+            font-size:.98rem;
+            outline:none;
+        }
+        .results{display:none}
+        .score-box{
+            display:flex;
+            gap:18px;
+            flex-wrap:wrap;
+            align-items:center;
+            justify-content:center;
+            margin-bottom:16px;
+        }
+        .score-pill{
+            min-width:130px;
+            text-align:center;
+            padding:16px 18px;
+            border-radius:16px;
+            background:var(--accent-soft);
+            border:1px solid #d8e5f2;
+        }
+        .score-pill strong{
+            display:block;
+            font-size:1.6rem;
+            color:var(--accent);
+            line-height:1.1;
+        }
+        table{
+            width:100%;
+            border-collapse:collapse;
+            font-size:.95rem;
+            background:#fff;
+            border-radius:14px;
+            overflow:hidden;
+        }
+        th, td{
+            padding:10px 12px;
+            border-bottom:1px solid #e8edf3;
+            text-align:left;
+            vertical-align:top;
+        }
+        th{
+            background:#f2f7fc;
+            color:var(--accent);
+            font-weight:700;
+            text-align:center;
+        }
+        td:first-child, td:last-child{
+            text-align:center;
+        }
+        tr:last-child td{border-bottom:none}
+        .ok{color:var(--ok); font-weight:700}
+        .bad{color:var(--bad); font-weight:700}
+        .muted{color:var(--muted)}
+        .center{
+            text-align:center;
+        }
+        .send-status{
+            margin-top:14px;
+            text-align:center;
+            font-size:.95rem;
+            min-height:24px;
+        }
+        .send-status.ok{
+            color:var(--ok);
+        }
+        .send-status.bad{
+            color:var(--bad);
+        }
+        @media (max-width:680px){
+            .wrap{padding:18px 14px 56px}
+            .hero,.card{padding-left:18px;padding-right:18px}
+            select.patch{width:100%; min-width:0; margin:8px 0}
+            .node:not(:last-child)::after{display:none}
         }
     </style>
 </head>
 <body>
-
-<!-- Hidden textarea for copy functionality -->
-<textarea id="copyTextarea"></textarea>
-
-<!-- Toast notification -->
-<div class="toast" id="toast"></div>
-
-<div class="container">
-    <header>
+<div class="wrap">
+    <section class="hero">
         <h1>Patch Quiz</h1>
-        <p>Тренажёр по планиметрии: параллелограмм, перпендикуляры и углы</p>
-        <p style="font-size: 0.9rem; color: #666;">Лёвин Артём Александрович | эксклюзивно для Полины Ковальчук</p>
-    </header>
+        <div class="subtitle">Тренажёр по задаче на кредит с поэтапным начислением процентов</div>
+        <div class="meta">Лёвин Артём Александрович | эксклюзивно для Ивана Необутова</div>
 
-    <!-- Progress Bar -->
-    <div class="progress-container">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-line">
+            <div class="progress-bar" aria-hidden="true">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Выполнено: 0 из 8 вопросов</div>
         </div>
-        <div class="progress-text">
-            Выполнено: <span id="progressCount">0</span> из <span id="totalCount">27</span> вопросов
-        </div>
-    </div>
-
-    <section class="intro-box">
-        <h3>Введение</h3>
-        <p>Этот тренажёр устроен так: перед вами дано полное решение задачи, а в ключевых местах рядом приведены варианты ответа.</p>
-        <p><strong>Ваша задача:</strong> не дописывать пропуски, а читать решение по порядку и в каждом отмеченном месте выбирать правильный вариант из выпадающего списка.</p>
-        <p>Работать лучше так: сначала внимательно прочитайте условие и рассмотрите рисунок, затем пройдите решение сверху вниз. После завершения нажмите кнопку "Завершить тестирование" для просмотра результатов и отправки.</p>
-        <p style="color: var(--accent); font-weight: bold;">⚠️ Варианты ответов перемешаны случайным образом!</p>
     </section>
 
-    <section>
-        <h2>Условие</h2>
-        <p>В параллелограмме \(ABCD\) с острым углом \(BAD\) точка \(E\) является серединой стороны \(BC\). Через точку \(B\) проведена прямая, перпендикулярная прямой \(AB\), а через точку \(E\) — прямая, перпендикулярная прямой \(DE\). Эти прямые пересекаются в точке \(K\).</p>
-        <ol>
-            <li>Докажите, что \(AK=KD\).</li>
-            <li>Найдите угол \(BAD\), если расстояние от точки \(K\) до прямой \(AD\) равно длине отрезка \(EC\) и \(\angle CED=58^\circ\).</li>
-        </ol>
+    <section class="card">
+        <h2 class="section-title">Условие</h2>
+        <div class="task-text">
+            <p>В июле 2029 года планируется взять кредит в банке на 6 лет. Условия его возврата таковы:</p>
+            <ul>
+                <li>в январе 2030, 2031 и 2032 годов долг возрастает на \(20\%\) по сравнению с концом предыдущего года;</li>
+                <li>в январе 2033, 2034 и 2035 годов долг возрастает на \(10\%\) по сравнению с концом предыдущего года;</li>
+                <li>с февраля по июнь каждого года необходимо выплатить часть долга;</li>
+                <li>в июле каждого года с 2030 по 2034 год долг должен быть на одну и ту же величину меньше долга на июль предыдущего года;</li>
+                <li>в июне 2035 года необходимо выплатить \(484\) тыс. рублей и тем самым полностью погасить кредит.</li>
+            </ul>
+            <p>Какую сумму планируется взять в кредит, если общая сумма выплат после полного его погашения составит \(2\) млн \(376\) тыс. рублей?</p>
+        </div>
     </section>
 
-    <section class="diagram-container">
-        <h3>Чертёж</h3>
-        <img src="static/images/01.png" alt="Геометрический чертёж к задаче">
-        <p style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">Рисунок 1. Параллелограмм ABCD и построения</p>
+    <section class="card">
+        <h2 class="section-title">Схема долгов по годам</h2>
+        <div class="draw-box">
+            <div class="schema-line">
+                <div class="node">
+                    <div class="year">июль 2029</div>
+                    <div class="debt">\(S\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2030</div>
+                    <div class="debt">\(S-d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2031</div>
+                    <div class="debt">\(S-2d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2032</div>
+                    <div class="debt">\(S-3d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2033</div>
+                    <div class="debt">\(S-4d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2034</div>
+                    <div class="debt">\(S-5d\)</div>
+                </div>
+            </div>
+            <div class="arrow-note">Каждый следующий июльский долг меньше предыдущего на одну и ту же величину.</div>
+        </div>
     </section>
 
-    <section>
-        <h2>Решение с выбором варианта</h2>
+    <section class="card">
+        <h2 class="section-title">Решение с выбором варианта</h2>
 
-        <h3>Часть а)</h3>
-        <ol>
-            <li class="quiz-item pending" id="q1" data-correct="F">
-                <p>Продолжим прямую \(DE\) до пересечения с прямой \(AB\) в точке...</p>
-                <select onchange="checkAnswer(1)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="E">E</option>
-                    <option value="M">M</option>
-                    <option value="F">F</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
+        <div class="solution-step">
+            <div class="step-label">Шаг 1</div>
+            <p>
+                Обозначим через \(S\) сумму кредита, а через \(d\) — величину ежегодного уменьшения июльского долга.
+                Так как в июле каждого года долг должен быть на одну и ту же величину меньше долга на июль предыдущего года,
+                июльские долги образуют
+                <select class="patch quiz-select" data-id="1" data-correct="арифметическую последовательность">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+            <div class="center-formula">
+                \[
+                S,\quad S-d,\quad S-2d,\quad S-3d,\quad S-4d,\quad S-5d.
+                \]
+            </div>
+        </div>
 
-            <li class="quiz-item pending" id="q2" data-correct="середина">
-                <p>Рассмотрим треугольники \(\triangle DCE\) и \(\triangle FBE\). Так как \(E\) — ... стороны \(BC\), то \(BE=EC\).</p>
-                <select onchange="checkAnswer(2)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="вершина">вершина</option>
-                    <option value="середина">середина</option>
-                    <option value="проекция">проекция</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
+        <div class="solution-step">
+            <div class="step-label">Шаг 2</div>
+            <p>
+                В июле 2034 года долг равен \(S-5d\). В январе 2035 года он возрастает на \(10\%\), значит перед последней выплатой становится равным \(1{,}1(S-5d)\).
+                Так как в июне 2035 года выплачивают \(484\) тыс. рублей и полностью гасят кредит, получаем
+                <select class="patch quiz-select" data-id="2" data-correct="первое линейное уравнение">
+                    <option value="">Выберите вариант</option>
+                </select>:
+            </p>
+            <div class="center-formula">
+                \[
+                1{,}1(S-5d)=484.
+                \]
+            </div>
+            <div class="center-formula">
+                \[
+                S-5d=440.
+                \]
+            </div>
+        </div>
 
-            <li class="quiz-item pending" id="q3" data-correct="накрест лежащие">
-                <p>Поскольку \(CD \parallel AB\), а прямая \(BC\) является секущей, имеем \(\angle DCE=\angle FBE\). Эти углы ...</p>
-                <select onchange="checkAnswer(3)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="вертикальные">вертикальные</option>
-                    <option value="накрест лежащие">накрестлежащие</option>
-                    <option value="смежные">смежные</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
+        <div class="solution-step">
+            <div class="step-label">Шаг 3</div>
+            <p>
+                Теперь выразим ежегодные выплаты. Например, в 2030 году после январского увеличения долг равен \(1{,}2S\), а в июле он должен стать равным \(S-d\). Поэтому выплата за 2030 год равна
+            </p>
+            <div class="center-formula">
+                \[
+                1{,}2S-(S-d)=0{,}2S+d.
+                \]
+            </div>
+            <p>Аналогично получаем:</p>
+            <div class="center-formula">
+                \[
+                2031:\ 0{,}2S+0{,}8d,\qquad
+                2032:\ 0{,}2S+0{,}6d,
+                \]
+                \[
+                2033:\ 0{,}1S+0{,}7d,\qquad
+                2034:\ 0{,}1S+0{,}6d.
+                \]
+            </div>
+            <p>
+                Значит, выплата за каждый год находится как
+                <select class="patch quiz-select" data-id="3" data-correct="долг после январского увеличения минус июльский долг этого же года">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
 
-            <li class="quiz-item pending" id="q4" data-correct="вертикальные">
-                <p>Углы \(\angle DEC\) и \(\angle FEB\) являются ..., поэтому они равны.</p>
-                <select onchange="checkAnswer(4)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="накрест лежащие">накрестлежащие</option>
-                    <option value="вертикальные">вертикальные</option>
-                    <option value="внешние">внешние</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
+        <div class="solution-step">
+            <div class="step-label">Шаг 4</div>
+            <p>
+                По условию общая сумма всех выплат равна \(2376\) тыс. рублей. Поэтому составляем
+                <select class="patch quiz-select" data-id="4" data-correct="второе линейное уравнение">
+                    <option value="">Выберите вариант</option>
+                </select>:
+            </p>
+            <div class="center-formula">
+                \[
+                (0{,}2S+d)+(0{,}2S+0{,}8d)+(0{,}2S+0{,}6d)+(0{,}1S+0{,}7d)+(0{,}1S+0{,}6d)+484=2376.
+                \]
+            </div>
+            <p>
+                После приведения подобных получаем
+                <select class="patch quiz-select" data-id="5" data-correct="0,8S+3,7d=1892">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
 
-            <li class="quiz-item pending" id="q5" data-correct="середина">
-                <p>Из равенства треугольников получаем \(DE=EF\). Значит, точка \(E\) — ... отрезка \(DF\).</p>
-                <select onchange="checkAnswer(5)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="конец">конец</option>
-                    <option value="вершина">вершина</option>
-                    <option value="середина">середина</option>
+        <div class="solution-step">
+            <div class="step-label">Шаг 5</div>
+            <p>Теперь решаем систему</p>
+            <div class="center-formula">
+                \[
+                \begin{cases}
+                S-5d=440,\\
+                0{,}8S+3{,}7d=1892.
+                \end{cases}
+                \]
+            </div>
+            <p>
+                Из первого уравнения выражаем
+                <select class="patch quiz-select" data-id="6" data-correct="S=440+5d">
+                    <option value="">Выберите вариант</option>
                 </select>
-                <div class="feedback"></div>
-            </li>
+                и подставляем во второе уравнение.
+            </p>
+            <div class="center-formula">
+                \[
+                0{,}8(440+5d)+3{,}7d=1892,
+                \]
+                \[
+                352+4d+3{,}7d=1892,
+                \]
+                \[
+                7{,}7d=1540,
+                \]
+                \[
+                d=200.
+                \]
+            </div>
+        </div>
 
-            <li class="quiz-item pending" id="q6" data-correct="медиана и высота">
-                <p>Рассмотрим треугольник \(DKF\). По условию прямая \(EK\) перпендикулярна прямой \(DE\), а точки \(D,E,F\) лежат на одной прямой. Следовательно, \(EK \perp DF\). Так как \(E\) — середина отрезка \(DF\), то в треугольнике \(DKF\) отрезок \(KE\) является одновременно ...</p>
-                <select onchange="checkAnswer(6)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="биссектриса и высота">биссектриса и высота</option>
-                    <option value="медиана и высота">медиана и высота</option>
-                    <option value="медиана и биссектриса">медиана и биссектриса</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
+        <div class="solution-step">
+            <div class="step-label">Шаг 6</div>
+            <div class="center-formula">
+                \[
+                S=440+5\cdot 200=1440.
+                \]
+            </div>
+            <p class="center">
+                Следовательно, сумма кредита равна
+                <select class="patch quiz-select" data-id="7" data-correct="1440 тыс. рублей">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
 
-            <li class="quiz-item pending" id="q7" data-correct="KF">
-                <p>Значит, треугольник \(DKF\) равнобедренный, и потому \(KD =\) ...</p>
-                <select onchange="checkAnswer(7)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="AF">AF</option>
-                    <option value="KF">KF</option>
-                    <option value="DF">DF</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q8" data-correct="высота">
-                <p>Рассмотрим треугольник \(AKF\). Точки \(A,B,F\) лежат на одной прямой. По условию \(BK \perp AB\), значит, \(BK \perp AF\). Следовательно, в треугольнике \(AKF\) отрезок \(BK\) является ...</p>
-                <select onchange="checkAnswer(8)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="медиана">медиана</option>
-                    <option value="биссектриса">биссектриса</option>
-                    <option value="высота">высота</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q9" data-correct="BF">
-                <p>Кроме того, в параллелограмме \(AB=CD\), а из предыдущего пункта уже получено: \(CD=BF\). Поэтому \(AB =\) ...</p>
-                <select onchange="checkAnswer(9)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="KF">KF</option>
-                    <option value="BF">BF</option>
-                    <option value="DF">DF</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q10" data-correct="середина">
-                <p>Значит, точка \(B\) — ... отрезка \(AF\), то есть \(BK\) является и медианой.</p>
-                <select onchange="checkAnswer(10)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="вершина">вершина</option>
-                    <option value="проекция">проекция</option>
-                    <option value="середина">середина</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q11" data-correct="медиана">
-                <p>Следовательно, треугольник \(AKF\) равнобедренный: \(AK=KF\).</p>
-                <select onchange="checkAnswer(11)">
-                    <option value="" disabled selected>Выберите вариант (роль BK)</option>
-                    <option value="биссектриса">биссектриса</option>
-                    <option value="боковая сторона">боковая сторона</option>
-                    <option value="медиана">медиана</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q12" data-correct="KF">
-                <p>Из равенств \(AK=KF\) и \(KD=KF\) получаем \(AK=KD\).</p>
-                <select onchange="checkAnswer(12)">
-                    <option value="" disabled selected>Выберите вариант (чему равна AK)</option>
-                    <option value="DF">DF</option>
-                    <option value="KF">KF</option>
-                    <option value="BF">BF</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-        </ol>
-
-        <h3>Часть б)</h3>
-        <ol start="13">
-            <li class="quiz-item pending" id="q13" data-correct="расстояние от точки K до прямой AD">
-                <p>Пусть \(KM \perp AD\), где \(M\) — основание перпендикуляра. Тогда \(KM\) — это ...</p>
-                <select onchange="checkAnswer(13)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="медиана треугольника AKD">медиана треугольника AKD</option>
-                    <option value="биссектриса угла KAD">биссектриса угла KAD</option>
-                    <option value="расстояние от точки K до прямой AD">расстояние от точки K до прямой AD</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q14" data-correct="AD/2">
-                <p>Так как \(E\) — середина \(BC\), а \(BC=AD\), то \(EC =\) ...</p>
-                <select onchange="checkAnswer(14)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="AD">AD</option>
-                    <option value="BC/4">BC/4</option>
-                    <option value="AD/2">AD/2</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q15" data-correct="равнобедренный">
-                <p>Так как \(AK=KD\), треугольник \(AKD\) ...</p>
-                <select onchange="checkAnswer(15)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="прямоугольный">прямоугольный</option>
-                    <option value="равнобедренный">равнобедренный</option>
-                    <option value="разносторонний">разносторонний</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q16" data-correct="середина">
-                <p>В равнобедренном треугольнике высота, опущенная к основанию, является медианой. Тогда точка \(M\) — ... отрезка \(AD\).</p>
-                <select onchange="checkAnswer(16)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="конец">конец</option>
-                    <option value="середина">середина</option>
-                    <option value="вершина">вершина</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q17" data-correct="45">
-                <p>В треугольнике \(KMD\): \(KM=MD\), \(\angle KMD=90^\circ\). Следовательно, этот треугольник равнобедренный прямоугольный, поэтому \(\angle KDM =\) ...</p>
-                <select onchange="checkAnswer(17)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="45">45°</option>
-                    <option value="58">58°</option>
-                    <option value="90">90°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q18" data-correct="45">
-                <p>Так как луч \(DM\) лежит на прямой \(DA\), то \(\angle KDA =\) ...</p>
-                <select onchange="checkAnswer(18)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="45">45°</option>
-                    <option value="58">58°</option>
-                    <option value="77">77°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q19" data-correct="90">
-                <p>В треугольнике \(AKD\): \(\angle KAD=\angle KDA\). Следовательно, \(\angle AKD =\) ...</p>
-                <select onchange="checkAnswer(19)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="45">45°</option>
-                    <option value="90">90°</option>
-                    <option value="77">77°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q20" data-correct="биссектрисой">
-                <p>В треугольнике \(AKF\) прямая \(BK\) является высотой и медианой, значит она является ... угла \(AKF\).</p>
-                <select onchange="checkAnswer(20)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="хордой">хордой</option>
-                    <option value="касательной">касательной</option>
-                    <option value="биссектрисой">биссектрисой</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q21" data-correct="биссектрисой">
-                <p>В треугольнике \(DKF\) прямая \(EK\) является высотой и медианой, значит она является ... угла \(DKF\).</p>
-                <select onchange="checkAnswer(21)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="биссектрисой">биссектрисой</option>
-                    <option value="секущей">секущей</option>
-                    <option value="боковой стороной">боковой стороной</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q22" data-correct="45">
-                <p>Поэтому \(\angle BKE =\) ...</p>
-                <select onchange="checkAnswer(22)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="58">58°</option>
-                    <option value="45">45°</option>
-                    <option value="90">90°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q23" data-correct="BK и EK">
-                <p>Так как \(BK \perp AB\), \(EK \perp DE\), то угол между прямыми \(AB\) и \(DE\) равен углу между прямыми ...</p>
-                <select onchange="checkAnswer(23)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="AK и KD">AK и KD</option>
-                    <option value="BK и EK">BK и EK</option>
-                    <option value="AD и BC">AD и BC</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q24" data-correct="45">
-                <p>Значит, угол между прямыми \(AB\) и \(DE\) равен ...</p>
-                <select onchange="checkAnswer(24)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="45">45°</option>
-                    <option value="58">58°</option>
-                    <option value="77">77°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q25" data-correct="angle CED=58">
-                <p>Так как \(AD \parallel BC\), то \(\angle ADE =\) ...</p>
-                <select onchange="checkAnswer(25)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="45">45°</option>
-                    <option value="90">90°</option>
-                    <option value="angle CED=58">∠CED=58°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q26" data-correct="58">
-                <p>Следовательно, угол между прямыми \(DE\) и \(AD\) равен ...</p>
-                <select onchange="checkAnswer(26)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="77">77°</option>
-                    <option value="58">58°</option>
-                    <option value="45">45°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-
-            <li class="quiz-item pending" id="q27" data-correct="77">
-                <p>Тогда \(\angle BAD = 180^\circ - 58^\circ - 45^\circ =\) ...</p>
-                <select onchange="checkAnswer(27)">
-                    <option value="" disabled selected>Выберите вариант</option>
-                    <option value="45">45°</option>
-                    <option value="58">58°</option>
-                    <option value="77">77°</option>
-                </select>
-                <div class="feedback"></div>
-            </li>
-        </ol>
+        <div class="solution-step">
+            <div class="step-label">Шаг 7</div>
+            <p>Быстрая проверка:</p>
+            <div class="center-formula">
+                \[
+                1{,}1\cdot 440=484,
+                \]
+            </div>
+            <p class="center">
+                что совпадает с условием. Значит, найденное значение
+                <select class="patch quiz-select" data-id="8" data-correct="согласовано с последней выплатой">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
     </section>
 
-    <!-- Submit Section -->
-    <section class="submit-section">
-        <h3>Завершение тестирования</h3>
-        <p>После завершения все ответы будут зафиксированы, и вы сможете просмотреть результаты и отправить их.</p>
-
-        <div class="student-info">
-            <label for="studentName">Ваше имя (обязательно):</label>
-            <input type="text" id="studentName" placeholder="Введите ваше имя и фамилию">
+    <section class="card">
+        <h2 class="section-title">Завершение тестирования</h2>
+        <p class="center">После завершения ответы будут зафиксированы, и вы увидите сводку результатов.</p>
+        <div class="name-row">
+            <label for="studentName"><strong>Ваше имя:</strong></label>
+            <input id="studentName" type="text" placeholder="Введите имя и фамилию" />
         </div>
-
-        <button class="submit-btn" id="submitBtn" onclick="submitTest()">
-            ✓ Завершить тестирование
-        </button>
-        <p class="submit-info">После нажатия кнопки вы увидите сводку результатов и сможете отправить их по email или скопировать</p>
+        <div class="actions">
+            <button class="primary" id="finishBtn" type="button">Завершить тестирование</button>
+            <button class="secondary" id="resetBtn" type="button">Сбросить ответы</button>
+        </div>
+        <div id="sendStatus" class="send-status"></div>
     </section>
 
-    <footer>
-        <p>Ответ: \(\boxed{77^\circ}\)</p>
-        <p>&copy; 2026 Лёвин А.А. Все права защищены.</p>
-    </footer>
-</div>
+    <section class="card answer-box">
+        <h2 class="section-title">Ответ</h2>
+        <p>\(\boxed{1440\text{ тыс. руб.}}\)</p>
+    </section>
 
-<!-- Results Modal -->
-<div class="modal-overlay" id="resultsModal">
-    <div class="modal">
-        <button class="modal-close" onclick="closeModal()">&times;</button>
+    <section class="card results" id="resultsBlock">
+        <h2 class="section-title">Таблица ответов</h2>
 
-        <div class="modal-header">
-            <img src="https://image.qwenlm.ai/public_source/1cdda5e4-25f2-423a-a271-24235313e95c/176e8867f-1237-4f23-80a0-a9373028aed8.png" alt="Результаты">
-            <h2>Результаты тестирования</h2>
-            <p id="studentNameDisplay"></p>
+        <div class="score-box">
+            <div class="score-pill">
+                <strong id="scoreValue">0/8</strong>
+                <span class="muted">верно</span>
+            </div>
+            <div class="score-pill">
+                <strong id="scorePercent">0%</strong>
+                <span class="muted">результат</span>
+            </div>
         </div>
 
-        <div class="score-display">
-            <div class="score-number" id="scoreNumber">0/27</div>
-            <div class="score-label" id="scorePercent">0%</div>
+        <div class="draw-box">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width:72px;">№</th>
+                    <th>Ваш ответ</th>
+                    <th>Правильный ответ</th>
+                    <th style="width:110px;">Статус</th>
+                </tr>
+                </thead>
+                <tbody id="resultsTableBody"></tbody>
+            </table>
         </div>
-
-        <table class="results-table" id="resultsTable">
-            <thead>
-            <tr>
-                <th>№</th>
-                <th>Ваш ответ</th>
-                <th>Правильный ответ</th>
-                <th>Статус</th>
-            </tr>
-            </thead>
-            <tbody id="resultsBody">
-            </tbody>
-        </table>
-
-        <div class="action-buttons">
-            <button class="action-btn email" onclick="sendByEmail()">
-                <span>📧</span> Отправить по email
-            </button>
-            <button class="action-btn copy" onclick="copyResults()">
-                <span>📋</span> Скопировать результаты
-            </button>
-            <button class="action-btn print" onclick="printResults()">
-                <span>🖨️</span> Распечатать
-            </button>
-        </div>
-    </div>
+    </section>
 </div>
 
 <script>
-    // Store user answers
-    const userAnswers = {};
-    const totalQuestions = 27;
-    let testSubmitted = false;
+    // Сюда вставьте ваш адрес Formspree
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/ВАШ_ID";
 
-    // Fisher-Yates shuffle algorithm
-    function shuffleArray(array) {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
+    const optionSets = {
+        1: [
+            "арифметическую последовательность",
+            "геометрическую прогрессию",
+            "убывающую геометрическую прогрессию"
+        ],
+        2: [
+            "первое линейное уравнение",
+            "квадратное уравнение",
+            "неравенство на сумму выплат"
+        ],
+        3: [
+            "долг после январского увеличения минус июльский долг этого же года",
+            "июльский долг минус долг после январского увеличения",
+            "сумма июльского долга и начисленных процентов"
+        ],
+        4: [
+            "второе линейное уравнение",
+            "формулу геометрической прогрессии",
+            "уравнение только на d"
+        ],
+        5: [
+            "0,8S+3,7d=1892",
+            "0,8S+3,7d=2376",
+            "0,7S+3,8d=1892"
+        ],
+        6: [
+            "S=440+5d",
+            "S=440-5d",
+            "S=5d-440"
+        ],
+        7: [
+            "1440 тыс. рублей",
+            "1540 тыс. рублей",
+            "1240 тыс. рублей"
+        ],
+        8: [
+            "согласовано с последней выплатой",
+            "противоречит условию задачи",
+            "требует дополнительной проверки через проценты 20%"
+        ]
+    };
+
+    const selects = [...document.querySelectorAll('.quiz-select')];
+    const total = selects.length;
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const finishBtn = document.getElementById('finishBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultsBlock = document.getElementById('resultsBlock');
+    const resultsTableBody = document.getElementById('resultsTableBody');
+    const scoreValue = document.getElementById('scoreValue');
+    const scorePercent = document.getElementById('scorePercent');
+    const studentNameInput = document.getElementById('studentName');
+    const sendStatus = document.getElementById('sendStatus');
+
+    function shuffle(arr){
+        const a = [...arr];
+        for(let i = a.length - 1; i > 0; i--){
             const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            [a[i], a[j]] = [a[j], a[i]];
         }
-        return shuffled;
+        return a;
     }
 
-    // Shuffle options for each question on page load
-    function shuffleOptions() {
-        document.querySelectorAll('.quiz-item select').forEach((select) => {
-            const options = Array.from(select.querySelectorAll('option'));
-            // Keep the first placeholder option
-            const placeholder = options.shift();
-            // Shuffle the rest
-            const shuffled = shuffleArray(options);
-            // Clear and rebuild
-            select.innerHTML = '';
-            select.appendChild(placeholder);
-            shuffled.forEach(opt => select.appendChild(opt));
+    function populateOptions(){
+        selects.forEach(select => {
+            const id = Number(select.dataset.id);
+            const options = shuffle(optionSets[id] || []);
+            const current = select.value;
+            select.innerHTML = '<option value="">Выберите вариант</option>';
+            options.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                select.appendChild(option);
+            });
+            select.value = current;
         });
     }
 
-    // Show toast notification
-    function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = 'toast show ' + type;
-
-        setTimeout(() => {
-            toast.className = 'toast';
-        }, 3000);
+    function updateProgress(){
+        const done = selects.filter(s => s.value !== '').length;
+        const percent = Math.round(done / total * 100);
+        progressFill.style.width = percent + '%';
+        progressText.textContent = `Выполнено: ${done} из ${total} вопросов`;
     }
 
-    // Update progress bar
-    function updateProgress() {
-        const answered = Object.keys(userAnswers).length;
-        const percentage = (answered / totalQuestions) * 100;
-
-        document.getElementById('progressFill').style.width = percentage + '%';
-        document.getElementById('progressCount').textContent = answered;
-
-        // Enable submit button if at least one answer is given
-        document.getElementById('submitBtn').disabled = answered === 0;
+    function escapeHtml(str){
+        return String(str)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
     }
 
-    // Check answer
-    function checkAnswer(questionId) {
-        if (testSubmitted) return;
+    function collectResults(){
+        let score = 0;
+        const answers = [];
 
-        const item = document.getElementById('q' + questionId);
-        const select = item.querySelector('select');
-        const feedback = item.querySelector('.feedback');
-        const selectedValue = select.value;
-        const correctValue = item.dataset.correct;
+        selects.forEach(select => {
+            const id = Number(select.dataset.id);
+            const userAnswer = select.value || '—';
+            const correct = select.dataset.correct;
+            const ok = userAnswer === correct;
+            if(ok) score++;
 
-        // Store answer
-        userAnswers[questionId] = selectedValue;
-        updateProgress();
+            answers.push({
+                question: id,
+                userAnswer,
+                correctAnswer: correct,
+                isCorrect: ok
+            });
+        });
 
-        // Remove previous classes
-        item.classList.remove('correct', 'incorrect', 'pending');
-        feedback.classList.remove('show', 'success', 'error');
+        const percent = Math.round(score / total * 100);
 
-        if (selectedValue === correctValue) {
-            item.classList.add('correct');
-            feedback.textContent = 'Верно!';
-            feedback.classList.add('show', 'success');
+        return {
+            score,
+            percent,
+            answers
+        };
+    }
+
+    function renderResults(resultData){
+        resultsTableBody.innerHTML = '';
+
+        resultData.answers.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.question}</td>
+                <td>${escapeHtml(item.userAnswer)}</td>
+                <td>${escapeHtml(item.correctAnswer)}</td>
+                <td class="${item.isCorrect ? 'ok' : 'bad'}">${item.isCorrect ? 'Верно' : 'Ошибка'}</td>
+            `;
+            resultsTableBody.appendChild(tr);
+        });
+
+        scoreValue.textContent = `${resultData.score}/${total}`;
+        scorePercent.textContent = `${resultData.percent}%`;
+        resultsBlock.style.display = 'block';
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([resultsBlock]).then(() => {
+                resultsBlock.scrollIntoView({behavior:'smooth', block:'start'});
+            });
         } else {
-            item.classList.add('incorrect');
-            feedback.textContent = 'Попробуйте ещё раз.';
-            feedback.classList.add('show', 'error');
+            resultsBlock.scrollIntoView({behavior:'smooth', block:'start'});
         }
     }
 
-    // Generate results text
-    function generateResultsText() {
-        const studentName = document.getElementById('studentName').value.trim();
-        const correctCount = document.getElementById('scoreNumber').textContent.split('/')[0];
-        const total = document.getElementById('scoreNumber').textContent.split('/')[1];
-        const percentage = document.getElementById('scorePercent').textContent;
-
-        let resultsText = `═══════════════════════════════════════\n`;
-        resultsText += `   PATCH QUIZ: ПЛАНИМЕТРИЯ\n`;
-        resultsText += `═══════════════════════════════════════\n\n`;
-        resultsText += `Студент: ${studentName}\n`;
-        resultsText += `Дата: ${new Date().toLocaleDateString('ru-RU')}\n`;
-        resultsText += `Результат: ${correctCount} из ${total} правильных ответов (${percentage})\n\n`;
-        resultsText += `───────────────────────────────────────\n`;
-        resultsText += `ДЕТАЛИЗАЦИЯ ОТВЕТОВ:\n`;
-        resultsText += `───────────────────────────────────────\n\n`;
-
-        for (let i = 1; i <= totalQuestions; i++) {
-            const item = document.getElementById('q' + i);
-            const userAnswer = userAnswers[i] || 'Не отвечено';
-            const correctAnswer = item.dataset.correct;
-            const isCorrect = userAnswer === correctAnswer;
-            const status = isCorrect ? '✓ ВЕРНО' : '✗ ОШИБКА';
-
-            resultsText += `${i}. ${status}\n`;
-            resultsText += `   Ваш ответ: ${userAnswer}\n`;
-            resultsText += `   Правильный: ${correctAnswer}\n\n`;
-        }
-
-        resultsText += `═══════════════════════════════════════\n`;
-        resultsText += `ФИНАЛЬНЫЙ ОТВЕТ: 77°\n`;
-        resultsText += `═══════════════════════════════════════\n`;
-
-        return resultsText;
+    function formatAnswersForEmail(answers){
+        return answers.map(item => {
+            return [
+                `Вопрос №${item.question}`,
+                `Ответ ученика: ${item.userAnswer}`,
+                `Правильный ответ: ${item.correctAnswer}`,
+                `Статус: ${item.isCorrect ? 'Верно' : 'Ошибка'}`
+            ].join('\n');
+        }).join('\n\n--------------------\n\n');
     }
 
-    // Submit test
-    function submitTest() {
-        const studentName = document.getElementById('studentName').value.trim();
+    async function sendResultsToFormspree(payload){
+        const formData = new FormData();
 
-        if (!studentName) {
-            showToast('Пожалуйста, введите ваше имя!', 'error');
+        // Обычные поля — так их удобно смотреть в письме
+        formData.append('student_name', payload.studentName);
+        formData.append('score', `${payload.score}/${payload.total}`);
+        formData.append('percent', `${payload.percent}%`);
+        formData.append('quiz_title', payload.quizTitle);
+        formData.append('submitted_at', payload.submittedAt);
+        formData.append('answers_text', payload.answersText);
+
+        // Дополнительно отправляем JSON целиком — пригодится для хранения
+        formData.append('answers_json', JSON.stringify(payload.answers, null, 2));
+
+        // Тема письма в Formspree
+        formData.append('_subject', `Результат теста: ${payload.studentName} — ${payload.score}/${payload.total}`);
+
+        const response = await fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Не удалось отправить результаты.');
+        }
+
+        return response.json().catch(() => ({}));
+    }
+
+    selects.forEach(select => {
+        select.addEventListener('change', updateProgress);
+    });
+
+    finishBtn.addEventListener('click', async () => {
+        const name = studentNameInput.value.trim();
+
+        if(!name){
+            alert('Пожалуйста, укажите имя перед завершением тестирования.');
+            studentNameInput.focus();
             return;
         }
 
-        const answered = Object.keys(userAnswers).length;
-        if (answered < totalQuestions) {
-            const confirmSubmit = confirm(`Вы ответили на ${answered} из ${totalQuestions} вопросов. Вы уверены, что хотите завершить тестирование?`);
-            if (!confirmSubmit) return;
-        }
+        const resultData = collectResults();
+        renderResults(resultData);
 
-        testSubmitted = true;
+        const payload = {
+            studentName: name,
+            score: resultData.score,
+            total,
+            percent: resultData.percent,
+            quizTitle: document.title,
+            submittedAt: new Date().toLocaleString('ru-RU'),
+            answers: resultData.answers,
+            answersText: formatAnswersForEmail(resultData.answers)
+        };
 
-        // Disable all selects
-        document.querySelectorAll('select').forEach(select => {
-            select.disabled = true;
-        });
-
-        // Calculate results
-        let correctCount = 0;
-        const resultsBody = document.getElementById('resultsBody');
-        resultsBody.innerHTML = '';
-
-        for (let i = 1; i <= totalQuestions; i++) {
-            const item = document.getElementById('q' + i);
-            const userAnswer = userAnswers[i] || 'Не отвечено';
-            const correctAnswer = item.dataset.correct;
-            const isCorrect = userAnswer === correctAnswer;
-
-            if (isCorrect) correctCount++;
-
-            const row = document.createElement('tr');
-            row.className = isCorrect ? 'correct' : 'incorrect';
-            row.innerHTML = `
-                <td>${i}</td>
-                <td>${userAnswer}</td>
-                <td>${correctAnswer}</td>
-                <td>${isCorrect ? '✓' : '✗'}</td>
-            `;
-            resultsBody.appendChild(row);
-        }
-
-        // Update score display
-        const percentage = Math.round((correctCount / totalQuestions) * 100);
-        document.getElementById('scoreNumber').textContent = `${correctCount}/${totalQuestions}`;
-        document.getElementById('scorePercent').textContent = `${percentage}%`;
-        document.getElementById('studentNameDisplay').textContent = `Студент: ${studentName}`;
-
-        // Show modal
-        document.getElementById('resultsModal').classList.add('active');
-
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        showToast('Тестирование завершено!', 'success');
-    }
-
-    // Close modal
-    function closeModal() {
-        document.getElementById('resultsModal').classList.remove('active');
-    }
-
-    // Send by email
-    function sendByEmail() {
-        const studentName = document.getElementById('studentName').value.trim();
-        const correctCount = document.getElementById('scoreNumber').textContent.split('/')[0];
-        const total = document.getElementById('scoreNumber').textContent.split('/')[1];
-        const percentage = document.getElementById('scorePercent').textContent;
-
-        let emailBody = `Результаты Patch Quiz: Планиметрия\n`;
-        emailBody += `================================\n\n`;
-        emailBody += `Студент: ${studentName}\n`;
-        emailBody += `Дата: ${new Date().toLocaleDateString('ru-RU')}\n`;
-        emailBody += `Результат: ${correctCount} из ${total} (${percentage})\n\n`;
-        emailBody += `Детализация:\n`;
-
-        for (let i = 1; i <= totalQuestions; i++) {
-            const item = document.getElementById('q' + i);
-            const userAnswer = userAnswers[i] || 'Не отвечено';
-            const correctAnswer = item.dataset.correct;
-            const isCorrect = userAnswer === correctAnswer;
-            emailBody += `${i}. ${isCorrect ? '✓' : '✗'} Ваш ответ: ${userAnswer} | Правильный: ${correctAnswer}\n`;
-        }
-
-        const subject = encodeURIComponent(`Patch Quiz Результаты: ${studentName} (${correctCount}/${total})`);
-        const body = encodeURIComponent(emailBody);
-
-        // Replace with actual recipient email
-        const recipientEmail = 'teacher@example.com';
-
-        window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
-    }
-
-    // Copy results to clipboard
-    function copyResults() {
-        const resultsText = generateResultsText();
-        const textarea = document.getElementById('copyTextarea');
-
-        textarea.value = resultsText;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '0';
-        textarea.style.top = '0';
-        textarea.style.opacity = '0';
-        textarea.style.width = '1px';
-        textarea.style.height = '1px';
-        textarea.focus();
-        textarea.select();
+        sendStatus.textContent = 'Идёт отправка результатов...';
+        sendStatus.className = 'send-status';
+        finishBtn.disabled = true;
 
         try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                showToast('✓ Результаты скопированы в буфер обмена!', 'success');
-            } else {
-                throw new Error('execCommand failed');
-            }
-        } catch (err) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(resultsText).then(() => {
-                    showToast('✓ Результаты скопированы в буфер обмена!', 'success');
-                }).catch(() => {
-                    fallbackCopy(resultsText);
-                });
-            } else {
-                fallbackCopy(resultsText);
-            }
-        }
-
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        textarea.style.top = '-9999px';
-    }
-
-    // Fallback copy method
-    function fallbackCopy(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '0';
-        textarea.style.top = '0';
-        textarea.style.opacity = '0';
-        textarea.style.width = '1px';
-        textarea.style.height = '1px';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                showToast('✓ Результаты скопированы в буфер обмена!', 'success');
-            } else {
-                throw new Error('execCommand failed');
-            }
-        } catch (err) {
-            showToast('✗ Не удалось скопировать. Выделите текст вручную.', 'error');
-        }
-
-        document.body.removeChild(textarea);
-    }
-
-    // Print results
-    function printResults() {
-        window.print();
-    }
-
-    // Close modal on outside click
-    document.getElementById('resultsModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal();
+            await sendResultsToFormspree(payload);
+            sendStatus.textContent = 'Результаты успешно отправлены.';
+            sendStatus.className = 'send-status ok';
+        } catch (error) {
+            console.error(error);
+            sendStatus.textContent = 'Не удалось отправить результаты. Проверьте настройки Formspree.';
+            sendStatus.className = 'send-status bad';
+        } finally {
+            finishBtn.disabled = false;
         }
     });
 
-    // Initialize on page load - shuffle options
-    document.addEventListener('DOMContentLoaded', function() {
-        shuffleOptions();
+    resetBtn.addEventListener('click', () => {
+        selects.forEach(s => s.value = '');
+        resultsBlock.style.display = 'none';
+        sendStatus.textContent = '';
+        sendStatus.className = 'send-status';
+        studentNameInput.value = '';
         updateProgress();
+        window.scrollTo({top:0, behavior:'smooth'});
+    });
+
+    populateOptions();
+    updateProgress();
+
+    window.addEventListener('load', () => {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
     });
 </script>
-
 </body>
 </html>
-
-
-
-<script>
-    function shuffleOptions() {
-        document.querySelectorAll('.quiz-item select').forEach((select) => {
-            const options = Array.from(select.querySelectorAll('option'));
-            const placeholder = options.shift(); // сохраняем первый элемент
-            const shuffled = shuffleArray(options); // перемешиваем остальные
-            // ... перестраиваем select
-        });
-    }
-
-    const recipientEmail = 'teacher@example.com';
-
-
-</script>
-</body>
-</html>
-                    
