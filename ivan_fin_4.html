@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patch Quiz: Кредит с поэтапным начислением процентов</title>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <style>
+        :root{
+            --card:#ffffff;
+            --text:#1f2937;
+            --muted:#6b7280;
+            --line:#d7dee8;
+            --accent:#345e8c;
+            --accent-soft:#eef4fa;
+            --ok:#1f7a45;
+            --bad:#b23a3a;
+            --shadow:0 10px 30px rgba(31,41,55,.08);
+            --radius:18px;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+            color:var(--text);
+            background:linear-gradient(180deg,#f7f9fc 0%, #eef3f8 100%);
+            line-height:1.7;
+        }
+        .wrap{
+            max-width:980px;
+            margin:0 auto;
+            padding:32px 20px 80px;
+        }
+        .hero,.card{
+            background:var(--card);
+            border:1px solid rgba(52,94,140,.10);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+        }
+        .hero{
+            padding:32px 28px 22px;
+            margin-bottom:20px;
+            position:relative;
+            overflow:hidden;
+            text-align:center;
+        }
+        .hero::before{
+            content:"";
+            position:absolute;
+            left:0; top:0; bottom:0;
+            width:6px;
+            background:linear-gradient(180deg,var(--accent),#5d83ae);
+        }
+        h1,h2,h3{
+            margin:0 0 12px;
+            color:var(--accent);
+            font-weight:700;
+            letter-spacing:.1px;
+        }
+        h1{font-size:2rem}
+        h2{font-size:1.35rem}
+        h3{font-size:1.08rem}
+        .section-title{
+            text-align:center;
+        }
+        .subtitle{
+            font-size:1.02rem;
+            margin-bottom:12px;
+        }
+        .meta{
+            color:var(--muted);
+            font-size:.96rem;
+            margin-bottom:10px;
+        }
+        .progress-line{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            margin-top:18px;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+        .progress-bar{
+            flex:1 1 260px;
+            max-width:520px;
+            height:10px;
+            border-radius:999px;
+            background:#e7edf5;
+            overflow:hidden;
+        }
+        .progress-fill{
+            height:100%;
+            width:0%;
+            background:linear-gradient(90deg,var(--accent),#6f93bb);
+            transition:width .25s ease;
+        }
+        .progress-text{
+            font-size:.95rem;
+            color:var(--muted);
+            white-space:nowrap;
+        }
+        .card{
+            padding:24px 24px 18px;
+            margin-bottom:18px;
+        }
+        .lead{
+            margin:0 0 8px;
+        }
+        .note{
+            background:var(--accent-soft);
+            border-left:4px solid var(--accent);
+            padding:12px 14px;
+            border-radius:12px;
+            color:#274868;
+            margin-top:14px;
+            text-align:center;
+        }
+        .task-text ul{
+            margin-top:10px;
+            margin-bottom:10px;
+        }
+        .draw-box{
+            background:#fbfcff;
+            border:1px solid var(--line);
+            border-radius:18px;
+            padding:18px;
+            overflow:auto;
+        }
+        .schema-line{
+            display:flex;
+            gap:18px;
+            align-items:center;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:10px;
+        }
+        .node{
+            flex:1 1 120px;
+            max-width:140px;
+            min-width:120px;
+            text-align:center;
+            position:relative;
+            padding:8px 6px;
+        }
+        .node:not(:last-child)::after{
+            content:"";
+            position:absolute;
+            top:37px;
+            right:-9px;
+            width:18px;
+            border-top:2px solid #8aa7c6;
+        }
+        .year{
+            font-size:.92rem;
+            color:var(--muted);
+            margin-bottom:8px;
+            text-align:center;
+        }
+        .debt{
+            font-weight:700;
+            color:var(--accent);
+            font-size:1rem;
+            text-align:center;
+        }
+        .arrow-note{
+            margin-top:12px;
+            color:var(--muted);
+            font-size:.93rem;
+            text-align:center;
+        }
+        .solution-step{
+            margin:0 0 18px;
+            padding:16px 18px;
+            border:1px solid var(--line);
+            border-radius:14px;
+            background:#fcfdff;
+        }
+        .step-label{
+            color:var(--accent);
+            font-weight:700;
+            margin-bottom:8px;
+            text-align:center;
+        }
+        .center-formula{
+            text-align:center;
+            margin:10px 0;
+        }
+        select.patch{
+            appearance:none;
+            -webkit-appearance:none;
+            -moz-appearance:none;
+            border:1px solid #bfd0e2;
+            background:
+            linear-gradient(180deg,#fff,#f7fbff) padding-box,
+            linear-gradient(180deg,#dbe7f3,#bfd0e2) border-box;
+            color:var(--text);
+            border-radius:10px;
+            padding:8px 38px 8px 12px;
+            font-size:.98rem;
+            min-width:240px;
+            vertical-align:middle;
+            margin:0 6px;
+            background-image:
+            linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+            linear-gradient(135deg, var(--accent) 50%, transparent 50%),
+            linear-gradient(to right, transparent, transparent);
+            background-position:
+            calc(100% - 18px) calc(50% - 3px),
+            calc(100% - 12px) calc(50% - 3px),
+            100% 0;
+            background-size:6px 6px, 6px 6px, 2.5em 2.5em;
+            background-repeat:no-repeat;
+        }
+        .answer-box{
+            background:linear-gradient(180deg,#fbfdff,#f2f7fc);
+            border:1px solid #d6e3f0;
+            border-radius:16px;
+            padding:18px;
+            text-align:center;
+        }
+        .actions{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:14px;
+        }
+        button{
+            border:none;
+            border-radius:12px;
+            padding:12px 18px;
+            font-size:.98rem;
+            font-weight:700;
+            cursor:pointer;
+            transition:transform .05s ease, opacity .2s ease;
+        }
+        button:active{transform:translateY(1px)}
+        .primary{background:var(--accent); color:#fff}
+        .secondary{background:#eef3f8; color:var(--accent)}
+        .name-row{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:10px;
+            text-align:center;
+        }
+        input[type="text"]{
+            width:min(420px,100%);
+            padding:11px 12px;
+            border-radius:12px;
+            border:1px solid #cdd9e5;
+            font-size:.98rem;
+            outline:none;
+        }
+        .results{display:none}
+        .score-box{
+            display:flex;
+            gap:18px;
+            flex-wrap:wrap;
+            align-items:center;
+            justify-content:center;
+            margin-bottom:16px;
+        }
+        .score-pill{
+            min-width:130px;
+            text-align:center;
+            padding:16px 18px;
+            border-radius:16px;
+            background:var(--accent-soft);
+            border:1px solid #d8e5f2;
+        }
+        .score-pill strong{
+            display:block;
+            font-size:1.6rem;
+            color:var(--accent);
+            line-height:1.1;
+        }
+        table{
+            width:100%;
+            border-collapse:collapse;
+            font-size:.95rem;
+            background:#fff;
+            border-radius:14px;
+            overflow:hidden;
+        }
+        th, td{
+            padding:10px 12px;
+            border-bottom:1px solid #e8edf3;
+            text-align:left;
+            vertical-align:top;
+        }
+        th{
+            background:#f2f7fc;
+            color:var(--accent);
+            font-weight:700;
+            text-align:center;
+        }
+        td:first-child, td:last-child{
+            text-align:center;
+        }
+        tr:last-child td{border-bottom:none}
+        .ok{color:var(--ok); font-weight:700}
+        .bad{color:var(--bad); font-weight:700}
+        .muted{color:var(--muted)}
+        .center{
+            text-align:center;
+        }
+        @media (max-width:680px){
+            .wrap{padding:18px 14px 56px}
+            .hero,.card{padding-left:18px;padding-right:18px}
+            select.patch{width:100%; min-width:0; margin:8px 0}
+            .node:not(:last-child)::after{display:none}
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="hero">
+        <h1>Patch Quiz</h1>
+        <div class="subtitle">Тренажёр по задаче на кредит с поэтапным начислением процентов</div>
+        <div class="meta">Лёвин Артём Александрович | эксклюзивно для Ивана Необутова</div>
+
+        <div class="progress-line">
+            <div class="progress-bar" aria-hidden="true">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Выполнено: 0 из 8 вопросов</div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">Введение</h2>
+        <p class="lead center">В этом тренажёре варианты ответа стоят только в действительно ключевых местах решения.</p>
+        <p class="lead center">Они проверяют не вычислительную рутину, а понимание структуры задачи: как моделируется долг, откуда берётся первое уравнение, как собирается сумма выплат и как получается окончательный ответ.</p>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">Условие</h2>
+        <div class="task-text">
+            <p>В июле 2029 года планируется взять кредит в банке на 6 лет. Условия его возврата таковы:</p>
+            <ul>
+                <li>в январе 2030, 2031 и 2032 годов долг возрастает на \(20\%\) по сравнению с концом предыдущего года;</li>
+                <li>в январе 2033, 2034 и 2035 годов долг возрастает на \(10\%\) по сравнению с концом предыдущего года;</li>
+                <li>с февраля по июнь каждого года необходимо выплатить часть долга;</li>
+                <li>в июле каждого года с 2030 по 2034 год долг должен быть на одну и ту же величину меньше долга на июль предыдущего года;</li>
+                <li>в июне 2035 года необходимо выплатить \(484\) тыс. рублей и тем самым полностью погасить кредит.</li>
+            </ul>
+            <p>Какую сумму планируется взять в кредит, если общая сумма выплат после полного его погашения составит \(2\) млн \(376\) тыс. рублей?</p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">Схема долгов по годам</h2>
+        <div class="draw-box">
+            <div class="schema-line">
+                <div class="node">
+                    <div class="year">июль 2029</div>
+                    <div class="debt">\(S\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2030</div>
+                    <div class="debt">\(S-d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2031</div>
+                    <div class="debt">\(S-2d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2032</div>
+                    <div class="debt">\(S-3d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2033</div>
+                    <div class="debt">\(S-4d\)</div>
+                </div>
+                <div class="node">
+                    <div class="year">июль 2034</div>
+                    <div class="debt">\(S-5d\)</div>
+                </div>
+            </div>
+            <div class="arrow-note">Каждый следующий июльский долг меньше предыдущего на одну и ту же величину.</div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">Решение с выбором варианта</h2>
+
+        <div class="solution-step">
+            <div class="step-label">Шаг 1</div>
+            <p>
+                Обозначим через \(S\) сумму кредита, а через \(d\) — величину ежегодного уменьшения июльского долга.
+                Так как в июле каждого года долг должен быть на одну и ту же величину меньше долга на июль предыдущего года,
+                июльские долги образуют
+                <select class="patch quiz-select" data-id="1" data-correct="арифметическую последовательность">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+            <div class="center-formula">
+                \[
+                S,\quad S-d,\quad S-2d,\quad S-3d,\quad S-4d,\quad S-5d.
+                \]
+            </div>
+        </div>
+
+        <div class="solution-step">
+            <div class="step-label">Шаг 2</div>
+            <p>
+                В июле 2034 года долг равен \(S-5d\). В январе 2035 года он возрастает на \(10\%\), значит перед последней выплатой становится равным \(1{,}1(S-5d)\).
+                Так как в июне 2035 года выплачивают \(484\) тыс. рублей и полностью гасят кредит, получаем
+                <select class="patch quiz-select" data-id="2" data-correct="первое линейное уравнение">
+                    <option value="">Выберите вариант</option>
+                </select>:
+            </p>
+            <div class="center-formula">
+                \[
+                1{,}1(S-5d)=484.
+                \]
+            </div>
+            <div class="center-formula">
+                \[
+                S-5d=440.
+                \]
+            </div>
+        </div>
+
+        <div class="solution-step">
+            <div class="step-label">Шаг 3</div>
+            <p>
+                Теперь выразим ежегодные выплаты. Например, в 2030 году после январского увеличения долг равен \(1{,}2S\), а в июле он должен стать равным \(S-d\). Поэтому выплата за 2030 год равна
+            </p>
+            <div class="center-formula">
+                \[
+                1{,}2S-(S-d)=0{,}2S+d.
+                \]
+            </div>
+            <p>Аналогично получаем:</p>
+            <div class="center-formula">
+                \[
+                2031:\ 0{,}2S+0{,}8d,\qquad
+                2032:\ 0{,}2S+0{,}6d,
+                \]
+                \[
+                2033:\ 0{,}1S+0{,}7d,\qquad
+                2034:\ 0{,}1S+0{,}6d.
+                \]
+            </div>
+            <p>
+                Значит, выплата за каждый год находится как
+                <select class="patch quiz-select" data-id="3" data-correct="долг после январского увеличения минус июльский долг этого же года">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
+
+        <div class="solution-step">
+            <div class="step-label">Шаг 4</div>
+            <p>
+                По условию общая сумма всех выплат равна \(2376\) тыс. рублей. Поэтому составляем
+                <select class="patch quiz-select" data-id="4" data-correct="второе линейное уравнение">
+                    <option value="">Выберите вариант</option>
+                </select>:
+            </p>
+            <div class="center-formula">
+                \[
+                (0{,}2S+d)+(0{,}2S+0{,}8d)+(0{,}2S+0{,}6d)+(0{,}1S+0{,}7d)+(0{,}1S+0{,}6d)+484=2376.
+                \]
+            </div>
+            <p>
+                После приведения подобных получаем
+                <select class="patch quiz-select" data-id="5" data-correct="0,8S+3,7d=1892">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
+
+        <div class="solution-step">
+            <div class="step-label">Шаг 5</div>
+            <p>Теперь решаем систему</p>
+            <div class="center-formula">
+                \[
+                \begin{cases}
+                S-5d=440,\\
+                0{,}8S+3{,}7d=1892.
+                \end{cases}
+                \]
+            </div>
+            <p>
+                Из первого уравнения выражаем
+                <select class="patch quiz-select" data-id="6" data-correct="S=440+5d">
+                    <option value="">Выберите вариант</option>
+                </select>
+                и подставляем во второе уравнение.
+            </p>
+            <div class="center-formula">
+                \[
+                0{,}8(440+5d)+3{,}7d=1892,
+                \]
+                \[
+                352+4d+3{,}7d=1892,
+                \]
+                \[
+                7{,}7d=1540,
+                \]
+                \[
+                d=200.
+                \]
+            </div>
+        </div>
+
+        <div class="solution-step">
+            <div class="step-label">Шаг 6</div>
+            <div class="center-formula">
+                \[
+                S=440+5\cdot 200=1440.
+                \]
+            </div>
+            <p class="center">
+                Следовательно, сумма кредита равна
+                <select class="patch quiz-select" data-id="7" data-correct="1440 тыс. рублей">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
+
+        <div class="solution-step">
+            <div class="step-label">Шаг 7</div>
+            <p>Быстрая проверка:</p>
+            <div class="center-formula">
+                \[
+                1{,}1\cdot 440=484,
+                \]
+            </div>
+            <p class="center">
+                что совпадает с условием. Значит, найденное значение
+                <select class="patch quiz-select" data-id="8" data-correct="согласовано с последней выплатой">
+                    <option value="">Выберите вариант</option>
+                </select>.
+            </p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">Завершение тестирования</h2>
+        <p class="center">После завершения ответы будут зафиксированы, и вы увидите сводку результатов.</p>
+        <div class="name-row">
+            <label for="studentName"><strong>Ваше имя:</strong></label>
+            <input id="studentName" type="text" placeholder="Введите имя и фамилию" />
+        </div>
+        <div class="actions">
+            <button class="primary" id="finishBtn">Завершить тестирование</button>
+            <button class="secondary" id="resetBtn" type="button">Сбросить ответы</button>
+        </div>
+    </section>
+
+    <section class="card answer-box">
+        <h2 class="section-title">Ответ</h2>
+        <p>\(\boxed{1440\text{ тыс. руб.}}\)</p>
+    </section>
+
+    <section class="card results" id="resultsBlock">
+        <h2 class="section-title">Таблица ответов</h2>
+
+        <div class="score-box">
+            <div class="score-pill">
+                <strong id="scoreValue">0/8</strong>
+                <span class="muted">верно</span>
+            </div>
+            <div class="score-pill">
+                <strong id="scorePercent">0%</strong>
+                <span class="muted">результат</span>
+            </div>
+        </div>
+
+        <div class="draw-box">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width:72px;">№</th>
+                    <th>Ваш ответ</th>
+                    <th>Правильный ответ</th>
+                    <th style="width:110px;">Статус</th>
+                </tr>
+                </thead>
+                <tbody id="resultsTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script>
+    const optionSets = {
+        1: [
+            "арифметическую последовательность",
+            "геометрическую прогрессию",
+            "убывающую геометрическую прогрессию"
+        ],
+        2: [
+            "первое линейное уравнение",
+            "квадратное уравнение",
+            "неравенство на сумму выплат"
+        ],
+        3: [
+            "долг после январского увеличения минус июльский долг этого же года",
+            "июльский долг минус долг после январского увеличения",
+            "сумма июльского долга и начисленных процентов"
+        ],
+        4: [
+            "второе линейное уравнение",
+            "формулу геометрической прогрессии",
+            "уравнение только на d"
+        ],
+        5: [
+            "0,8S+3,7d=1892",
+            "0,8S+3,7d=2376",
+            "0,7S+3,8d=1892"
+        ],
+        6: [
+            "S=440+5d",
+            "S=440-5d",
+            "S=5d-440"
+        ],
+        7: [
+            "1440 тыс. рублей",
+            "1540 тыс. рублей",
+            "1240 тыс. рублей"
+        ],
+        8: [
+            "согласовано с последней выплатой",
+            "противоречит условию задачи",
+            "требует дополнительной проверки через проценты 20%"
+        ]
+    };
+
+    const selects = [...document.querySelectorAll('.quiz-select')];
+    const total = selects.length;
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const finishBtn = document.getElementById('finishBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultsBlock = document.getElementById('resultsBlock');
+    const resultsTableBody = document.getElementById('resultsTableBody');
+    const scoreValue = document.getElementById('scoreValue');
+    const scorePercent = document.getElementById('scorePercent');
+    const studentNameInput = document.getElementById('studentName');
+
+    function shuffle(arr){
+        const a = [...arr];
+        for(let i = a.length - 1; i > 0; i--){
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function populateOptions(){
+        selects.forEach(select => {
+            const id = Number(select.dataset.id);
+            const options = shuffle(optionSets[id] || []);
+            const current = select.value;
+            select.innerHTML = '<option value="">Выберите вариант</option>';
+            options.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                select.appendChild(option);
+            });
+            select.value = current;
+        });
+    }
+
+    function updateProgress(){
+        const done = selects.filter(s => s.value !== '').length;
+        const percent = Math.round(done / total * 100);
+        progressFill.style.width = percent + '%';
+        progressText.textContent = `Выполнено: ${done} из ${total} вопросов`;
+    }
+
+    function buildResults(){
+        let score = 0;
+        resultsTableBody.innerHTML = '';
+
+        selects.forEach(select => {
+            const id = select.dataset.id;
+            const userAnswer = select.value || '—';
+            const correct = select.dataset.correct;
+            const ok = userAnswer === correct;
+            if(ok) score++;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+          <td>${id}</td>
+          <td>${escapeHtml(userAnswer)}</td>
+          <td>${escapeHtml(correct)}</td>
+          <td class="${ok ? 'ok' : 'bad'}">${ok ? 'Верно' : 'Ошибка'}</td>
+        `;
+            resultsTableBody.appendChild(tr);
+        });
+
+        const percent = Math.round(score / total * 100);
+        scoreValue.textContent = `${score}/${total}`;
+        scorePercent.textContent = `${percent}%`;
+        resultsBlock.style.display = 'block';
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([resultsBlock]).then(() => {
+                resultsBlock.scrollIntoView({behavior:'smooth', block:'start'});
+            });
+        } else {
+            resultsBlock.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+    }
+
+    function escapeHtml(str){
+        return String(str)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    selects.forEach(select => {
+        select.addEventListener('change', updateProgress);
+    });
+
+    finishBtn.addEventListener('click', () => {
+        const name = studentNameInput.value.trim();
+        if(!name){
+            alert('Пожалуйста, укажите имя перед завершением тестирования.');
+            studentNameInput.focus();
+            return;
+        }
+        buildResults();
+    });
+
+    resetBtn.addEventListener('click', () => {
+        selects.forEach(s => s.value = '');
+        resultsBlock.style.display = 'none';
+        updateProgress();
+        window.scrollTo({top:0, behavior:'smooth'});
+    });
+
+    populateOptions();
+    updateProgress();
+
+    window.addEventListener('load', () => {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
+    });
+</script>
+</body>
+</html>
