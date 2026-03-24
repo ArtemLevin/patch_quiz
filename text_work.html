@@ -1,0 +1,1952 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Текстовые задачи на производительность — интерактивная лаборатория</title>
+    <style>
+        :root{
+            --bg:#09111f;
+            --bg2:#0f1b31;
+            --panel:rgba(14,24,42,.72);
+            --panel-strong:rgba(11,20,36,.9);
+            --line:rgba(160,200,255,.18);
+            --text:#eaf2ff;
+            --muted:#a9b7d5;
+            --soft:#7f93b8;
+            --accent:#7ed0ff;
+            --accent-2:#9d8cff;
+            --accent-3:#61f0c2;
+            --warn:#ffd479;
+            --danger:#ff8f9c;
+            --ok:#7df3a7;
+            --shadow:0 24px 80px rgba(0,0,0,.38);
+            --radius:22px;
+            --radius-sm:14px;
+            --max:1240px;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            color:var(--text);
+            font-family: "Segoe UI", Inter, Arial, sans-serif;
+            background:
+            radial-gradient(circle at 20% 20%, rgba(126,208,255,.12), transparent 24%),
+            radial-gradient(circle at 85% 12%, rgba(157,140,255,.14), transparent 28%),
+            radial-gradient(circle at 75% 72%, rgba(97,240,194,.10), transparent 20%),
+            linear-gradient(180deg, #08101c 0%, #0b1526 44%, #09111f 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            background-image:
+            linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+            background-size:34px 34px;
+            mask-image: radial-gradient(circle at center, black 45%, transparent 92%);
+            opacity:.28;
+        }
+
+        a{color:inherit;text-decoration:none}
+        button,input,select{font:inherit}
+        .wrap{width:min(var(--max), calc(100% - 28px)); margin:0 auto}
+        .section{padding:42px 0}
+        .section-title{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin:0 0 16px;
+            font-size:clamp(1.55rem, 2.6vw, 2.45rem);
+            line-height:1.05;
+            letter-spacing:.02em;
+        }
+        .section-title .dot{
+            width:14px;height:14px;border-radius:50%;
+            background:linear-gradient(135deg,var(--accent),var(--accent-2));
+            box-shadow:0 0 18px rgba(126,208,255,.65);
+            flex:none;
+        }
+        .section-lead{
+            color:var(--muted);
+            max-width:880px;
+            margin:0 0 24px;
+            line-height:1.72;
+            font-size:1.02rem;
+        }
+
+        .card{
+            background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+            border:1px solid var(--line);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .hero{
+            position:relative;
+            padding:28px 0 26px;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+        }
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.1fr .9fr;
+            gap:24px;
+            align-items:stretch;
+        }
+        .hero-copy{
+            padding:30px;
+            position:relative;
+            overflow:hidden;
+        }
+        .hero-copy::after{
+            content:"";
+            position:absolute;
+            width:420px;height:420px;
+            right:-140px;top:-180px;
+            background:radial-gradient(circle, rgba(126,208,255,.18), transparent 62%);
+            pointer-events:none;
+        }
+        .eyebrow{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:10px 14px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+            color:#d7e7ff;
+            font-size:.92rem;
+            letter-spacing:.03em;
+            margin-bottom:18px;
+        }
+        .eyebrow .spark{
+            width:8px;height:8px;border-radius:50%;
+            background:var(--accent-3);
+            box-shadow:0 0 14px rgba(97,240,194,.9);
+        }
+        .hero h1{
+            margin:0 0 18px;
+            font-size:clamp(2.3rem, 5vw, 4.9rem);
+            line-height:.95;
+            letter-spacing:-.03em;
+        }
+        .hero h1 .gradient{
+            display:block;
+            background:linear-gradient(90deg, #ffffff, #dfeaff 42%, #9fdcff 76%, #b8aaff 100%);
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+            text-shadow:0 0 22px rgba(126,208,255,.08);
+        }
+        .hero p{
+            color:var(--muted);
+            line-height:1.82;
+            font-size:1.05rem;
+            max-width:760px;
+            margin:0 0 24px;
+        }
+        .badges{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin:0 0 24px;
+        }
+        .badge{
+            padding:10px 12px;
+            border-radius:999px;
+            background:rgba(126,208,255,.08);
+            border:1px solid rgba(126,208,255,.14);
+            color:#dcecff;
+            font-size:.92rem;
+            white-space:nowrap;
+        }
+        .hero-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+        }
+        .btn{
+            appearance:none;
+            border:none;
+            cursor:pointer;
+            border-radius:16px;
+            padding:14px 18px;
+            transition:.22s ease;
+            font-weight:700;
+            letter-spacing:.01em;
+        }
+        .btn-primary{
+            color:#05101f;
+            background:linear-gradient(135deg, var(--accent), #b3e6ff);
+            box-shadow:0 12px 30px rgba(126,208,255,.24);
+        }
+        .btn-primary:hover{transform:translateY(-2px)}
+        .btn-secondary{
+            background:rgba(255,255,255,.05);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.1);
+        }
+        .btn-secondary:hover{background:rgba(255,255,255,.08)}
+        .btn-ghost{
+            background:transparent;
+            color:var(--muted);
+            border:1px dashed rgba(255,255,255,.16);
+        }
+
+        .hero-visual{
+            padding:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .visual-shell{
+            width:100%;
+            min-height:560px;
+            border-radius:28px;
+            background:
+            radial-gradient(circle at 50% 16%, rgba(126,208,255,.12), transparent 35%),
+            linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+            border:1px solid rgba(255,255,255,.08);
+            position:relative;
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:18px;
+        }
+
+        .floating-note{
+            position:absolute;
+            padding:10px 12px;
+            border-radius:14px;
+            font-size:.86rem;
+            color:#d5e6ff;
+            background:rgba(7,14,27,.7);
+            border:1px solid rgba(255,255,255,.08);
+            backdrop-filter: blur(8px);
+            box-shadow:0 10px 28px rgba(0,0,0,.28);
+            animation: drift 8s ease-in-out infinite;
+        }
+        .floating-note.note-a{top:20px; left:18px}
+        .floating-note.note-b{top:72px; right:22px; animation-delay:-2s}
+        .floating-note.note-c{bottom:26px; left:26px; animation-delay:-4s}
+        .floating-note.note-d{bottom:64px; right:24px; animation-delay:-1s}
+
+        @keyframes drift{
+            0%,100%{transform:translateY(0px)}
+            50%{transform:translateY(-8px)}
+        }
+
+        .summary-grid,
+        .calc-grid,
+        .task-grid,
+        .cheat-grid,
+        .generator-grid,
+        .footer-grid{
+            display:grid;
+            gap:18px;
+        }
+        .summary-grid{grid-template-columns:repeat(4,1fr)}
+        .calc-grid{grid-template-columns:380px 1fr}
+        .task-grid{grid-template-columns:1fr}
+        .cheat-grid{grid-template-columns:repeat(2,1fr)}
+        .generator-grid{grid-template-columns:1fr 1fr}
+        .footer-grid{grid-template-columns:1.2fr .8fr}
+
+        .mini-card{
+            padding:20px;
+            min-height:160px;
+        }
+        .mini-card h3{
+            margin:0 0 10px;
+            font-size:1.08rem;
+            letter-spacing:.01em;
+        }
+        .mini-card p{
+            margin:0;
+            color:var(--muted);
+            line-height:1.68;
+            font-size:.97rem;
+        }
+        .mini-card .kpi{
+            font-size:1.8rem;
+            font-weight:800;
+            margin:0 0 8px;
+            letter-spacing:-.03em;
+            background:linear-gradient(90deg,#fff,#b7e5ff);
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+        }
+
+        .panel{
+            padding:22px;
+        }
+
+        .diagram-layout{
+            display:grid;
+            grid-template-columns:340px 1fr;
+            gap:18px;
+            align-items:start;
+        }
+
+        .controls-col{
+            display:grid;
+            gap:14px;
+        }
+
+        .control-group{
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .control-group h3{
+            margin:0 0 10px;
+            font-size:1rem;
+        }
+
+        .toggle-list{
+            display:grid;
+            gap:10px;
+        }
+
+        .toggle{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            padding:10px 12px;
+            border-radius:14px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.06);
+        }
+
+        .toggle label{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#dce8ff;
+            cursor:pointer;
+            flex:1;
+        }
+
+        .toggle input[type="checkbox"]{
+            width:18px;height:18px;
+            accent-color:#8fd8ff;
+            cursor:pointer;
+        }
+
+        .select{
+            width:100%;
+            padding:12px 14px;
+            border-radius:14px;
+            color:var(--text);
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.1);
+            outline:none;
+        }
+
+        .select:focus, .input:focus{
+            border-color:rgba(126,208,255,.45);
+            box-shadow:0 0 0 4px rgba(126,208,255,.12);
+        }
+
+        .svg-card{
+            padding:18px;
+            position:relative;
+            overflow:hidden;
+            min-height:560px;
+        }
+
+        .legend{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:14px;
+        }
+        .legend-item{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 10px;
+            border-radius:999px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--muted);
+            font-size:.9rem;
+        }
+        .legend-line{
+            width:24px;
+            height:4px;
+            border-radius:999px;
+            background:#fff;
+            flex:none;
+        }
+
+        .formula-strip{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:12px;
+            margin-top:18px;
+        }
+        .formula-chip{
+            padding:12px 14px;
+            border-radius:16px;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+            color:#d9e9ff;
+            font-size:.96rem;
+            line-height:1.45;
+        }
+
+        .fields{
+            display:grid;
+            gap:14px;
+        }
+        .field label{
+            display:block;
+            margin-bottom:7px;
+            font-size:.94rem;
+            color:#d9e7ff;
+        }
+        .input{
+            width:100%;
+            padding:13px 14px;
+            border-radius:14px;
+            border:1px solid rgba(255,255,255,.1);
+            background:rgba(255,255,255,.045);
+            color:var(--text);
+            outline:none;
+        }
+        input[type="range"]{
+            width:100%;
+            accent-color:#8fd8ff;
+        }
+
+        .solver-table{
+            width:100%;
+            border-collapse:separate;
+            border-spacing:0;
+            overflow:hidden;
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            margin-top:10px;
+        }
+        .solver-table th,
+        .solver-table td{
+            padding:14px 12px;
+            text-align:left;
+            vertical-align:top;
+            border-bottom:1px solid rgba(255,255,255,.07);
+        }
+        .solver-table th{
+            background:rgba(255,255,255,.05);
+            color:#e7f1ff;
+            font-size:.95rem;
+        }
+        .solver-table td{
+            color:var(--muted);
+            line-height:1.6;
+            font-size:.96rem;
+        }
+        .solver-table tr:last-child td{border-bottom:none}
+
+        .result-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:12px;
+            margin-top:18px;
+        }
+        .result-card{
+            padding:16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .result-card .label{
+            color:var(--soft);
+            font-size:.86rem;
+            margin-bottom:6px;
+        }
+        .result-card .value{
+            font-size:1.35rem;
+            font-weight:800;
+            letter-spacing:-.03em;
+            color:#fff;
+        }
+
+        .theory-accordion{
+            display:grid;
+            gap:14px;
+        }
+        .accordion-item{
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.08);
+            overflow:hidden;
+            background:rgba(255,255,255,.03);
+        }
+        .accordion-head{
+            width:100%;
+            text-align:left;
+            background:transparent;
+            color:var(--text);
+            border:none;
+            padding:18px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            cursor:pointer;
+            font-size:1rem;
+            font-weight:700;
+        }
+        .accordion-head span:last-child{
+            font-size:1.3rem;
+            color:var(--accent);
+            transition:.2s ease;
+        }
+        .accordion-item.open .accordion-head span:last-child{transform:rotate(45deg)}
+        .accordion-body{
+            max-height:0;
+            overflow:hidden;
+            transition:max-height .3s ease;
+        }
+        .accordion-inner{
+            padding:0 20px 20px;
+            color:var(--muted);
+            line-height:1.75;
+        }
+        .accent-line{
+            margin:12px 0;
+            height:1px;
+            background:linear-gradient(90deg, rgba(126,208,255,.5), transparent);
+        }
+
+        .steps{
+            display:grid;
+            gap:16px;
+        }
+
+        .task-card{
+            padding:22px;
+        }
+        .task-card h3{
+            margin:0 0 10px;
+            font-size:1.18rem;
+        }
+        .task-card p{
+            margin:0 0 12px;
+            color:var(--muted);
+            line-height:1.7;
+        }
+        .task-meta{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:12px;
+        }
+        .task-tag{
+            padding:8px 10px;
+            border-radius:999px;
+            background:rgba(126,208,255,.08);
+            border:1px solid rgba(126,208,255,.14);
+            color:#dff0ff;
+            font-size:.86rem;
+        }
+        .reveal{
+            display:grid;
+            gap:12px;
+            margin-top:14px;
+        }
+        .step-btn{
+            justify-self:start;
+        }
+        .step{
+            display:none;
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--muted);
+            line-height:1.7;
+        }
+        .step.visible{display:block}
+        .step strong{color:#fff}
+
+        .cheat-card{
+            padding:18px;
+            display:grid;
+            gap:10px;
+        }
+        .formula{
+            font-size:1.15rem;
+            font-weight:800;
+            color:#fff;
+            letter-spacing:-.02em;
+            line-height:1.4;
+        }
+        .meta-list{
+            display:grid;
+            gap:8px;
+            color:var(--muted);
+            font-size:.96rem;
+            line-height:1.66;
+        }
+        .meta-list b{color:#fff}
+
+        .quiz-wrap{
+            display:grid;
+            gap:18px;
+        }
+        .quiz-question{
+            padding:18px;
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .quiz-question h3{
+            margin:0 0 14px;
+            font-size:1rem;
+            line-height:1.55;
+        }
+        .quiz-options{
+            display:grid;
+            gap:10px;
+        }
+        .option{
+            padding:12px 14px;
+            border-radius:14px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.025);
+            color:#dce9ff;
+            cursor:pointer;
+            transition:.18s ease;
+            text-align:left;
+        }
+        .option:hover{
+            background:rgba(255,255,255,.05);
+            transform:translateY(-1px);
+        }
+        .option.correct{
+            border-color:rgba(125,243,167,.4);
+            background:rgba(125,243,167,.12);
+            color:#edfff3;
+        }
+        .option.wrong{
+            border-color:rgba(255,143,156,.38);
+            background:rgba(255,143,156,.12);
+            color:#fff0f3;
+        }
+
+        .quiz-result{
+            display:flex;
+            flex-wrap:wrap;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            padding:18px;
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .score{
+            font-size:1.18rem;
+            font-weight:800;
+        }
+
+        .generator-box,
+        .generator-answer{
+            padding:20px;
+        }
+
+        .problem-display{
+            min-height:160px;
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--text);
+            line-height:1.8;
+            font-size:1.02rem;
+        }
+        .problem-answer{
+            margin-top:14px;
+            display:none;
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(97,240,194,.08);
+            border:1px solid rgba(97,240,194,.18);
+            color:#eafff7;
+            line-height:1.7;
+        }
+        .problem-answer.show{display:block}
+
+        .insight{
+            padding:18px;
+            border-radius:18px;
+            background:linear-gradient(135deg, rgba(126,208,255,.08), rgba(157,140,255,.08));
+            border:1px solid rgba(255,255,255,.1);
+            color:#e7f2ff;
+            line-height:1.72;
+        }
+
+        .print-note{
+            color:var(--soft);
+            font-size:.92rem;
+            margin-top:10px;
+        }
+
+        footer{
+            padding:40px 0 60px;
+        }
+        .footer-card{
+            padding:24px;
+        }
+        .footer-card h3{
+            margin:0 0 10px;
+            font-size:1.1rem;
+        }
+        .footer-card p{
+            margin:0;
+            color:var(--muted);
+            line-height:1.75;
+        }
+
+        .muted{color:var(--muted)}
+        .center{text-align:center}
+        .small{font-size:.92rem}
+        .nowrap{white-space:nowrap}
+
+        @media (max-width: 1100px){
+            .hero-grid,
+            .calc-grid,
+            .diagram-layout,
+            .footer-grid{
+                grid-template-columns:1fr;
+            }
+            .summary-grid{grid-template-columns:repeat(2,1fr)}
+            .formula-strip{grid-template-columns:repeat(2,1fr)}
+            .result-grid{grid-template-columns:repeat(2,1fr)}
+            .generator-grid{grid-template-columns:1fr}
+            .visual-shell{min-height:460px}
+            .svg-card{min-height:500px}
+        }
+
+        @media (max-width: 720px){
+            .wrap{width:min(100% - 18px, var(--max))}
+            .hero{min-height:auto;padding-top:18px}
+            .hero-copy,.hero-visual,.panel,.mini-card,.task-card,.generator-box,.generator-answer,.footer-card{padding:18px}
+            .summary-grid,
+            .cheat-grid,
+            .formula-strip,
+            .result-grid{
+                grid-template-columns:1fr;
+            }
+            .hero-actions{flex-direction:column; align-items:stretch}
+            .btn{width:100%}
+            .visual-shell{min-height:360px}
+            .svg-card{min-height:420px}
+            .floating-note{display:none}
+            .section{padding:28px 0}
+            .section-title{font-size:1.7rem}
+            .diagram-layout{gap:14px}
+            .solver-table th,.solver-table td{padding:11px 10px;font-size:.92rem}
+        }
+
+        @media print{
+            :root{
+                --text:#111;
+                --muted:#333;
+                --soft:#555;
+                --line:rgba(0,0,0,.12);
+            }
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+            body::before,
+            .hero-visual,
+            .hero-actions,
+            .toggle-list,
+            .legend,
+            .quiz-wrap,
+            .generator-grid,
+            footer,
+            .print-hide{
+                display:none !important;
+            }
+            .card,
+            .mini-card,
+            .task-card,
+            .panel,
+            .cheat-card{
+                background:#fff !important;
+                color:#111 !important;
+                box-shadow:none !important;
+                border:1px solid #cfcfcf !important;
+                backdrop-filter:none !important;
+            }
+            .hero{
+                min-height:auto;
+                padding:0;
+            }
+            .hero-grid,
+            .summary-grid,
+            .calc-grid,
+            .diagram-layout,
+            .cheat-grid{
+                display:block;
+            }
+            .hero-copy,
+            .panel,
+            .mini-card,
+            .task-card,
+            .cheat-card{
+                margin-bottom:12px;
+            }
+            .accordion-body{
+                max-height:none !important;
+            }
+            .step{
+                display:block !important;
+            }
+            .section{
+                padding:14px 0;
+                break-inside:avoid;
+            }
+            .section-title,
+            .hero h1,
+            .formula,
+            .result-card .value{
+                color:#111 !important;
+            }
+            .badge,
+            .task-tag,
+            .eyebrow,
+            .formula-chip,
+            .result-card{
+                border:1px solid #ddd !important;
+                background:#f7f7f7 !important;
+                color:#111 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <section class="hero">
+        <div class="wrap">
+            <div class="hero-grid">
+                <div class="hero-copy card">
+                    <div class="eyebrow"><span class="spark"></span>ЕГЭ · алгебра и практическая математика · метод таблиц</div>
+                    <h1>
+                        <span class="gradient">Решение текстовых задач</span>
+                        <span class="gradient">на производительность</span>
+                        <span style="display:block;color:#f7fbff">при помощи таблиц</span>
+                    </h1>
+                    <p>
+                        Здесь собрана интерактивная учебная страница, где задачи на совместную работу, скорость выполнения и изменение производительности
+                        превращаются в ясную систему: <b>объём работы</b>, <b>время</b>, <b>производительность</b>. Главная идея проста:
+                        не угадывать уравнение вслепую, а сначала построить грамотную таблицу и увидеть структуру задачи.
+                    </p>
+
+                    <div class="badges">
+                        <span class="badge">Три величины: A = p·t</span>
+                        <span class="badge">Совместная работа: p₁ + p₂</span>
+                        <span class="badge">Обратная пропорциональность</span>
+                        <span class="badge">Частая тема ЕГЭ</span>
+                    </div>
+
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="#diagram">Перейти к модели</a>
+                        <a class="btn btn-secondary" href="#calculator">Открыть калькулятор</a>
+                        <a class="btn btn-ghost" href="#generator">Сгенерировать задачу</a>
+                    </div>
+                </div>
+
+                <div class="hero-visual card">
+                    <div class="visual-shell">
+                        <div class="floating-note note-a">Таблица — это не оформление, а модель.</div>
+                        <div class="floating-note note-b">Единица работы удобно принимается за 1.</div>
+                        <div class="floating-note note-c">Производительность = работа за 1 час.</div>
+                        <div class="floating-note note-d">Совместная работа складывает скорости.</div>
+
+                        <svg viewBox="0 0 680 540" width="100%" height="100%" aria-label="Визуальная схема задачи на производительность">
+                            <defs>
+                                <linearGradient id="heroLine" x1="0" x2="1">
+                                    <stop offset="0%" stop-color="#7ed0ff"/>
+                                    <stop offset="100%" stop-color="#9d8cff"/>
+                                </linearGradient>
+                                <linearGradient id="heroFill" x1="0" x2="1">
+                                    <stop offset="0%" stop-color="rgba(126,208,255,.18)"/>
+                                    <stop offset="100%" stop-color="rgba(157,140,255,.18)"/>
+                                </linearGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="6" result="blur"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+
+                            <g opacity=".12">
+                                <circle cx="340" cy="270" r="180" fill="none" stroke="#9fdcff"/>
+                                <circle cx="340" cy="270" r="120" fill="none" stroke="#9fdcff"/>
+                                <circle cx="340" cy="270" r="60" fill="none" stroke="#9fdcff"/>
+                            </g>
+
+                            <g transform="translate(70 70)">
+                                <rect x="0" y="0" width="540" height="400" rx="28" fill="rgba(9,17,31,.45)" stroke="rgba(255,255,255,.08)"/>
+                                <rect x="26" y="34" width="488" height="74" rx="18" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.09)"/>
+                                <text x="50" y="79" fill="#ebf5ff" font-size="28" font-weight="700">Табличная модель</text>
+                                <text x="346" y="79" fill="#a8b8d9" font-size="20">работа · время · производительность</text>
+
+                                <g transform="translate(36 132)">
+                                    <rect x="0" y="0" width="468" height="218" rx="22" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"/>
+                                    <line x1="0" y1="56" x2="468" y2="56" stroke="rgba(255,255,255,.08)"/>
+                                    <line x1="140" y1="0" x2="140" y2="218" stroke="rgba(255,255,255,.08)"/>
+                                    <line x1="310" y1="0" x2="310" y2="218" stroke="rgba(255,255,255,.08)"/>
+                                    <line x1="0" y1="137" x2="468" y2="137" stroke="rgba(255,255,255,.08)"/>
+
+                                    <text x="24" y="36" fill="#cfe6ff" font-size="20" font-weight="700">Участник</text>
+                                    <text x="176" y="36" fill="#cfe6ff" font-size="20" font-weight="700">Время</text>
+                                    <text x="342" y="36" fill="#cfe6ff" font-size="20" font-weight="700">Производительность</text>
+
+                                    <text x="24" y="98" fill="#ffffff" font-size="22" font-weight="700">Первый</text>
+                                    <text x="176" y="98" fill="#7ed0ff" font-size="26" font-weight="800">x ч</text>
+                                    <text x="342" y="98" fill="#7ed0ff" font-size="26" font-weight="800">1/x</text>
+
+                                    <text x="24" y="180" fill="#ffffff" font-size="22" font-weight="700">Второй</text>
+                                    <text x="176" y="180" fill="#9d8cff" font-size="26" font-weight="800">y ч</text>
+                                    <text x="342" y="180" fill="#9d8cff" font-size="26" font-weight="800">1/y</text>
+                                </g>
+
+                                <g transform="translate(60 370)">
+                                    <path d="M0 0 L164 0 L204 -40 L244 0 L448 0" fill="none" stroke="url(#heroLine)" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
+                                    <circle cx="0" cy="0" r="8" fill="#7ed0ff"/>
+                                    <circle cx="164" cy="0" r="8" fill="#7ed0ff"/>
+                                    <circle cx="204" cy="-40" r="10" fill="#61f0c2"/>
+                                    <circle cx="244" cy="0" r="8" fill="#9d8cff"/>
+                                    <circle cx="448" cy="0" r="8" fill="#9d8cff"/>
+                                    <text x="146" y="-16" fill="#dff2ff" font-size="18">p₁</text>
+                                    <text x="194" y="-54" fill="#f0fff9" font-size="18">p₁ + p₂</text>
+                                    <text x="262" y="-16" fill="#eee6ff" font-size="18">p₂</text>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="summary">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Краткая сводка по теме</h2>
+            <p class="section-lead">
+                Задачи на производительность описывают, как быстро выполняется работа, как меняется время при изменении темпа
+                и как соединяются усилия нескольких исполнителей. Ключевой инструмент — таблица, где каждая строка представляет участника или этап,
+                а столбцы фиксируют три величины: <b>объём работы</b>, <b>время</b>, <b>производительность</b>.
+            </p>
+
+            <div class="summary-grid">
+                <article class="mini-card card">
+                    <div class="kpi">A = p·t</div>
+                    <h3>Базовая связь</h3>
+                    <p>Если A — объём работы, p — производительность, t — время, то A = p·t. Из неё следуют p = A/t и t = A/p.</p>
+                </article>
+                <article class="mini-card card">
+                    <div class="kpi">1</div>
+                    <h3>Удобная единица работы</h3>
+                    <p>Если в задаче говорится про один заказ, один бассейн, одну траншею, весь участок работы часто удобно принять за 1.</p>
+                </article>
+                <article class="mini-card card">
+                    <div class="kpi">p₁ + p₂</div>
+                    <h3>Совместная работа</h3>
+                    <p>Если два исполнителя работают одновременно и независимо, их общая производительность равна сумме производительностей.</p>
+                </article>
+                <article class="mini-card card">
+                    <div class="kpi">обратная связь</div>
+                    <h3>Главная ловушка</h3>
+                    <p>Время и производительность не складываются напрямую. Если время уменьшается, производительность увеличивается не на столько же, а обратно пропорционально.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="diagram">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Интерактивная модель и учебный чертёж</h2>
+            <p class="section-lead">
+                Хотя тема не геометрическая, здесь нужен такой же строгий учебный рисунок: визуальная схема должна не украшать, а объяснять.
+                Ниже — интерактивная табличная модель совместной работы. Можно переключать слои, менять сценарий и сразу видеть,
+                как перестраивается смысл задачи.
+            </p>
+
+            <div class="diagram-layout">
+                <aside class="controls-col">
+                    <div class="control-group card">
+                        <h3>Сценарий</h3>
+                        <select class="select" id="scenarioSelect" aria-label="Выберите сценарий">
+                            <option value="together">Совместная работа двух исполнителей</option>
+                            <option value="separate">Отдельная работа двух исполнителей</option>
+                            <option value="stages">Два последовательных этапа</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group card">
+                        <h3>Показать слои</h3>
+                        <div class="toggle-list">
+                            <div class="toggle"><label><input type="checkbox" id="showWork" checked>Столбец «Работа»</label></div>
+                            <div class="toggle"><label><input type="checkbox" id="showTime" checked>Столбец «Время»</label></div>
+                            <div class="toggle"><label><input type="checkbox" id="showRate" checked>Столбец «Производительность»</label></div>
+                            <div class="toggle"><label><input type="checkbox" id="showArrows" checked>Стрелки зависимостей</label></div>
+                            <div class="toggle"><label><input type="checkbox" id="showEquation" checked>Уравнение модели</label></div>
+                        </div>
+                    </div>
+
+                    <div class="control-group card">
+                        <h3>Ключевая мысль</h3>
+                        <div class="insight" id="scenarioInsight">
+                            Если весь объём работы принят за 1, то при времени x часов производительность равна 1/x. Для двух исполнителей, работающих вместе,
+                            получаем: (1/x + 1/y)t = 1.
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="svg-card card">
+                    <svg id="modelSvg" viewBox="0 0 920 600" width="100%" height="100%" aria-label="Интерактивная схема метода таблиц">
+                        <defs>
+                            <linearGradient id="tableGlow" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#7ed0ff"/>
+                                <stop offset="100%" stop-color="#9d8cff"/>
+                            </linearGradient>
+                            <marker id="arrowHead" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#7ed0ff"></path>
+                            </marker>
+                        </defs>
+
+                        <rect x="24" y="24" width="872" height="552" rx="28" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"></rect>
+
+                        <text x="52" y="74" fill="#eff7ff" font-size="32" font-weight="800">Таблица величин</text>
+                        <text x="540" y="74" fill="#aabadd" font-size="20">объём работы · время · производительность</text>
+
+                        <g id="tableBase" transform="translate(50 108)">
+                            <rect x="0" y="0" width="820" height="300" rx="24" fill="rgba(255,255,255,.028)" stroke="rgba(255,255,255,.09)"></rect>
+                            <line x1="0" y1="68" x2="820" y2="68" stroke="rgba(255,255,255,.09)"></line>
+                            <line x1="180" y1="0" x2="180" y2="300" stroke="rgba(255,255,255,.09)"></line>
+                            <line x1="430" y1="0" x2="430" y2="300" stroke="rgba(255,255,255,.09)"></line>
+                            <line x1="620" y1="0" x2="620" y2="300" stroke="rgba(255,255,255,.09)"></line>
+                            <line x1="0" y1="146" x2="820" y2="146" stroke="rgba(255,255,255,.09)"></line>
+                            <line x1="0" y1="223" x2="820" y2="223" stroke="rgba(255,255,255,.09)"></line>
+
+                            <text x="26" y="43" fill="#d8ebff" font-size="20" font-weight="700">Кто / этап</text>
+                            <text class="col-work" x="224" y="43" fill="#d8ebff" font-size="20" font-weight="700">Работа</text>
+                            <text class="col-time" x="486" y="43" fill="#d8ebff" font-size="20" font-weight="700">Время</text>
+                            <text class="col-rate" x="646" y="43" fill="#d8ebff" font-size="20" font-weight="700">Производительность</text>
+
+                            <text id="row1Label" x="26" y="114" fill="#ffffff" font-size="22" font-weight="800">Первый</text>
+                            <text id="row2Label" x="26" y="191" fill="#ffffff" font-size="22" font-weight="800">Второй</text>
+                            <text id="row3Label" x="26" y="268" fill="#ffffff" font-size="22" font-weight="800">Вместе</text>
+
+                            <text class="work-cell" id="work1" x="246" y="114" fill="#7ed0ff" font-size="26" font-weight="800">1</text>
+                            <text class="work-cell" id="work2" x="246" y="191" fill="#9d8cff" font-size="26" font-weight="800">1</text>
+                            <text class="work-cell" id="work3" x="246" y="268" fill="#61f0c2" font-size="26" font-weight="800">1</text>
+
+                            <text class="time-cell" id="time1" x="474" y="114" fill="#7ed0ff" font-size="26" font-weight="800">x ч</text>
+                            <text class="time-cell" id="time2" x="474" y="191" fill="#9d8cff" font-size="26" font-weight="800">y ч</text>
+                            <text class="time-cell" id="time3" x="474" y="268" fill="#61f0c2" font-size="26" font-weight="800">t ч</text>
+
+                            <text class="rate-cell" id="rate1" x="646" y="114" fill="#7ed0ff" font-size="26" font-weight="800">1/x</text>
+                            <text class="rate-cell" id="rate2" x="646" y="191" fill="#9d8cff" font-size="26" font-weight="800">1/y</text>
+                            <text class="rate-cell" id="rate3" x="646" y="268" fill="#61f0c2" font-size="26" font-weight="800">1/t</text>
+                        </g>
+
+                        <g id="arrowsLayer">
+                            <path id="arrow1" d="M 715 220 C 775 220, 790 260, 790 300" stroke="#7ed0ff" stroke-width="4" fill="none" marker-end="url(#arrowHead)" opacity=".9"></path>
+                            <path id="arrow2" d="M 715 297 C 785 297, 805 310, 805 345" stroke="#9d8cff" stroke-width="4" fill="none" marker-end="url(#arrowHead)" opacity=".9"></path>
+                            <text x="740" y="332" fill="#d9efff" font-size="18">сложение скоростей</text>
+                        </g>
+
+                        <g id="equationLayer">
+                            <rect x="62" y="462" width="796" height="78" rx="20" fill="rgba(255,255,255,.04)" stroke="url(#tableGlow)"></rect>
+                            <text id="equationText" x="88" y="510" fill="#eff8ff" font-size="28" font-weight="800">(1/x + 1/y)·t = 1</text>
+                        </g>
+                    </svg>
+
+                    <div class="legend">
+                        <div class="legend-item"><span class="legend-line" style="background:#7ed0ff"></span>первый исполнитель</div>
+                        <div class="legend-item"><span class="legend-line" style="background:#9d8cff"></span>второй исполнитель</div>
+                        <div class="legend-item"><span class="legend-line" style="background:#61f0c2"></span>совместный или итоговый результат</div>
+                    </div>
+
+                    <div class="formula-strip">
+                        <div class="formula-chip">Если вся работа принята за 1, то при времени x часов производительность равна 1/x.</div>
+                        <div class="formula-chip">Если работа выполнена на долю k от общего объёма, то A = k, а не 1.</div>
+                        <div class="formula-chip">При совместной работе производительности складываются: p = p₁ + p₂ + …</div>
+                        <div class="formula-chip">Если исполнителей несколько, таблица помогает не потерять этапы и единицы измерения.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="calculator">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Калькулятор совместной работы</h2>
+            <p class="section-lead">
+                Введите время, за которое первый и второй исполнитель выполняют всю работу по отдельности.
+                Калькулятор мгновенно найдёт их производительности, суммарную скорость и время совместной работы.
+                Здесь весь объём работы принят за 1.
+            </p>
+
+            <div class="calc-grid">
+                <div class="panel card">
+                    <div class="fields">
+                        <div class="field">
+                            <label for="timeA">Первый исполнитель выполняет работу за x часов</label>
+                            <input class="input" id="timeA" type="number" min="0.1" step="0.1" value="6" />
+                        </div>
+
+                        <div class="field">
+                            <label for="rangeA">Быстрая настройка x</label>
+                            <input id="rangeA" type="range" min="1" max="20" step="1" value="6" />
+                        </div>
+
+                        <div class="field">
+                            <label for="timeB">Второй исполнитель выполняет работу за y часов</label>
+                            <input class="input" id="timeB" type="number" min="0.1" step="0.1" value="8" />
+                        </div>
+
+                        <div class="field">
+                            <label for="rangeB">Быстрая настройка y</label>
+                            <input id="rangeB" type="range" min="1" max="20" step="1" value="8" />
+                        </div>
+                    </div>
+
+                    <table class="solver-table" aria-label="Таблица расчёта производительности">
+                        <thead>
+                        <tr>
+                            <th>Строка</th>
+                            <th>Работа</th>
+                            <th>Время</th>
+                            <th>Производительность</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Первый</td>
+                            <td>1</td>
+                            <td id="tableXA">6 ч</td>
+                            <td id="rateA">1/6</td>
+                        </tr>
+                        <tr>
+                            <td>Второй</td>
+                            <td>1</td>
+                            <td id="tableYB">8 ч</td>
+                            <td id="rateB">1/8</td>
+                        </tr>
+                        <tr>
+                            <td>Вместе</td>
+                            <td>1</td>
+                            <td id="tableTogether">24/7 ч</td>
+                            <td id="rateTogether">7/24</td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="print-note">Формула: t = 1 / (1/x + 1/y) = xy / (x + y)</p>
+                </div>
+
+                <div class="panel card">
+                    <div class="result-grid">
+                        <div class="result-card">
+                            <div class="label">Производительность первого</div>
+                            <div class="value" id="cardRateA">0.1667</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="label">Производительность второго</div>
+                            <div class="value" id="cardRateB">0.1250</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="label">Совместная производительность</div>
+                            <div class="value" id="cardRateTogether">0.2917</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="label">Время совместной работы</div>
+                            <div class="value" id="cardTimeTogether">3.4286 ч</div>
+                        </div>
+                    </div>
+
+                    <div class="accent-line"></div>
+
+                    <div class="insight" id="calcInsight">
+                        При x = 6 и y = 8 получаем: 1/6 + 1/8 = 7/24. Значит, вместе они выполняют 7/24 работы за 1 час,
+                        поэтому на всю работу требуется 24/7 ч ≈ 3.4286 ч.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="theory">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Теория: как не теряться в задачах</h2>
+            <p class="section-lead">
+                Ниже собраны определения, стандартные схемы, выводы и типичные ошибки.
+                Раздел оформлен как раскрывающиеся блоки, чтобы можно было читать линейно или открывать только нужное.
+            </p>
+
+            <div class="theory-accordion">
+                <div class="accordion-item card open">
+                    <button class="accordion-head" type="button">
+                        <span>1. Три главные величины</span>
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-body" style="max-height: 500px;">
+                        <div class="accordion-inner">
+                            <p><b>Работа</b> — полный объём задания. Часто удобно принимать его за 1.</p>
+                            <p><b>Производительность</b> — какая часть работы выполняется за 1 единицу времени.</p>
+                            <p><b>Время</b> — сколько нужно часов, дней или минут для выполнения работы.</p>
+                            <div class="accent-line"></div>
+                            <p>Связь всегда одна и та же: <b>A = p·t</b>. В задачах на производительность это базовая формула, от которой строится вся таблица.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item card">
+                    <button class="accordion-head" type="button">
+                        <span>2. Почему таблица лучше «сразу уравнения»</span>
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-inner">
+                            <p>Таблица заставляет явно указать, <b>кто</b> выполняет работу, <b>какой объём</b> относится к каждой строке,
+                                <b>какое время</b> известно и <b>какая производительность</b> из этого следует.</p>
+                            <p>Когда задача содержит несколько этапов, перерывы, изменение темпа или совместную работу, таблица предотвращает типичную путаницу:
+                                школьник не начинает складывать несовместимые величины.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item card">
+                    <button class="accordion-head" type="button">
+                        <span>3. Совместная работа</span>
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-inner">
+                            <p>Если первый выполняет в час 1/x работы, а второй — 1/y работы, то вместе за 1 час они выполняют:</p>
+                            <p><b>1/x + 1/y</b></p>
+                            <p>Тогда время совместной работы равно:</p>
+                            <p><b>t = 1 / (1/x + 1/y) = xy / (x + y)</b></p>
+                            <p>Эта формула верна только тогда, когда оба работают одновременно всё время и общий объём работы действительно один и тот же.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item card">
+                    <button class="accordion-head" type="button">
+                        <span>4. Изменение производительности</span>
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-inner">
+                            <p>Если производительность увеличилась на 20%, то новая производительность равна <b>1.2p</b>.</p>
+                            <p>Тогда время на ту же работу станет равно <b>1 / 1.2</b> от старого времени, то есть уменьшится не на 20%, а до <b>5/6</b> прежнего.</p>
+                            <p>Это ключевая идея: <b>время обратно пропорционально производительности</b>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item card">
+                    <button class="accordion-head" type="button">
+                        <span>5. Типичные ошибки</span>
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-inner">
+                            <p>1) Складывают времена вместо производительностей.</p>
+                            <p>2) Принимают за 1 не весь объём работы, а только одну строку таблицы без согласования с остальными.</p>
+                            <p>3) Путают «сделал за x часов» и «делает x работы за час».</p>
+                            <p>4) Неправильно учитывают этапы: сначала часть работы выполнили отдельно, затем остаток — совместно.</p>
+                            <p>5) При процентах меняют время на тот же процент, что и производительность. Это неверно.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item card">
+                    <button class="accordion-head" type="button">
+                        <span>6. Универсальный алгоритм решения</span>
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-inner">
+                            <p><b>Шаг 1.</b> Определи полный объём работы и единицу измерения времени.</p>
+                            <p><b>Шаг 2.</b> Построй таблицу: участник или этап / работа / время / производительность.</p>
+                            <p><b>Шаг 3.</b> Заполни известные величины, неизвестное обозначь переменной.</p>
+                            <p><b>Шаг 4.</b> Вырази производительность через работу и время.</p>
+                            <p><b>Шаг 5.</b> Запиши связь между строками: сумма производительностей, сумма выполненных частей, остаток работы.</p>
+                            <p><b>Шаг 6.</b> Реши уравнение, затем обязательно вернись к смыслу переменной и сформулируй ответ словами задачи.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="tasks">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Разбор задач</h2>
+            <p class="section-lead">
+                Ниже три разобранные задачи: на совместную работу, на разность во времени и на изменение производительности.
+                Каждый разбор раскрывается по шагам, чтобы логика была прозрачной.
+            </p>
+
+            <div class="steps">
+                <article class="task-card card">
+                    <div class="task-meta">
+                        <span class="task-tag">Задача 1</span>
+                        <span class="task-tag">совместная работа</span>
+                        <span class="task-tag">прямая табличная модель</span>
+                    </div>
+                    <h3>Два мастера, работая вместе, выполняют заказ за 4 часа. Первый мастер один выполняет этот заказ за 6 часов. За сколько часов выполнит заказ второй мастер?</h3>
+                    <div class="reveal" data-steps="3">
+                        <button class="btn btn-secondary step-btn" type="button">Показать следующий шаг</button>
+                        <div class="step"><strong>Шаг 1.</strong> Примем весь заказ за 1. Тогда производительность совместной работы равна 1/4, а производительность первого мастера равна 1/6.</div>
+                        <div class="step"><strong>Шаг 2.</strong> Производительность второго мастера равна разности: 1/4 − 1/6 = 3/12 − 2/12 = 1/12.</div>
+                        <div class="step"><strong>Шаг 3.</strong> Если второй за 1 час выполняет 1/12 заказа, то весь заказ он выполнит за 12 часов. <strong>Ответ: 12 часов.</strong></div>
+                    </div>
+                </article>
+
+                <article class="task-card card">
+                    <div class="task-meta">
+                        <span class="task-tag">Задача 2</span>
+                        <span class="task-tag">разность во времени</span>
+                        <span class="task-tag">рациональное уравнение</span>
+                    </div>
+                    <h3>Первый рабочий может выполнить работу на 5 часов быстрее второго. Работая вместе, они выполняют её за 6 часов. За сколько часов выполнил бы работу первый рабочий?</h3>
+                    <div class="reveal" data-steps="4">
+                        <button class="btn btn-secondary step-btn" type="button">Показать следующий шаг</button>
+                        <div class="step"><strong>Шаг 1.</strong> Пусть первый выполняет работу за x часов, тогда второй — за x + 5 часов. Вся работа равна 1.</div>
+                        <div class="step"><strong>Шаг 2.</strong> Производительности равны 1/x и 1/(x + 5). Вместе они выполняют 1/6 работы за час, значит:
+                            <br><strong>1/x + 1/(x + 5) = 1/6.</strong></div>
+                        <div class="step"><strong>Шаг 3.</strong> Приведём к общему знаменателю:
+                            <br>(2x + 5) / (x(x + 5)) = 1/6
+                            <br>6(2x + 5) = x(x + 5)
+                            <br>12x + 30 = x² + 5x
+                            <br>x² − 7x − 30 = 0
+                            <br>(x − 10)(x + 3) = 0.</div>
+                        <div class="step"><strong>Шаг 4.</strong> Подходит только положительный корень x = 10. Значит, первый рабочий выполняет работу за 10 часов. <strong>Ответ: 10 часов.</strong></div>
+                    </div>
+                </article>
+
+                <article class="task-card card">
+                    <div class="task-meta">
+                        <span class="task-tag">Задача 3</span>
+                        <span class="task-tag">изменение производительности</span>
+                        <span class="task-tag">обратная пропорциональность</span>
+                    </div>
+                    <h3>После модернизации станок стал выпускать за час на 25% больше деталей, чем раньше. На изготовление той же партии деталей теперь требуется 8 часов. Сколько часов требовалось раньше?</h3>
+                    <div class="reveal" data-steps="3">
+                        <button class="btn btn-secondary step-btn" type="button">Показать следующий шаг</button>
+                        <div class="step"><strong>Шаг 1.</strong> Пусть старая производительность равна p. Тогда новая производительность равна 1.25p = 5p/4.</div>
+                        <div class="step"><strong>Шаг 2.</strong> Для одной и той же партии работа постоянна. Если теперь требуется 8 часов, то объём работы равен (5p/4)·8 = 10p.</div>
+                        <div class="step"><strong>Шаг 3.</strong> При старой производительности p на работу объёма 10p потребуется 10 часов. <strong>Ответ: 10 часов.</strong></div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="cheat">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Cheat sheet</h2>
+            <p class="section-lead">
+                Компактная опорная сводка: формулы, смысл, применение и типичные ловушки.
+            </p>
+
+            <div class="cheat-grid">
+                <article class="cheat-card card">
+                    <div class="formula">A = p·t</div>
+                    <div class="meta-list">
+                        <div><b>Смысл:</b> вся работа равна произведению производительности на время.</div>
+                        <div><b>Когда применять:</b> всегда, это основа любой задачи темы.</div>
+                        <div><b>Где легко ошибиться:</b> забыть, что работа и время должны относиться к одной строке таблицы.</div>
+                    </div>
+                </article>
+
+                <article class="cheat-card card">
+                    <div class="formula">p = 1/t, если A = 1</div>
+                    <div class="meta-list">
+                        <div><b>Смысл:</b> если весь объём работы принят за 1, то производительность равна доле работы за единицу времени.</div>
+                        <div><b>Когда применять:</b> в задачах про один заказ, одну траншею, один бассейн, один участок работы.</div>
+                        <div><b>Где легко ошибиться:</b> спутать 1/t и t.</div>
+                    </div>
+                </article>
+
+                <article class="cheat-card card">
+                    <div class="formula">p<sub>общ</sub> = p₁ + p₂ + …</div>
+                    <div class="meta-list">
+                        <div><b>Смысл:</b> при одновременной независимой работе производительности складываются.</div>
+                        <div><b>Когда применять:</b> когда участники работают вместе в один и тот же промежуток времени.</div>
+                        <div><b>Где легко ошибиться:</b> складывать времена вместо скоростей.</div>
+                    </div>
+                </article>
+
+                <article class="cheat-card card">
+                    <div class="formula">t = xy / (x + y)</div>
+                    <div class="meta-list">
+                        <div><b>Смысл:</b> время совместной работы двух исполнителей, если по отдельности они выполняют работу за x и y часов.</div>
+                        <div><b>Когда применять:</b> только при полном совпадении объёма работы и непрерывной совместной работе.</div>
+                        <div><b>Где легко ошибиться:</b> использовать формулу, если в задаче есть этапы или не весь объём работы выполняется вместе.</div>
+                    </div>
+                </article>
+
+                <article class="cheat-card card">
+                    <div class="formula">Если p выросла в k раз, то t уменьшилась в k раз</div>
+                    <div class="meta-list">
+                        <div><b>Смысл:</b> время обратно пропорционально производительности при постоянной работе.</div>
+                        <div><b>Когда применять:</b> в задачах про проценты, модернизацию, увеличение выпуска.</div>
+                        <div><b>Где легко ошибиться:</b> уменьшать время на тот же процент, на который выросла производительность.</div>
+                    </div>
+                </article>
+
+                <article class="cheat-card card">
+                    <div class="formula">Остаток работы = 1 − выполненная часть</div>
+                    <div class="meta-list">
+                        <div><b>Смысл:</b> удобно для многоэтапных задач.</div>
+                        <div><b>Когда применять:</b> если сначала часть работы сделал один участник, а потом включился другой.</div>
+                        <div><b>Где легко ошибиться:</b> не связать остаток с нужной строкой таблицы и потерять общий объём.</div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="quiz">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Мини-квиз</h2>
+            <p class="section-lead">
+                Выбери ответы, затем нажми кнопку проверки. Правильные варианты подсветятся, а внизу появится итоговый счёт.
+            </p>
+
+            <div class="quiz-wrap card panel">
+                <div class="quiz-question" data-correct="1">
+                    <h3>1. Если вся работа принята за 1 и исполнитель выполняет её за 12 часов, какова его производительность?</h3>
+                    <div class="quiz-options">
+                        <button class="option" type="button" data-index="0">12</button>
+                        <button class="option" type="button" data-index="1">1/12</button>
+                        <button class="option" type="button" data-index="2">11/12</button>
+                        <button class="option" type="button" data-index="3">12/1 ч</button>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-correct="2">
+                    <h3>2. Два исполнителя выполняют работу по отдельности за 4 ч и 6 ч. Какая формула задаёт их совместную производительность?</h3>
+                    <div class="quiz-options">
+                        <button class="option" type="button" data-index="0">4 + 6</button>
+                        <button class="option" type="button" data-index="1">1/(4 + 6)</button>
+                        <button class="option" type="button" data-index="2">1/4 + 1/6</button>
+                        <button class="option" type="button" data-index="3">4/6</button>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-correct="0">
+                    <h3>3. Если производительность выросла на 20%, то время выполнения той же работы...</h3>
+                    <div class="quiz-options">
+                        <button class="option" type="button" data-index="0">уменьшится до 5/6 прежнего</button>
+                        <button class="option" type="button" data-index="1">уменьшится на 20%</button>
+                        <button class="option" type="button" data-index="2">увеличится на 20%</button>
+                        <button class="option" type="button" data-index="3">останется тем же</button>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-correct="3">
+                    <h3>4. Какую величину чаще всего удобно принять за 1 в стандартной задаче на производительность?</h3>
+                    <div class="quiz-options">
+                        <button class="option" type="button" data-index="0">время самого быстрого исполнителя</button>
+                        <button class="option" type="button" data-index="1">сумму всех времён</button>
+                        <button class="option" type="button" data-index="2">разность производительностей</button>
+                        <button class="option" type="button" data-index="3">весь объём работы</button>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-correct="1">
+                    <h3>5. Какой из вариантов отражает главную ошибку в задачах на совместную работу?</h3>
+                    <div class="quiz-options">
+                        <button class="option" type="button" data-index="0">складывать доли работы</button>
+                        <button class="option" type="button" data-index="1">складывать времена вместо производительностей</button>
+                        <button class="option" type="button" data-index="2">принимать работу за 1</button>
+                        <button class="option" type="button" data-index="3">использовать таблицу</button>
+                    </div>
+                </div>
+
+                <div class="quiz-result">
+                    <div>
+                        <div class="score" id="quizScore">Пока не проверено</div>
+                        <div class="muted small">После проверки можно выбрать новые ответы и запустить проверку снова.</div>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn btn-primary" id="checkQuiz" type="button">Проверить</button>
+                        <button class="btn btn-secondary" id="resetQuiz" type="button">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="generator">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Генератор тренировочных задач</h2>
+            <p class="section-lead">
+                Генератор создаёт только проверяемые и корректные задачи. Шаблоны подобраны так, чтобы ответы были согласованы,
+                а вычисления — чистыми и надёжными.
+            </p>
+
+            <div class="generator-grid">
+                <div class="generator-box card">
+                    <h3 style="margin-top:0;">Новая задача</h3>
+                    <div class="problem-display" id="generatedProblem">
+                        Нажми кнопку, чтобы получить тренировочную задачу.
+                    </div>
+                    <div class="problem-answer" id="generatedAnswer"></div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                        <button class="btn btn-primary" id="generateBtn" type="button">Сгенерировать</button>
+                        <button class="btn btn-secondary" id="showAnswerBtn" type="button">Показать ответ</button>
+                    </div>
+                </div>
+
+                <div class="generator-answer card">
+                    <h3 style="margin-top:0;">Какие шаблоны используются</h3>
+                    <div class="meta-list">
+                        <div><b>Шаблон 1.</b> Один исполнитель известен, совместное время известно, найти время второго.</div>
+                        <div><b>Шаблон 2.</b> Известна разность во времени и совместное время, найти время более быстрого.</div>
+                        <div><b>Шаблон 3.</b> Производительность увеличилась на заданный процент, известно новое время, найти старое время.</div>
+                        <div><b>Шаблон 4.</b> Сначала часть работы выполнил один исполнитель, затем остаток завершили вместе.</div>
+                        <div><b>Шаблон 5.</b> Даны два времени по отдельности, нужно найти совместное время.</div>
+                    </div>
+                    <div class="accent-line"></div>
+                    <div class="insight">
+                        Все шаблоны запрограммированы так, чтобы давать положительные ответы и корректную физическую интерпретацию.
+                        Для рациональных уравнений используются заранее проверенные наборы параметров.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section print-hide">
+        <div class="wrap">
+            <h2 class="section-title"><span class="dot"></span>Печатная версия</h2>
+            <p class="section-lead">
+                Эта страница адаптирована для печати: декоративные эффекты исчезают, а теория, формулы и разборы остаются.
+                Для печати можно использовать обычную команду браузера.
+            </p>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="wrap">
+        <div class="footer-grid">
+            <div class="footer-card card">
+                <h3>Главная мысль темы</h3>
+                <p>
+                    Хорошее решение задачи на производительность почти всегда начинается не с уравнения, а с грамотной структуры.
+                    Если таблица построена верно, уравнение получается естественно и почти без риска ошибки.
+                    В этой теме побеждает не скорость счёта, а точность математической модели.
+                </p>
+            </div>
+            <div class="footer-card card">
+                <h3>Мини-напоминание</h3>
+                <p>
+                    Всегда проверяй: что принято за 1, что означает каждая строка таблицы, какие величины складываются,
+                    а какие связаны обратной пропорциональностью.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    (function(){
+        const scenarioSelect = document.getElementById('scenarioSelect');
+        const showWork = document.getElementById('showWork');
+        const showTime = document.getElementById('showTime');
+        const showRate = document.getElementById('showRate');
+        const showArrows = document.getElementById('showArrows');
+        const showEquation = document.getElementById('showEquation');
+        const scenarioInsight = document.getElementById('scenarioInsight');
+
+        const row1Label = document.getElementById('row1Label');
+        const row2Label = document.getElementById('row2Label');
+        const row3Label = document.getElementById('row3Label');
+
+        const work1 = document.getElementById('work1');
+        const work2 = document.getElementById('work2');
+        const work3 = document.getElementById('work3');
+        const time1 = document.getElementById('time1');
+        const time2 = document.getElementById('time2');
+        const time3 = document.getElementById('time3');
+        const rate1 = document.getElementById('rate1');
+        const rate2 = document.getElementById('rate2');
+        const rate3 = document.getElementById('rate3');
+        const equationText = document.getElementById('equationText');
+
+        const arrowsLayer = document.getElementById('arrowsLayer');
+        const equationLayer = document.getElementById('equationLayer');
+
+        const colWork = document.querySelectorAll('.col-work, .work-cell');
+        const colTime = document.querySelectorAll('.col-time, .time-cell');
+        const colRate = document.querySelectorAll('.col-rate, .rate-cell');
+
+        const scenarios = {
+            together: {
+                labels: ['Первый','Второй','Вместе'],
+                work: ['1','1','1'],
+                time: ['x ч','y ч','t ч'],
+                rate: ['1/x','1/y','1/x + 1/y'],
+                equation: '(1/x + 1/y)·t = 1',
+                insight: 'Если весь объём работы принят за 1, то при времени x часов производительность равна 1/x. Для двух исполнителей, работающих вместе, получаем: (1/x + 1/y)t = 1.'
+            },
+            separate: {
+                labels: ['Первый','Второй','Сравнение'],
+                work: ['1','1','—'],
+                time: ['x ч','y ч','y − x'],
+                rate: ['1/x','1/y','—'],
+                equation: 'Если второй медленнее на k часов, то y = x + k',
+                insight: 'В задачах на разность во времени строки «Первый» и «Второй» описывают один и тот же объём работы. Тогда их времена можно сравнивать напрямую: например, y = x + 5.'
+            },
+            stages: {
+                labels: ['Этап 1','Этап 2','Итог'],
+                work: ['a','1 − a','1'],
+                time: ['t₁','t₂','t₁ + t₂'],
+                rate: ['p₁','p₂','—'],
+                equation: 'a = p₁·t₁,   1 − a = p₂·t₂',
+                insight: 'В многоэтапных задачах удобно разделить работу на части. Например, сначала выполнили a работы, затем остаток 1 − a. Таблица помогает не потерять остаток и не смешать этапы.'
+            }
+        };
+
+        function toggleVisibility(elements, visible){
+            elements.forEach(el => {
+                el.style.opacity = visible ? '1' : '.13';
+            });
+        }
+
+        function updateScenario(){
+            const s = scenarios[scenarioSelect.value];
+            row1Label.textContent = s.labels[0];
+            row2Label.textContent = s.labels[1];
+            row3Label.textContent = s.labels[2];
+            work1.textContent = s.work[0];
+            work2.textContent = s.work[1];
+            work3.textContent = s.work[2];
+            time1.textContent = s.time[0];
+            time2.textContent = s.time[1];
+            time3.textContent = s.time[2];
+            rate1.textContent = s.rate[0];
+            rate2.textContent = s.rate[1];
+            rate3.textContent = s.rate[2];
+            equationText.textContent = s.equation;
+            scenarioInsight.textContent = s.insight;
+        }
+
+        function updateLayerVisibility(){
+            toggleVisibility(colWork, showWork.checked);
+            toggleVisibility(colTime, showTime.checked);
+            toggleVisibility(colRate, showRate.checked);
+            arrowsLayer.style.display = showArrows.checked ? 'block' : 'none';
+            equationLayer.style.display = showEquation.checked ? 'block' : 'none';
+        }
+
+        [scenarioSelect, showWork, showTime, showRate, showArrows, showEquation].forEach(el => {
+            el.addEventListener('input', () => {
+                updateScenario();
+                updateLayerVisibility();
+            });
+            el.addEventListener('change', () => {
+                updateScenario();
+                updateLayerVisibility();
+            });
+        });
+
+        updateScenario();
+        updateLayerVisibility();
+
+        const timeA = document.getElementById('timeA');
+        const timeB = document.getElementById('timeB');
+        const rangeA = document.getElementById('rangeA');
+        const rangeB = document.getElementById('rangeB');
+
+        const tableXA = document.getElementById('tableXA');
+        const tableYB = document.getElementById('tableYB');
+        const tableTogether = document.getElementById('tableTogether');
+        const rateAEl = document.getElementById('rateA');
+        const rateBEl = document.getElementById('rateB');
+        const rateTogetherEl = document.getElementById('rateTogether');
+
+        const cardRateA = document.getElementById('cardRateA');
+        const cardRateB = document.getElementById('cardRateB');
+        const cardRateTogether = document.getElementById('cardRateTogether');
+        const cardTimeTogether = document.getElementById('cardTimeTogether');
+        const calcInsight = document.getElementById('calcInsight');
+
+        function gcd(a, b){
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b !== 0){
+                const t = a % b;
+                a = b;
+                b = t;
+            }
+            return a || 1;
+        }
+
+        function fractionString(num, den){
+            if (!Number.isFinite(num) || !Number.isFinite(den) || den === 0) return '—';
+            if (Math.abs(num % den) < 1e-9) return String(num / den);
+            const g = gcd(Math.round(num), Math.round(den));
+            return (num / g) + '/' + (den / g);
+        }
+
+        function decimal(val){
+            return (Math.round(val * 10000) / 10000).toFixed(4);
+        }
+
+        function updateCalculator(fromRange){
+            if (fromRange === 'a') timeA.value = rangeA.value;
+            if (fromRange === 'b') timeB.value = rangeB.value;
+
+            let x = parseFloat(timeA.value);
+            let y = parseFloat(timeB.value);
+
+            if (!Number.isFinite(x) || x <= 0) x = 1;
+            if (!Number.isFinite(y) || y <= 0) y = 1;
+
+            timeA.value = x;
+            timeB.value = y;
+            rangeA.value = Math.min(20, Math.max(1, Math.round(x)));
+            rangeB.value = Math.min(20, Math.max(1, Math.round(y)));
+
+            const p1 = 1 / x;
+            const p2 = 1 / y;
+            const ps = p1 + p2;
+            const t = 1 / ps;
+
+            const numTogether = Math.round(x * y);
+            const denTogether = Math.round(x + y);
+
+            tableXA.textContent = x + ' ч';
+            tableYB.textContent = y + ' ч';
+            rateAEl.textContent = '1/' + x;
+            rateBEl.textContent = '1/' + y;
+            rateTogetherEl.textContent = fractionString(Math.round(x + y), Math.round(x * y));
+            tableTogether.textContent = fractionString(numTogether, denTogether) + ' ч';
+
+            cardRateA.textContent = decimal(p1);
+            cardRateB.textContent = decimal(p2);
+            cardRateTogether.textContent = decimal(ps);
+            cardTimeTogether.textContent = decimal(t) + ' ч';
+
+            calcInsight.innerHTML = 'При x = <b>' + x + '</b> и y = <b>' + y + '</b> получаем: <b>1/' + x + ' + 1/' + y + ' = ' +
+            fractionString(Math.round(x + y), Math.round(x * y)) + '</b>. Значит, вместе они выполняют <b>' +
+            fractionString(Math.round(x + y), Math.round(x * y)) + '</b> работы за 1 час, поэтому на всю работу требуется <b>' +
+            fractionString(Math.round(x * y), Math.round(x + y)) + ' ч</b> ≈ <b>' + decimal(t) + ' ч</b>.';
+        }
+
+        timeA.addEventListener('input', () => updateCalculator());
+        timeB.addEventListener('input', () => updateCalculator());
+        rangeA.addEventListener('input', () => updateCalculator('a'));
+        rangeB.addEventListener('input', () => updateCalculator('b'));
+        updateCalculator();
+
+        document.querySelectorAll('.accordion-item').forEach(item => {
+            const head = item.querySelector('.accordion-head');
+            const body = item.querySelector('.accordion-body');
+            head.addEventListener('click', () => {
+                const isOpen = item.classList.contains('open');
+                document.querySelectorAll('.accordion-item').forEach(other => {
+                    other.classList.remove('open');
+                    other.querySelector('.accordion-body').style.maxHeight = null;
+                });
+                if (!isOpen){
+                    item.classList.add('open');
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                }
+            });
+        });
+
+        document.querySelectorAll('.reveal').forEach(box => {
+            const btn = box.querySelector('.step-btn');
+            const steps = Array.from(box.querySelectorAll('.step'));
+            let index = 0;
+            btn.addEventListener('click', () => {
+                if (index < steps.length){
+                    steps[index].classList.add('visible');
+                    index += 1;
+                    if (index === steps.length){
+                        btn.textContent = 'Все шаги показаны';
+                        btn.disabled = true;
+                        btn.style.opacity = '.7';
+                    }
+                }
+            });
+        });
+
+        const quizQuestions = Array.from(document.querySelectorAll('.quiz-question'));
+        const quizScore = document.getElementById('quizScore');
+        const checkQuiz = document.getElementById('checkQuiz');
+        const resetQuiz = document.getElementById('resetQuiz');
+
+        quizQuestions.forEach(q => {
+            const options = q.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    options.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                });
+            });
+        });
+
+        checkQuiz.addEventListener('click', () => {
+            let score = 0;
+            quizQuestions.forEach(q => {
+                const correct = Number(q.dataset.correct);
+                const options = q.querySelectorAll('.option');
+                options.forEach(opt => {
+                    opt.classList.remove('correct', 'wrong');
+                    const idx = Number(opt.dataset.index);
+                    if (idx === correct) opt.classList.add('correct');
+                    if (opt.classList.contains('selected') && idx !== correct) opt.classList.add('wrong');
+                });
+                const selected = q.querySelector('.option.selected');
+                if (selected && Number(selected.dataset.index) === correct) score++;
+            });
+
+            const total = quizQuestions.length;
+            let comment = 'Хороший старт.';
+            if (score === total) comment = 'Отлично: все ответы верны.';
+            else if (score >= total - 1) comment = 'Очень сильный результат.';
+            else if (score <= 2) comment = 'Полезно ещё раз пройти теорию и разборы.';
+            quizScore.textContent = 'Результат: ' + score + ' из ' + total + '. ' + comment;
+        });
+
+        resetQuiz.addEventListener('click', () => {
+            quizQuestions.forEach(q => {
+                q.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('selected', 'correct', 'wrong');
+                });
+            });
+            quizScore.textContent = 'Пока не проверено';
+        });
+
+        const generateBtn = document.getElementById('generateBtn');
+        const showAnswerBtn = document.getElementById('showAnswerBtn');
+        const generatedProblem = document.getElementById('generatedProblem');
+        const generatedAnswer = document.getElementById('generatedAnswer');
+
+        let currentGenerated = null;
+
+        const templates = [
+            function(){
+                const a = [4,5,6,8][Math.floor(Math.random()*4)];
+                const b = [12,15,24][Math.floor(Math.random()*3)];
+                const t = (a * b) / (a + b);
+                return {
+                    problem: 'Первый исполнитель может выполнить работу за ' + a + ' ч, а второй — за ' + b + ' ч. За сколько часов они выполнят эту работу вместе?',
+                    answer: 'Совместная производительность равна 1/' + a + ' + 1/' + b + ' = ' + fractionString(a + b, a * b) +
+                    '. Тогда время совместной работы равно ' + fractionString(a * b, a + b) + ' ч ≈ ' + decimal(t) + ' ч.'
+                };
+            },
+            function(){
+                const x = [6,8,10,12][Math.floor(Math.random()*4)];
+                const t = [3,4,5][Math.floor(Math.random()*3)];
+                const y = (x * t) / (x - t);
+                if (!Number.isInteger(y) || y <= x) return templates[1]();
+                return {
+                    problem: 'Работая вместе, два исполнителя выполняют работу за ' + t + ' ч. Первый исполнитель выполняет эту работу один за ' + x + ' ч. За сколько часов выполнит работу второй исполнитель?',
+                    answer: 'Производительность второго равна 1/' + t + ' − 1/' + x + ' = ' + fractionString(x - t, x * t) +
+                    ', значит его время равно ' + y + ' ч.'
+                };
+            },
+            function(){
+                const x = [8,10,12][Math.floor(Math.random()*3)];
+                const k = [2,3,4][Math.floor(Math.random()*3)];
+                const y = x + k;
+                const together = (x * y) / (x + y);
+                return {
+                    problem: 'Первый рабочий выполняет работу на ' + k + ' ч быстрее второго. Работая вместе, они выполняют её за ' +
+                    fractionString(x * y, x + y) + ' ч. За сколько часов выполнил бы работу первый рабочий?',
+                    answer: 'Пусть первый выполняет работу за x ч, тогда второй — за x + ' + k +
+                    ' ч. Подобранный набор параметров даёт корень x = ' + x +
+                    '. Проверка: 1/' + x + ' + 1/' + y + ' = ' + fractionString(x + y, x * y) +
+                    ', значит вместе они работают ' + fractionString(x * y, x + y) + ' ч. Ответ: ' + x + ' ч.'
+                };
+            },
+            function(){
+                const oldTime = [10,12,15][Math.floor(Math.random()*3)];
+                const pct = [20,25,50][Math.floor(Math.random()*3)];
+                const factor = 1 + pct / 100;
+                const newTime = oldTime / factor;
+                return {
+                    problem: 'После улучшения технологии производительность выросла на ' + pct + '%. На ту же работу теперь требуется ' +
+                    decimal(newTime) + ' ч. Сколько часов требовалось раньше?',
+                    answer: 'Если производительность выросла в ' + decimal(factor) + ' раза, то время уменьшилось во столько же раз. Значит, старое время равно ' +
+                    decimal(newTime) + ' · ' + decimal(factor) + ' = ' + oldTime + ' ч.'
+                };
+            },
+            function(){
+                const solo = [6,8,10][Math.floor(Math.random()*3)];
+                const together = [3,4,5][Math.floor(Math.random()*3)];
+                const firstHours = [1,2][Math.floor(Math.random()*2)];
+                const second = (solo * together) / (solo - together);
+                if (!Number.isInteger(second) || second <= 0) return templates[0]();
+                const doneByFirst = firstHours / solo;
+                const remaining = 1 - doneByFirst;
+                const timeFinish = remaining / (1 / solo + 1 / second);
+                return {
+                    problem: 'Первый исполнитель может выполнить работу за ' + solo + ' ч, второй — за ' + second +
+                    ' ч. Сначала первый работал один ' + firstHours + ' ч, после чего второй присоединился к нему. За сколько часов после этого работа будет завершена?',
+                    answer: 'За первые ' + firstHours + ' ч первый выполнил ' + fractionString(firstHours, solo) +
+                    ' работы. Осталось ' + fractionString(solo - firstHours, solo) + '. Совместная производительность равна ' +
+                    fractionString(solo + second, solo * second) + '. Тогда время на остаток равно ' + decimal(timeFinish) +
+                    ' ч. Точно: (' + fractionString(solo - firstHours, solo) + ') / (' + fractionString(solo + second, solo * second) + ').'
+                };
+            }
+        ];
+
+        generateBtn.addEventListener('click', () => {
+            const template = templates[Math.floor(Math.random() * templates.length)];
+            currentGenerated = template();
+            generatedProblem.textContent = currentGenerated.problem;
+            generatedAnswer.textContent = currentGenerated.answer;
+            generatedAnswer.classList.remove('show');
+        });
+
+        showAnswerBtn.addEventListener('click', () => {
+            if (!currentGenerated){
+                generateBtn.click();
+            }
+            generatedAnswer.classList.add('show');
+        });
+    })();
+</script>
+</body>
+</html>

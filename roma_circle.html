@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Взаимное расположение окружностей | Интерактивное пособие</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #121826;
+            --bg-card: #1a2236;
+            --bg-glass: rgba(26, 34, 54, 0.85);
+            --accent-primary: #00d4aa;
+            --accent-secondary: #7b68ee;
+            --accent-tertiary: #ff6b9d;
+            --text-primary: #e8ecf1;
+            --text-secondary: #a0aab8;
+            --text-muted: #6b7785;
+            --success: #00d4aa;
+            --warning: #ffb84d;
+            --error: #ff6b9d;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 40px rgba(0, 212, 170, 0.15);
+            --gradient-main: linear-gradient(135deg, #00d4aa 0%, #7b68ee 50%, #ff6b9d 100%);
+            --gradient-subtle: linear-gradient(180deg, rgba(0, 212, 170, 0.1) 0%, rgba(123, 104, 238, 0.05) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Background Effects */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+
+        .bg-orb-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--accent-primary);
+            top: -200px;
+            right: -200px;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-orb-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent-secondary);
+            bottom: -150px;
+            left: -150px;
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        .bg-orb-3 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-tertiary);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -30px) rotate(5deg); }
+            50% { transform: translate(-20px, 20px) rotate(-5deg); }
+            75% { transform: translate(20px, 10px) rotate(3deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.35; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 14, 26, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 50%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 50px rgba(0, 212, 170, 0.25);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-main);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .card-text {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+            padding: 1rem;
+            background: rgba(0, 212, 170, 0.05);
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .formula-desc {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Interactive Calculator */
+        .calculator {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 3rem 0;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+        }
+
+        .result-box {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .result-status {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .status-no-intersection {
+            background: rgba(255, 107, 157, 0.15);
+            color: var(--error);
+        }
+
+        .status-touch {
+            background: rgba(255, 184, 77, 0.15);
+            color: var(--warning);
+        }
+
+        .status-intersect {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--success);
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 2rem 0;
+        }
+
+        .accordion-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: var(--bg-secondary);
+        }
+
+        .accordion-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .accordion-icon {
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-item.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .accordion-content-inner {
+            padding: 0 2rem 2rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* SVG Visualization */
+        .visualization-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .svg-canvas {
+            max-width: 100%;
+            height: auto;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+
+        .vis-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .vis-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .vis-btn:hover, .vis-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        /* Quiz Section */
+        .quiz-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 3rem 0;
+        }
+
+        .quiz-question {
+            margin-bottom: 2rem;
+        }
+
+        .quiz-question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .quiz-option {
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            color: var(--text-primary);
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(0, 212, 170, 0.15);
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--error);
+            background: rgba(255, 107, 157, 0.15);
+        }
+
+        .quiz-result {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin-top: 2rem;
+        }
+
+        .quiz-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        /* Task Generator */
+        .generator-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 3rem 0;
+        }
+
+        .generated-task {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            min-height: 150px;
+        }
+
+        .task-condition {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .task-answer {
+            display: none;
+            padding: 1.5rem;
+            background: rgba(0, 212, 170, 0.1);
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .task-answer.visible {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 4rem 2rem 2rem;
+            margin-top: 6rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .footer-section p,
+        .footer-section li {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Print Styles */
+        @media print {
+            .bg-effects,
+            .nav,
+            .hero-buttons,
+            .vis-controls,
+            .quiz-container,
+            .generator-container,
+            .btn,
+            .accordion-header,
+            .footer {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .card,
+            .calculator,
+            .formula-box,
+            .accordion-content {
+                background: white;
+                border: 1px solid #ddd;
+                box-shadow: none;
+            }
+
+            .accordion-content {
+                max-height: none !important;
+                display: block !important;
+            }
+
+            .section {
+                padding: 2rem 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            .section {
+                padding: 4rem 1.5rem;
+            }
+
+            .calculator,
+            .quiz-container,
+            .generator-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .formula {
+                font-size: 1.1rem;
+                padding: 0.75rem;
+            }
+
+            .result-value {
+                font-size: 2rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-accent {
+            color: var(--accent-primary);
+        }
+
+        .text-gradient {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mb-2 { margin-bottom: 2rem; }
+        .mb-3 { margin-bottom: 3rem; }
+        .mt-3 { margin-top: 3rem; }
+
+        .highlight {
+            background: rgba(0, 212, 170, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+<!-- Background Effects -->
+<div class="bg-effects">
+    <div class="bg-gradient-orb bg-orb-1"></div>
+    <div class="bg-gradient-orb bg-orb-2"></div>
+    <div class="bg-gradient-orb bg-orb-3"></div>
+</div>
+
+<!-- Navigation -->
+<nav class="nav">
+    <div class="nav-container">
+        <div class="nav-logo">Математика.Pro</div>
+        <ul class="nav-links">
+            <li><a href="#theory">Теория</a></li>
+            <li><a href="#calculator">Калькулятор</a></li>
+            <li><a href="#examples">Примеры</a></li>
+            <li><a href="#quiz">Тест</a></li>
+            <li><a href="#generator">Генератор</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <span class="hero-badge">📐 Геометрия • Алгебра • Анализ</span>
+        <h1 class="hero-title">Взаимное расположение окружностей</h1>
+        <p class="hero-subtitle">
+            Интерактивное пособие по аналитической геометрии. Изучите все случаи взаимного расположения
+            двух окружностей, научитесь решать системы уравнений графическим методом и работать с неравенствами.
+        </p>
+        <div class="hero-buttons">
+            <a href="#theory" class="btn btn-primary">
+                Начать изучение →
+            </a>
+            <a href="#calculator" class="btn btn-secondary">
+                Калькулятор
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Theory Section -->
+<section id="theory" class="section">
+    <div class="section-header">
+        <span class="section-tag">Основы</span>
+        <h2 class="section-title">Теоретический блок</h2>
+        <p class="section-subtitle">Ключевые понятия и формулы для анализа взаимного расположения окружностей</p>
+    </div>
+
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-icon">⭕</div>
+            <h3 class="card-title">Уравнение окружности</h3>
+            <p class="card-text">
+                Стандартный вид: <span class="highlight">(x − a)² + (y − b)² = R²</span><br><br>
+                где (a; b) — координаты центра, R — радиус окружности.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📏</div>
+            <h3 class="card-title">Расстояние между центрами</h3>
+            <p class="card-text">
+                Формула расстояния:<br>
+                <span class="highlight">d = √((x₂ − x₁)² + (y₂ − y₁)²)</span><br><br>
+                Вычисляется по координатам центров O₁ и O₂.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">🔀</div>
+            <h3 class="card-title">Три случая расположения</h3>
+            <p class="card-text">
+                1. Нет общих точек<br>
+                2. Одна общая точка (касание)<br>
+                3. Две общие точки (пересечение)
+            </p>
+        </div>
+    </div>
+
+    <!-- Formula Box -->
+    <div class="formula-box">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Условия взаимного расположения</h3>
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Случай</th>
+                <th>Условие</th>
+                <th>Описание</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><strong>Нет общих точек</strong></td>
+                <td>d &gt; r₁ + r₂</td>
+                <td>Окружности вне друг друга</td>
+            </tr>
+            <tr>
+                <td><strong>Нет общих точек</strong></td>
+                <td>d &lt; |r₁ − r₂|</td>
+                <td>Одна внутри другой</td>
+            </tr>
+            <tr>
+                <td><strong>Касание (1 точка)</strong></td>
+                <td>d = r₁ + r₂</td>
+                <td>Внешнее касание</td>
+            </tr>
+            <tr>
+                <td><strong>Касание (1 точка)</strong></td>
+                <td>d = |r₁ − r₂|</td>
+                <td>Внутреннее касание</td>
+            </tr>
+            <tr>
+                <td><strong>Пересечение (2 точки)</strong></td>
+                <td>|r₁ − r₂| &lt; d &lt; r₁ + r₂</td>
+                <td>Две общие точки</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Accordion -->
+    <div class="accordion">
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="accordion-title">Как привести уравнение к стандартному виду?</span>
+                <span class="accordion-icon">+</span>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p>Для приведения общего вида уравнения x² + y² + Dx + Ey + F = 0 к стандартному:</p>
+                    <br>
+                    <p>1. Сгруппируйте слагаемые с x и с y отдельно</p>
+                    <p>2. Выделите полный квадрат для каждой группы</p>
+                    <p>3. Перенесите свободный член в правую часть</p>
+                    <br>
+                    <p><strong>Пример:</strong> x² − 2x + y² − y − 1 = 0</p>
+                    <p>(x² − 2x + 1) + (y² − y + 0.25) = 1 + 1 + 0.25</p>
+                    <p>(x − 1)² + (y − 0.5)² = 2.25</p>
+                    <br>
+                    <p>Центр: (1; 0.5), Радиус: √2.25 = 1.5</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="accordion-title">Уравнения с произведением переменных</span>
+                <span class="accordion-icon">+</span>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p>Уравнение вида x² + Bxy + Cy² + Dx + Ey + F = 0 может раскладываться на множители.</p>
+                    <br>
+                    <p><strong>Алгоритм:</strong></p>
+                    <p>1. Рассмотрите как квадратное относительно x</p>
+                    <p>2. Вычислите дискриминант D</p>
+                    <p>3. Если D — полный квадрат, уравнение раскладывается</p>
+                    <br>
+                    <p><strong>Пример:</strong> x² − xy − 6y² = 0</p>
+                    <p>D = y² + 24y² = 25y² = (5y)²</p>
+                    <p>Корни: x₁ = 3y, x₂ = −2y</p>
+                    <p>График — две прямые: y = x/3 и y = −x/2</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="accordion-title">Графический метод решения неравенств</span>
+                <span class="accordion-icon">+</span>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p><strong>Алгоритм решения:</strong></p>
+                    <br>
+                    <p>1. Постройте граничные линии (замените знак на =)</p>
+                    <p>2. При строгом неравенстве (&lt;, &gt;) линии пунктирные</p>
+                    <p>3. При нестрогом (≤, ≥) линии сплошные</p>
+                    <p>4. Граничные линии разбивают плоскость на области</p>
+                    <p>5. Методом подстановки проверьте каждую область</p>
+                    <p>6. Закрасьте подходящие области</p>
+                    <br>
+                    <p><strong>Важно:</strong> Для проверки берите простые точки с нулевыми координатами.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Visualization Section -->
+<section class="section">
+    <div class="section-header">
+        <span class="section-tag">Визуализация</span>
+        <h2 class="section-title">Интерактивная модель</h2>
+        <p class="section-subtitle">Наглядное представление всех случаев взаимного расположения</p>
+    </div>
+
+    <div class="visualization-container">
+        <svg class="svg-canvas" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- Grid -->
+            <defs>
+                <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="800" height="500" fill="url(#grid)"/>
+
+            <!-- Axes -->
+            <line x1="50" y1="250" x2="750" y2="250" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+            <line x1="400" y1="50" x2="400" y2="450" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+
+            <!-- Circle 1 -->
+            <circle id="vis-circle1" cx="300" cy="250" r="80" fill="none" stroke="#00d4aa" stroke-width="3" opacity="0.8"/>
+            <circle cx="300" cy="250" r="4" fill="#00d4aa"/>
+            <text x="310" y="255" fill="#00d4aa" font-size="14" font-family="sans-serif">O₁</text>
+
+            <!-- Circle 2 -->
+            <circle id="vis-circle2" cx="500" cy="250" r="60" fill="none" stroke="#7b68ee" stroke-width="3" opacity="0.8"/>
+            <circle cx="500" cy="250" r="4" fill="#7b68ee"/>
+            <text x="510" y="255" fill="#7b68ee" font-size="14" font-family="sans-serif">O₂</text>
+
+            <!-- Distance Line -->
+            <line id="vis-distance" x1="300" y1="250" x2="500" y2="250" stroke="#ff6b9d" stroke-width="2" stroke-dasharray="5,5"/>
+            <text id="vis-distance-label" x="400" y="240" fill="#ff6b9d" font-size="14" font-family="sans-serif" text-anchor="middle">d</text>
+
+            <!-- Status Text -->
+            <text id="vis-status" x="400" y="470" fill="#e8ecf1" font-size="18" font-family="sans-serif" text-anchor="middle" font-weight="600">Пересечение (2 точки)</text>
+        </svg>
+
+        <div class="vis-controls">
+            <button class="vis-btn active" onclick="setVisualization('intersect')">Пересечение</button>
+            <button class="vis-btn" onclick="setVisualization('touch-external')">Внешнее касание</button>
+            <button class="vis-btn" onclick="setVisualization('touch-internal')">Внутреннее касание</button>
+            <button class="vis-btn" onclick="setVisualization('separate')">Раздельно</button>
+            <button class="vis-btn" onclick="setVisualization('inside')">Одна внутри</button>
+        </div>
+    </div>
+</section>
+
+<!-- Calculator Section -->
+<section id="calculator" class="section">
+    <div class="section-header">
+        <span class="section-tag">Инструменты</span>
+        <h2 class="section-title">Калькулятор расположения</h2>
+        <p class="section-subtitle">Введите параметры двух окружностей и получите анализ их взаимного расположения</p>
+    </div>
+
+    <div class="calculator">
+        <div class="calculator-grid">
+            <div>
+                <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Окружность 1</h3>
+                <div class="input-group">
+                    <label class="input-label">Центр O₁ (x₁)</label>
+                    <input type="number" id="x1" class="input-field" value="1" step="0.5">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Центр O₁ (y₁)</label>
+                    <input type="number" id="y1" class="input-field" value="0.5" step="0.5">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Радиус r₁</label>
+                    <input type="number" id="r1" class="input-field" value="1.5" step="0.5" min="0.1">
+                </div>
+            </div>
+
+            <div>
+                <h3 style="color: var(--accent-secondary); margin-bottom: 1.5rem;">Окружность 2</h3>
+                <div class="input-group">
+                    <label class="input-label">Центр O₂ (x₂)</label>
+                    <input type="number" id="x2" class="input-field" value="3" step="0.5">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Центр O₂ (y₂)</label>
+                    <input type="number" id="y2" class="input-field" value="-5" step="0.5">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Радиус r₂</label>
+                    <input type="number" id="r2" class="input-field" value="4" step="0.5" min="0.1">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="calculatePosition()" style="width: 100%; margin-top: 2rem;">
+            Рассчитать
+        </button>
+
+        <div class="result-box" id="result-box" style="display: none;">
+            <div class="result-value" id="result-distance">0.00</div>
+            <div class="result-label">Расстояние между центрами</div>
+            <div class="result-status" id="result-status"></div>
+            <div style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;" id="result-details"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Examples Section -->
+<section id="examples" class="section">
+    <div class="section-header">
+        <span class="section-tag">Практика</span>
+        <h2 class="section-title">Разбор задач</h2>
+        <p class="section-subtitle">Подробные решения типовых задач с пошаговыми объяснениями</p>
+    </div>
+
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-icon">📝</div>
+            <h3 class="card-title">Задача 1</h3>
+            <p class="card-text" style="margin-bottom: 1rem;">
+                Даны окружности:<br>
+                ω₁: x² − 2x + y² − y − 1 = 0<br>
+                ω₂: (x − 3)² + (y + 5)² = 16
+            </p>
+            <p class="card-text">
+                <strong>Решение:</strong><br>
+                O₁(1; 0.5), r₁ = 1.5<br>
+                O₂(3; −5), r₂ = 4<br>
+                d = √34.25 ≈ 5.85<br>
+                <span class="text-accent">d &gt; r₁ + r₂ → нет общих точек</span>
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📝</div>
+            <h3 class="card-title">Задача 2</h3>
+            <p class="card-text" style="margin-bottom: 1rem;">
+                Разложите на множители:<br>
+                x² − xy − 6y² = 0
+            </p>
+            <p class="card-text">
+                <strong>Решение:</strong><br>
+                D = y² + 24y² = 25y²<br>
+                x₁ = 3y, x₂ = −2y<br>
+                <span class="text-accent">Две прямые: y = x/3 и y = −x/2</span>
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📝</div>
+            <h3 class="card-title">Задача 3</h3>
+            <p class="card-text" style="margin-bottom: 1rem;">
+                Решите неравенство:<br>
+                x² − xy − 6y² &gt; 0
+            </p>
+            <p class="card-text">
+                <strong>Решение:</strong><br>
+                Границы: y = x/3, y = −x/2<br>
+                4 области, проверка подстановкой<br>
+                <span class="text-accent">Подходят 2 противоположные области</span>
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Quiz Section -->
+<section id="quiz" class="section">
+    <div class="section-header">
+        <span class="section-tag">Проверка</span>
+        <h2 class="section-title">Мини-тест</h2>
+        <p class="section-subtitle">Проверьте свои знания по теме</p>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-questions">
+            <!-- Questions will be generated by JS -->
+        </div>
+
+        <button class="btn btn-primary" onclick="checkQuiz()" id="check-quiz-btn" style="margin-top: 2rem;">
+            Проверить ответы
+        </button>
+
+        <div class="quiz-result" id="quiz-result" style="display: none;">
+            <div class="quiz-score" id="quiz-score">0/5</div>
+            <p id="quiz-message" style="color: var(--text-secondary); margin-top: 1rem;"></p>
+            <button class="btn btn-secondary" onclick="resetQuiz()" style="margin-top: 1.5rem;">
+                Пройти заново
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Task Generator Section -->
+<section id="generator" class="section">
+    <div class="section-header">
+        <span class="section-tag">Тренировка</span>
+        <h2 class="section-title">Генератор задач</h2>
+        <p class="section-subtitle">Бесконечная практика с автоматической проверкой</p>
+    </div>
+
+    <div class="generator-container">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+            <button class="btn btn-primary" onclick="generateTask('position')">
+                📐 Расположение окружностей
+            </button>
+            <button class="btn btn-secondary" onclick="generateTask('factor')">
+                ✂️ Разложение на множители
+            </button>
+            <button class="btn btn-secondary" onclick="generateTask('inequality')">
+                📊 Неравенство
+            </button>
+        </div>
+
+        <div class="generated-task" id="generated-task">
+            <p class="task-condition" id="task-condition">
+                Нажмите на одну из кнопок выше, чтобы сгенерировать задачу.
+            </p>
+            <div class="task-answer" id="task-answer"></div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="showAnswer()" id="show-answer-btn" style="display: none;">
+            Показать ответ
+        </button>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h4>О пособии</h4>
+            <p>Интерактивное учебное пособие по аналитической геометрии для подготовки к экзаменам и углублённого изучения темы.</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Разделы</h4>
+            <ul>
+                <li><a href="#theory" style="color: var(--text-secondary); text-decoration: none;">Теория</a></li>
+                <li><a href="#calculator" style="color: var(--text-secondary); text-decoration: none;">Калькулятор</a></li>
+                <li><a href="#examples" style="color: var(--text-secondary); text-decoration: none;">Примеры</a></li>
+                <li><a href="#quiz" style="color: var(--text-secondary); text-decoration: none;">Тест</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Ключевые темы</h4>
+            <ul>
+                <li>Уравнение окружности</li>
+                <li>Взаимное расположение</li>
+                <li>Графический метод</li>
+                <li>Системы уравнений</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 Математика.Pro | Интерактивное учебное пособие</p>
+    </div>
+</footer>
+
+<script>
+    // Accordion functionality
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        const isActive = item.classList.contains('active');
+
+        // Close all accordions
+        document.querySelectorAll('.accordion-item').forEach(acc => {
+            acc.classList.remove('active');
+            acc.querySelector('.accordion-content').style.maxHeight = '0';
+        });
+
+        // Open clicked if not active
+        if (!isActive) {
+            item.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + 'px';
+        }
+    }
+
+    // Calculator functionality
+    function calculatePosition() {
+        const x1 = parseFloat(document.getElementById('x1').value);
+        const y1 = parseFloat(document.getElementById('y1').value);
+        const r1 = parseFloat(document.getElementById('r1').value);
+        const x2 = parseFloat(document.getElementById('x2').value);
+        const y2 = parseFloat(document.getElementById('y2').value);
+        const r2 = parseFloat(document.getElementById('r2').value);
+
+        // Calculate distance
+        const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        const sumR = r1 + r2;
+        const diffR = Math.abs(r1 - r2);
+
+        // Determine position
+        let status, statusClass, details;
+
+        if (d > sumR) {
+            status = 'Нет общих точек (раздельно)';
+            statusClass = 'status-no-intersection';
+            details = `d = ${d.toFixed(2)} > r₁ + r₂ = ${sumR.toFixed(2)}`;
+        } else if (d < diffR) {
+            status = 'Нет общих точек (одна внутри)';
+            statusClass = 'status-no-intersection';
+            details = `d = ${d.toFixed(2)} < |r₁ − r₂| = ${diffR.toFixed(2)}`;
+        } else if (Math.abs(d - sumR) < 0.01) {
+            status = 'Внешнее касание (1 точка)';
+            statusClass = 'status-touch';
+            details = `d = ${d.toFixed(2)} = r₁ + r₂ = ${sumR.toFixed(2)}`;
+        } else if (Math.abs(d - diffR) < 0.01) {
+            status = 'Внутреннее касание (1 точка)';
+            statusClass = 'status-touch';
+            details = `d = ${d.toFixed(2)} = |r₁ − r₂| = ${diffR.toFixed(2)}`;
+        } else {
+            status = 'Пересечение (2 точки)';
+            statusClass = 'status-intersect';
+            details = `${diffR.toFixed(2)} = |r₁ − r₂| < d = ${d.toFixed(2)} < r₁ + r₂ = ${sumR.toFixed(2)}`;
+        }
+
+        // Display results
+        document.getElementById('result-box').style.display = 'block';
+        document.getElementById('result-distance').textContent = d.toFixed(2);
+        document.getElementById('result-status').textContent = status;
+        document.getElementById('result-status').className = 'result-status ' + statusClass;
+        document.getElementById('result-details').textContent = details;
+    }
+
+    // Visualization functionality
+    function setVisualization(type) {
+        const circle1 = document.getElementById('vis-circle1');
+        const circle2 = document.getElementById('vis-circle2');
+        const distanceLine = document.getElementById('vis-distance');
+        const statusText = document.getElementById('vis-status');
+        const buttons = document.querySelectorAll('.vis-btn');
+
+        if(!circle1 || !circle2) return;
+
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        switch(type) {
+            case 'intersect':
+                circle1.setAttribute('cx', 300);
+                circle1.setAttribute('cy', 250);
+                circle1.setAttribute('r', 80);
+                circle2.setAttribute('cx', 420);
+                circle2.setAttribute('cy', 250);
+                circle2.setAttribute('r', 70);
+                distanceLine.setAttribute('x2', 420);
+                statusText.textContent = 'Пересечение (2 точки)';
+                buttons[0].classList.add('active');
+                break;
+            case 'touch-external':
+                circle1.setAttribute('cx', 300);
+                circle1.setAttribute('cy', 250);
+                circle1.setAttribute('r', 80);
+                circle2.setAttribute('cx', 460);
+                circle2.setAttribute('cy', 250);
+                circle2.setAttribute('r', 80);
+                distanceLine.setAttribute('x2', 460);
+                statusText.textContent = 'Внешнее касание (1 точка)';
+                buttons[1].classList.add('active');
+                break;
+            case 'touch-internal':
+                circle1.setAttribute('cx', 350);
+                circle1.setAttribute('cy', 250);
+                circle1.setAttribute('r', 100);
+                circle2.setAttribute('cx', 380);
+                circle2.setAttribute('cy', 250);
+                circle2.setAttribute('r', 70);
+                distanceLine.setAttribute('x2', 380);
+                statusText.textContent = 'Внутреннее касание (1 точка)';
+                buttons[2].classList.add('active');
+                break;
+            case 'separate':
+                circle1.setAttribute('cx', 250);
+                circle1.setAttribute('cy', 250);
+                circle1.setAttribute('r', 70);
+                circle2.setAttribute('cx', 550);
+                circle2.setAttribute('cy', 250);
+                circle2.setAttribute('r', 60);
+                distanceLine.setAttribute('x2', 550);
+                statusText.textContent = 'Нет общих точек (раздельно)';
+                buttons[3].classList.add('active');
+                break;
+            case 'inside':
+                circle1.setAttribute('cx', 400);
+                circle1.setAttribute('cy', 250);
+                circle1.setAttribute('r', 120);
+                circle2.setAttribute('cx', 420);
+                circle2.setAttribute('cy', 250);
+                circle2.setAttribute('r', 40);
+                distanceLine.setAttribute('x2', 420);
+                statusText.textContent = 'Нет общих точек (одна внутри)';
+                buttons[4].classList.add('active');
+                break;
+        }
+    }
+
+    // Quiz functionality
+    const quizQuestions = [
+        {
+            question: 'При каком условии две окружности не имеют общих точек и расположены вне друг друга?',
+            options: ['d = r₁ + r₂', 'd > r₁ + r₂', 'd < |r₁ − r₂|', '|r₁ − r₂| < d < r₁ + r₂'],
+            correct: 1
+        },
+        {
+            question: 'Сколько общих точек имеют окружности при внешнем касании?',
+            options: ['0', '1', '2', '3'],
+            correct: 1
+        },
+        {
+            question: 'Какое уравнение задаёт окружность с центром (2; −3) и радиусом 5?',
+            options: ['(x − 2)² + (y + 3)² = 25', '(x + 2)² + (y − 3)² = 25', '(x − 2)² + (y − 3)² = 5', '(x + 2)² + (y + 3)² = 5'],
+            correct: 0
+        },
+        {
+            question: 'Что представляет уравнение x² − xy − 6y² = 0?',
+            options: ['Окружность', 'Одну прямую', 'Две прямые', 'Параболу'],
+            correct: 2
+        },
+        {
+            question: 'При каком условии окружности пересекаются в двух точках?',
+            options: ['d > r₁ + r₂', 'd = r₁ + r₂', '|r₁ − r₂| < d < r₁ + r₂', 'd < |r₁ − r₂|'],
+            correct: 2
+        }
+    ];
+
+    let selectedAnswers = [];
+
+    function initQuiz() {
+        const container = document.getElementById('quiz-questions');
+        container.innerHTML = '';
+        selectedAnswers = new Array(quizQuestions.length).fill(null);
+
+        quizQuestions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'quiz-question';
+            questionDiv.innerHTML = `
+                    <p class="quiz-question-text">${index + 1}. ${q.question}</p>
+                    <div class="quiz-options">
+                        ${q.options.map((opt, optIndex) => `
+                            <div class="quiz-option" onclick="selectAnswer(${index}, ${optIndex}, this)">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            container.appendChild(questionDiv);
+        });
+    }
+
+    function selectAnswer(questionIndex, answerIndex, element) {
+        // Remove selected from all options in this question
+        const options = element.parentElement.querySelectorAll('.quiz-option');
+        options.forEach(opt => opt.classList.remove('selected'));
+
+        // Add selected to clicked
+        element.classList.add('selected');
+        selectedAnswers[questionIndex] = answerIndex;
+    }
+
+    function checkQuiz() {
+        let score = 0;
+
+        quizQuestions.forEach((q, index) => {
+            const options = document.querySelectorAll('.quiz-question')[index].querySelectorAll('.quiz-option');
+
+            if (selectedAnswers[index] === q.correct) {
+                score++;
+                options[q.correct].classList.add('correct');
+            } else if (selectedAnswers[index] !== null) {
+                options[selectedAnswers[index]].classList.add('incorrect');
+                options[q.correct].classList.add('correct');
+            } else {
+                options[q.correct].classList.add('correct');
+            }
+        });
+
+        // Show result
+        document.getElementById('quiz-result').style.display = 'block';
+        document.getElementById('quiz-score').textContent = `${score}/${quizQuestions.length}`;
+
+        const messages = [
+            'Попробуйте ещё раз!',
+            'Неплохо, но можно лучше!',
+            'Хороший результат!',
+            'Отлично!',
+            'Превосходно!'
+        ];
+        document.getElementById('quiz-message').textContent = messages[Math.min(score, messages.length - 1)];
+
+        document.getElementById('check-quiz-btn').style.display = 'none';
+    }
+
+    function resetQuiz() {
+        document.getElementById('quiz-result').style.display = 'none';
+        document.getElementById('check-quiz-btn').style.display = 'inline-flex';
+        initQuiz();
+    }
+
+    // Task Generator
+    let currentTask = null;
+
+    function generateTask(type) {
+        const conditionEl = document.getElementById('task-condition');
+        const answerEl = document.getElementById('task-answer');
+        const showBtn = document.getElementById('show-answer-btn');
+
+        answerEl.classList.remove('visible');
+        showBtn.style.display = 'inline-flex';
+
+        if (type === 'position') {
+            const x1 = Math.floor(Math.random() * 10) - 5;
+            const y1 = Math.floor(Math.random() * 10) - 5;
+            const r1 = Math.floor(Math.random() * 5) + 1;
+            const x2 = x1 + Math.floor(Math.random() * 15) + 3;
+            const y2 = y1 + Math.floor(Math.random() * 10) - 5;
+            const r2 = Math.floor(Math.random() * 5) + 1;
+
+            // Fixed: r1*r1 instead of r1²
+            currentTask = {
+                condition: `Даны окружности:<br>ω₁: (x − ${x1})² + (y − ${y1})² = ${r1 * r1}<br>ω₂: (x − ${x2})² + (y − ${y2})² = ${r2 * r2}<br><br>Определите их взаимное расположение.`,
+                answer: `O₁(${x1}; ${y1}), r₁ = ${r1}<br>O₂(${x2}; ${y2}), r₂ = ${r2}<br>d = √(${x2-x1}² + ${y2-y1}²) = √${Math.pow(x2-x1,2) + Math.pow(y2-y1,2)} ≈ ${Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2)).toFixed(2)}<br>r₁ + r₂ = ${r1 + r2}, |r₁ − r₂| = ${Math.abs(r1 - r2)}`
+            };
+        } else if (type === 'factor') {
+            const a = Math.floor(Math.random() * 3) + 1;
+            const b = Math.floor(Math.random() * 3) + 1;
+
+            currentTask = {
+                condition: `Разложите на множители:<br>x² − ${a+b}xy + ${a*b}y² = 0`,
+                answer: `Две прямые: y = x/${a} и y = x/${b}`
+            };
+        } else if (type === 'inequality') {
+            const a = Math.floor(Math.random() * 3) + 1;
+            const b = Math.floor(Math.random() * 3) + 1;
+
+            currentTask = {
+                condition: `Опишите решение неравенства:<br>(x − ${a}y)(x + ${b}y) > 0`,
+                answer: `Граничные прямые: y = x/${a} и y = −x/${b}<br>Решение — две противоположные области (проверяется подстановкой)`
+            };
+        }
+
+        conditionEl.innerHTML = currentTask.condition;
+        answerEl.textContent = currentTask.answer;
+    }
+
+    function showAnswer() {
+        document.getElementById('task-answer').classList.add('visible');
+        document.getElementById('show-answer-btn').style.display = 'none';
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+        initQuiz();
+        calculatePosition();
+        // Set initial visualization state
+        setVisualization('intersect');
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
