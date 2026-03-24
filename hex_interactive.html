@@ -1,0 +1,1400 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Правильный шестиугольник — интерактивное пособие</title>
+    <style>
+        :root{
+            --bg:#08111f;
+            --bg2:#0d1b2f;
+            --panel:rgba(255,255,255,.08);
+            --line:rgba(255,255,255,.12);
+            --text:#edf4ff;
+            --muted:#b6c5dd;
+            --accent:#5eead4;
+            --accent2:#7dd3fc;
+            --accent3:#fbbf24;
+            --good:#34d399;
+            --bad:#fb7185;
+            --shadow:0 20px 60px rgba(0,0,0,.35);
+            --radius:24px;
+            --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+            color:var(--text);
+            background:
+            radial-gradient(1200px 600px at 10% -10%, rgba(94,234,212,.18), transparent 60%),
+            radial-gradient(900px 500px at 100% 0%, rgba(125,211,252,.14), transparent 55%),
+            linear-gradient(180deg,var(--bg),var(--bg2));
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        .stars,.grid{
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            z-index:-2;
+        }
+        .stars{
+            background-image:
+            radial-gradient(circle at 10% 20%, rgba(255,255,255,.7) 0 1px, transparent 1.2px),
+            radial-gradient(circle at 20% 80%, rgba(255,255,255,.45) 0 1px, transparent 1.2px),
+            radial-gradient(circle at 70% 30%, rgba(255,255,255,.55) 0 1px, transparent 1.2px),
+            radial-gradient(circle at 85% 60%, rgba(255,255,255,.35) 0 1px, transparent 1.2px),
+            radial-gradient(circle at 55% 75%, rgba(255,255,255,.5) 0 1px, transparent 1.2px),
+            radial-gradient(circle at 35% 45%, rgba(255,255,255,.35) 0 1px, transparent 1.2px);
+            background-size:420px 420px,560px 560px,500px 500px,620px 620px,700px 700px,840px 840px;
+            opacity:.7;
+            animation:drift 90s linear infinite;
+        }
+        .grid{
+            background-image:
+            linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+            background-size:40px 40px;
+            mask-image:radial-gradient(circle at 50% 0%, black 20%, transparent 85%);
+            opacity:.35;
+        }
+        @keyframes drift { from{transform:translateY(0)} to{transform:translateY(40px)} }
+
+        .wrap{
+            max-width:1360px;
+            margin:0 auto;
+            padding:24px 16px 64px;
+        }
+
+        .glass{
+            background:var(--panel);
+            backdrop-filter:blur(18px);
+            -webkit-backdrop-filter:blur(18px);
+            border:1px solid var(--line);
+            box-shadow:var(--shadow);
+            border-radius:var(--radius);
+        }
+
+        .hero{
+            position:relative;
+            overflow:hidden;
+            padding:28px;
+            min-height:290px;
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:24px;
+            align-items:center;
+        }
+        .hero::before{
+            content:"";
+            position:absolute;
+            inset:auto -80px -80px auto;
+            width:340px;
+            height:340px;
+            background:radial-gradient(circle, rgba(94,234,212,.18), transparent 65%);
+            filter:blur(14px);
+        }
+
+        .badge{
+            display:inline-flex;
+            gap:10px;
+            align-items:center;
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.08);
+            color:var(--muted);
+            font-size:14px;
+            margin-bottom:14px;
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        h1{
+            margin:0;
+            font-size:clamp(34px, 6vw, 68px);
+            line-height:1.02;
+            letter-spacing:-.04em;
+        }
+
+        .gradient-text{
+            background:linear-gradient(90deg,var(--accent),var(--accent2),#fff);
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+        }
+
+        .lead{
+            color:var(--muted);
+            margin:16px 0 0;
+            max-width:760px;
+            font-size:18px;
+        }
+
+        .hero-tags{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:18px;
+        }
+
+        .hero-tag{
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.07);
+            border:1px solid rgba(255,255,255,.08);
+            font-size:14px;
+            color:#d9e8ff;
+        }
+
+        .hero-visual{
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            min-height:260px;
+        }
+
+        .pulse{
+            position:absolute;
+            width:320px;
+            height:320px;
+            border-radius:50%;
+            background:radial-gradient(circle, rgba(125,211,252,.16), transparent 60%);
+            filter:blur(6px);
+            animation:pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse{
+            0%,100%{transform:scale(.95); opacity:.65}
+            50%{transform:scale(1.06); opacity:1}
+        }
+
+        .layout{
+            margin-top:24px;
+            display:grid;
+            gap:24px;
+            grid-template-columns:1.08fr .92fr;
+        }
+
+        .section-title{ margin:0 0 14px; }
+
+        .mini{
+            color:var(--accent);
+            font-size:14px;
+            font-weight:700;
+            letter-spacing:.04em;
+            text-transform:uppercase;
+            margin-bottom:8px;
+        }
+
+        .section-title h2{
+            margin:0;
+            font-size:clamp(26px,3.3vw,40px);
+            line-height:1.05;
+            letter-spacing:-.03em;
+        }
+
+        .section-title p{
+            color:var(--muted);
+            margin:10px 0 0;
+            max-width:800px;
+        }
+
+        .panel{ padding:18px; }
+
+        .btn-row,.toggle-row{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:14px;
+        }
+
+        button{
+            font:inherit;
+            cursor:pointer;
+            transition:.18s ease;
+        }
+
+        .chip,.toggle,.ghost,.primary,.secondary{
+            border:none;
+            border-radius:16px;
+        }
+
+        .chip{
+            padding:10px 14px;
+            background:rgba(255,255,255,.07);
+            color:var(--muted);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .chip.active{
+            background:linear-gradient(180deg, rgba(94,234,212,.24), rgba(94,234,212,.15));
+            color:#e9fffb;
+            border-color:rgba(94,234,212,.35);
+            transform:translateY(-1px);
+        }
+
+        .toggle{
+            padding:8px 12px;
+            background:rgba(255,255,255,.05);
+            color:var(--muted);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .toggle.active{
+            background:rgba(125,211,252,.14);
+            color:#eef7ff;
+            border-color:rgba(125,211,252,.35);
+        }
+
+        .ghost{
+            padding:11px 14px;
+            background:rgba(255,255,255,.06);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .primary{
+            padding:12px 16px;
+            background:linear-gradient(180deg, var(--accent), #14b8a6);
+            color:#07231f;
+            font-weight:800;
+            box-shadow:0 10px 24px rgba(20,184,166,.22);
+        }
+
+        .secondary{
+            padding:12px 16px;
+            background:rgba(255,255,255,.06);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.1);
+            font-weight:700;
+        }
+
+        .primary:hover,.secondary:hover,.ghost:hover,.chip:hover,.toggle:hover{
+            transform:translateY(-1px);
+            filter:brightness(1.03);
+        }
+
+        .viz-grid{
+            display:grid;
+            gap:16px;
+            grid-template-columns:1.2fr .8fr;
+            align-items:start;
+        }
+
+        .svg-shell{
+            position:relative;
+            padding:10px;
+            border-radius:20px;
+            background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+            border:1px solid rgba(255,255,255,.08);
+            overflow:hidden;
+        }
+
+        .svg-shell::after{
+            content:"";
+            position:absolute;
+            inset:auto 10px 10px auto;
+            width:120px;
+            height:120px;
+            background:radial-gradient(circle, rgba(251,191,36,.13), transparent 60%);
+            pointer-events:none;
+        }
+
+        svg{ width:100%; height:auto; display:block; }
+
+        .formula-col{
+            display:grid;
+            gap:12px;
+        }
+
+        .fbox{
+            border-radius:18px;
+            padding:14px 15px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .fbox .label{
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .fbox .value{
+            margin-top:6px;
+            font-size:22px;
+            font-weight:800;
+            letter-spacing:-.02em;
+        }
+
+        .control{ margin-top:14px; }
+
+        .control label{
+            display:block;
+            color:var(--muted);
+            font-size:14px;
+            margin-bottom:8px;
+            font-weight:700;
+        }
+
+        input[type="range"]{
+            width:100%;
+            accent-color:#5eead4;
+        }
+
+        input[type="number"]{
+            width:140px;
+            padding:12px 12px;
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,.1);
+            outline:none;
+            font:inherit;
+            background:rgba(255,255,255,.06);
+            color:var(--text);
+        }
+
+        .inline{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            margin-top:12px;
+            flex-wrap:wrap;
+        }
+
+        .calc-grid{
+            margin-top:16px;
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:12px;
+        }
+
+        .formula-board{
+            margin-top:16px;
+            border-radius:20px;
+            padding:16px;
+            background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+            border:1px dashed rgba(255,255,255,.16);
+        }
+
+        .formula-board .title{
+            font-size:14px;
+            color:var(--muted);
+            margin-bottom:10px;
+        }
+
+        .formula-line + .formula-line{ margin-top:6px; }
+
+        .math{
+            font-family:var(--mono);
+            color:#eafffd;
+            white-space:nowrap;
+        }
+
+        .stack{
+            margin-top:24px;
+            display:grid;
+            gap:12px;
+        }
+
+        .accordion{ overflow:hidden; }
+
+        .acc-btn{
+            width:100%;
+            text-align:left;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:18px 20px;
+            color:var(--text);
+            background:transparent;
+            border:none;
+            font-weight:800;
+            letter-spacing:-.01em;
+        }
+
+        .acc-btn span:last-child{
+            color:var(--muted);
+            font-size:18px;
+            transition:transform .18s ease;
+        }
+
+        .accordion.open .acc-btn span:last-child{ transform:rotate(180deg); }
+
+        .acc-content{
+            display:none;
+            border-top:1px solid rgba(255,255,255,.08);
+            padding:16px 20px 18px;
+            color:#d7e3f6;
+        }
+
+        .accordion.open .acc-content{ display:block; }
+
+        .task-grid{
+            margin-top:24px;
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:24px;
+        }
+
+        .answer{
+            margin-top:14px;
+            padding:14px 16px;
+            border-radius:18px;
+            background:linear-gradient(180deg, rgba(52,211,153,.16), rgba(52,211,153,.08));
+            border:1px solid rgba(52,211,153,.24);
+            color:#eafff7;
+        }
+
+        .answer strong{ color:#dcfff4; }
+
+        ol.tight,ul.tight{
+            margin:10px 0 0;
+            padding-left:22px;
+        }
+
+        ol.tight li + li, ul.tight li + li{ margin-top:7px; }
+
+        .dual{
+            margin-top:24px;
+            display:grid;
+            grid-template-columns:1fr .95fr;
+            gap:24px;
+        }
+
+        .question{
+            padding:16px;
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+        }
+
+        .q-title{
+            font-weight:800;
+            letter-spacing:-.01em;
+        }
+
+        .options{
+            display:grid;
+            gap:8px;
+            margin-top:12px;
+        }
+
+        .option{
+            width:100%;
+            text-align:left;
+            padding:12px 14px;
+            border-radius:16px;
+            background:rgba(255,255,255,.05);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .option.selected{
+            border-color:rgba(94,234,212,.36);
+            background:rgba(94,234,212,.1);
+        }
+
+        .option.correct{
+            border-color:rgba(52,211,153,.45);
+            background:rgba(52,211,153,.14);
+        }
+
+        .option.wrong{
+            border-color:rgba(251,113,133,.46);
+            background:rgba(251,113,133,.12);
+        }
+
+        .result{
+            margin-top:14px;
+            padding:14px 16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+            display:none;
+        }
+
+        .result .small{ color:var(--muted); font-size:14px; }
+        .result .big{ margin-top:3px; font-size:30px; font-weight:900; }
+
+        .cheat{ overflow:hidden; }
+
+        .cheat-head,.cheat-row{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+        }
+
+        .cheat-head{
+            background:rgba(255,255,255,.06);
+            color:var(--muted);
+            font-weight:800;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        .cheat-head > div,.cheat-row > div{ padding:14px 16px; }
+        .cheat-row + .cheat-row{ border-top:1px solid rgba(255,255,255,.08); }
+
+        .small-card{
+            margin-top:16px;
+            padding:16px;
+        }
+
+        .small-card h3{
+            margin:0 0 8px;
+            font-size:16px;
+            color:var(--accent);
+        }
+
+        .generator-grid{
+            margin-top:24px;
+            display:grid;
+            gap:24px;
+            grid-template-columns:1fr 1fr;
+        }
+
+        .task-preview{
+            font-size:17px;
+            color:#eef5ff;
+            line-height:1.65;
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            min-height:140px;
+        }
+
+        .reveal{
+            margin-top:14px;
+            display:none;
+            padding:14px 16px;
+            border-radius:18px;
+            background:rgba(125,211,252,.1);
+            border:1px solid rgba(125,211,252,.24);
+            color:#eff8ff;
+        }
+
+        .footer-note{
+            margin-top:28px;
+            text-align:center;
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .print-actions{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-top:12px;
+        }
+
+        @keyframes spin{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @keyframes orbitA{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @keyframes orbitB{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @keyframes orbitC{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @keyframes orbitD{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @keyframes orbitE{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+        @media (max-width:1100px){
+            .hero,.layout,.viz-grid,.task-grid,.dual,.generator-grid{ grid-template-columns:1fr; }
+        }
+
+        @media (max-width:720px){
+            .wrap{ padding:14px 10px 36px; }
+            .hero{ padding:18px; min-height:auto; }
+            .panel{ padding:14px; }
+            .calc-grid{ grid-template-columns:1fr; }
+            .cheat-head,.cheat-row{ grid-template-columns:1fr; }
+            .math{ white-space:normal; }
+        }
+
+        @media print{
+            body{
+                background:#fff;
+                color:#111;
+            }
+            .stars,.grid,.print-hide{ display:none !important; }
+            .glass{
+                background:#fff;
+                border:1px solid #ccc;
+                box-shadow:none;
+            }
+            .hero{ color:#111; background:#fff; }
+            .lead,.mini,.section-title p,.badge,.hero-tag,.footer-note,.label,.formula-board .title{
+                color:#333 !important;
+            }
+            .gradient-text{ color:#111 !important; -webkit-text-fill-color:inherit; }
+            .math{ color:#111 !important; }
+            .option,.chip,.toggle,.fbox,.question,.task-preview,.reveal,.answer,.result{
+                background:#fff !important;
+                color:#111 !important;
+                border-color:#ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="grid"></div>
+
+<div class="wrap">
+    <section class="glass hero">
+        <div>
+            <div class="badge">Интерактивное пособие • 11 класс • профильная математика</div>
+            <h1>
+                Правильный шестиугольник:
+                <span class="gradient-text">длины, углы, площади</span>
+            </h1>
+            <p class="lead">
+                Не просто конспект, а маленькая геометрическая лаборатория:
+                живой чертёж, калькулятор, генератор задач, квиз и режим печати — всё в одном автономном файле.
+            </p>
+            <div class="hero-tags">
+                <span class="hero-tag">без Node.js</span>
+                <span class="hero-tag">открывается двойным кликом</span>
+                <span class="hero-tag">подготовка к ЕГЭ</span>
+                <span class="hero-tag">для Полины Ковальчук</span>
+            </div>
+            <div class="print-actions print-hide">
+                <button class="primary" id="scrollToCalc">Открыть калькулятор</button>
+                <button class="secondary" id="scrollToQuiz">Проверить себя</button>
+                <button class="ghost" onclick="window.print()">Распечатать шпаргалку</button>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="pulse"></div>
+            <svg viewBox="0 0 440 340" aria-hidden="true">
+                <defs>
+                    <linearGradient id="hexStroke" x1="0" x2="1">
+                        <stop offset="0%" stop-color="#5eead4"/>
+                        <stop offset="100%" stop-color="#7dd3fc"/>
+                    </linearGradient>
+                </defs>
+                <g transform="translate(220 170)">
+                    <circle r="115" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.4"></circle>
+                    <g style="transform-origin:center; animation: spin 18s linear infinite;">
+                        <polygon points="0,-115 99,-57.5 99,57.5 0,115 -99,57.5 -99,-57.5"
+                                 fill="rgba(255,255,255,.02)" stroke="url(#hexStroke)" stroke-width="3.5"></polygon>
+                        <line x1="0" y1="0" x2="0" y2="-115" stroke="rgba(255,255,255,.24)"/>
+                        <line x1="0" y1="0" x2="99" y2="-57.5" stroke="rgba(255,255,255,.24)"/>
+                        <line x1="0" y1="0" x2="99" y2="57.5" stroke="rgba(255,255,255,.24)"/>
+                        <line x1="0" y1="0" x2="0" y2="115" stroke="rgba(255,255,255,.24)"/>
+                        <line x1="0" y1="0" x2="-99" y2="57.5" stroke="rgba(255,255,255,.24)"/>
+                        <line x1="0" y1="0" x2="-99" y2="-57.5" stroke="rgba(255,255,255,.24)"/>
+                        <circle r="5" fill="#fbbf24"></circle>
+                    </g>
+                    <circle r="3" fill="#fff"></circle>
+                </g>
+                <text x="20" y="30" fill="#b6c5dd" font-size="14">Шесть равносторонних треугольников внутри одной фигуры</text>
+            </svg>
+        </div>
+    </section>
+
+    <section class="layout">
+        <div>
+            <div class="section-title">
+                <div class="mini">Визуальная модель</div>
+                <h2>Чертёж, который отвечает</h2>
+                <p>Включайте и выключайте элементы, меняйте вершину, наблюдайте, как одна сторона управляет всей фигурой.</p>
+            </div>
+
+            <div class="glass panel">
+                <div class="btn-row" id="vertexButtons"></div>
+                <div class="toggle-row print-hide">
+                    <button class="toggle active" data-toggle="circle">Описанная окружность</button>
+                    <button class="toggle active" data-toggle="radii">Радиусы</button>
+                    <button class="toggle active" data-toggle="inradius">Апофема</button>
+                    <button class="toggle active" data-toggle="shortDiag">Короткая диагональ</button>
+                    <button class="toggle active" data-toggle="longDiag">Длинная диагональ</button>
+                    <button class="toggle active" data-toggle="triangle">Треугольник ACE</button>
+                </div>
+
+                <div class="viz-grid">
+                    <div class="svg-shell">
+                        <svg viewBox="0 0 460 430" aria-label="Интерактивный чертёж правильного шестиугольника">
+                            <defs>
+                                <linearGradient id="shortLine" x1="0" x2="1">
+                                    <stop offset="0%" stop-color="#5eead4"/>
+                                    <stop offset="100%" stop-color="#14b8a6"/>
+                                </linearGradient>
+                                <linearGradient id="longLine" x1="0" x2="1">
+                                    <stop offset="0%" stop-color="#fbbf24"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </linearGradient>
+                            </defs>
+
+                            <circle id="circumcircle" cx="230" cy="215" r="134" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1.5"></circle>
+                            <polygon id="triangleACE" fill="rgba(125,211,252,.10)" stroke="rgba(125,211,252,.34)" stroke-width="1.2"></polygon>
+                            <polygon id="hexagon" fill="rgba(255,255,255,.02)" stroke="#7dd3fc" stroke-width="2.6"></polygon>
+                            <g id="radiiGroup"></g>
+                            <line id="shortDiag" stroke="url(#shortLine)" stroke-width="3.2" stroke-linecap="round"></line>
+                            <line id="longDiag" stroke="url(#longLine)" stroke-width="3.2" stroke-linecap="round"></line>
+                            <line id="inradiusLine" x1="230" y1="215" x2="163" y2="99" stroke="#fbbf24" stroke-width="2.3" stroke-linecap="round"></line>
+
+                            <g id="pointsGroup"></g>
+
+                            <circle cx="230" cy="215" r="4.5" fill="#fbbf24"></circle>
+                            <text x="240" y="207" font-size="16" fill="#ffffff" font-weight="700">O</text>
+
+                            <g opacity=".85">
+                                <text x="20" y="28" font-size="14" fill="#b6c5dd">Выбранная вершина: <tspan id="selectedVertexText">A</tspan></text>
+                                <text x="20" y="48" font-size="14" fill="#b6c5dd" id="angleHint">∠BAC = 30°, ∠CAD = 30°</text>
+                                <text x="20" y="390" font-size="14" fill="#b6c5dd">Подвигайте сторону в калькуляторе справа — и всё обновится</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="formula-col">
+                        <div class="fbox"><div class="label">Сторона</div><div class="value" id="sideValue"></div></div>
+                        <div class="fbox"><div class="label">Радиус описанной окружности</div><div class="value" id="RValue"></div></div>
+                        <div class="fbox"><div class="label">Радиус вписанной окружности</div><div class="value" id="rValue"></div></div>
+                        <div class="fbox"><div class="label">Короткая диагональ</div><div class="value" id="shortValue"></div></div>
+                        <div class="fbox"><div class="label">Длинная диагональ</div><div class="value" id="longValue"></div></div>
+                        <div class="fbox"><div class="label">Периметр</div><div class="value" id="perimeterMiniValue"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="calculator">
+            <div class="section-title">
+                <div class="mini">Калькулятор</div>
+                <h2>Одна сторона — весь мир фигуры</h2>
+                <p>Меняйте <span class="math">a</span>, и страница мгновенно пересчитывает все базовые величины.</p>
+            </div>
+
+            <div class="glass panel">
+                <div class="control">
+                    <label for="sideRange">Сторона шестиугольника <span class="math">a</span></label>
+                    <input id="sideRange" type="range" min="1" max="20" step="0.5" value="6">
+                    <div class="inline">
+                        <input id="sideNumber" type="number" min="0.1" step="0.1" value="6">
+                        <span style="color:var(--muted)">единиц длины</span>
+                    </div>
+                </div>
+
+                <div class="calc-grid">
+                    <div class="fbox"><div class="label">Периметр</div><div class="value" id="perimeterValue"></div></div>
+                    <div class="fbox"><div class="label">Площадь шестиугольника</div><div class="value" id="areaValue"></div></div>
+                    <div class="fbox"><div class="label">Площадь треугольника ACE</div><div class="value" id="triangleAreaValue"></div></div>
+                    <div class="fbox"><div class="label">Расстояние между противоположными сторонами</div><div class="value" id="distanceValue"></div></div>
+                </div>
+
+                <div class="formula-board">
+                    <div class="title">Формулы, которые работают прямо сейчас</div>
+                    <div class="formula-line"><span class="math">R = a</span></div>
+                    <div class="formula-line"><span class="math">r = (√3 / 2)a</span></div>
+                    <div class="formula-line"><span class="math">dкор = a√3</span></div>
+                    <div class="formula-line"><span class="math">dдл = 2a</span></div>
+                    <div class="formula-line"><span class="math">S = (3√3 / 2)a²</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stack">
+        <div class="section-title">
+            <div class="mini">Теория</div>
+            <h2>Ключевые свойства без шумов и лишней тяжести</h2>
+            <p>Каждый блок раскрывается отдельно, как карточка памяти перед задачей.</p>
+        </div>
+
+        <div class="glass accordion open">
+            <button class="acc-btn"><span>1. Базовая модель</span><span>▾</span></button>
+            <div class="acc-content">
+                Центр правильного шестиугольника делит фигуру на шесть равносторонних треугольников.
+                Отсюда почти мгновенно следуют формулы для радиусов, диагоналей и площади.
+            </div>
+        </div>
+
+        <div class="glass accordion">
+            <button class="acc-btn"><span>2. Диагонали</span><span>▾</span></button>
+            <div class="acc-content">
+                Короткая диагональ соединяет вершины через одну и равна <span class="math">a√3</span>.
+                Длинная диагональ соединяет противоположные вершины и равна <span class="math">2a</span>, потому что это диаметр описанной окружности.
+            </div>
+        </div>
+
+        <div class="glass accordion">
+            <button class="acc-btn"><span>3. Площади</span><span>▾</span></button>
+            <div class="acc-content">
+                Площадь правильного шестиугольника равна сумме площадей шести равносторонних треугольников:
+                <span class="math">S = (3√3 / 2)a²</span>.
+                Треугольник по вершинам через одну тоже равносторонний и имеет площадь, равную половине площади шестиугольника.
+            </div>
+        </div>
+
+        <div class="glass accordion">
+            <button class="acc-btn"><span>4. Ловушки</span><span>▾</span></button>
+            <div class="acc-content">
+                <ul class="tight">
+                    <li>Не путать <span class="math">R</span> и <span class="math">r</span>.</li>
+                    <li>Не путать <span class="math">a√3</span> и <span class="math">2a</span>.</li>
+                    <li>Расстояние между противоположными сторонами равно <span class="math">2r</span>, а не <span class="math">R</span>.</li>
+                    <li>Треугольник из вершин через одну даёт ровно половину площади шестиугольника.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="task-grid">
+        <div>
+            <div class="section-title">
+                <div class="mini">Разбор</div>
+                <h2>Задача 1</h2>
+                <p>Сторона известна, значит почти всё извлекается прямым применением формул.</p>
+            </div>
+
+            <div class="glass accordion open">
+                <button class="acc-btn"><span>Открыть подробное решение</span><span>▾</span></button>
+                <div class="acc-content">
+                    <p><strong>Условие.</strong> В правильном шестиугольнике сторона равна 6 см. Найдите диагонали, радиусы окружностей, углы, площадь шестиугольника и площадь треугольника <span class="math">ACE</span>.</p>
+                    <ol class="tight">
+                        <li>Короткая диагональ: <span class="math">AC = a√3 = 6√3</span>.</li>
+                        <li>Длинная диагональ: <span class="math">AD = 2a = 12</span>.</li>
+                        <li>Радиусы: <span class="math">R = 6</span>, <span class="math">r = 3√3</span>.</li>
+                        <li>В треугольнике <span class="math">ABC</span> угол при <span class="math">B</span> равен <span class="math">120°</span>, значит <span class="math">∠BAC = 30°</span>.</li>
+                        <li><span class="math">AD</span> — диаметр описанной окружности, поэтому <span class="math">∠ACD = 90°</span>.</li>
+                        <li>В прямоугольном треугольнике <span class="math">ACD</span>: <span class="math">sin ∠CAD = CD / AD = 6 / 12 = 1/2</span>, значит <span class="math">∠CAD = 30°</span>.</li>
+                        <li>Площадь шестиугольника: <span class="math">S = (3√3 / 2)·6² = 54√3</span>.</li>
+                        <li>Площадь треугольника <span class="math">ACE</span> вдвое меньше: <span class="math">27√3</span>.</li>
+                    </ol>
+                    <div class="answer"><strong>Ответ.</strong> <span class="math">AC = 6√3</span>, <span class="math">AD = 12</span>, <span class="math">R = 6</span>, <span class="math">r = 3√3</span>, <span class="math">∠BAC = 30°</span>, <span class="math">∠CAD = 30°</span>, <span class="math">∠ACD = 90°</span>, <span class="math">S = 54√3</span>, <span class="math">S(ACE) = 27√3</span>.</div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">
+                <div class="mini">Разбор</div>
+                <h2>Задача 2</h2>
+                <p>Дано расстояние между противоположными сторонами, значит сначала восстанавливаем апофему.</p>
+            </div>
+
+            <div class="glass accordion">
+                <button class="acc-btn"><span>Открыть подробное решение</span><span>▾</span></button>
+                <div class="acc-content">
+                    <p><strong>Условие.</strong> Расстояние между противоположными сторонами равно <span class="math">12√3</span> см. Найдите сторону, диагонали, периметр, площадь шестиугольника, площадь описанного круга и площадь части круга вне шестиугольника.</p>
+                    <ol class="tight">
+                        <li>Расстояние между противоположными сторонами равно <span class="math">2r</span>, значит <span class="math">r = 6√3</span>.</li>
+                        <li>По формуле <span class="math">r = (√3 / 2)a</span> получаем <span class="math">a = 12</span>.</li>
+                        <li>Короткая диагональ: <span class="math">12√3</span>. Длинная диагональ: <span class="math">24</span>.</li>
+                        <li>Периметр: <span class="math">P = 72</span>.</li>
+                        <li>Площадь: <span class="math">S = 216√3</span>.</li>
+                        <li>Радиус описанной окружности: <span class="math">R = 12</span>, площадь круга: <span class="math">144π</span>.</li>
+                        <li>Часть круга вне шестиугольника: <span class="math">144π − 216√3</span>.</li>
+                    </ol>
+                    <div class="answer"><strong>Ответ.</strong> <span class="math">a = 12</span>, <span class="math">dкор = 12√3</span>, <span class="math">dдл = 24</span>, <span class="math">P = 72</span>, <span class="math">S = 216√3</span>, <span class="math">Sкруга = 144π</span>, <span class="math">Sвне = 144π − 216√3</span>.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="generator-grid">
+        <div>
+            <div class="section-title">
+                <div class="mini">Тренажёр</div>
+                <h2>Генератор новых задач</h2>
+                <p>Страница сама придумывает корректную задачу и сразу готовит ответ. Каждый клик — новый вариант.</p>
+            </div>
+
+            <div class="glass panel">
+                <div class="btn-row print-hide">
+                    <button class="primary" id="generateTask">Сгенерировать задачу</button>
+                    <button class="secondary" id="showGeneratedAnswer">Показать ответ</button>
+                </div>
+                <div class="task-preview" id="generatedTask"></div>
+                <div class="reveal" id="generatedAnswer"></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">
+                <div class="mini">Режим памяти</div>
+                <h2>Формульная гравитация</h2>
+                <p>Сторона — ядро, а все остальные формулы будто вращаются вокруг неё.</p>
+            </div>
+
+            <div class="glass panel">
+                <svg viewBox="0 0 520 300" aria-label="Связи между формулами">
+                    <defs>
+                        <linearGradient id="orbit1" x1="0" x2="1">
+                            <stop offset="0%" stop-color="#5eead4"/>
+                            <stop offset="100%" stop-color="#7dd3fc"/>
+                        </linearGradient>
+                    </defs>
+                    <g transform="translate(260 150)">
+                        <circle r="108" fill="none" stroke="rgba(255,255,255,.08)" stroke-dasharray="5 7"></circle>
+                        <circle r="72" fill="none" stroke="rgba(255,255,255,.08)" stroke-dasharray="5 7"></circle>
+                        <circle r="36" fill="none" stroke="rgba(255,255,255,.08)" stroke-dasharray="5 7"></circle>
+
+                        <circle r="28" fill="rgba(94,234,212,.16)" stroke="url(#orbit1)"></circle>
+                        <text text-anchor="middle" y="6" fill="#ffffff" font-weight="800" font-size="20">a</text>
+
+                        <g style="transform-origin:center; animation: orbitA 12s linear infinite;">
+                            <circle cx="0" cy="-108" r="22" fill="rgba(125,211,252,.12)" stroke="#7dd3fc"></circle>
+                            <text x="0" y="-102" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">R = a</text>
+                        </g>
+
+                        <g style="transform-origin:center; animation: orbitB 16s linear infinite reverse;">
+                            <circle cx="72" cy="0" r="24" fill="rgba(251,191,36,.12)" stroke="#fbbf24"></circle>
+                            <text x="72" y="5" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">r = √3a / 2</text>
+                        </g>
+
+                        <g style="transform-origin:center; animation: orbitC 14s linear infinite;">
+                            <circle cx="-36" cy="0" r="22" fill="rgba(94,234,212,.12)" stroke="#5eead4"></circle>
+                            <text x="-36" y="5" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">2a</text>
+                        </g>
+
+                        <g style="transform-origin:center; animation: orbitD 19s linear infinite;">
+                            <circle cx="0" cy="108" r="24" fill="rgba(125,211,252,.12)" stroke="#7dd3fc"></circle>
+                            <text x="0" y="113" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="700">S = 3√3a² / 2</text>
+                        </g>
+
+                        <g style="transform-origin:center; animation: orbitE 11s linear infinite reverse;">
+                            <circle cx="-72" cy="0" r="22" fill="rgba(251,191,36,.12)" stroke="#fbbf24"></circle>
+                            <text x="-72" y="5" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="700">a√3</text>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="dual" id="quizSection">
+        <div>
+            <div class="section-title">
+                <div class="mini">Самопроверка</div>
+                <h2>Мини-квиз</h2>
+                <p>Проверьте, насколько уверенно держатся ключевые формулы.</p>
+            </div>
+
+            <div class="glass panel">
+                <div id="quizContainer"></div>
+                <div class="btn-row print-hide" style="margin-top:18px;">
+                    <button class="primary" id="checkQuiz">Проверить</button>
+                    <button class="secondary" id="resetQuiz">Сбросить</button>
+                </div>
+                <div class="result" id="quizResult">
+                    <div class="small">Результат</div>
+                    <div class="big" id="scoreText"></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">
+                <div class="mini">Сводка</div>
+                <h2>Cheat sheet</h2>
+                <p>Самое главное — в одном компактном блоке, который удобно печатать и повторять.</p>
+            </div>
+
+            <div class="glass cheat">
+                <div class="cheat-head">
+                    <div>Что помнить</div>
+                    <div>Формула</div>
+                </div>
+                <div class="cheat-row"><div>Радиус описанной окружности</div><div class="math">R = a</div></div>
+                <div class="cheat-row"><div>Радиус вписанной окружности</div><div class="math">r = (√3 / 2)a</div></div>
+                <div class="cheat-row"><div>Расстояние между противоположными сторонами</div><div class="math">2r = a√3</div></div>
+                <div class="cheat-row"><div>Короткая диагональ</div><div class="math">a√3</div></div>
+                <div class="cheat-row"><div>Длинная диагональ</div><div class="math">2a</div></div>
+                <div class="cheat-row"><div>Периметр</div><div class="math">6a</div></div>
+                <div class="cheat-row"><div>Площадь шестиугольника</div><div class="math">(3√3 / 2)a²</div></div>
+                <div class="cheat-row"><div>Площадь треугольника ACE</div><div class="math">S(ACE) = ½ S₆</div></div>
+            </div>
+
+            <div class="glass small-card">
+                <h3>Что особенно важно не перепутать</h3>
+                <ul class="tight">
+                    <li><span class="math">R = a</span>, но <span class="math">r = (√3 / 2)a</span>.</li>
+                    <li>Короткая диагональ — <span class="math">a√3</span>, длинная — <span class="math">2a</span>.</li>
+                    <li>Треугольник из вершин через одну не равен всему шестиугольнику, а даёт его половину.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="footer-note">
+        Один файл, ноль зависимостей, максимум геометрической пользы.
+        Сохраните как <strong>index.html</strong> и открывайте где угодно.
+    </div>
+</div>
+
+<script>
+    const state = {
+        a: 6,
+        selectedVertex: "A",
+        toggles: {
+            circle: true,
+            radii: true,
+            inradius: true,
+            shortDiag: true,
+            longDiag: true,
+            triangle: true
+        },
+        quizAnswers: {},
+        quizChecked: false,
+        generated: null
+    };
+
+    const center = { x: 230, y: 215 };
+    const vertices = [
+        { name:"A", x:163, y:99 },
+        { name:"B", x:297, y:99 },
+        { name:"C", x:364, y:215 },
+        { name:"D", x:297, y:331 },
+        { name:"E", x:163, y:331 },
+        { name:"F", x:96,  y:215 }
+    ];
+    const byName = Object.fromEntries(vertices.map(v => [v.name, v]));
+    const selectedMap = {
+        A:{ short:["A","C"], long:["A","D"], angleText:"∠BAC = 30°, ∠CAD = 30°" },
+        B:{ short:["B","D"], long:["B","E"], angleText:"аналогично по симметрии" },
+        C:{ short:["C","E"], long:["C","F"], angleText:"аналогично по симметрии" },
+        D:{ short:["D","F"], long:["D","A"], angleText:"аналогично по симметрии" },
+        E:{ short:["E","A"], long:["E","B"], angleText:"аналогично по симметрии" },
+        F:{ short:["F","B"], long:["F","C"], angleText:"аналогично по симметрии" }
+    };
+
+    const quiz = [
+        {
+            key:"q1",
+            q:"Чему равен радиус описанной окружности правильного шестиугольника со стороной a?",
+            options:["R = a","R = a / 2","R = a√3","R = 2a"],
+            correct:0
+        },
+        {
+            key:"q2",
+            q:"Чему равна короткая диагональ?",
+            options:["a","2a","a√3","a / √3"],
+            correct:2
+        },
+        {
+            key:"q3",
+            q:"Чему равна площадь правильного шестиугольника?",
+            options:["3a²","(3√3 / 2)a²","(√3 / 2)a²","6a²"],
+            correct:1
+        },
+        {
+            key:"q4",
+            q:"Как связаны площади шестиугольника и треугольника из вершин через одну?",
+            options:[
+                "Они равны",
+                "Площадь треугольника в 2 раза больше",
+                "Площадь треугольника равна половине площади шестиугольника",
+                "Связи нет"
+            ],
+            correct:2
+        }
+    ];
+
+    function fmt(x){
+        const r = Math.round(x * 1000) / 1000;
+        if (Math.abs(r - Math.round(r)) < 1e-10) return String(Math.round(r));
+        return String(r).replace(".", ",");
+    }
+
+    function values(a){
+        const R = a;
+        const r = Math.sqrt(3) * a / 2;
+        const dShort = Math.sqrt(3) * a;
+        const dLong = 2 * a;
+        const perimeter = 6 * a;
+        const area = 3 * Math.sqrt(3) * a * a / 2;
+        const triangleArea = area / 2;
+        return { R, r, dShort, dLong, perimeter, area, triangleArea };
+    }
+
+    function renderVertexButtons(){
+        const box = document.getElementById("vertexButtons");
+        box.innerHTML = "";
+        vertices.forEach(v => {
+            const b = document.createElement("button");
+            b.className = "chip" + (state.selectedVertex === v.name ? " active" : "");
+            b.textContent = "Вершина " + v.name;
+            b.addEventListener("click", () => {
+                state.selectedVertex = v.name;
+                renderAll();
+            });
+            box.appendChild(b);
+        });
+    }
+
+    function renderToggles(){
+        document.querySelectorAll("[data-toggle]").forEach(btn => {
+            const key = btn.getAttribute("data-toggle");
+            btn.classList.toggle("active", !!state.toggles[key]);
+        });
+    }
+
+    function renderSVG(){
+        document.getElementById("hexagon").setAttribute("points", vertices.map(v => `${v.x},${v.y}`).join(" "));
+        document.getElementById("triangleACE").setAttribute("points", ["A","C","E"].map(k => `${byName[k].x},${byName[k].y}`).join(" "));
+        document.getElementById("selectedVertexText").textContent = state.selectedVertex;
+        document.getElementById("angleHint").textContent = selectedMap[state.selectedVertex].angleText;
+
+        const rg = document.getElementById("radiiGroup");
+        rg.innerHTML = "";
+        vertices.forEach(v => {
+            const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+            line.setAttribute("x1", center.x);
+            line.setAttribute("y1", center.y);
+            line.setAttribute("x2", v.x);
+            line.setAttribute("y2", v.y);
+            line.setAttribute("stroke", "rgba(255,255,255,.22)");
+            line.setAttribute("stroke-width", "1.4");
+            rg.appendChild(line);
+        });
+
+        const pg = document.getElementById("pointsGroup");
+        pg.innerHTML = "";
+        vertices.forEach(v => {
+            const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+            const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+            c.setAttribute("cx", v.x);
+            c.setAttribute("cy", v.y);
+            c.setAttribute("r", "5.2");
+            c.setAttribute("fill", v.name === state.selectedVertex ? "#5eead4" : "#ffffff");
+
+            const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+            let dx = 0, dy = 0;
+            if (v.name === "C") dx = 10;
+            if (v.name === "F") dx = -16;
+            if (v.name === "A" || v.name === "B") dy = -10;
+            else if (v.name === "D" || v.name === "E") dy = 18;
+            else dy = 5;
+
+            t.setAttribute("x", v.x + dx);
+            t.setAttribute("y", v.y + dy);
+            t.setAttribute("fill", "#ffffff");
+            t.setAttribute("font-size", "15");
+            t.setAttribute("font-weight", "700");
+            t.textContent = v.name;
+
+            g.appendChild(c);
+            g.appendChild(t);
+            pg.appendChild(g);
+        });
+
+        const sPair = selectedMap[state.selectedVertex].short;
+        const lPair = selectedMap[state.selectedVertex].long;
+        const s1 = byName[sPair[0]], s2 = byName[sPair[1]];
+        const l1 = byName[lPair[0]], l2 = byName[lPair[1]];
+
+        const sd = document.getElementById("shortDiag");
+        sd.setAttribute("x1", s1.x);
+        sd.setAttribute("y1", s1.y);
+        sd.setAttribute("x2", s2.x);
+        sd.setAttribute("y2", s2.y);
+
+        const ld = document.getElementById("longDiag");
+        ld.setAttribute("x1", l1.x);
+        ld.setAttribute("y1", l1.y);
+        ld.setAttribute("x2", l2.x);
+        ld.setAttribute("y2", l2.y);
+
+        document.getElementById("circumcircle").style.display = state.toggles.circle ? "" : "none";
+        document.getElementById("radiiGroup").style.display = state.toggles.radii ? "" : "none";
+        document.getElementById("inradiusLine").style.display = state.toggles.inradius ? "" : "none";
+        document.getElementById("shortDiag").style.display = state.toggles.shortDiag ? "" : "none";
+        document.getElementById("longDiag").style.display = state.toggles.longDiag ? "" : "none";
+        document.getElementById("triangleACE").style.display = state.toggles.triangle ? "" : "none";
+    }
+
+    function renderValues(){
+        const v = values(state.a);
+        document.getElementById("sideValue").textContent = `a = ${fmt(state.a)}`;
+        document.getElementById("RValue").textContent = `R = ${fmt(v.R)}`;
+        document.getElementById("rValue").textContent = `r = ${fmt(v.r)}`;
+        document.getElementById("shortValue").textContent = `a√3 ≈ ${fmt(v.dShort)}`;
+        document.getElementById("longValue").textContent = `2a = ${fmt(v.dLong)}`;
+        document.getElementById("perimeterMiniValue").textContent = `P = ${fmt(v.perimeter)}`;
+
+        document.getElementById("perimeterValue").textContent = `P = ${fmt(v.perimeter)}`;
+        document.getElementById("areaValue").textContent = `≈ ${fmt(v.area)}`;
+        document.getElementById("triangleAreaValue").textContent = `≈ ${fmt(v.triangleArea)}`;
+        document.getElementById("distanceValue").textContent = `2r ≈ ${fmt(2 * v.r)}`;
+
+        document.getElementById("sideRange").value = state.a;
+        document.getElementById("sideNumber").value = state.a;
+    }
+
+    function renderQuiz(){
+        const box = document.getElementById("quizContainer");
+        box.innerHTML = "";
+
+        quiz.forEach((item, idx) => {
+            const q = document.createElement("div");
+            q.className = "question";
+
+            const title = document.createElement("div");
+            title.className = "q-title";
+            title.textContent = `${idx + 1}. ${item.q}`;
+            q.appendChild(title);
+
+            const opts = document.createElement("div");
+            opts.className = "options";
+
+            item.options.forEach((opt, i) => {
+                const b = document.createElement("button");
+                b.className = "option";
+                if (state.quizAnswers[item.key] === i) b.classList.add("selected");
+                if (state.quizChecked && i === item.correct) b.classList.add("correct");
+                if (state.quizChecked && state.quizAnswers[item.key] === i && i !== item.correct) b.classList.add("wrong");
+                b.textContent = opt;
+                b.addEventListener("click", () => {
+                    state.quizAnswers[item.key] = i;
+                    state.quizChecked = false;
+                    renderQuiz();
+                    renderQuizResult();
+                });
+                opts.appendChild(b);
+            });
+
+            q.appendChild(opts);
+            box.appendChild(q);
+        });
+    }
+
+    function renderQuizResult(){
+        const result = document.getElementById("quizResult");
+        if (!state.quizChecked) {
+            result.style.display = "none";
+            return;
+        }
+        const score = quiz.reduce((acc, item) => acc + (state.quizAnswers[item.key] === item.correct ? 1 : 0), 0);
+        result.style.display = "block";
+        document.getElementById("scoreText").textContent = `${score} из ${quiz.length}`;
+    }
+
+    function randomChoice(arr){
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function formatSqrtMultiple(value){
+        return value === 1 ? "√3" : `${value}√3`;
+    }
+
+    function generateTask(){
+        const types = ["side","distance","triangleArea","shortDiag"];
+        const type = randomChoice(types);
+
+        let taskText = "";
+        let answerText = "";
+
+        if (type === "side") {
+            const a = randomChoice([4,5,6,8,10,12]);
+            taskText = `В правильном шестиугольнике сторона равна ${a} см. Найдите короткую диагональ, длинную диагональ, радиус вписанной окружности и площадь шестиугольника.`;
+            const rText = a % 2 === 0 ? formatSqrtMultiple(a / 2) : `${a}√3 / 2`;
+            answerText = `
+          <div><span class="math">dкор = a√3 = ${a}√3</span></div>
+          <div><span class="math">dдл = 2a = ${2 * a}</span></div>
+          <div><span class="math">r = (√3 / 2)a = ${rText}</span></div>
+          <div><span class="math">S = (3√3 / 2)a² = ${(3 * a * a) / 2}√3</span></div>
+        `;
+        }
+
+        if (type === "distance") {
+            const a = randomChoice([4,6,8,10,14]);
+            taskText = `Расстояние между противоположными сторонами правильного шестиугольника равно ${a}√3 см. Найдите сторону, периметр и площадь шестиугольника.`;
+            answerText = `
+          <div><span class="math">2r = a√3</span>, значит сразу <span class="math">a = ${a}</span></div>
+          <div><span class="math">P = 6a = ${6 * a}</span></div>
+          <div><span class="math">S = (3√3 / 2)a² = ${(3 * a * a) / 2}√3</span></div>
+        `;
+        }
+
+        if (type === "triangleArea") {
+            const a = randomChoice([4,8,12]);
+            const triCoef = (3 * a * a) / 4;
+            const hexCoef = (3 * a * a) / 2;
+            taskText = `Площадь треугольника, образованного вершинами правильного шестиугольника через одну, равна ${triCoef}√3 см². Найдите сторону шестиугольника и его площадь.`;
+            answerText = `
+          <div>Так как <span class="math">S(ACE) = (3√3 / 4)a²</span>, получаем <span class="math">a = ${a}</span></div>
+          <div><span class="math">S₆ = 2S(ACE) = ${hexCoef}√3</span></div>
+        `;
+        }
+
+        if (type === "shortDiag") {
+            const a = randomChoice([2,6,10,14]);
+            taskText = `Короткая диагональ правильного шестиугольника равна ${a}√3 см. Найдите сторону, длинную диагональ и площадь шестиугольника.`;
+            answerText = `
+          <div>Так как <span class="math">dкор = a√3</span>, то <span class="math">a = ${a}</span></div>
+          <div><span class="math">dдл = 2a = ${2 * a}</span></div>
+          <div><span class="math">S = (3√3 / 2)a² = ${(3 * a * a) / 2}√3</span></div>
+        `;
+        }
+
+        state.generated = { taskText, answerText };
+        document.getElementById("generatedTask").textContent = taskText;
+        const ans = document.getElementById("generatedAnswer");
+        ans.innerHTML = answerText;
+        ans.style.display = "none";
+    }
+
+    function renderAll(){
+        renderVertexButtons();
+        renderToggles();
+        renderSVG();
+        renderValues();
+        renderQuiz();
+        renderQuizResult();
+        if (!state.generated) generateTask();
+    }
+
+    document.querySelectorAll(".acc-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            btn.parentElement.classList.toggle("open");
+        });
+    });
+
+    document.querySelectorAll("[data-toggle]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const key = btn.getAttribute("data-toggle");
+            state.toggles[key] = !state.toggles[key];
+            renderAll();
+        });
+    });
+
+    document.getElementById("sideRange").addEventListener("input", e => {
+        state.a = Number(e.target.value);
+        renderAll();
+    });
+
+    document.getElementById("sideNumber").addEventListener("input", e => {
+        state.a = Math.max(0.1, Number(e.target.value) || 0.1);
+        renderAll();
+    });
+
+    document.getElementById("checkQuiz").addEventListener("click", () => {
+        state.quizChecked = true;
+        renderAll();
+    });
+
+    document.getElementById("resetQuiz").addEventListener("click", () => {
+        state.quizAnswers = {};
+        state.quizChecked = false;
+        renderAll();
+    });
+
+    document.getElementById("generateTask").addEventListener("click", generateTask);
+
+    document.getElementById("showGeneratedAnswer").addEventListener("click", () => {
+        const ans = document.getElementById("generatedAnswer");
+        ans.style.display = ans.style.display === "block" ? "none" : "block";
+    });
+
+    document.getElementById("scrollToCalc").addEventListener("click", () => {
+        document.getElementById("calculator").scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+
+    document.getElementById("scrollToQuiz").addEventListener("click", () => {
+        document.getElementById("quizSection").scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+
+    renderAll();
+</script>
+</body>
+</html>
