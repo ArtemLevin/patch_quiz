@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задачи на производительность | Интерактивный чек-лист</title>
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111625;
+            --bg-card: #1a2030;
+            --bg-glass: rgba(26, 32, 48, 0.85);
+            --accent-primary: #00d4aa;
+            --accent-secondary: #7b68ee;
+            --accent-tertiary: #ff6b9d;
+            --accent-gold: #ffd700;
+            --text-primary: #e8ecf1;
+            --text-secondary: #a0aab8;
+            --text-muted: #6b7785;
+            --success: #00d4aa;
+            --warning: #ffb84d;
+            --error: #ff6b9d;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 40px rgba(0, 212, 170, 0.15);
+            --gradient-main: linear-gradient(135deg, #00d4aa 0%, #7b68ee 50%, #ff6b9d 100%);
+            --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Enhanced Background Dynamics --- */
+        .bg-effects {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: -1; overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #1a2236 0%, #0b0f19 100%);
+        }
+
+        /* Animated Orbs */
+        .bg-gradient-orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.2;
+            animation: float 20s ease-in-out infinite;
+        }
+        .bg-orb-1 { width: 600px; height: 600px; background: var(--accent-primary); top: -200px; right: -200px; }
+        .bg-orb-2 { width: 500px; height: 500px; background: var(--accent-secondary); bottom: -150px; left: -150px; animation-delay: -5s; }
+        .bg-orb-3 { width: 400px; height: 400px; background: var(--accent-tertiary); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: pulse 15s ease-in-out infinite; }
+
+        /* Floating Particles */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: rise 15s infinite ease-in;
+        }
+        .particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-duration: 12s; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-duration: 18s; animation-delay: 2s; }
+        .particle:nth-child(3) { width: 3px; height: 3px; left: 35%; animation-duration: 15s; animation-delay: 4s; }
+        .particle:nth-child(4) { width: 5px; height: 5px; left: 50%; animation-duration: 20s; animation-delay: 1s; }
+        .particle:nth-child(5) { width: 4px; height: 4px; left: 65%; animation-duration: 14s; animation-delay: 3s; }
+        .particle:nth-child(6) { width: 7px; height: 7px; left: 80%; animation-duration: 16s; animation-delay: 5s; }
+        .particle:nth-child(7) { width: 3px; height: 3px; left: 90%; animation-duration: 19s; animation-delay: 2s; }
+
+        /* Grid Overlay */
+        .grid-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(30px, -30px) rotate(5deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.1); }
+        }
+        @keyframes rise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color); padding: 1rem 2rem;
+        }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo {
+            font-size: 1.4rem; font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: all 0.3s; }
+        .nav-links a:hover { color: var(--accent-primary); }
+
+        /* Hero Section */
+        .hero {
+            min-height: 80vh; display: flex; align-items: center; justify-content: center;
+            padding: 8rem 2rem 4rem; text-align: center; position: relative; overflow: hidden;
+        }
+        .hero-content { max-width: 900px; z-index: 1; margin: 0 auto; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 1.8rem; background: var(--bg-glass);
+            border: 1px solid var(--border-color); border-radius: 50px; font-size: 0.9rem;
+            color: var(--accent-primary); margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1;
+            margin-bottom: 1.5rem; background: var(--gradient-main);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-subtitle { font-size: 1.3rem; color: var(--text-secondary); margin-bottom: 3rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+
+        .btn {
+            padding: 1.2rem 3rem; border-radius: 16px; font-weight: 700; cursor: pointer;
+            transition: all 0.3s; border: none; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 0.7rem; font-size: 1rem;
+        }
+        .btn-primary { background: var(--gradient-main); color: white; box-shadow: var(--shadow-glow); }
+        .btn-primary:hover { transform: translateY(-4px); box-shadow: 0 15px 60px rgba(0, 212, 170, 0.3); }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: var(--bg-secondary); border-color: var(--accent-primary); transform: translateY(-2px); }
+
+        /* Sections */
+        .section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; position: relative; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-tag {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1.5rem; background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3); border-radius: 50px; font-size: 0.85rem;
+            color: var(--accent-primary); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        .section-title { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 1rem; }
+        .section-subtitle { font-size: 1.15rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+        /* Cards */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; }
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px;
+            padding: 2.5rem; transition: all 0.4s; position: relative; overflow: hidden;
+        }
+        .card:hover { transform: translateY(-8px); border-color: rgba(0, 212, 170, 0.4); }
+        .card-icon {
+            font-size: 3rem; margin-bottom: 1.5rem;
+            width: 80px; height: 80px; background: var(--bg-secondary);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+        }
+        .card-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); }
+        .card-text { color: var(--text-secondary); font-size: 1rem; line-height: 1.8; }
+        .highlight {
+            background: rgba(0, 212, 170, 0.15); padding: 0.3rem 0.7rem;
+            border-radius: 6px; color: var(--accent-primary); font-family: monospace; font-weight: 600;
+        }
+
+        /* Trainer Containers */
+        .trainer-container {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 24px; padding: 3rem; margin: 3rem auto; max-width: 1000px;
+            box-shadow: var(--shadow-soft);
+        }
+        .trainer-header {
+            display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);
+            justify-content: center; text-align: center;
+        }
+        .trainer-icon { font-size: 3rem; }
+        .trainer-title { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); }
+        .trainer-desc { color: var(--text-secondary); font-size: 1rem; }
+
+        /* Trainer 1: What Quantity */
+        .quantity-trainer { display: grid; gap: 2rem; }
+        .problem-card {
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
+        }
+        .problem-text { font-size: 1.15rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--text-primary); text-align: left; }
+        .problem-inputs { display: grid; gap: 1.5rem; }
+        .input-row { display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: center; }
+        .input-label { color: var(--text-secondary); font-weight: 500; }
+        .input-field {
+            width: 100%; padding: 1rem; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 12px;
+            color: var(--text-primary); font-size: 1rem;
+        }
+        .input-field:focus { outline: none; border-color: var(--accent-primary); }
+        .feedback-box {
+            margin-top: 1.5rem; padding: 1.5rem; border-radius: 12px;
+            display: none;
+        }
+        .feedback-correct { background: rgba(0, 212, 170, 0.15); border: 1px solid var(--success); }
+        .feedback-incorrect { background: rgba(255, 107, 157, 0.15); border: 1px solid var(--error); }
+
+        /* Trainer 2: Algorithm Cards */
+        .algorithm-trainer { display: grid; gap: 2rem; }
+        .cards-pool {
+            display: flex; flex-wrap: wrap; gap: 1rem; padding: 2rem;
+            background: var(--bg-secondary); border-radius: 16px; min-height: 150px;
+            justify-content: center;
+        }
+        .algo-card {
+            padding: 1rem 1.5rem; background: var(--bg-card);
+            border: 2px solid var(--border-color); border-radius: 12px;
+            cursor: pointer; transition: all 0.3s; font-size: 0.95rem;
+        }
+        .algo-card:hover { border-color: var(--accent-primary); }
+        .algo-card.selected { border-color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
+        .algo-card.correct { border-color: var(--success); background: rgba(0, 212, 170, 0.15); }
+        .algo-card.wrong { border-color: var(--error); background: rgba(255, 107, 157, 0.15); }
+        .algo-card.extra { border-color: var(--warning); background: rgba(255, 184, 77, 0.15); text-decoration: line-through; }
+        .sequence-area {
+            display: flex; flex-wrap: wrap; gap: 1rem; padding: 2rem;
+            background: var(--bg-secondary); border-radius: 16px; min-height: 200px;
+            border: 2px dashed var(--border-color);
+            justify-content: center; align-items: center;
+        }
+        .sequence-slot {
+            width: 50px; height: 50px; background: var(--bg-card);
+            border: 2px solid var(--border-color); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: var(--text-muted);
+        }
+        .sequence-slot.filled { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+        /* Trainer 3: Catch Error */
+        .error-trainer { display: grid; gap: 2rem; }
+        .solution-display {
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 2rem; font-family: monospace;
+            line-height: 2; font-size: 1.1rem; max-width: 600px; margin: 0 auto;
+        }
+        .solution-line {
+            padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .solution-line:hover { background: rgba(0, 212, 170, 0.1); }
+        .solution-line.error-highlight { background: rgba(255, 107, 157, 0.2); border-left: 4px solid var(--error); }
+        .solution-line.correct-highlight { background: rgba(0, 212, 170, 0.2); border-left: 4px solid var(--success); }
+        .error-options { display: grid; gap: 1rem; margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .error-option {
+            padding: 1.2rem; background: var(--bg-card);
+            border: 2px solid var(--border-color); border-radius: 12px;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .error-option:hover { border-color: var(--accent-primary); }
+        .error-option.selected { border-color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
+
+        /* Trainer 4: Strategy Sort */
+        .strategy-trainer { display: grid; gap: 2rem; }
+        .strategy-folders { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .strategy-folder {
+            padding: 1.5rem; background: var(--bg-secondary);
+            border: 2px solid var(--border-color); border-radius: 16px;
+            cursor: pointer; transition: all 0.3s; text-align: center;
+        }
+        .strategy-folder:hover { border-color: var(--accent-primary); }
+        .strategy-folder.active { border-color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
+        .strategy-folder-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .strategy-folder-title { font-weight: 600; color: var(--text-primary); }
+        .problem-sort-list { display: grid; gap: 1rem; max-width: 800px; margin: 0 auto; }
+        .sort-item {
+            padding: 1.5rem; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sort-item-text { flex: 1; color: var(--text-primary); }
+        .sort-item-select {
+            padding: 0.5rem 1rem; background: var(--bg-secondary);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-primary); cursor: pointer;
+        }
+
+        /* Trainer 5: Mini Case */
+        .case-trainer { display: grid; gap: 2rem; }
+        .case-steps { display: grid; gap: 1.5rem; max-width: 800px; margin: 0 auto; }
+        .case-step {
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 2rem;
+        }
+        .case-step-header {
+            display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .step-number {
+            width: 40px; height: 40px; background: var(--gradient-main);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: white;
+        }
+        .step-title { font-size: 1.2rem; font-weight: 600; color: var(--text-primary); }
+        .case-textarea {
+            width: 100%; padding: 1rem; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 12px;
+            color: var(--text-primary); font-size: 1rem; min-height: 100px;
+            font-family: monospace; resize: vertical;
+        }
+        .case-table {
+            width: 100%; border-collapse: collapse; margin: 1.5rem 0;
+        }
+        .case-table th, .case-table td {
+            padding: 1rem; text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .case-table th { background: var(--bg-card); color: var(--accent-primary); }
+
+        /* Common Elements */
+        .trainer-actions {
+            display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; justify-content: center;
+        }
+        .progress-bar {
+            height: 8px; background: var(--bg-secondary);
+            border-radius: 4px; overflow: hidden; margin: 2rem 0;
+        }
+        .progress-fill {
+            height: 100%; background: var(--gradient-main);
+            border-radius: 4px; transition: width 0.5s;
+        }
+        .score-display {
+            font-size: 2rem; font-weight: 700; color: var(--accent-primary);
+            text-align: center; padding: 2rem; background: var(--bg-secondary);
+            border-radius: 16px; margin-top: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary); border-top: 1px solid var(--border-color);
+            padding: 5rem 2rem 3rem; margin-top: 6rem; text-align: center;
+        }
+        .footer-content { max-width: 800px; margin: 0 auto; }
+        .footer-logo {
+            font-size: 2rem; font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        .footer-student { color: var(--accent-primary); font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .footer-author { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .section { padding: 4rem 1.5rem; }
+            .trainer-container { padding: 2rem 1.5rem; }
+            .input-row { grid-template-columns: 1fr; }
+        }
+
+        /* Print */
+        @media print {
+            .bg-effects, .nav, .btn, .trainer-actions { display: none !important; }
+            body { background: white; color: black; }
+            .card, .trainer-container { background: white; border: 1px solid #ddd; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+<!-- Enhanced Background -->
+<div class="bg-effects">
+    <div class="grid-overlay"></div>
+    <div class="bg-gradient-orb bg-orb-1"></div>
+    <div class="bg-gradient-orb bg-orb-2"></div>
+    <div class="bg-gradient-orb bg-orb-3"></div>
+    <!-- Particles -->
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+</div>
+
+<nav class="nav">
+    <div class="nav-container">
+        <div class="nav-logo">📐 MathLab.Pro</div>
+        <ul class="nav-links">
+            <li><a href="#trainers">Тренажёры</a></li>
+            <li><a href="#trainer1">Величина</a></li>
+            <li><a href="#trainer2">Алгоритм</a></li>
+            <li><a href="#trainer3">Ошибки</a></li>
+            <li><a href="#trainer4">Стратегия</a></li>
+            <li><a href="#trainer5">Мини-кейс</a></li>
+        </ul>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+        <span class="hero-badge">🎯 8 класс • Продвинутый уровень</span>
+        <h1 class="hero-title">Текстовые задачи на производительность</h1>
+        <p class="hero-subtitle">
+            5 принципиально разных тренажёров для развития математического мышления.
+            От распознавания структуры до проектирования полной модели решения.
+        </p>
+        <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+            <a href="#trainers" class="btn btn-primary">🚀 Начать тренировку</a>
+        </div>
+    </div>
+</section>
+
+<section id="trainers" class="section">
+    <div class="section-header">
+        <span class="section-tag">🏋️ 5 ТРЕНАЖЁРОВ</span>
+        <h2 class="section-title">Прокачай математическое мышление</h2>
+        <p class="section-subtitle">Каждый тренажёр развивает отдельный навык решения задач</p>
+    </div>
+
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-icon">🔍</div>
+            <h3 class="card-title">1. Что за величина?</h3>
+            <p class="card-text">
+                Научись мгновенно распознавать производительность, время и результат в тексте задачи.
+                Основа грамотного моделирования.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-icon">📋</div>
+            <h3 class="card-title">2. Алгоритм из карточек</h3>
+            <p class="card-text">
+                Собери правильный порядок решения как конструктор. Пойми, зачем нужен каждый шаг.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🐛</div>
+            <h3 class="card-title">3. Лови ошибку</h3>
+            <p class="card-text">
+                Найди ошибки в чужом решении. Развей критическое мышление и устойчивость к собственным ошибкам.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🎯</div>
+            <h3 class="card-title">4. Выбери стратегию</h3>
+            <p class="card-text">
+                Распознай тип задачи и выбери правильную модель решения. Видь математику за сюжетом.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🏗️</div>
+            <h3 class="card-title">5. Мини-кейс</h3>
+            <p class="card-text">
+                Пройди полный цикл: от условия до ответа. Спроектируй модель решения самостоятельно.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- TRAINER 1: What Quantity -->
+<section id="trainer1" class="section">
+    <div class="trainer-container">
+        <div class="trainer-header">
+            <span class="trainer-icon">🔍</span>
+            <div>
+                <h2 class="trainer-title">Тренажёр 1: «Что за величина?»</h2>
+                <p class="trainer-desc">Распознай структуру задачи: производительность — время — результат</p>
+            </div>
+        </div>
+
+        <div class="quantity-trainer" id="q-trainer">
+            <!-- Problems will be injected by JS -->
+        </div>
+
+        <div class="trainer-actions">
+            <button class="btn btn-primary" onclick="checkQuantityTrainer()">✅ Проверить ответы</button>
+            <button class="btn btn-secondary" onclick="resetQuantityTrainer()">🔄 Сбросить</button>
+        </div>
+
+        <div class="score-display" id="q-score" style="display: none;"></div>
+    </div>
+</section>
+
+<!-- TRAINER 2: Algorithm Cards -->
+<section id="trainer2" class="section">
+    <div class="trainer-container">
+        <div class="trainer-header">
+            <span class="trainer-icon">📋</span>
+            <div>
+                <h2 class="trainer-title">Тренажёр 2: «Алгоритм из карточек»</h2>
+                <p class="trainer-desc">Восстанови правильный порядок решения задачи</p>
+            </div>
+        </div>
+
+        <div class="algorithm-trainer">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">Нажми на карточку в пуле, чтобы добавить её в последовательность</p>
+                <p style="color: var(--warning);">⚠️ Одна карточка лишняя!</p>
+            </div>
+
+            <div class="cards-pool" id="algo-pool">
+                <!-- Cards injected by JS -->
+            </div>
+
+            <div class="sequence-area" id="algo-sequence">
+                <div class="sequence-slot">1</div>
+                <div class="sequence-slot">2</div>
+                <div class="sequence-slot">3</div>
+                <div class="sequence-slot">4</div>
+                <div class="sequence-slot">5</div>
+                <div class="sequence-slot">6</div>
+                <div class="sequence-slot">7</div>
+            </div>
+
+            <div class="trainer-actions">
+                <button class="btn btn-primary" onclick="checkAlgorithmTrainer()">✅ Проверить порядок</button>
+                <button class="btn btn-secondary" onclick="resetAlgorithmTrainer()">🔄 Сбросить</button>
+            </div>
+
+            <div class="score-display" id="algo-score" style="display: none;"></div>
+        </div>
+    </div>
+</section>
+
+<!-- TRAINER 3: Catch Error -->
+<section id="trainer3" class="section">
+    <div class="trainer-container">
+        <div class="trainer-header">
+            <span class="trainer-icon">🐛</span>
+            <div>
+                <h2 class="trainer-title">Тренажёр 3: «Лови ошибку методиста»</h2>
+                <p class="trainer-desc">Найди и исправь ошибку в решении</p>
+            </div>
+        </div>
+
+        <div class="error-trainer">
+            <div class="problem-card" style="max-width: 600px; margin: 0 auto;">
+                <p class="problem-text">
+                    <strong>Задача:</strong> Один рабочий выполняет заказ за 3 часа, другой — за 6 часов.
+                    За сколько часов они выполнят заказ вместе?
+                </p>
+            </div>
+
+            <div class="solution-display" id="solution-lines">
+                <div class="solution-line" data-line="1">1/3 + 1/6 = x</div>
+                <div class="solution-line" data-line="2">2/6 + 1/6 = x</div>
+                <div class="solution-line" data-line="3">3/6 = x</div>
+                <div class="solution-line" data-line="4">x = 1/2</div>
+            </div>
+
+            <div class="error-options">
+                <p style="color: var(--text-secondary); margin-bottom: 1rem; text-align: center;">Выберите тип ошибки:</p>
+                <div class="error-option" data-error="1">❌ Неверно выбрана переменная (x — время, а не производительность)</div>
+                <div class="error-option" data-error="2">❌ Ошибка в сложении дробей</div>
+                <div class="error-option" data-error="3">❌ Неверно найдены производительности</div>
+                <div class="error-option" data-error="4">❌ Ошибка в переводе единиц времени</div>
+            </div>
+
+            <div class="trainer-actions">
+                <button class="btn btn-primary" onclick="checkErrorTrainer()">✅ Проверить</button>
+                <button class="btn btn-secondary" onclick="resetErrorTrainer()">🔄 Сбросить</button>
+            </div>
+
+            <div class="feedback-box" id="error-feedback" style="max-width: 600px; margin: 2rem auto;"></div>
+        </div>
+    </div>
+</section>
+
+<!-- TRAINER 4: Strategy Sort -->
+<section id="trainer4" class="section">
+    <div class="trainer-container">
+        <div class="trainer-header">
+            <span class="trainer-icon">🎯</span>
+            <div>
+                <h2 class="trainer-title">Тренажёр 4: «Выбери стратегию»</h2>
+                <p class="trainer-desc">Распредели задачи по типам моделей решения</p>
+            </div>
+        </div>
+
+        <div class="strategy-trainer">
+            <div class="strategy-folders">
+                <div class="strategy-folder" data-type="A">
+                    <div class="strategy-folder-icon">🤝</div>
+                    <div class="strategy-folder-title">Папка A: Совместная работа</div>
+                </div>
+                <div class="strategy-folder" data-type="B">
+                    <div class="strategy-folder-icon">⏱️</div>
+                    <div class="strategy-folder-title">Папка B: Разность времён</div>
+                </div>
+                <div class="strategy-folder" data-type="C">
+                    <div class="strategy-folder-icon">⚙️</div>
+                    <div class="strategy-folder-title">Папка C: Производительность дана</div>
+                </div>
+                <div class="strategy-folder" data-type="D">
+                    <div class="strategy-folder-icon">📊</div>
+                    <div class="strategy-folder-title">Папка D: Два этапа процесса</div>
+                </div>
+            </div>
+
+            <div class="problem-sort-list" id="sort-list">
+                <!-- Problems injected by JS -->
+            </div>
+
+            <div class="trainer-actions">
+                <button class="btn btn-primary" onclick="checkStrategyTrainer()">✅ Проверить сортировку</button>
+                <button class="btn btn-secondary" onclick="resetStrategyTrainer()">🔄 Сбросить</button>
+            </div>
+
+            <div class="score-display" id="strategy-score" style="display: none;"></div>
+        </div>
+    </div>
+</section>
+
+<!-- TRAINER 5: Mini Case -->
+<section id="trainer5" class="section">
+    <div class="trainer-container">
+        <div class="trainer-header">
+            <span class="trainer-icon">🏗️</span>
+            <div>
+                <h2 class="trainer-title">Тренажёр 5: «Мини-кейс»</h2>
+                <p class="trainer-desc">Спроектируй полную модель решения задачи</p>
+            </div>
+        </div>
+
+        <div class="case-trainer">
+            <div class="problem-card" style="max-width: 800px; margin: 0 auto;">
+                <p class="problem-text" style="font-size: 1.2rem;">
+                    📝 <strong>Кейс:</strong> Первый насос может заполнить резервуар на 3 часа быстрее, чем второй.
+                    Если оба насоса работают вместе, они заполняют резервуар за 4 часа.
+                    За сколько часов каждый насос заполняет резервуар отдельно?
+                </p>
+            </div>
+
+            <div class="case-steps">
+                <div class="case-step">
+                    <div class="case-step-header">
+                        <span class="step-number">1</span>
+                        <span class="step-title">Выбери переменную x</span>
+                    </div>
+                    <textarea class="case-textarea" id="case-var" placeholder="Пусть x = ..."></textarea>
+                </div>
+
+                <div class="case-step">
+                    <div class="case-step-header">
+                        <span class="step-number">2</span>
+                        <span class="step-title">Заполни таблицу</span>
+                    </div>
+                    <table class="case-table">
+                        <thead>
+                        <tr>
+                            <th>Насос</th>
+                            <th>Производительность</th>
+                            <th>Время</th>
+                            <th>Работа</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Первый</td>
+                            <td><input type="text" class="input-field" id="case-p1" placeholder="Через x"></td>
+                            <td><input type="text" class="input-field" id="case-t1" placeholder="Через x"></td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <td>Второй</td>
+                            <td><input type="text" class="input-field" id="case-p2" placeholder="Через x"></td>
+                            <td><input type="text" class="input-field" id="case-t2" placeholder="Через x"></td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <td>Вместе</td>
+                            <td><input type="text" class="input-field" id="case-psum" placeholder="Сумма"></td>
+                            <td>4 часа</td>
+                            <td>1</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="case-step">
+                    <div class="case-step-header">
+                        <span class="step-number">3</span>
+                        <span class="step-title">Составь уравнение</span>
+                    </div>
+                    <textarea class="case-textarea" id="case-equation" placeholder="Уравнение:"></textarea>
+                </div>
+
+                <div class="case-step">
+                    <div class="case-step-header">
+                        <span class="step-number">4</span>
+                        <span class="step-title">Реши и проверь ответ</span>
+                    </div>
+                    <textarea class="case-textarea" id="case-solution" placeholder="Решение и ответ:"></textarea>
+                </div>
+            </div>
+
+            <div class="trainer-actions">
+                <button class="btn btn-primary" onclick="checkCaseTrainer()">✅ Проверить решение</button>
+                <button class="btn btn-secondary" onclick="showCaseSolution()">💡 Показать образец</button>
+            </div>
+
+            <div class="feedback-box" id="case-feedback" style="max-width: 800px; margin: 2rem auto;"></div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-logo">📐 MathLab.Pro</div>
+        <div class="footer-student">Эксклюзивно для Ярослава Верещагина</div>
+        <div class="footer-author">Лёвин Артём Александрович © 2026</div>
+        <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1.5rem; opacity: 0.6;">
+            <span style="font-size: 1.5rem;">📚</span>
+            <span style="font-size: 1.5rem;">🎯</span>
+            <span style="font-size: 1.5rem;">🏆</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // ==================== TRAINER 1: What Quantity ====================
+    const quantityProblems = [
+        {
+            text: "Первая труба наполняет бассейн за 6 часов, вторая — за 4 часа. За сколько часов они наполнят бассейн вместе?",
+            answers: {
+                result: "1 бассейн",
+                p1: "1/6",
+                p2: "1/4",
+                x: "время совместной работы",
+                equation: "1/6 + 1/4 = 1/x"
+            }
+        },
+        {
+            text: "Мастер делает 5 деталей в час. Сколько времени ему понадобится на 40 деталей?",
+            answers: {
+                result: "40 деталей",
+                p1: "5 деталей/час",
+                p2: "-",
+                x: "время работы",
+                equation: "5 · x = 40"
+            }
+        },
+        {
+            text: "Один ученик закончил тест на 15 минут позже другого. Первый отвечает на 6 вопросов в час, второй — на 8 вопросов в час.",
+            answers: {
+                result: "число вопросов в тесте",
+                p1: "6 вопросов/час",
+                p2: "8 вопросов/час",
+                x: "число вопросов в тесте",
+                equation: "x/6 - x/8 = 1/4"
+            }
+        }
+    ];
+
+    function initQuantityTrainer() {
+        const container = document.getElementById('q-trainer');
+        container.innerHTML = quantityProblems.map((prob, idx) => `
+                <div class="problem-card" data-idx="${idx}">
+                    <p class="problem-text">${prob.text}</p>
+                    <div class="problem-inputs">
+                        <div class="input-row">
+                            <span class="input-label">📦 Результат работы:</span>
+                            <input type="text" class="input-field" data-field="result" placeholder="Что является работой?">
+                        </div>
+                        <div class="input-row">
+                            <span class="input-label">⚙️ Производительность 1:</span>
+                            <input type="text" class="input-field" data-field="p1" placeholder="p₁ = ?">
+                        </div>
+                        <div class="input-row">
+                            <span class="input-label">⚙️ Производительность 2:</span>
+                            <input type="text" class="input-field" data-field="p2" placeholder="p₂ = ?">
+                        </div>
+                        <div class="input-row">
+                            <span class="input-label">✏️ Что за x:</span>
+                            <input type="text" class="input-field" data-field="x" placeholder="Что обозначим через x?">
+                        </div>
+                        <div class="input-row">
+                            <span class="input-label">📝 Уравнение:</span>
+                            <input type="text" class="input-field" data-field="equation" placeholder="Какое уравнение получится?">
+                        </div>
+                    </div>
+                    <div class="feedback-box" id="q-feedback-${idx}"></div>
+                </div>
+            `).join('');
+    }
+
+    function checkQuantityTrainer() {
+        let score = 0;
+        let total = 0;
+
+        quantityProblems.forEach((prob, idx) => {
+            const card = document.querySelector(`.problem-card[data-idx="${idx}"]`);
+            const inputs = card.querySelectorAll('.input-field');
+            let correct = 0;
+            let fields = 0;
+
+            inputs.forEach(input => {
+                const field = input.dataset.field;
+                const userVal = input.value.trim().toLowerCase();
+                const correctVal = prob.answers[field].toLowerCase();
+                fields++;
+
+                if (userVal.includes(correctVal.split(' ')[0]) || userVal === correctVal) {
+                    input.style.borderColor = 'var(--success)';
+                    correct++;
+                } else {
+                    input.style.borderColor = 'var(--error)';
+                }
+            });
+
+            score += correct;
+            total += fields;
+
+            const feedback = document.getElementById(`q-feedback-${idx}`);
+            feedback.style.display = 'block';
+            feedback.className = 'feedback-box ' + (correct === fields ? 'feedback-correct' : 'feedback-incorrect');
+            feedback.innerHTML = `<strong>${correct}/${fields}</strong> правильных ответов. ${correct === fields ? '🎉 Отлично!' : 'Проверь выделенные поля.'}`;
+        });
+
+        const scoreDisplay = document.getElementById('q-score');
+        scoreDisplay.style.display = 'block';
+        scoreDisplay.innerHTML = `📊 Результат: ${score}/${total} (${Math.round(score/total*100)}%)`;
+    }
+
+    function resetQuantityTrainer() {
+        document.querySelectorAll('#q-trainer .input-field').forEach(input => {
+            input.value = '';
+            input.style.borderColor = 'var(--border-color)';
+        });
+        document.querySelectorAll('#q-trainer .feedback-box').forEach(fb => fb.style.display = 'none');
+        document.getElementById('q-score').style.display = 'none';
+    }
+
+    // ==================== TRAINER 2: Algorithm Cards ====================
+    const algoCards = [
+        { id: 1, text: "Определить результат работы", correct: true, order: 1 },
+        { id: 2, text: "Ввести переменную x", correct: true, order: 2 },
+        { id: 3, text: "Составить таблицу", correct: true, order: 3 },
+        { id: 4, text: "Выразить величины через x", correct: true, order: 4 },
+        { id: 5, text: "Составить уравнение", correct: true, order: 5 },
+        { id: 6, text: "Найти корни уравнения", correct: true, order: 6 },
+        { id: 7, text: "Проверить ответ по смыслу", correct: true, order: 7 },
+        { id: 8, text: "Сложить все числа из условия", correct: false, order: -1 }
+    ];
+
+    let selectedCards = [];
+
+    function initAlgorithmTrainer() {
+        const pool = document.getElementById('algo-pool');
+        pool.innerHTML = algoCards.map(card => `
+                <div class="algo-card" data-id="${card.id}" onclick="selectAlgoCard(${card.id})">
+                    ${card.text}
+                </div>
+            `).join('');
+    }
+
+    function selectAlgoCard(id) {
+        const card = document.querySelector(`.algo-card[data-id="${id}"]`);
+        const slot = document.querySelector(`#algo-sequence .sequence-slot:not(.filled)`);
+
+        if (card.classList.contains('selected') || !slot) return;
+
+        card.classList.add('selected');
+        slot.classList.add('filled');
+        slot.textContent = id;
+        slot.dataset.cardId = id;
+        selectedCards.push(id);
+    }
+
+    function checkAlgorithmTrainer() {
+        const correctOrder = [1, 2, 3, 4, 5, 6, 7];
+        const slots = document.querySelectorAll('#algo-sequence .sequence-slot');
+        let score = 0;
+        let hasExtra = false;
+
+        slots.forEach((slot, idx) => {
+            const cardId = parseInt(slot.dataset.cardId);
+            const card = algoCards.find(c => c.id === cardId);
+
+            if (!cardId) {
+                slot.style.borderColor = 'var(--error)';
+                return;
+            }
+
+            if (!card.correct) {
+                slot.style.borderColor = 'var(--warning)';
+                hasExtra = true;
+            } else if (card.order === idx + 1) {
+                slot.style.borderColor = 'var(--success)';
+                score++;
+            } else {
+                slot.style.borderColor = 'var(--error)';
+            }
+        });
+
+        const scoreDisplay = document.getElementById('algo-score');
+        scoreDisplay.style.display = 'block';
+        scoreDisplay.innerHTML = `📊 Результат: ${score}/7 ${hasExtra ? '<br>⚠️ Лишняя карточка использована!' : '<br>🎉 Все шаги верны!'}`;
+    }
+
+    function resetAlgorithmTrainer() {
+        document.querySelectorAll('.algo-card').forEach(card => card.classList.remove('selected'));
+        document.querySelectorAll('.sequence-slot').forEach(slot => {
+            slot.classList.remove('filled');
+            slot.textContent = slot.dataset.slot || (Array.from(slot.parentElement.children).indexOf(slot) + 1);
+            slot.style.borderColor = 'var(--border-color)';
+            delete slot.dataset.cardId;
+        });
+        selectedCards = [];
+        document.getElementById('algo-score').style.display = 'none';
+    }
+
+    // ==================== TRAINER 3: Catch Error ====================
+    let selectedErrorLine = null;
+    let selectedErrorType = null;
+
+    document.querySelectorAll('.solution-line').forEach(line => {
+        line.addEventListener('click', function() {
+            document.querySelectorAll('.solution-line').forEach(l => l.classList.remove('error-highlight'));
+            this.classList.add('error-highlight');
+            selectedErrorLine = this.dataset.line;
+        });
+    });
+
+    document.querySelectorAll('.error-option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('.error-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedErrorType = this.dataset.error;
+        });
+    });
+
+    function checkErrorTrainer() {
+        const feedback = document.getElementById('error-feedback');
+
+        if (selectedErrorLine === '1' && selectedErrorType === '1') {
+            feedback.style.display = 'block';
+            feedback.className = 'feedback-box feedback-correct';
+            feedback.innerHTML = `
+                    <strong>✅ Верно!</strong><br><br>
+                    Ошибка в первой строке: слева записана сумма производительностей (1/3 + 1/6),
+                    а справа — x (время). Правильное уравнение: <strong>1/3 + 1/6 = 1/x</strong>
+                `;
+            document.querySelector('.solution-line[data-line="1"]').classList.add('correct-highlight');
+        } else {
+            feedback.style.display = 'block';
+            feedback.className = 'feedback-box feedback-incorrect';
+            feedback.innerHTML = `<strong>❌ Неверно.</strong><br>Подсказка: посмотри на первую строку решения. Что обозначает x?`;
+        }
+    }
+
+    function resetErrorTrainer() {
+        document.querySelectorAll('.solution-line').forEach(l => {
+            l.classList.remove('error-highlight', 'correct-highlight');
+        });
+        document.querySelectorAll('.error-option').forEach(o => o.classList.remove('selected'));
+        document.getElementById('error-feedback').style.display = 'none';
+        selectedErrorLine = null;
+        selectedErrorType = null;
+    }
+
+    // ==================== TRAINER 4: Strategy Sort ====================
+    const sortProblems = [
+        { text: "Два мастера вместе выполнили заказ за 4 часа.", correct: "A" },
+        { text: "Один ученик закончил тест на 15 минут позже другого.", correct: "B" },
+        { text: "Насос перекачивает 12 литров в минуту.", correct: "C" },
+        { text: "Бассейн сначала наполняли, затем откачивали, всего 7 часов.", correct: "D" },
+        { text: "Первая труба наполняет бассейн за 6 часов, вторая — за 4 часа.", correct: "A" },
+        { text: "Рабочий делает на 5 деталей в час больше, поэтому закончил на 2 часа раньше.", correct: "B" }
+    ];
+
+    function initStrategyTrainer() {
+        const list = document.getElementById('sort-list');
+        list.innerHTML = sortProblems.map((prob, idx) => `
+                <div class="sort-item" data-idx="${idx}">
+                    <span class="sort-item-text">${prob.text}</span>
+                    <select class="sort-item-select" data-idx="${idx}">
+                        <option value="">Выберите папку...</option>
+                        <option value="A">🤝 Совместная работа</option>
+                        <option value="B">⏱️ Разность времён</option>
+                        <option value="C">⚙️ Производительность дана</option>
+                        <option value="D">📊 Два этапа</option>
+                    </select>
+                </div>
+            `).join('');
+    }
+
+    function checkStrategyTrainer() {
+        let score = 0;
+
+        sortProblems.forEach((prob, idx) => {
+            const select = document.querySelector(`.sort-item-select[data-idx="${idx}"]`);
+            const item = document.querySelector(`.sort-item[data-idx="${idx}"]`);
+
+            if (select.value === prob.correct) {
+                score++;
+                item.style.borderColor = 'var(--success)';
+            } else {
+                item.style.borderColor = 'var(--error)';
+            }
+        });
+
+        const scoreDisplay = document.getElementById('strategy-score');
+        scoreDisplay.style.display = 'block';
+        scoreDisplay.innerHTML = `📊 Результат: ${score}/${sortProblems.length} (${Math.round(score/sortProblems.length*100)}%)`;
+    }
+
+    function resetStrategyTrainer() {
+        document.querySelectorAll('.sort-item-select').forEach(s => s.value = '');
+        document.querySelectorAll('.sort-item').forEach(item => item.style.borderColor = 'var(--border-color)');
+        document.getElementById('strategy-score').style.display = 'none';
+    }
+
+    // ==================== TRAINER 5: Mini Case ====================
+    function checkCaseTrainer() {
+        const feedback = document.getElementById('case-feedback');
+        let score = 0;
+        let total = 4;
+
+        // Check variable
+        const varInput = document.getElementById('case-var').value.toLowerCase();
+        if (varInput.includes('x') && (varInput.includes('первый') || varInput.includes('1'))) {
+            score++;
+        }
+
+        // Check equation
+        const eqInput = document.getElementById('case-equation').value;
+        if (eqInput.includes('1/x') && eqInput.includes('1/(x+3)') && eqInput.includes('1/4')) {
+            score++;
+        }
+
+        // Check solution mentions quadratic
+        const solInput = document.getElementById('case-solution').value.toLowerCase();
+        if (solInput.includes('квадрат') || solInput.includes('корень') || solInput.includes('9')) {
+            score++;
+        }
+
+        // Check answer
+        if (solInput.includes('9') && solInput.includes('12')) {
+            score++;
+        }
+
+        feedback.style.display = 'block';
+        feedback.className = 'feedback-box ' + (score >= 3 ? 'feedback-correct' : 'feedback-incorrect');
+        feedback.innerHTML = `<strong>${score}/${total}</strong> ключевых элементов найдено. ${score >= 3 ? '🎉 Отличная работа!' : 'Сверься с образцом решения.'}`;
+    }
+
+    function showCaseSolution() {
+        const feedback = document.getElementById('case-feedback');
+        feedback.style.display = 'block';
+        feedback.className = 'feedback-box';
+        feedback.style.background = 'var(--bg-secondary)';
+        feedback.style.border = '1px solid var(--accent-primary)';
+        feedback.innerHTML = `
+                <strong>💡 Образец решения:</strong><br><br>
+                <strong>1. Переменная:</strong> Пусть первый насос заполняет за x часов, тогда второй — за (x+3) часа.<br><br>
+                <strong>2. Таблица:</strong><br>
+                P₁ = 1/x, P₂ = 1/(x+3), P_вместе = 1/4<br><br>
+                <strong>3. Уравнение:</strong> 1/x + 1/(x+3) = 1/4<br><br>
+                <strong>4. Решение:</strong><br>
+                Умножаем на 4x(x+3): 4(x+3) + 4x = x(x+3)<br>
+                x² - 5x - 12 = 0<br>
+                D = 25 + 48 = 73<br>
+                x = (5 + √73)/2 ≈ 6.77 часа (первый насос)<br>
+                x + 3 ≈ 9.77 часа (второй насос)
+            `;
+    }
+
+    // Initialize all trainers
+    window.addEventListener('DOMContentLoaded', () => {
+        initQuantityTrainer();
+        initAlgorithmTrainer();
+        initStrategyTrainer();
+    });
+</script>
+</body>
+</html>

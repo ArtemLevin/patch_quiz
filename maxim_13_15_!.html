@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математическая Лаборатория: ЕГЭ Профиль</title>
+    <style>
+        :root {
+            --bg-dark: #050a10;
+            --bg-panel: #0f172a;
+            --bg-glass: rgba(15, 23, 42, 0.6);
+            --primary: #00f2ff;
+            --primary-dim: rgba(0, 242, 255, 0.1);
+            --secondary: #008080;
+            --accent: #00ff9d;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --danger: #ff4d4d;
+            --border: rgba(255, 255, 255, 0.1);
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            background-image:
+            radial-gradient(circle at 10% 20%, rgba(0, 128, 128, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            border-left: 4px solid var(--secondary);
+            padding-left: 1rem;
+            margin-top: 3rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            color: var(--text-main);
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-muted); }
+
+        .math {
+            font-family: var(--font-mono);
+            color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+            padding: 0.1em 0.3em;
+            border-radius: 4px;
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+
+        .math-block {
+            display: block;
+            text-align: center;
+            font-family: var(--font-mono);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .logo span { color: var(--primary); }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: var(--primary); }
+
+        /* Cards & Panels */
+        .card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        /* Interactive Elements */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--secondary), #005c5c);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 15px var(--primary-dim);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Grid Systems */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* Accordion */
+        .accordion-item {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 1.5rem 0;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .accordion-item.active .accordion-content {
+            max-height: 1000px;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '−';
+        }
+
+        /* SVG Circle Styles */
+        #trig-circle {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.2));
+        }
+
+        .trig-line { stroke-width: 2; fill: none; transition: all 0.5s ease; }
+        .trig-axis { stroke: #475569; stroke-width: 1; }
+        .trig-point { fill: var(--primary); transition: all 0.3s; }
+        .trig-label { fill: var(--text-muted); font-size: 12px; font-family: var(--font-mono); }
+
+        /* Quiz Styles */
+        .quiz-option {
+            display: block;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover { background: rgba(255,255,255,0.08); }
+
+        .quiz-option.selected {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--accent);
+            background: rgba(0, 255, 157, 0.1);
+        }
+
+        .quiz-option.wrong {
+            border-color: var(--danger);
+            background: rgba(255, 77, 77, 0.1);
+        }
+
+        /* Generator */
+        .gen-panel {
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px dashed var(--border);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Print */
+        @media print {
+            body { background: white; color: black; }
+            .card { border: 1px solid #ccc; break-inside: avoid; }
+            .btn, nav, .interactive-controls { display: none; }
+            .math { color: black; background: none; }
+            h1 { color: black; -webkit-text-fill-color: black; }
+            h2 { color: black; border-color: black; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container nav-grid">
+        <div class="logo">Math<span>Lab</span> EGE</div>
+        <nav>
+            <ul>
+                <li><a href="#theory">Теория</a></li>
+                <li><a href="#visualizer">Визуализатор</a></li>
+                <li><a href="#tasks">Задачи</a></li>
+                <li><a href="#generator">Генератор</a></li>
+                <li><a href="#quiz">Квиз</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- HERO -->
+    <section style="text-align: center; padding: 4rem 0;">
+        <h1>Тригонометрия и<br>Логарифмические Неравенства</h1>
+        <p style="max-width: 600px; margin: 1rem auto; font-size: 1.2rem;">
+            Интерактивное пособие для подготовки к ЕГЭ (Профиль).
+            Разбор уравнений, отбор корней и сложные неравенства.
+        </p>
+        <div style="margin-top: 2rem;">
+            <a href="#tasks" class="btn">Начать разбор задач</a>
+            <a href="#generator" class="btn btn-outline" style="margin-left: 1rem;">Тренировка</a>
+        </div>
+    </section>
+
+    <!-- THEORY -->
+    <section id="theory">
+        <h2>Теоретический минимум</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Табличные значения</h3>
+                <div class="math-block" style="text-align: left;">
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; font-size: 0.9rem;">
+                        <div>α</div><div>30°</div><div>45°</div><div>60°</div><div>90°</div>
+                        <div>sin</div><div>1/2</div><div>√2/2</div><div>√3/2</div><div>1</div>
+                        <div>cos</div><div>√3/2</div><div>√2/2</div><div>1/2</div><div>0</div>
+                        <div>tg</div><div>√3/3</div><div>1</div><div>√3</div><div>—</div>
+                    </div>
+                </div>
+                <p>Запомните: <span class="math">sin 30° = 0.5</span>, <span class="math">tg 45° = 1</span>.</p>
+            </div>
+            <div class="card">
+                <h3>Формулы приведения</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li class="accordion-item">
+                        <button class="accordion-header">Основные правила</button>
+                        <div class="accordion-content">
+                            <div class="math-block" style="text-align: left;">
+                                • sin(π + α) = −sin α<br>
+                                • cos(π + α) = −cos α<br>
+                                • tg(−α) = −tg α<br>
+                                • cos(α + 3π/2) = sin α
+                            </div>
+                            <p>Правило: "Знак ставится по исходной функции, название меняется, если откладываем от вертикальной оси (π/2, 3π/2)".</p>
+                        </div>
+                    </li>
+                    <li class="accordion-item">
+                        <button class="accordion-header">Формулы двойного угла</button>
+                        <div class="accordion-content">
+                            <div class="math-block">
+                                sin 2α = 2 sin α cos α<br>
+                                cos 2α = cos²α − sin²α
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- VISUALIZER -->
+    <section id="visualizer" style="margin-top: 4rem;">
+        <h2>Интерактивный Тригонометрический Круг</h2>
+        <div class="card" style="text-align: center;">
+            <div class="grid-2" style="align-items: center;">
+                <div>
+                    <svg id="trig-circle" viewBox="-120 -120 240 240">
+                        <!-- Grid -->
+                        <circle cx="0" cy="0" r="100" stroke="#334155" stroke-width="1" fill="none" />
+                        <line x1="-110" y1="0" x2="110" y2="0" class="trig-axis" />
+                        <line x1="0" y1="-110" x2="0" y2="110" class="trig-axis" />
+
+                        <!-- Dynamic Elements -->
+                        <line id="angle-line" x1="0" y1="0" x2="100" y2="0" stroke="#00f2ff" stroke-width="3" />
+                        <line id="sin-line" x1="0" y1="0" x2="0" y2="0" stroke="#00ff9d" stroke-width="2" stroke-dasharray="4" />
+                        <line id="cos-line" x1="0" y1="0" x2="0" y2="0" stroke="#ff00ff" stroke-width="2" stroke-dasharray="4" />
+
+                        <circle id="point-p" cx="100" cy="0" r="4" class="trig-point" />
+
+                        <!-- Labels -->
+                        <text x="105" y="5" class="trig-label">1</text>
+                        <text x="5" y="-105" class="trig-label">1</text>
+                        <text id="angle-label" x="80" y="-20" class="trig-label" fill="#00f2ff">0°</text>
+                        <text id="sin-val" x="-90" y="-60" class="trig-label" fill="#00ff9d">sin: 0</text>
+                        <text id="cos-val" x="-90" y="-45" class="trig-label" fill="#ff00ff">cos: 1</text>
+                    </svg>
+                </div>
+                <div style="text-align: left;">
+                    <h3>Управление углом</h3>
+                    <p>Перемещайте ползунок, чтобы увидеть изменения синуса и косинуса.</p>
+                    <input type="range" id="angle-slider" min="0" max="360" value="0" style="width: 100%; margin: 2rem 0; accent-color: var(--primary);">
+
+                    <div class="math-block" style="text-align: left;">
+                        Угол: <span id="disp-deg" class="math">0°</span> (<span id="disp-rad" class="math">0</span>)<br>
+                        sin α = <span id="disp-sin" class="math">0</span><br>
+                        cos α = <span id="disp-cos" class="math">1</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="resetCircle()">Сбросить</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TASKS -->
+    <section id="tasks" style="margin-top: 4rem;">
+        <h2>Разбор задач из пособия</h2>
+
+        <!-- Task 1 -->
+        <div class="card">
+            <h3>Задача 1: Вычисление выражения</h3>
+            <p><strong>Условие:</strong> Вычислите <span class="math">2√6 · cos(π/4) · sin(7π/6) · tg(−2π/3)</span></p>
+
+            <details style="margin-top: 1rem; cursor: pointer;">
+                <summary style="color: var(--primary); font-weight: bold;">Показать решение</summary>
+                <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                    <ol style="padding-left: 1.5rem; color: var(--text-muted);">
+                        <li>Значения функций:
+                            <ul>
+                                <li><span class="math">cos(π/4) = √2/2</span></li>
+                                <li><span class="math">sin(7π/6) = sin(π + π/6) = −sin(π/6) = −1/2</span></li>
+                                <li><span class="math">tg(−2π/3) = −tg(2π/3) = −(−√3) = √3</span></li>
+                            </ul>
+                        </li>
+                        <li>Подстановка:
+                            <div class="math-block">
+                                2√6 · (√2/2) · (−1/2) · √3 = <br>
+                                = − (2 · √6 · √2 · √3) / 4 = <br>
+                                = − (2 · √36) / 4 = − (2 · 6) / 4 = −3
+                            </div>
+                        </li>
+                    </ol>
+                    <div style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Ответ: −3</div>
+                </div>
+            </details>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="card">
+            <h3>Задача 2: Уравнение с отбором</h3>
+            <p><strong>Условие:</strong> <span class="math">cos 2x − sin 2x = cos x + sin x + 1</span></p>
+            <p>а) Решить уравнение. б) Отбор на <span class="math">[−5π/2; −π]</span>.</p>
+
+            <details style="margin-top: 1rem; cursor: pointer;">
+                <summary style="color: var(--primary); font-weight: bold;">Показать решение</summary>
+                <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                    <p><strong>а) Решение:</strong></p>
+                    <p>Используем формулы: <span class="math">cos 2x = cos²x − sin²x</span>, <span class="math">1 = sin²x + cos²x</span>.</p>
+                    <div class="math-block">
+                        (cos²x − sin²x) − 2sin x cos x = cos x + sin x + (cos²x + sin²x)<br>
+                        −2sin²x − 2sin x cos x − cos x − sin x = 0<br>
+                        2sin x(sin x + cos x) + (sin x + cos x) = 0<br>
+                        (sin x + cos x)(2sin x + 1) = 0
+                    </div>
+                    <p>Совокупность:</p>
+                    <ul>
+                        <li><span class="math">sin x + cos x = 0 ⇒ tg x = −1 ⇒ x = −π/4 + πn</span></li>
+                        <li><span class="math">sin x = −1/2 ⇒ x = −π/6 + 2πk, x = −5π/6 + 2πk</span></li>
+                    </ul>
+                    <p><strong>б) Отбор:</strong></p>
+                    <p>На отрезке <span class="math">[−2.5π; −π]</span>:</p>
+                    <ul>
+                        <li>Серия <span class="math">−π/4 + πn</span>: при n=−2 получаем <span class="math">x = −9π/4</span>.</li>
+                        <li>Серия <span class="math">−π/6 + 2πk</span>: при k=−1 получаем <span class="math">x = −13π/6</span>.</li>
+                        <li>Серия <span class="math">−5π/6 + 2πk</span>: корней нет (−5π/6 > −π).</li>
+                    </ul>
+                    <div style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Ответ: −9π/4, −13π/6</div>
+                </div>
+            </details>
+        </div>
+
+        <!-- Task 4 -->
+        <div class="card">
+            <h3>Задача 4: Логарифмическое неравенство</h3>
+            <p><strong>Условие:</strong> <span class="math">9·2^(log₃(5−x)) + 2^(1+log₃x) − 2^(log₃(5x−x²)) ≤ 18</span></p>
+
+            <details style="margin-top: 1rem; cursor: pointer;">
+                <summary style="color: var(--primary); font-weight: bold;">Показать решение</summary>
+                <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                    <p><strong>1. ОДЗ:</strong> <span class="math">x ∈ (0; 5)</span>.</p>
+                    <p><strong>2. Упрощение:</strong> Заметим, что <span class="math">5x − x² = x(5−x)</span>.</p>
+                    <p>Обозначим <span class="math">a = 2^(log₃x)</span>, <span class="math">b = 2^(log₃(5−x))</span>.</p>
+                    <div class="math-block">
+                        9b + 2a − ab ≤ 18<br>
+                        ab − 2a − 9b + 18 ≥ 0<br>
+                        (a − 9)(b − 2) ≥ 0
+                    </div>
+                    <p><strong>3. Анализ:</strong></p>
+                    <p>Так как <span class="math">x < 5</span>, то <span class="math">log₃x < log₃5 < 2</span>, значит <span class="math">a = 2^(log₃x) < 4</span>.</p>
+                    <p>Следовательно, <span class="math">(a − 9)</span> всегда отрицательно.</p>
+                    <p>Чтобы произведение было ≥ 0, второй множитель должен быть ≤ 0:</p>
+                    <div class="math-block">
+                        b − 2 ≤ 0 ⇒ 2^(log₃(5−x)) ≤ 2¹<br>
+                        log₃(5−x) ≤ 1<br>
+                        5 − x ≤ 3 ⇒ x ≥ 2
+                    </div>
+                    <p>С учетом ОДЗ: <span class="math">x ∈ [2; 5)</span>.</p>
+                    <div style="margin-top: 1rem; font-weight: bold; color: var(--accent);">Ответ: [2; 5)</div>
+                </div>
+            </details>
+        </div>
+    </section>
+
+    <!-- GENERATOR -->
+    <section id="generator" style="margin-top: 4rem;">
+        <h2>Генератор задач</h2>
+        <div class="card">
+            <div class="grid-2">
+                <div>
+                    <h3>Тренировка вычислений</h3>
+                    <p>Нажмите кнопку, чтобы получить новое случайное выражение типа Задачи 1.</p>
+                    <button class="btn" onclick="generateTask()">Сгенерировать задачу</button>
+                </div>
+                <div class="gen-panel">
+                    <div id="gen-task" style="font-size: 1.2rem; margin-bottom: 1rem; min-height: 3rem;">
+                        Нажмите кнопку для старта...
+                    </div>
+                    <button class="btn btn-outline" onclick="toggleGenAnswer()">Показать ответ</button>
+                    <div id="gen-answer" style="margin-top: 1rem; color: var(--accent); font-weight: bold; display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" style="margin-top: 4rem; margin-bottom: 4rem;">
+        <h2>Мини-Квиз</h2>
+        <div class="card">
+            <div id="quiz-container">
+                <!-- Question 1 -->
+                <div class="quiz-question" data-correct="2">
+                    <p style="font-weight: bold; margin-bottom: 1rem;">1. Чему равен sin(3π/2)?</p>
+                    <div class="quiz-option" onclick="selectOption(this, 0)">0</div>
+                    <div class="quiz-option" onclick="selectOption(this, 1)">1</div>
+                    <div class="quiz-option" onclick="selectOption(this, 2)">-1</div>
+                    <div class="quiz-option" onclick="selectOption(this, 3)">Не существует</div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="quiz-question" data-correct="1" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+                    <p style="font-weight: bold; margin-bottom: 1rem;">2. Решите неравенство: 2^x > 8</p>
+                    <div class="quiz-option" onclick="selectOption(this, 0)">x > 2</div>
+                    <div class="quiz-option" onclick="selectOption(this, 1)">x > 3</div>
+                    <div class="quiz-option" onclick="selectOption(this, 2)">x < 3</div>
+                    <div class="quiz-option" onclick="selectOption(this, 3)">x > 0</div>
+                </div>
+
+                <button class="btn" style="margin-top: 2rem;" onclick="checkQuiz()">Проверить результаты</button>
+                <div id="quiz-result" style="margin-top: 1rem; font-weight: bold;"></div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>© 2023 Математическая Лаборатория. Подготовка к ЕГЭ.</p>
+        <p style="font-size: 0.8rem; opacity: 0.6;">Создано на основе материалов Лёвина А.А.</p>
+    </div>
+</footer>
+
+<script>
+    // --- Accordion Logic ---
+    document.querySelectorAll('.accordion-header').forEach(button => {
+        button.addEventListener('click', () => {
+            const item = button.parentElement;
+            item.classList.toggle('active');
+        });
+    });
+
+    // --- Trig Circle Logic ---
+    const slider = document.getElementById('angle-slider');
+    const angleLine = document.getElementById('angle-line');
+    const sinLine = document.getElementById('sin-line');
+    const cosLine = document.getElementById('cos-line');
+    const pointP = document.getElementById('point-p');
+    const angleLabel = document.getElementById('angle-label');
+    const sinVal = document.getElementById('sin-val');
+    const cosVal = document.getElementById('cos-val');
+
+    const dispDeg = document.getElementById('disp-deg');
+    const dispRad = document.getElementById('disp-rad');
+    const dispSin = document.getElementById('disp-sin');
+    const dispCos = document.getElementById('disp-cos');
+
+    function updateCircle() {
+        const deg = parseInt(slider.value);
+        const rad = deg * (Math.PI / 180);
+        const r = 100; // SVG radius
+
+        const x = Math.cos(rad) * r;
+        const y = -Math.sin(rad) * r; // SVG Y is inverted
+
+        // Update Lines
+        angleLine.setAttribute('x2', x);
+        angleLine.setAttribute('y2', y);
+
+        cosLine.setAttribute('x2', x);
+        sinLine.setAttribute('y2', y);
+        sinLine.setAttribute('x1', x); // From point to axis
+        sinLine.setAttribute('x2', x);
+        sinLine.setAttribute('y1', y);
+        sinLine.setAttribute('y2', 0);
+
+        pointP.setAttribute('cx', x);
+        pointP.setAttribute('cy', y);
+
+        // Update Text
+        angleLabel.setAttribute('x', x > 0 ? x + 10 : x - 30);
+        angleLabel.setAttribute('y', y > 0 ? y + 10 : y - 10);
+        angleLabel.textContent = deg + '°';
+
+        sinVal.textContent = `sin: ${Math.sin(rad).toFixed(2)}`;
+        cosVal.textContent = `cos: ${Math.cos(rad).toFixed(2)}`;
+
+        dispDeg.textContent = `${deg}°`;
+        dispRad.textContent = deg === 0 ? '0' : (deg === 180 ? 'π' : (deg/180) + 'π');
+        dispSin.textContent = Math.sin(rad).toFixed(3);
+        dispCos.textContent = Math.cos(rad).toFixed(3);
+    }
+
+    slider.addEventListener('input', updateCircle);
+
+    function resetCircle() {
+        slider.value = 0;
+        updateCircle();
+    }
+
+    // --- Generator Logic ---
+    const templates = [
+        {
+            q: (a,b,c) => `Вычислите: ${a}√${b} · cos(π/4) · sin(7π/6)`,
+            a: (a,b,c) => {
+                // cos(pi/4) = sqrt2/2, sin(7pi/6) = -1/2
+                // Result: a * sqrt(b) * sqrt(2)/2 * -1/2 = -a * sqrt(2b) / 4
+                // Let's keep it simple for integer results if possible, or just raw calculation
+                // Simplified logic for demo:
+                // a * sqrt(b) * (sqrt(2)/2) * (-0.5)
+                const val = a * Math.sqrt(b) * (Math.sqrt(2)/2) * (-0.5);
+                return val.toFixed(2).replace('.00', '');
+            }
+        },
+        {
+            q: (a,b,c) => `Упростите: ${a} · tg(π/4) + cos(0)`,
+            a: (a,b,c) => {
+                // tg(pi/4)=1, cos(0)=1. Result: a + 1
+                return a + 1;
+            }
+        }
+    ];
+
+    function generateTask() {
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        const a = Math.floor(Math.random() * 5) + 2; // 2 to 6
+        const b = 2;
+        const c = 3;
+
+        document.getElementById('gen-task').innerHTML = t.q(a,b,c);
+        document.getElementById('gen-answer').textContent = "Ответ: " + t.a(a,b,c);
+        document.getElementById('gen-answer').style.display = 'none';
+    }
+
+    function toggleGenAnswer() {
+        const ans = document.getElementById('gen-answer');
+        ans.style.display = ans.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // --- Quiz Logic ---
+    function selectOption(el, index) {
+        const parent = el.parentElement;
+        // Remove selected from siblings
+        parent.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+        el.classList.add('selected');
+        el.dataset.selectedIndex = index;
+    }
+
+    function checkQuiz() {
+        const questions = document.querySelectorAll('.quiz-question');
+        let score = 0;
+
+        questions.forEach(q => {
+            const selected = q.querySelector('.quiz-option.selected');
+            const correctIndex = parseInt(q.dataset.correct);
+
+            // Reset styles
+            q.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'wrong');
+            });
+
+            if (selected) {
+                const userIndex = parseInt(selected.dataset.selectedIndex);
+                if (userIndex === correctIndex) {
+                    selected.classList.add('correct');
+                    score++;
+                } else {
+                    selected.classList.add('wrong');
+                    // Show correct one
+                    q.querySelectorAll('.quiz-option')[correctIndex].classList.add('correct');
+                }
+            }
+        });
+
+        const resultDiv = document.getElementById('quiz-result');
+        resultDiv.textContent = `Ваш результат: ${score} из ${questions.length}`;
+        resultDiv.style.color = score === questions.length ? 'var(--accent)' : 'var(--text-main)';
+    }
+
+    // Init
+    updateCircle();
+</script>
+
+</body>
+</html>
