@@ -1,0 +1,1823 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Методы решения задач задач повышенной сложности | Профильная математика</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #121826;
+            --bg-card: #1a2236;
+            --bg-glass: rgba(26, 34, 54, 0.7);
+            --accent: #006699;
+            --accent-light: #0099cc;
+            --accent-glow: rgba(0, 102, 153, 0.4);
+            --text-primary: #e8eef5;
+            --text-secondary: #a8b4c8;
+            --text-muted: #6b7a8f;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --gradient-1: linear-gradient(135deg, #006699 0%, #0099cc 50%, #00ccff 100%);
+            --gradient-2: linear-gradient(135deg, #1a2236 0%, #0f1522 100%);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 40px rgba(0, 102, 153, 0.3);
+            --border-subtle: 1px solid rgba(255, 255, 255, 0.08);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 32px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Background Effects */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-orb-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--accent);
+            top: -200px;
+            right: -200px;
+        }
+
+        .bg-orb-2 {
+            width: 500px;
+            height: 500px;
+            background: #0099cc;
+            bottom: -150px;
+            left: -150px;
+            animation-delay: -5s;
+        }
+
+        .bg-orb-3 {
+            width: 400px;
+            height: 400px;
+            background: #00ccff;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.15;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 10px) scale(1.02); }
+        }
+
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.5;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-bottom: var(--border-subtle);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-light);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 1000px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--bg-glass);
+            border: var(--border-subtle);
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+            color: var(--accent-light);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 50px rgba(0, 102, 153, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border: var(--border-subtle);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 6rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: var(--accent-glow);
+            color: var(--accent-light);
+            padding: 0.375rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-glass {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-1);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* Theory Box */
+        .theory-box {
+            border-left: 4px solid var(--accent);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .theory-box h4 {
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+
+        .theory-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .theory-box li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .theory-box li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Trap Box */
+        .trap-box {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-left: 4px solid var(--danger);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            margin: 1.5rem 0;
+        }
+
+        .trap-box-title {
+            color: var(--danger);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Math Display */
+        .math {
+            font-family: 'Courier New', 'Consolas', monospace;
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: var(--border-subtle);
+            font-size: 1.1rem;
+            line-height: 2;
+        }
+
+        .math-inline {
+            font-family: 'Courier New', 'Consolas', monospace;
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        /* Number Line Visualization */
+        .number-line {
+            position: relative;
+            padding: 3rem 2rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            margin: 2rem 0;
+        }
+
+        .number-line-axis {
+            position: relative;
+            height: 4px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            margin: 2rem 0;
+        }
+
+        .number-line-point {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            top: 50%;
+            margin-top: -8px;
+        }
+
+        .number-line-point::after {
+            content: attr(data-value);
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .number-line-sign {
+            position: absolute;
+            top: -30px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            transform: translateX(-50%);
+        }
+
+        .number-line-sign.positive { color: var(--success); }
+        .number-line-sign.negative { color: var(--danger); }
+
+        .number-line-solution {
+            position: absolute;
+            height: 6px;
+            background: var(--gradient-1);
+            border-radius: 3px;
+            top: -12px;
+            opacity: 0.8;
+        }
+
+        /* Interactive Graph */
+        .graph-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            border: var(--border-subtle);
+        }
+
+        .graph-canvas {
+            width: 100%;
+            height: 400px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Slider Control */
+        .slider-control {
+            margin: 2rem 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .slider-value {
+            color: var(--accent-light);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-secondary);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+            transition: transform 0.2s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 1.5rem 0;
+        }
+
+        .accordion-item {
+            border: var(--border-subtle);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            background: var(--bg-card);
+        }
+
+        .accordion-header {
+            width: 100%;
+            padding: 1.25rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content-inner {
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Answer Box */
+        .answer-box {
+            background: linear-gradient(135deg, rgba(0, 102, 153, 0.2) 0%, rgba(0, 153, 204, 0.1) 100%);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .answer-box-label {
+            color: var(--accent-light);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 1px;
+        }
+
+        .answer-box-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Quiz */
+        .quiz-container {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .quiz-question {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: var(--border-subtle);
+        }
+
+        .quiz-question:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .quiz-question-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            padding: 1rem 1.25rem;
+            background: var(--bg-secondary);
+            border: var(--border-subtle);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .quiz-option:hover {
+            background: rgba(0, 102, 153, 0.2);
+            border-color: var(--accent);
+        }
+
+        .quiz-option.selected {
+            background: rgba(0, 102, 153, 0.3);
+            border-color: var(--accent);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: var(--danger);
+        }
+
+        .quiz-option-letter {
+            width: 28px;
+            height: 28px;
+            background: var(--bg-card);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .quiz-result {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Task Generator */
+        .generator-container {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .generator-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .generator-task {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .generator-task-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .generator-task-text {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .generator-answer {
+            display: none;
+            background: rgba(0, 102, 153, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .generator-answer.show {
+            display: block;
+        }
+
+        /* Cheat Sheet Table */
+        .cheat-sheet {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        .cheat-sheet th,
+        .cheat-sheet td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: var(--border-subtle);
+        }
+
+        .cheat-sheet th {
+            background: var(--bg-secondary);
+            color: var(--accent-light);
+            font-weight: 700;
+        }
+
+        .cheat-sheet tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .cheat-sheet td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .cheat-sheet td:last-child {
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: var(--border-subtle);
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .footer-author {
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+
+        /* Print Styles */
+        @media print {
+            .bg-effects,
+            .nav,
+            .hero-cta,
+            .btn,
+            .slider-control,
+            .generator-controls,
+            .quiz-option,
+            .accordion-header {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .card,
+            .answer-box,
+            .math {
+                background: white;
+                border: 1px solid #ccc;
+                box-shadow: none;
+            }
+
+            .hero-title {
+                -webkit-text-fill-color: black;
+                background: none;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 6rem 1rem 3rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .section {
+                margin-bottom: 4rem;
+            }
+
+            .math {
+                font-size: 0.9rem;
+                padding: 1rem;
+            }
+
+            .number-line {
+                padding: 2rem 1rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-accent { color: var(--accent-light); }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        .hidden { display: none; }
+        .flex { display: flex; }
+        .flex-wrap { flex-wrap: wrap; }
+        .gap-1 { gap: 0.5rem; }
+        .gap-2 { gap: 1rem; }
+        .justify-center { justify-content: center; }
+        .items-center { align-items: center; }
+    </style>
+</head>
+<body>
+<!-- Background Effects -->
+<div class="bg-effects">
+    <div class="bg-gradient-orb bg-orb-1"></div>
+    <div class="bg-gradient-orb bg-orb-2"></div>
+    <div class="bg-gradient-orb bg-orb-3"></div>
+    <div class="bg-grid"></div>
+</div>
+
+<!-- Navigation -->
+<nav class="nav">
+    <div class="nav-brand">Алгебра Профиль</div>
+    <ul class="nav-links">
+        <li><a href="#topic1">Метод интервалов</a></li>
+        <li><a href="#topic2">Функции с модулем</a></li>
+        <li><a href="#topic3">Параметры</a></li>
+        <li><a href="#quiz">Тест</a></li>
+        <li><a href="#cheatsheet">Шпаргалка</a></li>
+    </ul>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <span class="hero-badge"> Профильная математика</span>
+        <h1 class="hero-title">Методы решения задач повышенной сложности</h1>
+        <p class="hero-subtitle">
+            Интерактивное пособие по трём ключевым темам: метод интервалов для многочленов,
+            исследование функций с модулями и задачи с параметрами.
+            Создано для глубокого понимания, а не просто запоминания.
+        </p>
+        <div class="hero-cta">
+            <a href="#topic1" class="btn btn-primary">
+                Начать обучение
+                <span>→</span>
+            </a>
+            <a href="#quiz" class="btn btn-secondary">
+                Пройти тест
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<main class="main">
+    <!-- Topic 1: Interval Method -->
+    <section id="topic1" class="section">
+        <div class="section-header">
+            <span class="section-tag">Тема 1</span>
+            <h2 class="section-title">Метод интервалов для многочленов</h2>
+            <p class="section-desc">
+                Универсальный метод решения рациональных неравенств, основанный на анализе знаков множителей
+            </p>
+        </div>
+
+        <div class="card card-glass">
+            <h3 class="card-title">
+                <span class="card-icon">📐</span>
+                Алгоритм решения
+            </h3>
+            <div class="theory-box">
+                <h4>Пошаговая инструкция:</h4>
+                <ul>
+                    <li>Найти корни уравнения f(x) = 0</li>
+                    <li>Отметить корни на числовой прямой</li>
+                    <li>Определить знак на правом интервале</li>
+                    <li>Чередовать знаки при переходе через корни нечётной кратности</li>
+                    <li>Выбрать нужные интервалы в соответствии со знаком неравенства</li>
+                    <li>Для ≥ и ≤ включить корни, для > и < — исключить</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="trap-box">
+            <div class="trap-box-title">⚠️ Ловушка</div>
+            <p>При корнях <strong>чётной кратности</strong> знак <strong>не меняется</strong> при переходе через корень.
+                При корнях <strong>нечётной кратности</strong> знак <strong>меняется</strong>.</p>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">
+                <span class="card-icon">✏️</span>
+                Задача 1: Базовая
+            </h3>
+            <p class="mb-2"><strong>Условие:</strong> Решите неравенство:</p>
+            <div class="math">
+                (x − 1)(x − 2)(x − 3)(x − 4) ≥ 0
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Показать решение</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p class="mb-2"><strong>Шаг 1. Найдём корни уравнения:</strong></p>
+                            <div class="math">
+                                (x − 1)(x − 2)(x − 3)(x − 4) = 0<br>
+                                x₁ = 1, x₂ = 2, x₃ = 3, x₄ = 4
+                            </div>
+                            <p class="mb-2">Все корни имеют кратность 1 (нечётная).</p>
+
+                            <p class="mb-2"><strong>Шаг 2. Числовая прямая:</strong></p>
+                            <div class="number-line" id="numberline1">
+                                <div class="number-line-axis">
+                                    <div class="number-line-solution" style="left: 0%; width: 20%;"></div>
+                                    <div class="number-line-solution" style="left: 40%; width: 20%;"></div>
+                                    <div class="number-line-solution" style="left: 80%; width: 20%;"></div>
+                                    <div class="number-line-point" style="left: 20%;" data-value="1"></div>
+                                    <div class="number-line-point" style="left: 40%;" data-value="2"></div>
+                                    <div class="number-line-point" style="left: 60%;" data-value="3"></div>
+                                    <div class="number-line-point" style="left: 80%;" data-value="4"></div>
+                                    <span class="number-line-sign positive" style="left: 10%;">+</span>
+                                    <span class="number-line-sign negative" style="left: 30%;">−</span>
+                                    <span class="number-line-sign positive" style="left: 50%;">+</span>
+                                    <span class="number-line-sign negative" style="left: 70%;">−</span>
+                                    <span class="number-line-sign positive" style="left: 90%;">+</span>
+                                </div>
+                            </div>
+
+                            <p class="mb-2"><strong>Шаг 3. Определяем знак на правом интервале:</strong></p>
+                            <p class="mb-2">При x > 4 все множители положительны, значит произведение положительно.</p>
+
+                            <p class="mb-2"><strong>Шаг 4. Выбираем интервалы:</strong></p>
+                            <p class="mb-2">Так как неравенство ≥ 0, выбираем интервалы со знаком + и включаем корни.</p>
+
+                            <div class="answer-box">
+                                <div class="answer-box-label">Ответ</div>
+                                <div class="answer-box-value">x ∈ (−∞; 1] ∪ [2; 3] ∪ [4; +∞)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="generator-container">
+            <h3 class="card-title mb-2">
+                <span class="card-icon">🎲</span>
+                Генератор задач
+            </h3>
+            <div class="generator-controls">
+                <button class="btn btn-primary" onclick="generateIntervalTask()">Сгенерировать задачу</button>
+                <button class="btn btn-secondary" onclick="resetGenerator()">Сбросить</button>
+            </div>
+            <div id="generatedTask">
+                <div class="generator-task">
+                    <div class="generator-task-label">Условие:</div>
+                    <div class="generator-task-text" id="taskText">Нажмите "Сгенерировать задачу" для начала</div>
+                    <div class="generator-answer" id="taskAnswer">
+                        <div class="answer-box-label">Ответ</div>
+                        <div class="answer-box-value" id="answerValue"></div>
+                    </div>
+                    <button class="btn btn-secondary mt-2" onclick="toggleAnswer()">Показать ответ</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Topic 2: Functions with Absolute Value -->
+    <section id="topic2" class="section">
+        <div class="section-header">
+            <span class="section-tag">Тема 2</span>
+            <h2 class="section-title">Исследование функций с модулями</h2>
+            <p class="section-desc">
+                Методика работы с кусочно-заданными функциями, содержащими выражения под знаком модуля
+            </p>
+        </div>
+
+        <div class="card card-glass">
+            <h3 class="card-title">
+                <span class="card-icon">📊</span>
+                Определение модуля
+            </h3>
+            <div class="theory-box">
+                <div class="math">
+                    |a| = { a, если a ≥ 0<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ −a, если a < 0
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-glass">
+            <h3 class="card-title">
+                <span class="card-icon">🔍</span>
+                Алгоритм исследования
+            </h3>
+            <div class="theory-box">
+                <h4>Пошаговая инструкция:</h4>
+                <ul>
+                    <li>Найти точки, где выражения под модулем равны нулю</li>
+                    <li>Разбить область определения на интервалы по этим точкам</li>
+                    <li>На каждом интервале раскрыть модули</li>
+                    <li>Исследовать полученную кусочно-заданную функцию</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="trap-box">
+            <div class="trap-box-title">⚠️ Ловушка</div>
+            <p>Не забывайте проверять <strong>границы интервалов</strong> — функция может быть непрерывной в точках «сшивки»,
+                но производная там не существует.</p>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">
+                <span class="card-icon">✏️</span>
+                Задача 2: Исследование функции
+            </h3>
+            <p class="mb-2"><strong>Условие:</strong> Исследуйте функцию:</p>
+            <div class="math">
+                y = |x + 2| + |x − 3| − 4
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Показать решение</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p class="mb-2"><strong>Шаг 1. Найдём критические точки:</strong></p>
+                            <div class="math">
+                                x + 2 = 0 ⇒ x = −2<br>
+                                x − 3 = 0 ⇒ x = 3
+                            </div>
+
+                            <p class="mb-2"><strong>Шаг 2. Разобьём на интервалы:</strong></p>
+                            <table class="cheat-sheet">
+                                <thead>
+                                <tr>
+                                    <th>Интервал</th>
+                                    <th>Выражение</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>x < −2</td>
+                                    <td>y = −(x + 2) − (x − 3) − 4 = −2x − 3</td>
+                                </tr>
+                                <tr>
+                                    <td>−2 ≤ x < 3</td>
+                                    <td>y = (x + 2) − (x − 3) − 4 = 1</td>
+                                </tr>
+                                <tr>
+                                    <td>x ≥ 3</td>
+                                    <td>y = (x + 2) + (x − 3) − 4 = 2x − 5</td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="mb-2"><strong>Шаг 3. Исследуем функцию:</strong></p>
+                            <ul>
+                                <li>При x < −2: y = −2x − 3 — убывающая линейная функция</li>
+                                <li>При −2 ≤ x < 3: y = 1 — постоянная функция</li>
+                                <li>При x ≥ 3: y = 2x − 5 — возрастающая линейная функция</li>
+                            </ul>
+
+                            <div class="graph-container mt-3">
+                                <h4 class="mb-2">График функции:</h4>
+                                <canvas id="functionGraph" class="graph-canvas"></canvas>
+                            </div>
+
+                            <p class="mb-2"><strong>Шаг 4. Выводы:</strong></p>
+                            <ul>
+                                <li>Область определения: D(y) = ℝ</li>
+                                <li>Область значений: E(y) = [1; +∞)</li>
+                                <li>Функция убывает на (−∞; −2], постоянна на [−2; 3], возрастает на [3; +∞)</li>
+                                <li>Минимум: y<sub>min</sub> = 1 при x ∈ [−2; 3]</li>
+                                <li>Функция непрерывна на всей области определения</li>
+                            </ul>
+
+                            <div class="answer-box">
+                                <div class="answer-box-label">Ответ</div>
+                                <div class="answer-box-value">D(y) = ℝ, E(y) = [1; +∞), y<sub>min</sub> = 1 при x ∈ [−2; 3]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slider-control">
+            <div class="slider-label">
+                <span>Изменение параметра в функции y = |x + a| + |x − 3| − 4</span>
+                <span class="slider-value" id="sliderValue">a = 2</span>
+            </div>
+            <input type="range" class="slider" id="paramSlider" min="-5" max="5" value="2" step="0.5" oninput="updateGraph()">
+        </div>
+    </section>
+
+    <!-- Topic 3: Parameters -->
+    <section id="topic3" class="section">
+        <div class="section-header">
+            <span class="section-tag">Тема 3</span>
+            <h2 class="section-title">Задачи с параметрами</h2>
+            <p class="section-desc">
+                Графо-аналитический метод решения квадратных уравнений с параметром и условиями на корни
+            </p>
+        </div>
+
+        <div class="card card-glass">
+            <h3 class="card-title">
+                <span class="card-icon">📈</span>
+                Условия расположения корней
+            </h3>
+            <div class="theory-box">
+                <h4>Для f(x) = ax² + bx + c на интервале (m; n):</h4>
+                <ul>
+                    <li>D > 0 (два различных корня)</li>
+                    <li>a · f(m) > 0 (значение на левой границе того же знака, что a)</li>
+                    <li>a · f(n) > 0 (значение на правой границе того же знака, что a)</li>
+                    <li>m < x₀ < n, где x₀ = −b / (2a) (абсцисса вершины внутри интервала)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="trap-box">
+            <div class="trap-box-title">⚠️ Ловушка</div>
+            <p>Не забывайте проверять <strong>все четыре условия одновременно</strong>. Пропуск любого условия
+                приводит к потере решений или появлению посторонних.</p>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">
+                <span class="card-icon">✏️</span>
+                Задача 3: Параметр
+            </h3>
+            <p class="mb-2"><strong>Условие:</strong> При каких значениях a уравнение</p>
+            <div class="math">
+                x² − 2ax + a + 3 = 0
+            </div>
+            <p class="mb-2">имеет два различных корня, и оба принадлежат интервалу (0; 4)?</p>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Показать решение</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p class="mb-2"><strong>Шаг 1. Обозначим функцию:</strong></p>
+                            <div class="math">
+                                f(x) = x² − 2ax + a + 3
+                            </div>
+                            <p class="mb-2">Парабола ветвями вверх (a = 1 > 0).</p>
+
+                            <p class="mb-2"><strong>Шаг 2. Условие 1: D > 0</strong></p>
+                            <div class="math">
+                                D = (−2a)² − 4 · 1 · (a + 3) = 4a² − 4a − 12<br>
+                                D > 0 ⇒ 4a² − 4a − 12 > 0<br>
+                                a² − a − 3 > 0<br>
+                                Корни: a₁,₂ = (1 ± √13) / 2<br>
+                                a ∈ (−∞; (1 − √13) / 2) ∪ ((1 + √13) / 2; +∞)
+                            </div>
+
+                            <p class="mb-2"><strong>Шаг 3. Условие 2: f(0) > 0</strong></p>
+                            <div class="math">
+                                f(0) = 0² − 2a · 0 + a + 3 = a + 3<br>
+                                a + 3 > 0 ⇒ a > −3
+                            </div>
+
+                            <p class="mb-2"><strong>Шаг 4. Условие 3: f(4) > 0</strong></p>
+                            <div class="math">
+                                f(4) = 16 − 8a + a + 3 = 19 − 7a<br>
+                                19 − 7a > 0 ⇒ a < 19 / 7
+                            </div>
+
+                            <p class="mb-2"><strong>Шаг 5. Условие 4: Вершина внутри (0; 4)</strong></p>
+                            <div class="math">
+                                x₀ = 2a / 2 = a<br>
+                                0 < a < 4
+                            </div>
+
+                            <p class="mb-2"><strong>Шаг 6. Объединяем все условия:</strong></p>
+                            <table class="cheat-sheet">
+                                <thead>
+                                <tr>
+                                    <th>Условие</th>
+                                    <th>Решение</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>D > 0</td>
+                                    <td>a ∈ (−∞; (1 − √13) / 2) ∪ ((1 + √13) / 2; +∞)</td>
+                                </tr>
+                                <tr>
+                                    <td>f(0) > 0</td>
+                                    <td>a > −3</td>
+                                </tr>
+                                <tr>
+                                    <td>f(4) > 0</td>
+                                    <td>a < 19 / 7</td>
+                                </tr>
+                                <tr>
+                                    <td>0 < x₀ < 4</td>
+                                    <td>0 < a < 4</td>
+                                </tr>
+                                <tr style="background: rgba(0, 102, 153, 0.2);">
+                                    <td><strong>Пересечение</strong></td>
+                                    <td><strong>a ∈ ((1 + √13) / 2; 19 / 7)</strong></td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="mb-2"><strong>Шаг 7. Проверка границ:</strong></p>
+                            <div class="math">
+                                (1 + √13) / 2 ≈ 2.3, 19 / 7 ≈ 2.71
+                            </div>
+                            <p class="mb-2">Интервал непустой.</p>
+
+                            <div class="answer-box">
+                                <div class="answer-box-label">Ответ</div>
+                                <div class="answer-box-value">a ∈ ((1 + √13) / 2; 19 / 7)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="section">
+        <div class="section-header">
+            <span class="section-tag">Проверка знаний</span>
+            <h2 class="section-title">Мини-тест</h2>
+            <p class="section-desc">
+                Проверьте своё понимание материала с помощью 5 вопросов
+            </p>
+        </div>
+
+        <div class="quiz-container">
+            <div class="quiz-question" data-correct="1">
+                <p class="quiz-question-text">1. Что происходит со знаком при переходе через корень чётной кратности?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, 0)">
+                        <span class="quiz-option-letter">A</span>
+                        <span>Знак меняется</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 1)">
+                        <span class="quiz-option-letter">B</span>
+                        <span>Знак не меняется</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 2)">
+                        <span class="quiz-option-letter">C</span>
+                        <span>Знак становится нулём</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 3)">
+                        <span class="quiz-option-letter">D</span>
+                        <span>Зависит от степени многочлена</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="quiz-question-text">2. Как раскрыть модуль |x − a| при x < a?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, 0)">
+                        <span class="quiz-option-letter">A</span>
+                        <span>−(x − a) = a − x</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 1)">
+                        <span class="quiz-option-letter">B</span>
+                        <span>x − a</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 2)">
+                        <span class="quiz-option-letter">C</span>
+                        <span>0</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 3)">
+                        <span class="quiz-option-letter">D</span>
+                        <span>Не определено</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="3">
+                <p class="quiz-question-text">3. Сколько условий нужно проверить для расположения корней квадратного трёхчлена на интервале?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, 0)">
+                        <span class="quiz-option-letter">A</span>
+                        <span>2</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 1)">
+                        <span class="quiz-option-letter">B</span>
+                        <span>3</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 2)">
+                        <span class="quiz-option-letter">C</span>
+                        <span>5</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 3)">
+                        <span class="quiz-option-letter">D</span>
+                        <span>4</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="quiz-question-text">4. Чему равна абсцисса вершины параболы y = ax² + bx + c?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, 0)">
+                        <span class="quiz-option-letter">A</span>
+                        <span>−b / a</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 1)">
+                        <span class="quiz-option-letter">B</span>
+                        <span>b / (2a)</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 2)">
+                        <span class="quiz-option-letter">C</span>
+                        <span>−b / (2a)</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 3)">
+                        <span class="quiz-option-letter">D</span>
+                        <span>−c / b</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="quiz-question-text">5. Когда квадратное уравнение имеет два различных корня?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectOption(this, 0)">
+                        <span class="quiz-option-letter">A</span>
+                        <span>D = 0</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 1)">
+                        <span class="quiz-option-letter">B</span>
+                        <span>D > 0</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 2)">
+                        <span class="quiz-option-letter">C</span>
+                        <span>D < 0</span>
+                    </div>
+                    <div class="quiz-option" onclick="selectOption(this, 3)">
+                        <span class="quiz-option-letter">D</span>
+                        <span>D ≥ 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="checkQuiz()">Проверить ответы</button>
+
+            <div class="quiz-result" id="quizResult">
+                <div class="quiz-score" id="quizScore">0 / 5</div>
+                <p id="quizMessage"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cheat Sheet -->
+    <section id="cheatsheet" class="section">
+        <div class="section-header">
+            <span class="section-tag">Шпаргалка</span>
+            <h2 class="section-title">Итоговая сводка</h2>
+            <p class="section-desc">
+                Ключевые формулы и правила для быстрого повторения
+            </p>
+        </div>
+
+        <div class="card">
+            <table class="cheat-sheet">
+                <thead>
+                <tr>
+                    <th>Тема</th>
+                    <th>Ключевые формулы и правила</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Метод интервалов</td>
+                    <td>Корни нечётной кратности → знак меняется; чётной → не меняется</td>
+                </tr>
+                <tr>
+                    <td>Модуль</td>
+                    <td>|a| = a при a ≥ 0, |a| = −a при a < 0</td>
+                </tr>
+                <tr>
+                    <td>Квадратное уравнение</td>
+                    <td>D = b² − 4ac, x₁,₂ = (−b ± √D) / (2a)</td>
+                </tr>
+                <tr>
+                    <td>Корни на интервале</td>
+                    <td>D > 0, a·f(m) > 0, a·f(n) > 0, m < −b/(2a) < n</td>
+                </tr>
+                <tr style="background: rgba(220, 38, 38, 0.1);">
+                    <td style="color: var(--danger);">Ловушка</td>
+                    <td style="color: var(--danger);">Не включать корни при строгом неравенстве (>, <)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <p class="footer-text">Пособие подготовлено для подготовки к экзаменам по профильной математике</p>
+    <p class="footer-author">Автор: Лёвин Артём Александрович</p>
+    <p class="footer-text" style="margin-top: 1rem; font-size: 0.875rem;">
+        Эксклюзивно для Игоря Федорова • 2026
+    </p>
+</footer>
+
+<script>
+    // Accordion functionality
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        const isActive = item.classList.contains('active');
+
+        // Close all accordions
+        document.querySelectorAll('.accordion-item').forEach(acc => {
+            acc.classList.remove('active');
+            acc.querySelector('.accordion-content').style.maxHeight = '0';
+        });
+
+        // Open clicked if it wasn't active
+        if (!isActive) {
+            item.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + 'px';
+        }
+    }
+
+    // Quiz functionality
+    let quizAnswers = {};
+
+    function selectOption(element, optionIndex) {
+        const question = element.parentElement.parentElement;
+        const questionIndex = Array.from(document.querySelectorAll('.quiz-question')).indexOf(question);
+
+        // Remove selected from all options in this question
+        question.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+
+        // Add selected to clicked option
+        element.classList.add('selected');
+        quizAnswers[questionIndex] = optionIndex;
+    }
+
+    function checkQuiz() {
+        const questions = document.querySelectorAll('.quiz-question');
+        let score = 0;
+
+        questions.forEach((question, index) => {
+            const correct = parseInt(question.dataset.correct);
+            const userAnswer = quizAnswers[index];
+            const options = question.querySelectorAll('.quiz-option');
+
+            // Reset styles
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+
+            // Show correct answer
+            options[correct].classList.add('correct');
+
+            // Check user answer
+            if (userAnswer === correct) {
+                score++;
+            } else if (userAnswer !== undefined) {
+                options[userAnswer].classList.add('incorrect');
+            }
+        });
+
+        // Show result
+        const result = document.getElementById('quizResult');
+        const scoreDisplay = document.getElementById('quizScore');
+        const message = document.getElementById('quizMessage');
+
+        scoreDisplay.textContent = `${score} / ${questions.length}`;
+
+        if (score === questions.length) {
+            message.textContent = '🎉 Отлично! Все ответы верны!';
+            message.style.color = 'var(--success)';
+        } else if (score >= questions.length / 2) {
+            message.textContent = '👍 Хорошо! Но есть куда расти.';
+            message.style.color = 'var(--warning)';
+        } else {
+            message.textContent = '📚 Стоит повторить материал.';
+            message.style.color = 'var(--danger)';
+        }
+
+        result.classList.add('show');
+        result.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Task Generator
+    const taskTemplates = [
+        {
+            roots: [1, 2, 3, 4],
+            sign: '≥',
+            answer: 'x ∈ (−∞; 1] ∪ [2; 3] ∪ [4; +∞)'
+        },
+        {
+            roots: [-2, 0, 3, 5],
+            sign: '≤',
+            answer: 'x ∈ [−2; 0] ∪ [3; 5]'
+        },
+        {
+            roots: [-3, -1, 2, 4, 6],
+            sign: '>',
+            answer: 'x ∈ (−3; −1) ∪ (2; 4) ∪ (6; +∞)'
+        },
+        {
+            roots: [-1, 1, 3],
+            sign: '<',
+            answer: 'x ∈ (−∞; −1) ∪ (1; 3)'
+        }
+    ];
+
+    function generateIntervalTask() {
+        const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+        const roots = template.roots;
+        const sign = template.sign;
+
+        // Build expression
+        let expression = roots.map(r => {
+            if (r >= 0) return `(x − ${r})`;
+            return `(x + ${Math.abs(r)})`;
+        }).join('');
+
+        const taskText = `Решите неравенство: ${expression} ${sign} 0`;
+
+        document.getElementById('taskText').textContent = taskText;
+        document.getElementById('answerValue').textContent = template.answer;
+        document.getElementById('taskAnswer').classList.remove('show');
+    }
+
+    function resetGenerator() {
+        document.getElementById('taskText').textContent = 'Нажмите "Сгенерировать задачу" для начала';
+        document.getElementById('answerValue').textContent = '';
+        document.getElementById('taskAnswer').classList.remove('show');
+    }
+
+    function toggleAnswer() {
+        document.getElementById('taskAnswer').classList.toggle('show');
+    }
+
+    // Graph drawing for absolute value function
+    function drawFunctionGraph(a = 2) {
+        const canvas = document.getElementById('functionGraph');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const width = canvas.offsetWidth;
+        const height = canvas.offsetHeight;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const padding = 40;
+        const graphWidth = width - 2 * padding;
+        const graphHeight = height - 2 * padding;
+
+        // Clear canvas
+        ctx.fillStyle = '#0a0e1a';
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw grid
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i <= 10; i++) {
+            const x = padding + (i / 10) * graphWidth;
+            ctx.beginPath();
+            ctx.moveTo(x, padding);
+            ctx.lineTo(x, height - padding);
+            ctx.stroke();
+
+            const y = padding + (i / 10) * graphHeight;
+            ctx.beginPath();
+            ctx.moveTo(padding, y);
+            ctx.lineTo(width - padding, y);
+            ctx.stroke();
+        }
+
+        // Draw axes
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 2;
+
+        // X-axis
+        ctx.beginPath();
+        ctx.moveTo(padding, height / 2);
+        ctx.lineTo(width - padding, height / 2);
+        ctx.stroke();
+
+        // Y-axis
+        ctx.beginPath();
+        ctx.moveTo(width / 2, padding);
+        ctx.lineTo(width / 2, height - padding);
+        ctx.stroke();
+
+        // Draw function y = |x + a| + |x - 3| - 4
+        ctx.strokeStyle = '#0099cc';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        const xMin = -6;
+        const xMax = 7;
+        const yMin = -2;
+        const yMax = 8;
+
+        let firstPoint = true;
+
+        for (let x = xMin; x <= xMax; x += 0.1) {
+            const y = Math.abs(x + a) + Math.abs(x - 3) - 4;
+
+            // Scale to canvas coordinates
+            const canvasX = padding + ((x - xMin) / (xMax - xMin)) * graphWidth;
+            const canvasY = height - padding - ((y - yMin) / (yMax - yMin)) * graphHeight;
+
+            if (firstPoint) {
+                ctx.moveTo(canvasX, canvasY);
+                firstPoint = false;
+            } else {
+                ctx.lineTo(canvasX, canvasY);
+            }
+        }
+
+        ctx.stroke();
+
+        // Mark critical points
+        ctx.fillStyle = '#0099cc';
+
+        const points = [
+            { x: -a, y: 1 },
+            { x: 3, y: 1 }
+        ];
+
+        points.forEach(point => {
+            const canvasX = padding + ((point.x - xMin) / (xMax - xMin)) * graphWidth;
+            const canvasY = height - padding - ((point.y - yMin) / (yMax - yMin)) * graphHeight;
+
+            ctx.beginPath();
+            ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+
+        // Labels
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('x', width - padding + 5, height / 2);
+        ctx.fillText('y', width / 2 + 5, padding - 5);
+    }
+
+    function updateGraph() {
+        const slider = document.getElementById('paramSlider');
+        const value = parseFloat(slider.value);
+        document.getElementById('sliderValue').textContent = `a = ${value}`;
+        drawFunctionGraph(value);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        drawFunctionGraph(2);
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card, .section-header').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+
+    // Print functionality
+    function printPage() {
+        window.print();
+    }
+</script>
+</body>
+</html>
