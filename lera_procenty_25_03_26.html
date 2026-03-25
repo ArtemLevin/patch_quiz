@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проценты: Изменение Величины | Интерактивная Лаборатория</title>
+    <style>
+        :root {
+            --bg-dark: #050b14;
+            --bg-card: rgba(20, 30, 48, 0.6);
+            --bg-card-hover: rgba(30, 41, 59, 0.8);
+            --accent: #00f2ff;
+            --accent-secondary: #008080;
+            --accent-glow: rgba(0, 242, 255, 0.4);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --danger: #ff0055;
+            --success: #00ff9d;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- 1. АНИМИРОВАННЫЙ ФОН (CANVAS) --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- ПРОГРЕСС БАР --- */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent));
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* --- ТИПОГРАФИКА И ОБЩИЕ СТИЛИ --- */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1, h2, h3 {
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+            animation: glowText 3s infinite alternate;
+        }
+
+        @keyframes glowText {
+            from { text-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
+            to { text-shadow: 0 0 40px rgba(0, 242, 255, 0.6); }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-muted); }
+
+        code, .math {
+            font-family: var(--font-mono);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            color: var(--accent);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        code:hover, .math:hover {
+            background: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 10px var(--accent-glow);
+            cursor: default;
+        }
+
+        /* --- 2. 3D TILT КАРТОЧКИ & GLASSMORPHISM --- */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            transition: transform 0.1s ease, box-shadow 0.3s ease, border-color 0.3s;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            opacity: 0; /* Для анимации появления */
+            transform: translateY(30px);
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            border-color: rgba(0, 242, 255, 0.3);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+
+        /* Внутренний контент карточки должен иметь z-index чтобы быть над фоном при 3D */
+        .card-content {
+            transform: translateZ(20px);
+            pointer-events: none; /* Чтобы клики проходили сквозь, если нужно, но лучше убрать для интерактива */
+            pointer-events: auto;
+        }
+
+        /* --- СЕТКИ И ЛЕЙАУТ --- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+            .container { padding: 2rem 1rem; }
+        }
+
+        /* --- ТАБЛИЦЫ --- */
+        .math-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-family: var(--font-mono);
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .math-table th, .math-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .math-table th {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        /* --- КНОПКИ И ИНТЕРФЕЙС --- */
+        .btn {
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent));
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before { left: 100%; }
+        .btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 242, 255, 0.5);
+        }
+
+        .btn:active { transform: translateY(1px); }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+
+        /* --- ВИЗУАЛИЗАТОР (БАРЫ) --- */
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 3rem;
+            height: 250px;
+            margin: 2rem 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .bar {
+            width: 100px;
+            background: linear-gradient(to top, var(--accent-secondary), var(--accent));
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 15px;
+            color: #000;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            box-shadow: 0 0 30px var(--accent-glow);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -40px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bar-value {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+
+        /* --- INPUTS --- */
+        input[type="number"], select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- QUIZ --- */
+        .quiz-option {
+            display: block;
+            background: rgba(255,255,255,0.03);
+            padding: 1.2rem;
+            margin-bottom: 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--accent);
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        .quiz-option.correct {
+            background: rgba(0, 255, 157, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .quiz-option.wrong {
+            background: rgba(255, 0, 85, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* --- GAMIFICATION BADGES --- */
+        .badge-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            opacity: 0.5;
+            transition: 0.3s;
+        }
+        .badge.unlocked {
+            opacity: 1;
+            background: rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 10px var(--accent-glow);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- DETAILS/ACCORDION --- */
+        details {
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        details[open] {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        summary {
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--accent);
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker { display: none; }
+
+        summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::after {
+            transform: rotate(45deg);
+            color: #fff;
+        }
+
+        details p, details table {
+            padding: 0 1rem 1rem;
+            margin: 0;
+        }
+
+        /* --- PRINT --- */
+        @media print {
+            #bg-canvas, .btn, .progress-container, .interactive-controls { display: none !important; }
+            body { background: #fff; color: #000; }
+            .card { border: 1px solid #ccc; background: #fff; box-shadow: none; break-inside: avoid; page-break-inside: avoid; }
+            h1, h2 { color: #000; -webkit-text-fill-color: #000; text-shadow: none; }
+            .bar { background: #ccc !important; box-shadow: none; color: #000; }
+            .math-table th { background: #eee; color: #000; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 1. АНИМИРОВАННЫЙ ФОН -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ПРОГРЕСС БАРА -->
+<div class="progress-container">
+    <div class="progress-bar" id="scroll-progress"></div>
+</div>
+
+<div class="container">
+    <header style="text-align: center; margin-bottom: 4rem;">
+        <div class="badge-container" style="justify-content: center;">
+            <span class="badge" id="badge-newbie">🌱 Новичок</span>
+            <span class="badge" id="badge-learner">📚 Ученик</span>
+            <span class="badge" id="badge-master">🎓 Эксперт</span>
+        </div>
+        <h1>Проценты: Изменение Величины</h1>
+        <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+            Интерактивный чек-лист · Лёвин Артём Александрович · Эксклюзивно для Валерии Деньгиной
+        </p>
+        <div style="margin-top: 2rem;">
+            <button class="btn btn-outline" onclick="window.print()">🖨️ Печать / PDF</button>
+        </div>
+    </header>
+
+    <!-- ВИЗУАЛИЗАТОР -->
+    <div class="card tilt-card">
+        <div class="card-content">
+            <h2>📊 Визуальная Лаборатория</h2>
+            <p>Понимание разницы между "было" (100%) и "стало" (100% ± p%). Попробуйте изменить параметры.</p>
+
+            <div class="grid-2">
+                <div class="interactive-controls">
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">Начальная величина (100%)</label>
+                        <input type="number" id="viz-start" value="1000" oninput="updateViz()">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">Изменение (%)</label>
+                        <input type="range" id="viz-slider" min="-90" max="200" value="20" style="width:100%" oninput="syncSlider()">
+                        <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                            <span style="color:var(--danger)">-90%</span>
+                            <span id="slider-val" style="color:var(--accent); font-weight:bold;">+20%</span>
+                            <span style="color:var(--success)">+200%</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">Тип изменения</label>
+                        <select id="viz-type" onchange="updateViz()">
+                            <option value="inc">Увеличение (+)</option>
+                            <option value="dec">Уменьшение (-)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar" id="bar-start" style="height: 60%;">
+                        <span class="bar-value" id="label-start-val">1000</span>
+                        <div class="bar-label">Было</div>
+                    </div>
+                    <div class="bar" id="bar-end" style="height: 60%;">
+                        <span class="bar-value" id="label-end-val">1200</span>
+                        <div class="bar-label">Стало</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТЕОРИЯ -->
+    <div class="grid-2">
+        <div class="card tilt-card">
+            <div class="card-content">
+                <h2>1. Ключевые Понятия</h2>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="margin-bottom: 1.5rem; border-left: 2px solid var(--accent); padding-left: 1rem;">
+                        <strong style="color:#fff; font-size:1.1rem;">Процент</strong><br>
+                        Одна сотая доля:<br>
+                        <code>1% = 1/100 = 0,01</code>
+                    </li>
+                    <li style="margin-bottom: 1.5rem; border-left: 2px solid var(--accent); padding-left: 1rem;">
+                        <strong style="color:#fff; font-size:1.1rem;">Обозначения</strong><br>
+                        <code>p%</code> от числа <code>A</code> равно <code>A · p / 100</code>.
+                    </li>
+                    <li style="border-left: 2px solid var(--accent); padding-left: 1rem;">
+                        <strong style="color:#fff; font-size:1.1rem;">Главное правило</strong><br>
+                        В задачах на изменение важно различать <span style="color: var(--accent);">исходное</span> (100%) и <span style="color: var(--accent);">конечное</span> значение.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card tilt-card">
+            <div class="card-content">
+                <h2>2. Метод Таблицы</h2>
+                <p>Для задач вида «было – стало»:</p>
+                <table class="math-table">
+                    <thead>
+                    <tr>
+                        <th>Состояние</th>
+                        <th>Величина</th>
+                        <th>%</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>До</td>
+                        <td>A</td>
+                        <td>100</td>
+                    </tr>
+                    <tr>
+                        <td>После</td>
+                        <td>B</td>
+                        <td>x</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p>Пропорция: <code>A / 100 = B / x</code> ⇒ <code>A · x = B · 100</code>.</p>
+                <div style="margin-top:1rem; padding:1rem; background:rgba(0,242,255,0.05); border-radius:8px;">
+                    <small>💡 <strong>Лайфхак:</strong> Если изменение на <code>p%</code>, то новый процент <code>x = 100 ± p</code>.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card tilt-card">
+        <div class="card-content">
+            <h2>3. Формулы Прямого Счёта</h2>
+            <div class="grid-2">
+                <div>
+                    <h3>Изменение величины</h3>
+                    <p>Увеличение на <code>p%</code>:<br>
+                        <code>B = A · (1 + p / 100)</code></p>
+                    <p>Уменьшение на <code>p%</code>:<br>
+                        <code>B = A · (1 - p / 100)</code></p>
+                </div>
+                <div>
+                    <h3>Нахождение процента</h3>
+                    <p>На сколько % изменилась величина:</p>
+                    <code>p = (|B - A| / A) · 100%</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- КАЛЬКУЛЯТОР -->
+    <div class="card tilt-card">
+        <div class="card-content">
+            <h2>🧮 Калькулятор Процентов</h2>
+            <div class="grid-2">
+                <div>
+                    <div class="input-group">
+                        <label>Было (Исходное)</label>
+                        <input type="number" id="calc-a" placeholder="Например, 1000">
+                    </div>
+                    <div class="input-group">
+                        <label>Стало (Конечное)</label>
+                        <input type="number" id="calc-b" placeholder="Например, 1200">
+                    </div>
+                    <button class="btn" onclick="calculateChange()">Рассчитать изменение</button>
+                </div>
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <p style="margin:0; font-size: 0.9rem; text-transform:uppercase; letter-spacing:1px;">Результат</p>
+                    <h3 id="calc-result" style="font-size: 2.5rem; color: var(--accent); margin: 0.5rem 0;">-</h3>
+                    <p id="calc-detail" style="font-size: 1rem; color: #fff;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ПРИМЕРЫ -->
+    <div class="card tilt-card">
+        <div class="card-content">
+            <h2>📖 Разбор Задач</h2>
+
+            <details>
+                <summary>Задача 1: Повышение цены</summary>
+                <p>Цена товара повысилась на 11% и составила 1443 руб. Найти первоначальную цену.</p>
+                <table class="math-table" style="max-width: 400px; margin: 1rem auto;">
+                    <tr><th></th><th>руб</th><th>%</th></tr>
+                    <tr><td>До</td><td>x</td><td>100</td></tr>
+                    <tr><td>После</td><td>1443</td><td>111</td></tr>
+                </table>
+                <p>Решение: <code>111x = 1443 · 100</code> ⇒ <code>x = 1300</code>.</p>
+            </details>
+
+            <details>
+                <summary>Задача 2: Уменьшение в несколько раз</summary>
+                <p>Себестоимость микрочипа снизилась в 2,5 раза. На сколько процентов снизилась себестоимость?</p>
+                <p>Если снизилась в 2,5 раза, значит стала равна <code>1 / 2,5 = 0,4</code> от исходной.</p>
+                <p><code>0,4 = 40%</code>.</p>
+                <p>Снижение: <code>100% - 40% = 60%</code>.</p>
+            </details>
+
+            <details>
+                <summary>Задача 3: Последовательные изменения</summary>
+                <p>Население 40 000. Выросло на 8%, затем ещё на 9%. Сколько стало?</p>
+                <p>Шаг 1: <code>40000 · 1,08 = 43200</code></p>
+                <p>Шаг 2: <code>43200 · 1,09 = 47088</code></p>
+                <p>Ответ: 47 088 человек.</p>
+            </details>
+        </div>
+    </div>
+
+    <!-- ГЕНЕРАТОР -->
+    <div class="card tilt-card">
+        <div class="card-content">
+            <h2>🎲 Генератор Тренировочных Задач</h2>
+            <div id="gen-container">
+                <div class="generator-box" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid var(--accent);">
+                    <h3 id="gen-title" style="margin-bottom:0.5rem; color:#fff;">Задача</h3>
+                    <p id="gen-text" style="font-size: 1.2rem; color: #fff; line-height: 1.5;">Нажмите "Сгенерировать", чтобы получить новую задачу.</p>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn" onclick="generateProblem()">🔄 Сгенерировать новую</button>
+                    <button class="btn btn-outline" onclick="toggleAnswer()">👁️ Показать ответ</button>
+                </div>
+                <div id="gen-answer" class="hidden" style="margin-top: 1.5rem; padding: 1.5rem; background: rgba(0, 255, 157, 0.1); border: 1px solid var(--success); border-radius: 12px; animation: popIn 0.3s;">
+                    <strong style="color:var(--success); display:block; margin-bottom:0.5rem;">✅ Решение:</strong>
+                    <span id="gen-solution" style="color:#fff;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- КВИЗ -->
+    <div class="card tilt-card">
+        <div class="card-content">
+            <h2>📝 Мини-Квиз</h2>
+            <div id="quiz-container">
+                <!-- Questions injected by JS -->
+            </div>
+            <button class="btn" onclick="checkQuiz()" style="margin-top: 1.5rem; width: 100%;">🚀 Проверить ответы</button>
+            <div id="quiz-result" style="margin-top: 1.5rem; font-weight: bold; text-align: center; font-size: 1.2rem;"></div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; padding: 3rem 0; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05);">
+        <p>Создано эксклюзивно для Валерии Деньгиной · 2026</p>
+        <p style="font-size: 0.8rem; opacity: 0.6;">Артём Александрович Лёвин</p>
+    </footer>
+</div>
+
+<script>
+    // --- 1. АНИМИРОВАННЫЙ ФОН (CANVAS) ---
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    const symbols = ['∫', '∑', '√', 'π', '∞', '%', 'x', 'y', 'β', 'Δ'];
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            this.size = Math.random() * 20 + 10;
+            this.alpha = Math.random() * 0.05 + 0.02;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0) this.x = width;
+            if (this.x > width) this.x = 0;
+            if (this.y < 0) this.y = height;
+            if (this.y > height) this.y = 0;
+        }
+        draw() {
+            ctx.fillStyle = `rgba(0, 242, 255, ${this.alpha})`;
+            ctx.font = `${this.size}px monospace`;
+            ctx.fillText(this.symbol, this.x, this.y);
+        }
+    }
+
+    for (let i = 0; i < 40; i++) particles.push(new Particle());
+
+    function animateBg() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 150) {
+                    ctx.strokeStyle = `rgba(0, 242, 255, ${0.1 * (1 - dist/150)})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animateBg);
+    }
+    animateBg();
+
+    // --- 2. SCROLL PROGRESS & OBSERVER ---
+    window.onscroll = function() {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        document.getElementById("scroll-progress").style.width = scrolled + "%";
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+    // --- 3. 3D TILT EFFECT ---
+    document.querySelectorAll('.tilt-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -5; // Max 5 deg
+            const rotateY = ((x - centerX) / centerX) * 5;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+        });
+    });
+
+    // --- 4. CONFETTI SYSTEM ---
+    let confettiParticles = [];
+    const confettiCanvas = document.createElement('canvas');
+    confettiCanvas.style.position = 'fixed';
+    confettiCanvas.style.top = '0';
+    confettiCanvas.style.left = '0';
+    confettiCanvas.style.width = '100%';
+    confettiCanvas.style.height = '100%';
+    confettiCanvas.style.pointerEvents = 'none';
+    confettiCanvas.style.zIndex = '9999';
+    document.body.appendChild(confettiCanvas);
+    const cCtx = confettiCanvas.getContext('2d');
+
+    let cWidth, cHeight;
+    function resizeConfetti() {
+        cWidth = confettiCanvas.width = window.innerWidth;
+        cHeight = confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function fireConfetti() {
+        for(let i=0; i<100; i++) {
+            confettiParticles.push({
+                x: cWidth / 2,
+                y: cHeight / 2,
+                vx: (Math.random() - 0.5) * 20,
+                vy: (Math.random() - 0.5) * 20,
+                color: `hsl(${Math.random()*360}, 100%, 50%)`,
+                size: Math.random() * 10 + 5,
+                life: 100
+            });
+        }
+        requestAnimationFrame(updateConfetti);
+    }
+
+    function updateConfetti() {
+        cCtx.clearRect(0, 0, cWidth, cHeight);
+        confettiParticles.forEach((p, index) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.5; // gravity
+            p.life--;
+            cCtx.fillStyle = p.color;
+            cCtx.fillRect(p.x, p.y, p.size, p.size);
+            if(p.life <= 0) confettiParticles.splice(index, 1);
+        });
+        if(confettiParticles.length > 0) requestAnimationFrame(updateConfetti);
+    }
+
+    // --- 5. VISUALIZER LOGIC ---
+    function syncSlider() {
+        const val = document.getElementById('viz-slider').value;
+        const type = val >= 0 ? 'inc' : 'dec';
+        document.getElementById('viz-type').value = type;
+
+        const absVal = Math.abs(val);
+        const sign = val >= 0 ? '+' : '-';
+        document.getElementById('slider-val').innerText = `${sign}${absVal}%`;
+        document.getElementById('slider-val').style.color = val >= 0 ? 'var(--success)' : 'var(--danger)';
+
+        updateViz();
+    }
+
+    function updateViz() {
+        const start = parseFloat(document.getElementById('viz-start').value) || 0;
+        const change = parseFloat(document.getElementById('viz-slider').value) || 0;
+        const type = change >= 0 ? 'inc' : 'dec'; // Override select with slider logic for simplicity
+
+        let end = 0;
+
+        // Logic based on slider value directly
+        const factor = 1 + (change / 100);
+        end = start * factor;
+
+        const barStart = document.getElementById('bar-start');
+        const barEnd = document.getElementById('bar-end');
+
+        // Base height 60%
+        const baseH = 60;
+        barStart.style.height = baseH + '%';
+        document.getElementById('label-start-val').innerText = start.toLocaleString();
+
+        // End height relative
+        // If factor is 1.2, height is 72%. If 0.5, height is 30%.
+        let endH = baseH * factor;
+        if (endH < 5) endH = 5; // Min height
+        barEnd.style.height = endH + '%';
+        document.getElementById('label-end-val').innerText = Math.round(end).toLocaleString();
+
+        // Color
+        if (change >= 0) {
+            barEnd.style.background = 'linear-gradient(to top, #008080, #00f2ff)';
+            barEnd.style.boxShadow = '0 0 30px rgba(0, 242, 255, 0.4)';
+        } else {
+            barEnd.style.background = 'linear-gradient(to top, #800000, #ff0055)';
+            barEnd.style.boxShadow = '0 0 30px rgba(255, 0, 85, 0.4)';
+        }
+    }
+    updateViz();
+
+    // --- 6. CALCULATOR LOGIC ---
+    function calculateChange() {
+        const A = parseFloat(document.getElementById('calc-a').value);
+        const B = parseFloat(document.getElementById('calc-b').value);
+        const resEl = document.getElementById('calc-result');
+        const detailEl = document.getElementById('calc-detail');
+
+        if (!A || !B) {
+            resEl.innerText = "-";
+            detailEl.innerText = "Введите оба числа";
+            return;
+        }
+
+        const diff = B - A;
+        const percent = (Math.abs(diff) / A) * 100;
+
+        if (diff > 0) {
+            resEl.innerText = `+${percent.toFixed(1)}%`;
+            resEl.style.color = 'var(--success)';
+            detailEl.innerText = `Увеличение на ${diff}`;
+        } else if (diff < 0) {
+            resEl.innerText = `-${percent.toFixed(1)}%`;
+            resEl.style.color = 'var(--danger)';
+            detailEl.innerText = `Уменьшение на ${Math.abs(diff)}`;
+        } else {
+            resEl.innerText = "0%";
+            resEl.style.color = '#fff';
+            detailEl.innerText = "Без изменений";
+        }
+    }
+
+    // --- 7. GENERATOR LOGIC ---
+    const templates = [
+        {
+            type: 'increase',
+            text: (p, A) => `Цена товара повысилась на ${p}% и составила ${A} руб. Найти первоначальную цену.`,
+            solve: (p, A) => {
+                const factor = 1 + p/100;
+                const res = A / factor;
+                return `Было 100%, стало ${(100+p)}%. Пропорция: X / 100 = ${A} / ${100+p}. X = ${Math.round(res)} руб.`;
+            }
+        },
+        {
+            type: 'decrease_val',
+            text: (p, A) => `Товар стоил ${A} руб., после снижения — ${Math.round(A * (1 - p/100))} руб. На сколько процентов снизилась цена?`,
+            solve: (p, A) => {
+                const B = Math.round(A * (1 - p/100));
+                return `Снижение: (${A} - ${B}) / ${A} * 100% = ${p}%.`;
+            }
+        },
+        {
+            type: 'factor',
+            text: (k, _) => `Себестоимость товара уменьшилась в ${k} раза. На сколько процентов снизилась себестоимость?`,
+            solve: (k, _) => {
+                const percentLeft = 100 / k;
+                const decrease = 100 - percentLeft;
+                return `Стало 1/${k} от исходного = ${(100/k).toFixed(1)}%. Снижение: 100% - ${(100/k).toFixed(1)}% = ${decrease.toFixed(1)}%.`;
+            }
+        },
+        {
+            type: 'compound',
+            text: (_, base) => `В городе проживало ${base} человек. Население выросло на 10%, а затем ещё на 5%. Сколько человек стало?`,
+            solve: (_, base) => {
+                const step1 = base * 1.10;
+                const step2 = step1 * 1.05;
+                return `1 шаг: ${base} * 1.1 = ${step1}. 2 шаг: ${step1} * 1.05 = ${Math.round(step2)}.`;
+            }
+        }
+    ];
+
+    let currentProblem = null;
+    let solvedCount = 0;
+
+    function updateBadges() {
+        if(solvedCount >= 1) document.getElementById('badge-newbie').classList.add('unlocked');
+        if(solvedCount >= 3) document.getElementById('badge-learner').classList.add('unlocked');
+        if(solvedCount >= 5) document.getElementById('badge-master').classList.add('unlocked');
+    }
+
+    function generateProblem() {
+        document.getElementById('gen-answer').classList.add('hidden');
+        const t = templates[Math.floor(Math.random() * templates.length)];
+        let p1, p2, val;
+
+        if (t.type === 'increase') {
+            p1 = [5, 10, 15, 20, 25][Math.floor(Math.random()*5)];
+            const cleanBase = Math.floor(Math.random() * 50 + 10) * 100;
+            val = Math.round(cleanBase * (1 + p1/100));
+            currentProblem = { text: t.text(p1, val), sol: t.solve(p1, val) };
+        } else if (t.type === 'decrease_val') {
+            p1 = [10, 15, 20, 25, 30][Math.floor(Math.random()*5)];
+            val = Math.floor(Math.random() * 50 + 10) * 100;
+            currentProblem = { text: t.text(p1, val), sol: t.solve(p1, val) };
+        } else if (t.type === 'factor') {
+            p1 = [2, 2.5, 4, 5, 10][Math.floor(Math.random()*5)];
+            currentProblem = { text: t.text(p1, 0), sol: t.solve(p1, 0) };
+        } else if (t.type === 'compound') {
+            val = Math.floor(Math.random() * 5 + 2) * 10000;
+            currentProblem = { text: t.text(0, val), sol: t.solve(0, val) };
+        }
+
+        document.getElementById('gen-text').innerText = currentProblem.text;
+    }
+
+    function toggleAnswer() {
+        const ansBox = document.getElementById('gen-answer');
+        if (currentProblem) {
+            if(ansBox.classList.contains('hidden')) {
+                document.getElementById('gen-solution').innerText = currentProblem.sol;
+                ansBox.classList.remove('hidden');
+                solvedCount++;
+                updateBadges();
+                fireConfetti(); // Reward for checking answer
+            } else {
+                ansBox.classList.add('hidden');
+            }
+        }
+    }
+
+    // --- 8. QUIZ LOGIC ---
+    const quizData = [
+        {
+            q: "Цена товара повысилась на 20%. Сколько процентов от новой цены составляет старая цена?",
+            options: ["80%", "83.3%", "120%", "Невозможно узнать"],
+            correct: 1
+        },
+        {
+            q: "Число увеличили на 50%, а затем уменьшили на 50%. Как изменилось число?",
+            options: ["Осталось прежним", "Увеличилось", "Уменьшилось", "Зависит от числа"],
+            correct: 2
+        },
+        {
+            q: "Товар подешевел в 2 раза. На сколько процентов он подешевел?",
+            options: ["200%", "50%", "100%", "25%"],
+            correct: 1
+        },
+        {
+            q: "Что больше: 15% от 40 или 40% от 15?",
+            options: ["15% от 40", "40% от 15", "Равны", "Зависит от контекста"],
+            correct: 2
+        },
+        {
+            q: "Если число A составляет 20% от числа B, то число B составляет сколько процентов от A?",
+            options: ["20%", "80%", "400%", "500%"],
+            correct: 2
+        }
+    ];
+
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        quizData.forEach((item, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.style.marginBottom = '1.5rem';
+            qDiv.innerHTML = `<p style="font-weight:bold; margin-bottom:0.5rem; color:#fff;">${index+1}. ${item.q}</p>`;
+
+            item.options.forEach((opt, optIndex) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.innerText = opt;
+                btn.onclick = function() {
+                    const siblings = qDiv.querySelectorAll('.quiz-option');
+                    siblings.forEach(s => s.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    btn.dataset.val = optIndex;
+                };
+                qDiv.appendChild(btn);
+            });
+            container.appendChild(qDiv);
+        });
+    }
+
+    function checkQuiz() {
+        const selected = document.querySelectorAll('.quiz-option.selected');
+        let score = 0;
+        let total = quizData.length;
+
+        document.querySelectorAll('.quiz-option').forEach(el => {
+            el.classList.remove('correct', 'wrong');
+        });
+
+        selected.forEach(el => {
+            const parent = el.parentElement;
+            const qIndex = Array.from(document.getElementById('quiz-container').children).indexOf(parent);
+            const userVal = parseInt(el.dataset.val);
+
+            if (userVal === quizData[qIndex].correct) {
+                el.classList.add('correct');
+                score++;
+            } else {
+                el.classList.add('wrong');
+                const correctOpt = parent.children[quizData[qIndex].correct + 1];
+                if(correctOpt) correctOpt.classList.add('correct');
+            }
+        });
+
+        const resDiv = document.getElementById('quiz-result');
+        resDiv.innerText = `Ваш результат: ${score} из ${total}`;
+
+        if (score === total) {
+            resDiv.style.color = 'var(--success)';
+            resDiv.innerText += " 🏆 Идеально!";
+            fireConfetti();
+            fireConfetti();
+            solvedCount += 2; // Bonus for quiz
+            updateBadges();
+        } else if (score > total/2) {
+            resDiv.style.color = '#fff';
+        } else {
+            resDiv.style.color = 'var(--danger)';
+        }
+    }
+
+    renderQuiz();
+    generateProblem();
+    updateBadges(); // Init badges state
+
+</script>
+</body>
+</html>
