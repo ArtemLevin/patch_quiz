@@ -10,7 +10,6 @@
             --bg-secondary: #1e293b;
             --bg-card: rgba(30, 41, 59, 0.8);
             --accent: #3b82f6;
-            --accent-hover: #2563eb;
             --accent-glow: rgba(59, 130, 246, 0.4);
             --success: #10b981;
             --warning: #f59e0b;
@@ -31,7 +30,7 @@
         }
 
         .container {
-            max-width: 1460px;
+            max-width: 1540px;
             margin: 0 auto;
             padding: 1rem;
             height: 100vh;
@@ -53,17 +52,20 @@
             margin-bottom: 0.25rem;
         }
 
-        .subtitle { color: var(--text-secondary); font-size: 0.9rem; }
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
 
         .main-grid {
             display: grid;
-            grid-template-columns: 300px 1fr 320px;
+            grid-template-columns: 340px 1fr 380px;
             gap: 1rem;
             flex-grow: 1;
             min-height: 0;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1280px) {
             .main-grid { grid-template-columns: 1fr; overflow-y: auto; }
             body { overflow: auto; }
         }
@@ -81,9 +83,9 @@
         }
 
         .panel-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 0.9rem;
             color: var(--accent);
             display: flex;
             align-items: center;
@@ -91,14 +93,17 @@
             flex-shrink: 0;
         }
 
-        .shape-selector {
+        .shape-selector,
+        .mode-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
-        .shape-btn {
+        .shape-btn,
+        .mode-btn,
+        .section-tab-btn {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             color: var(--text-primary);
@@ -106,11 +111,19 @@
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 0.85rem;
+            font-size: 0.84rem;
+            text-align: center;
         }
 
-        .shape-btn:hover { background: var(--accent); border-color: var(--accent); }
-        .shape-btn.active {
+        .shape-btn:hover,
+        .mode-btn:hover,
+        .section-tab-btn:hover {
+            background: var(--accent);
+        }
+
+        .shape-btn.active,
+        .mode-btn.active,
+        .section-tab-btn.active {
             background: var(--accent);
             border-color: var(--accent);
             box-shadow: 0 0 10px var(--accent-glow);
@@ -143,13 +156,23 @@
             cursor: pointer;
         }
 
+        select {
+            width: 100%;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.55rem;
+            font-size: 0.84rem;
+        }
+
         .canvas-container {
             background: var(--bg-secondary);
             border-radius: 12px;
             overflow: hidden;
             position: relative;
             flex-grow: 1;
-            min-height: 420px;
+            min-height: 460px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
 
@@ -173,7 +196,7 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             color: var(--text-primary);
-            padding: 0.5rem 0.8rem;
+            padding: 0.55rem 0.8rem;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
@@ -195,11 +218,74 @@
             color: white;
         }
 
-        .points-list {
-            flex-grow: 1;
-            overflow-y: auto;
+        .instruction {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 6px;
+            padding: 0.8rem;
             margin-bottom: 1rem;
+            font-size: 0.84rem;
+            color: #fcd34d;
+            flex-shrink: 0;
+        }
+
+        .sections-list,
+        .points-list,
+        .intersections-list {
+            background: rgba(15, 23, 42, 0.18);
+            border-radius: 8px;
+            padding: 0.4rem;
+            margin-bottom: 1rem;
+            overflow-y: auto;
+        }
+
+        .sections-list {
             min-height: 100px;
+            max-height: 190px;
+        }
+
+        .points-list {
+            min-height: 120px;
+            max-height: 260px;
+        }
+
+        .intersections-list {
+            min-height: 70px;
+            max-height: 140px;
+        }
+
+        .section-item,
+        .intersection-item {
+            background: var(--bg-secondary);
+            padding: 0.55rem;
+            border-radius: 6px;
+            margin-bottom: 0.45rem;
+            border-left: 4px solid transparent;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .section-item.active {
+            outline: 1px solid var(--accent);
+        }
+
+        .section-meta,
+        .intersection-meta {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .section-badge,
+        .intersection-badge {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.7);
+            display: inline-block;
+            margin-right: 0.4rem;
+            vertical-align: middle;
         }
 
         .point-item {
@@ -211,7 +297,7 @@
             justify-content: space-between;
             align-items: center;
             border-left: 3px solid var(--accent);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         .remove-btn {
@@ -223,11 +309,12 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 0.7rem;
+            flex-shrink: 0;
         }
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 0.5rem;
             margin-top: auto;
             flex-shrink: 0;
@@ -235,31 +322,20 @@
 
         .stat-item {
             background: var(--bg-secondary);
-            padding: 0.5rem;
+            padding: 0.55rem;
             border-radius: 6px;
             text-align: center;
         }
 
         .stat-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: var(--accent);
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-secondary);
-        }
-
-        .instruction {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid var(--warning);
-            border-radius: 6px;
-            padding: 0.8rem;
-            margin-bottom: 1rem;
-            font-size: 0.85rem;
-            color: #fcd34d;
-            flex-shrink: 0;
         }
 
         @keyframes popIn {
@@ -284,7 +360,7 @@
 <div class="container">
     <header>
         <h1>🔷 3D Сечения</h1>
-        <p class="subtitle">Конструктор сечений многогранников и тел вращения</p>
+        <p class="subtitle">Конструктор нескольких сечений многогранников и тел вращения</p>
     </header>
 
     <div class="main-grid">
@@ -293,11 +369,18 @@
             <div class="shape-selector">
                 <button class="shape-btn active" data-shape="cube">Куб</button>
                 <button class="shape-btn" data-shape="pyramid">Пирамида</button>
+                <button class="shape-btn" data-shape="hexagonalPyramid">6-уг. пирамида</button>
                 <button class="shape-btn" data-shape="prism">Призма</button>
                 <button class="shape-btn" data-shape="tetrahedron">Тетраэдр</button>
                 <button class="shape-btn" data-shape="cylinder">Цилиндр</button>
                 <button class="shape-btn" data-shape="cone">Конус</button>
                 <button class="shape-btn" data-shape="sphere">Шар</button>
+            </div>
+
+            <h2 class="panel-title">📍 Режим точки</h2>
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="edge">По рёбрам</button>
+                <button class="mode-btn" data-mode="face">По граням</button>
             </div>
 
             <h2 class="panel-title">⚙️ Параметры</h2>
@@ -313,29 +396,38 @@
                 <label>Поворот Y: <span id="rotYValue">45</span>°</label>
                 <input type="range" id="rotYSlider" min="-180" max="180" value="45">
             </div>
+            <div class="control-group">
+                <label>Толщина линий фигуры: <span id="edgeThicknessValue">2</span></label>
+                <input type="range" id="edgeThicknessSlider" min="1" max="6" step="0.5" value="2">
+            </div>
 
             <div class="toolbar">
-                <button class="tool-btn" id="buildSectionBtn">✂️ Сечение</button>
-                <button class="tool-btn danger" id="clearBtn">🗑️ Сброс</button>
+                <button class="tool-btn" id="newSectionBtn">➕ Новое сечение</button>
+                <button class="tool-btn" id="buildSectionBtn">✂️ Построить текущее</button>
+                <button class="tool-btn danger" id="deleteSectionBtn">🗑️ Удалить текущее</button>
             </div>
 
             <div class="instruction">
                 💡 <strong>Как работать:</strong><br>
-                1. Вращайте фигуру мышкой.<br>
-                2. Кликните на ребро/линию сетки, чтобы поставить точку.<br>
-                3. Поставьте минимум 3 точки.<br>
-                4. Нажмите «Сечение».<br><br>
-                Для цилиндра, конуса и шара используется сеточная аппроксимация.
+                1. Создайте новое сечение.<br>
+                2. Поставьте его точки по рёбрам или по граням.<br>
+                3. Постройте текущее сечение.<br>
+                4. Выберите второе сечение справа и постройте линию пересечения.<br>
+                5. Можно включить тёплую подсветку и настроить толщину линий фигуры.
             </div>
 
             <div class="stats">
                 <div class="stat-item">
-                    <div class="stat-value" id="pointsCount">0</div>
-                    <div class="stat-label">Точек</div>
+                    <div class="stat-value" id="sectionsCount">1</div>
+                    <div class="stat-label">Сечений</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="sectionArea">0</div>
-                    <div class="stat-label">Площадь</div>
+                    <div class="stat-value" id="activePointsCount">0</div>
+                    <div class="stat-label">Точек в текущем</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="intersectionCount">0</div>
+                    <div class="stat-label">Линий пересеч.</div>
                 </div>
             </div>
         </div>
@@ -346,33 +438,47 @@
             </div>
             <div class="toolbar" style="background: var(--bg-card); padding: 1rem; border-radius: 12px; margin-top: 1rem; border: 1px solid var(--border);">
                 <button class="tool-btn" id="resetViewBtn">🔄 Вид спереди</button>
+                <button class="tool-btn" id="resetZoomBtn">🔍 Сброс зума</button>
                 <button class="tool-btn" id="toggleWireframeBtn">👁️ Сплошной/Каркас</button>
+                <button class="tool-btn" id="toggleWarmLightBtn">☀️ Тёплая подсветка</button>
                 <button class="tool-btn" id="toggleLabelsBtn">🔤 Подписи вершин/точек</button>
             </div>
         </div>
 
         <div class="panel">
-            <h2 class="panel-title">📍 Точки</h2>
-            <div class="points-list" id="pointsList">
-                <p style="color: var(--text-secondary); text-align: center; padding: 1rem; font-size: 0.9rem;">
-                    Нет точек
-                </p>
-            </div>
+            <h2 class="panel-title">🧩 Сечения</h2>
+            <div class="sections-list" id="sectionsList"></div>
 
             <div id="sectionInfo" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-                <strong style="color: var(--accent);">Сечение построено</strong>
+                <strong style="color: var(--accent);">Текущее сечение</strong>
                 <p id="sectionDetails" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-secondary);"></p>
             </div>
 
-            <h2 class="panel-title">🎨 Стиль</h2>
+            <h2 class="panel-title">📍 Точки текущего сечения</h2>
+            <div class="points-list" id="pointsList">
+                <p style="color: var(--text-secondary); text-align: center; padding: 1rem; font-size: 0.9rem;">Нет точек</p>
+            </div>
+
+            <h2 class="panel-title">🎨 Стиль текущего</h2>
             <div class="control-group">
                 <label>Прозрачность: <span id="opacityValue">0.6</span></label>
                 <input type="range" id="opacitySlider" min="0.1" max="1" step="0.1" value="0.6">
             </div>
             <div class="control-group">
-                <label>Цвет сечения:</label>
+                <label>Цвет текущего сечения:</label>
                 <input type="color" id="sectionColor" value="#3b82f6" style="width: 100%; height: 35px; border: none; background: none;">
             </div>
+
+            <h2 class="panel-title">📏 Линия пересечения</h2>
+            <div class="control-group">
+                <label>Второе сечение:</label>
+                <select id="intersectionTargetSelect"></select>
+            </div>
+            <div class="toolbar" style="margin-top:0; margin-bottom:1rem;">
+                <button class="tool-btn" id="buildIntersectionBtn">📏 Построить линию</button>
+                <button class="tool-btn danger" id="clearIntersectionBtn">🗑️ Очистить линии</button>
+            </div>
+            <div class="intersections-list" id="intersectionsList"></div>
         </div>
     </div>
 </div>
@@ -382,13 +488,11 @@
         constructor(x, y, z) {
             this.x = x; this.y = y; this.z = z;
         }
-
         clone() { return new Point3D(this.x, this.y, this.z); }
         add(p) { return new Point3D(this.x + p.x, this.y + p.y, this.z + p.z); }
         sub(p) { return new Point3D(this.x - p.x, this.y - p.y, this.z - p.z); }
         scale(k) { return new Point3D(this.x * k, this.y * k, this.z * k); }
         dot(p) { return this.x * p.x + this.y * p.y + this.z * p.z; }
-
         cross(p) {
             return new Point3D(
                 this.y * p.z - this.z * p.y,
@@ -396,52 +500,31 @@
                 this.x * p.y - this.y * p.x
             );
         }
-
-        length() {
-            return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-        }
-
+        length() { return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z); }
         normalize() {
             const len = this.length();
             if (len < 1e-9) return new Point3D(0, 0, 0);
             return this.scale(1 / len);
         }
-
         distanceTo(p) { return this.sub(p).length(); }
 
         rotateX(angle) {
             const rad = angle * Math.PI / 180;
             const c = Math.cos(rad), s = Math.sin(rad);
-            return new Point3D(
-                this.x,
-                this.y * c - this.z * s,
-                this.y * s + this.z * c
-            );
+            return new Point3D(this.x, this.y * c - this.z * s, this.y * s + this.z * c);
         }
-
         rotateY(angle) {
             const rad = angle * Math.PI / 180;
             const c = Math.cos(rad), s = Math.sin(rad);
-            return new Point3D(
-                this.x * c + this.z * s,
-                this.y,
-                -this.x * s + this.z * c
-            );
+            return new Point3D(this.x * c + this.z * s, this.y, -this.x * s + this.z * c);
         }
+        rotate(rx, ry) { return this.rotateX(rx).rotateY(ry); }
 
-        rotate(rx, ry) {
-            return this.rotateX(rx).rotateY(ry);
-        }
-
-        project(w, h, fov = 500) {
-            const z = this.z + fov;
-            const f = fov / z;
-            return {
-                x: w / 2 + this.x * f,
-                y: h / 2 - this.y * f,
-                z: this.z,
-                f
-            };
+        project(w, h, cameraDistance = 500, zoom = 1) {
+            const z = this.z + cameraDistance;
+            const safeZ = Math.max(z, 1);
+            const f = (cameraDistance * zoom) / safeZ;
+            return { x: w / 2 + this.x * f, y: h / 2 - this.y * f, z: this.z, f };
         }
     }
 
@@ -452,7 +535,6 @@
             this.idx = idx;
             this.v1Index = v1Index;
             this.v2Index = v2Index;
-            this.points = [];
             this.faceIndices = [];
         }
 
@@ -461,26 +543,29 @@
             const B = y - projV1.y;
             const C = projV2.x - projV1.x;
             const D = projV2.y - projV1.y;
-
             const dot = A * C + B * D;
             const lenSq = C * C + D * D;
             let param = -1;
-
             if (lenSq !== 0) param = dot / lenSq;
 
             let xx, yy;
-            if (param < 0) {
-                xx = projV1.x; yy = projV1.y;
-            } else if (param > 1) {
-                xx = projV2.x; yy = projV2.y;
-            } else {
-                xx = projV1.x + param * C;
-                yy = projV1.y + param * D;
-            }
+            if (param < 0) { xx = projV1.x; yy = projV1.y; }
+            else if (param > 1) { xx = projV2.x; yy = projV2.y; }
+            else { xx = projV1.x + param * C; yy = projV1.y + param * D; }
 
             const dx = x - xx;
             const dy = y - yy;
             return Math.sqrt(dx * dx + dy * dy) < threshold;
+        }
+
+        projectParamFromScreen(x, y, projV1, projV2) {
+            const A = x - projV1.x;
+            const B = y - projV1.y;
+            const C = projV2.x - projV1.x;
+            const D = projV2.y - projV1.y;
+            const lenSq = C * C + D * D;
+            if (lenSq < 1e-9) return 0;
+            return (A * C + B * D) / lenSq;
         }
 
         getPointAt(param) {
@@ -489,6 +574,7 @@
                 this.v1.y + (this.v2.y - this.v1.y) * param,
                 this.v1.z + (this.v2.z - this.v1.z) * param
             );
+            p.hostType = 'edge';
             p.edgeIdx = this.idx;
             p.param = param;
             return p;
@@ -508,15 +594,11 @@
                 for (let i = 0; i < face.length; i++) {
                     const a = face[i];
                     const b = face[(i + 1) % face.length];
-
                     const edgeIdx = this.edges.findIndex(e =>
                     (e.v1Index === a && e.v2Index === b) ||
                     (e.v1Index === b && e.v2Index === a)
                     );
-
-                    if (edgeIdx !== -1) {
-                        this.edges[edgeIdx].faceIndices.push(fIdx);
-                    }
+                    if (edgeIdx !== -1) this.edges[edgeIdx].faceIndices.push(fIdx);
                 }
             });
         }
@@ -556,6 +638,34 @@
         }
     }
 
+    class HexagonalPyramid extends Shape {
+        constructor(s) {
+            super();
+            const r = s / 2;
+            const baseY = -s / 2;
+            const apexY = s / 2;
+            for (let i = 0; i < 6; i++) {
+                const a = (2 * Math.PI * i) / 6;
+                this.vertices.push(new Point3D(r * Math.cos(a), baseY, r * Math.sin(a)));
+            }
+            const apexIndex = this.vertices.length;
+            this.vertices.push(new Point3D(0, apexY, 0));
+            for (let i = 0; i < 6; i++) {
+                const next = (i + 1) % 6;
+                this.edges.push(new Edge(this.vertices[i], this.vertices[next], this.edges.length, i, next));
+            }
+            for (let i = 0; i < 6; i++) {
+                this.edges.push(new Edge(this.vertices[i], this.vertices[apexIndex], this.edges.length, i, apexIndex));
+            }
+            this.faces.push([0,1,2,3,4,5]);
+            for (let i = 0; i < 6; i++) {
+                const next = (i + 1) % 6;
+                this.faces.push([i, next, apexIndex]);
+            }
+            this.buildConnectivity();
+        }
+    }
+
     class Prism extends Shape {
         constructor(s) {
             super();
@@ -591,7 +701,6 @@
     class Cylinder extends Shape {
         constructor(s, segments = 24) {
             super();
-
             const r = s / 2;
             const h = s;
             const topY = h / 2;
@@ -599,42 +708,28 @@
 
             for (let i = 0; i < segments; i++) {
                 const a = (2 * Math.PI * i) / segments;
-                this.vertices.push(new Point3D(
-                    r * Math.cos(a),
-                    topY,
-                    r * Math.sin(a)
-                ));
+                this.vertices.push(new Point3D(r * Math.cos(a), topY, r * Math.sin(a)));
             }
-
             for (let i = 0; i < segments; i++) {
                 const a = (2 * Math.PI * i) / segments;
-                this.vertices.push(new Point3D(
-                    r * Math.cos(a),
-                    bottomY,
-                    r * Math.sin(a)
-                ));
+                this.vertices.push(new Point3D(r * Math.cos(a), bottomY, r * Math.sin(a)));
             }
 
             for (let i = 0; i < segments; i++) {
                 const next = (i + 1) % segments;
                 this.edges.push(new Edge(this.vertices[i], this.vertices[next], this.edges.length, i, next));
             }
-
             for (let i = 0; i < segments; i++) {
                 const a = segments + i;
                 const b = segments + ((i + 1) % segments);
                 this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
             }
-
             for (let i = 0; i < segments; i++) {
-                const a = i;
-                const b = segments + i;
-                this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                this.edges.push(new Edge(this.vertices[i], this.vertices[segments + i], this.edges.length, i, segments + i));
             }
 
             this.faces.push([...Array(segments).keys()]);
             this.faces.push([...Array(segments).keys()].map(i => segments + (segments - 1 - i)));
-
             for (let i = 0; i < segments; i++) {
                 const next = (i + 1) % segments;
                 this.faces.push([i, next, segments + next, segments + i]);
@@ -647,40 +742,28 @@
     class Cone extends Shape {
         constructor(s, segments = 24) {
             super();
-
             const r = s / 2;
             const h = s;
             const baseY = -h / 2;
             const apexY = h / 2;
-
             for (let i = 0; i < segments; i++) {
                 const a = (2 * Math.PI * i) / segments;
-                this.vertices.push(new Point3D(
-                    r * Math.cos(a),
-                    baseY,
-                    r * Math.sin(a)
-                ));
+                this.vertices.push(new Point3D(r * Math.cos(a), baseY, r * Math.sin(a)));
             }
-
             const apexIndex = this.vertices.length;
             this.vertices.push(new Point3D(0, apexY, 0));
-
             for (let i = 0; i < segments; i++) {
                 const next = (i + 1) % segments;
                 this.edges.push(new Edge(this.vertices[i], this.vertices[next], this.edges.length, i, next));
             }
-
             for (let i = 0; i < segments; i++) {
                 this.edges.push(new Edge(this.vertices[i], this.vertices[apexIndex], this.edges.length, i, apexIndex));
             }
-
             this.faces.push([...Array(segments).keys()]);
-
             for (let i = 0; i < segments; i++) {
                 const next = (i + 1) % segments;
                 this.faces.push([i, next, apexIndex]);
             }
-
             this.buildConnectivity();
         }
     }
@@ -688,9 +771,7 @@
     class Sphere extends Shape {
         constructor(s, latSegments = 10, lonSegments = 16) {
             super();
-
             const r = s / 2;
-
             const topIndex = this.vertices.length;
             this.vertices.push(new Point3D(0, r, 0));
 
@@ -699,7 +780,6 @@
                 const phi = Math.PI * lat / latSegments;
                 const y = r * Math.cos(phi);
                 const rr = r * Math.sin(phi);
-
                 const ring = [];
                 for (let lon = 0; lon < lonSegments; lon++) {
                     const theta = 2 * Math.PI * lon / lonSegments;
@@ -726,26 +806,17 @@
                 const ringA = ringIndices[k];
                 const ringB = ringIndices[k + 1];
                 for (let i = 0; i < lonSegments; i++) {
-                    const a = ringA[i];
-                    const b = ringB[i];
-                    this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                    this.edges.push(new Edge(this.vertices[ringA[i]], this.vertices[ringB[i]], this.edges.length, ringA[i], ringB[i]));
                 }
             }
 
             if (ringIndices.length > 0) {
                 for (let i = 0; i < lonSegments; i++) {
-                    const a = topIndex;
-                    const b = ringIndices[0][i];
-                    this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                    this.edges.push(new Edge(this.vertices[topIndex], this.vertices[ringIndices[0][i]], this.edges.length, topIndex, ringIndices[0][i]));
                 }
-            }
-
-            if (ringIndices.length > 0) {
                 const lastRing = ringIndices[ringIndices.length - 1];
                 for (let i = 0; i < lonSegments; i++) {
-                    const a = lastRing[i];
-                    const b = bottomIndex;
-                    this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                    this.edges.push(new Edge(this.vertices[lastRing[i]], this.vertices[bottomIndex], this.edges.length, lastRing[i], bottomIndex));
                 }
             }
 
@@ -755,18 +826,16 @@
                     const next = (i + 1) % lonSegments;
                     this.faces.push([topIndex, firstRing[next], firstRing[i]]);
                 }
-            }
 
-            for (let k = 0; k < ringIndices.length - 1; k++) {
-                const ringA = ringIndices[k];
-                const ringB = ringIndices[k + 1];
-                for (let i = 0; i < lonSegments; i++) {
-                    const next = (i + 1) % lonSegments;
-                    this.faces.push([ringA[i], ringA[next], ringB[next], ringB[i]]);
+                for (let k = 0; k < ringIndices.length - 1; k++) {
+                    const ringA = ringIndices[k];
+                    const ringB = ringIndices[k + 1];
+                    for (let i = 0; i < lonSegments; i++) {
+                        const next = (i + 1) % lonSegments;
+                        this.faces.push([ringA[i], ringA[next], ringB[next], ringB[i]]);
+                    }
                 }
-            }
 
-            if (ringIndices.length > 0) {
                 const lastRing = ringIndices[ringIndices.length - 1];
                 for (let i = 0; i < lonSegments; i++) {
                     const next = (i + 1) % lonSegments;
@@ -783,9 +852,7 @@
         const ac = c.sub(a);
         const normal = ab.cross(ac);
         const len = normal.length();
-
         if (len < 1e-6) return null;
-
         const n = normal.scale(1 / len);
         const d = -n.dot(a);
         return { n, d };
@@ -799,10 +866,7 @@
         const da = signedDistanceToPlane(plane, a);
         const db = signedDistanceToPlane(plane, b);
 
-        if (Math.abs(da) < eps && Math.abs(db) < eps) {
-            return [a.clone(), b.clone()];
-        }
-
+        if (Math.abs(da) < eps && Math.abs(db) < eps) return [a.clone(), b.clone()];
         if (Math.abs(da) < eps) return [a.clone()];
         if (Math.abs(db) < eps) return [b.clone()];
         if (da * db > 0) return [];
@@ -824,16 +888,13 @@
     function uniquePoints(points, eps = 1e-4) {
         const result = [];
         for (const p of points) {
-            if (!result.some(q => samePoint(p, q, eps))) {
-                result.push(p);
-            }
+            if (!result.some(q => samePoint(p, q, eps))) result.push(p);
         }
         return result;
     }
 
     function buildSectionPolygon(shape, plane) {
         const raw = [];
-
         for (const edge of shape.edges) {
             const pts = intersectSegmentPlane(edge.v1, edge.v2, plane);
             raw.push(...pts);
@@ -864,16 +925,13 @@
 
     function polygonArea3D(points) {
         if (!points || points.length < 3) return 0;
-
         const p0 = points[0];
         let area = 0;
-
         for (let i = 1; i < points.length - 1; i++) {
             const a = points[i].sub(p0);
             const b = points[i + 1].sub(p0);
             area += a.cross(b).length() / 2;
         }
-
         return area;
     }
 
@@ -885,36 +943,92 @@
 
             this.shapeType = 'cube';
             this.shape = new Cube(200);
-
-            this.points = [];
-            this.sectionPoints = [];
+            this.pointPlacementMode = 'edge';
 
             this.rotX = -30;
             this.rotY = 45;
             this.size = 200;
+
+            this.cameraDistance = 500;
+            this.zoom = 1;
+            this.minZoom = 0.05;
+            this.maxZoom = 500;
+
+            this.edgeThickness = 2;
+            this.warmLight = false;
 
             this.isDragging = false;
             this.mouseDown = false;
             this.lastX = 0;
             this.lastY = 0;
             this.hoveredEdgeIdx = -1;
+            this.hoveredFaceIdx = -1;
+            this.hoveredPointIdx = -1;
+            this.draggingPointIdx = -1;
+
             this.wireframeOnly = false;
             this.showLabels = false;
+            this.lastTouchDistance = null;
+
+            this.sections = [];
+            this.activeSectionIndex = 0;
+            this.sectionColorPalette = [
+                '#3b82f6', '#ef4444', '#10b981', '#a855f7',
+                '#f59e0b', '#06b6d4', '#ec4899', '#84cc16'
+            ];
+
+            this.intersectionPairs = [];
 
             this.ui = {
                 size: document.getElementById('sizeSlider'),
                 rotX: document.getElementById('rotXSlider'),
                 rotY: document.getElementById('rotYSlider'),
+                edgeThickness: document.getElementById('edgeThicknessSlider'),
                 opacity: document.getElementById('opacitySlider'),
                 color: document.getElementById('sectionColor'),
                 pointsList: document.getElementById('pointsList'),
-                pointsCount: document.getElementById('pointsCount'),
-                sectionArea: document.getElementById('sectionArea'),
+                sectionsList: document.getElementById('sectionsList'),
+                intersectionsList: document.getElementById('intersectionsList'),
+                intersectionTargetSelect: document.getElementById('intersectionTargetSelect'),
+                sectionsCount: document.getElementById('sectionsCount'),
+                activePointsCount: document.getElementById('activePointsCount'),
+                intersectionCount: document.getElementById('intersectionCount'),
                 sectionInfo: document.getElementById('sectionInfo'),
                 sectionDetails: document.getElementById('sectionDetails')
             };
 
+            this.ensureAtLeastOneSection();
             this.init();
+        }
+
+        ensureAtLeastOneSection() {
+            if (this.sections.length === 0) {
+                this.sections.push(this.createEmptySection());
+                this.activeSectionIndex = 0;
+            }
+        }
+
+        createEmptySection() {
+            const idx = this.sections.length;
+            return {
+                id: Date.now() + Math.random(),
+                name: `Сечение ${idx + 1}`,
+                color: this.sectionColorPalette[idx % this.sectionColorPalette.length],
+                opacity: 0.6,
+                points: [],
+                polygon: [],
+                built: false,
+                area: 0,
+                plane: null
+            };
+        }
+
+        get activeSection() {
+            return this.sections[this.activeSectionIndex];
+        }
+
+        getSectionById(id) {
+            return this.sections.find(s => s.id === id) || null;
         }
 
         init() {
@@ -922,6 +1036,8 @@
             window.addEventListener('resize', () => this.resize());
             this.setupInputs();
             this.setupMouse();
+            this.syncSectionControls();
+            this.updateUI();
             this.loop();
         }
 
@@ -936,6 +1052,14 @@
                     document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
                     this.setShape(e.target.dataset.shape);
+                });
+            });
+
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    this.pointPlacementMode = e.target.dataset.mode;
                 });
             });
 
@@ -955,20 +1079,82 @@
                 document.getElementById('rotYValue').textContent = Math.round(this.rotY);
             };
 
-            this.ui.opacity.oninput = (e) => {
-                document.getElementById('opacityValue').textContent = e.target.value;
+            this.ui.edgeThickness.oninput = (e) => {
+                this.edgeThickness = parseFloat(e.target.value);
+                document.getElementById('edgeThicknessValue').textContent = e.target.value;
             };
 
-            document.getElementById('clearBtn').onclick = () => {
-                this.points = [];
-                this.sectionPoints = [];
-                this.shape.edges.forEach(e => e.points = []);
-                this.ui.sectionArea.textContent = '0';
-                this.ui.sectionInfo.style.display = 'none';
+            this.ui.opacity.oninput = (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('opacityValue').textContent = e.target.value;
+                this.activeSection.opacity = val;
+            };
+
+            this.ui.color.oninput = (e) => {
+                this.activeSection.color = e.target.value;
                 this.updateUI();
             };
 
-            document.getElementById('buildSectionBtn').onclick = () => this.buildSection();
+            document.getElementById('newSectionBtn').onclick = () => {
+                this.sections.push(this.createEmptySection());
+                this.activeSectionIndex = this.sections.length - 1;
+                this.syncSectionControls();
+                this.updateUI();
+            };
+
+            document.getElementById('buildSectionBtn').onclick = () => this.buildActiveSection();
+
+            document.getElementById('deleteSectionBtn').onclick = () => {
+                const activeId = this.activeSection.id;
+                if (this.sections.length === 1) {
+                    this.sections[0] = this.createEmptySection();
+                    this.activeSectionIndex = 0;
+                } else {
+                    this.sections.splice(this.activeSectionIndex, 1);
+                    this.activeSectionIndex = Math.max(0, this.activeSectionIndex - 1);
+                }
+                this.intersectionPairs = this.intersectionPairs.filter(p => p.aId !== activeId && p.bId !== activeId);
+                this.syncSectionControls();
+                this.updateUI();
+            };
+
+            document.getElementById('buildIntersectionBtn').onclick = () => {
+                const targetId = Number(this.ui.intersectionTargetSelect.value);
+                if (!targetId) return;
+
+                const a = this.activeSection;
+                const b = this.getSectionById(targetId);
+                if (!a || !b || a.id === b.id) return;
+
+                if (!a.built || !b.built) {
+                    alert('Оба сечения должны быть построены.');
+                    return;
+                }
+
+                const segment = this.computeIntersectionSegment(a, b);
+                if (!segment) {
+                    alert('Для этих сечений не удалось получить линию пересечения внутри фигуры.');
+                    return;
+                }
+
+                const exists = this.intersectionPairs.some(p =>
+                (p.aId === a.id && p.bId === b.id) || (p.aId === b.id && p.bId === a.id)
+                );
+                if (!exists) {
+                    this.intersectionPairs.push({
+                        id: Date.now() + Math.random(),
+                        aId: a.id,
+                        bId: b.id,
+                        color: '#fbbf24'
+                    });
+                }
+                this.updateUI();
+            };
+
+            document.getElementById('clearIntersectionBtn').onclick = () => {
+                this.intersectionPairs = [];
+                this.updateUI();
+            };
 
             document.getElementById('resetViewBtn').onclick = () => {
                 this.rotX = -30;
@@ -979,8 +1165,16 @@
                 document.getElementById('rotYValue').textContent = 45;
             };
 
+            document.getElementById('resetZoomBtn').onclick = () => {
+                this.zoom = 1;
+            };
+
             document.getElementById('toggleWireframeBtn').onclick = () => {
                 this.wireframeOnly = !this.wireframeOnly;
+            };
+
+            document.getElementById('toggleWarmLightBtn').onclick = () => {
+                this.warmLight = !this.warmLight;
             };
 
             document.getElementById('toggleLabelsBtn').onclick = () => {
@@ -988,38 +1182,148 @@
             };
         }
 
+        syncSectionControls() {
+            const s = this.activeSection;
+            this.ui.color.value = s.color;
+            this.ui.opacity.value = s.opacity;
+            document.getElementById('opacityValue').textContent = String(s.opacity);
+        }
+
         setShape(type) {
             this.shapeType = type;
-            this.points = [];
-            this.sectionPoints = [];
 
             switch(type) {
-                case 'cube':
-                    this.shape = new Cube(this.size);
-                    break;
-                case 'pyramid':
-                    this.shape = new Pyramid(this.size);
-                    break;
-                case 'prism':
-                    this.shape = new Prism(this.size);
-                    break;
-                case 'tetrahedron':
-                    this.shape = new Tetrahedron(this.size);
-                    break;
-                case 'cylinder':
-                    this.shape = new Cylinder(this.size, 28);
-                    break;
-                case 'cone':
-                    this.shape = new Cone(this.size, 28);
-                    break;
-                case 'sphere':
-                    this.shape = new Sphere(this.size, 12, 20);
-                    break;
+                case 'cube': this.shape = new Cube(this.size); break;
+                case 'pyramid': this.shape = new Pyramid(this.size); break;
+                case 'hexagonalPyramid': this.shape = new HexagonalPyramid(this.size); break;
+                case 'prism': this.shape = new Prism(this.size); break;
+                case 'tetrahedron': this.shape = new Tetrahedron(this.size); break;
+                case 'cylinder': this.shape = new Cylinder(this.size, 28); break;
+                case 'cone': this.shape = new Cone(this.size, 28); break;
+                case 'sphere': this.shape = new Sphere(this.size, 12, 20); break;
             }
 
-            this.ui.sectionArea.textContent = '0';
-            this.ui.sectionInfo.style.display = 'none';
+            this.sections = [this.createEmptySection()];
+            this.activeSectionIndex = 0;
+            this.intersectionPairs = [];
+            this.draggingPointIdx = -1;
+            this.hoveredPointIdx = -1;
+            this.hoveredFaceIdx = -1;
+            this.hoveredEdgeIdx = -1;
+            this.syncSectionControls();
             this.updateUI();
+        }
+
+        getRotatedVertices() {
+            return this.shape.rotate(this.rotX, this.rotY);
+        }
+
+        inverseRotatePoint(p) {
+            return p.rotateY(-this.rotY).rotateX(-this.rotX);
+        }
+
+        getRayFromScreen(x, y) {
+            const sx = (x - this.canvas.width / 2) / this.zoom;
+            const sy = -(y - this.canvas.height / 2) / this.zoom;
+            const origin = new Point3D(0, 0, -this.cameraDistance);
+            const dir = new Point3D(sx, sy, this.cameraDistance).normalize();
+            return { origin, dir };
+        }
+
+        intersectRayPlane(origin, dir, planePoint, planeNormal) {
+            const denom = planeNormal.dot(dir);
+            if (Math.abs(denom) < 1e-9) return null;
+            const t = planeNormal.dot(planePoint.sub(origin)) / denom;
+            if (t < 0) return null;
+            return origin.add(dir.scale(t));
+        }
+
+        pointInPolygon2D(x, y, poly) {
+            let inside = false;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const xi = poly[i].x, yi = poly[i].y;
+                const xj = poly[j].x, yj = poly[j].y;
+                const intersect = ((yi > y) !== (yj > y)) &&
+                (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-9) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        pointInFace3D(point, faceIndices, rotatedVertices) {
+            const p0 = rotatedVertices[faceIndices[0]];
+            const p1 = rotatedVertices[faceIndices[1]];
+            const p2 = rotatedVertices[faceIndices[2]];
+            const normal = p1.sub(p0).cross(p2.sub(p0)).normalize();
+            const helper = Math.abs(normal.x) < 0.9 ? new Point3D(1, 0, 0) : new Point3D(0, 1, 0);
+            const u = normal.cross(helper).normalize();
+            const v = normal.cross(u).normalize();
+
+            const poly2d = faceIndices.map(idx => {
+                const d = rotatedVertices[idx].sub(p0);
+                return { x: d.dot(u), y: d.dot(v) };
+            });
+
+            const dp = point.sub(p0);
+            return this.pointInPolygon2D(dp.dot(u), dp.dot(v), poly2d);
+        }
+
+        computeFaceVisibility(rotated) {
+            let shapeCenter = new Point3D(0, 0, 0);
+            for (const v of rotated) shapeCenter = shapeCenter.add(v);
+            shapeCenter = shapeCenter.scale(1 / rotated.length);
+            const cameraPos = new Point3D(0, 0, -this.cameraDistance);
+
+            return this.shape.faces.map(face => {
+                const v0 = rotated[face[0]];
+                const v1 = rotated[face[1]];
+                const v2 = rotated[face[2]];
+                const a = v1.sub(v0);
+                const b = v2.sub(v0);
+                let n = a.cross(b);
+
+                let center = new Point3D(0, 0, 0);
+                for (const idx of face) center = center.add(rotated[idx]);
+                center = center.scale(1 / face.length);
+
+                const fromShapeCenter = center.sub(shapeCenter);
+                if (n.dot(fromShapeCenter) < 0) n = n.scale(-1);
+
+                const toCamera = cameraPos.sub(center);
+                return n.dot(toCamera) > 0;
+            });
+        }
+
+        findFaceUnderCursor(x, y) {
+            const rotated = this.getRotatedVertices();
+            const faceVisible = this.computeFaceVisibility(rotated);
+            const ray = this.getRayFromScreen(x, y);
+            let best = null;
+
+            for (let fIdx = 0; fIdx < this.shape.faces.length; fIdx++) {
+                if (!faceVisible[fIdx]) continue;
+
+                const face = this.shape.faces[fIdx];
+                const projFace = face.map(idx =>
+                rotated[idx].project(this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom)
+                );
+
+                if (!this.pointInPolygon2D(x, y, projFace)) continue;
+
+                const p0 = rotated[face[0]];
+                const p1 = rotated[face[1]];
+                const p2 = rotated[face[2]];
+                const normal = p1.sub(p0).cross(p2.sub(p0)).normalize();
+
+                const hit = this.intersectRayPlane(ray.origin, ray.dir, p0, normal);
+                if (!hit) continue;
+                if (!this.pointInFace3D(hit, face, rotated)) continue;
+
+                const dist = hit.sub(ray.origin).length();
+                if (!best || dist < best.dist) best = { faceIdx: fIdx, pointRotated: hit, dist };
+            }
+
+            return best;
         }
 
         setupMouse() {
@@ -1028,38 +1332,49 @@
                 this.isDragging = false;
                 this.lastX = x;
                 this.lastY = y;
+                this.updateHoverState(x, y);
+                this.draggingPointIdx = this.hoveredPointIdx !== -1 ? this.hoveredPointIdx : -1;
             };
 
             const moveDrag = (x, y) => {
+                if (this.draggingPointIdx !== -1) {
+                    const p = this.activeSection.points[this.draggingPointIdx];
+                    if (p?.hostType === 'edge') this.movePointAlongEdge(this.draggingPointIdx, x, y);
+                    else if (p?.hostType === 'face') this.movePointOnFace(this.draggingPointIdx, x, y);
+                    return;
+                }
+
                 if (this.mouseDown) {
                     const dx = x - this.lastX;
                     const dy = y - this.lastY;
-
-                    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-                        this.isDragging = true;
-                    }
+                    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) this.isDragging = true;
 
                     if (this.isDragging) {
                         this.rotY += dx * 0.5;
                         this.rotX -= dy * 0.5;
-
                         this.ui.rotX.value = this.rotX;
                         this.ui.rotY.value = this.rotY;
                         document.getElementById('rotXValue').textContent = Math.round(this.rotX);
                         document.getElementById('rotYValue').textContent = Math.round(this.rotY);
-
                         this.lastX = x;
                         this.lastY = y;
                     }
                 }
 
-                this.checkHover(x, y);
+                this.updateHoverState(x, y);
             };
 
             const endDrag = (x, y) => {
-                if (!this.isDragging) {
-                    this.handleClick(x, y);
+                if (this.draggingPointIdx !== -1) {
+                    this.draggingPointIdx = -1;
+                    this.updateHoverState(x, y);
+                    this.mouseDown = false;
+                    this.isDragging = false;
+                    return;
                 }
+
+                if (!this.isDragging) this.handleClick(x, y);
+
                 this.mouseDown = false;
                 this.isDragging = false;
             };
@@ -1069,83 +1384,256 @@
             this.canvas.onmouseup = e => endDrag(e.offsetX, e.offsetY);
             this.canvas.onmouseleave = () => {
                 this.hoveredEdgeIdx = -1;
+                this.hoveredFaceIdx = -1;
+                this.hoveredPointIdx = -1;
+                this.draggingPointIdx = -1;
                 this.mouseDown = false;
                 this.isDragging = false;
+                this.canvas.style.cursor = 'crosshair';
             };
+
+            this.canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomFactor = Math.exp(-e.deltaY * 0.0015);
+                this.zoom *= zoomFactor;
+                this.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoom));
+            }, { passive: false });
 
             this.canvas.ontouchstart = e => {
                 e.preventDefault();
-                const t = e.touches[0];
                 const rect = this.canvas.getBoundingClientRect();
-                startDrag(t.clientX - rect.left, t.clientY - rect.top);
+
+                if (e.touches.length === 1) {
+                    const t = e.touches[0];
+                    startDrag(t.clientX - rect.left, t.clientY - rect.top);
+                }
+
+                if (e.touches.length === 2) {
+                    const t1 = e.touches[0];
+                    const t2 = e.touches[1];
+                    this.lastTouchDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+                }
             };
 
             this.canvas.ontouchmove = e => {
                 e.preventDefault();
-                const t = e.touches[0];
                 const rect = this.canvas.getBoundingClientRect();
-                moveDrag(t.clientX - rect.left, t.clientY - rect.top);
+
+                if (e.touches.length === 1) {
+                    const t = e.touches[0];
+                    moveDrag(t.clientX - rect.left, t.clientY - rect.top);
+                }
+
+                if (e.touches.length === 2) {
+                    const t1 = e.touches[0];
+                    const t2 = e.touches[1];
+                    const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+                    if (this.lastTouchDistance !== null) {
+                        const factor = dist / this.lastTouchDistance;
+                        this.zoom *= factor;
+                        this.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoom));
+                    }
+                    this.lastTouchDistance = dist;
+                }
             };
 
             this.canvas.ontouchend = e => {
                 e.preventDefault();
-                const t = e.changedTouches[0];
-                const rect = this.canvas.getBoundingClientRect();
-                endDrag(t.clientX - rect.left, t.clientY - rect.top);
+                if (e.touches.length < 2) this.lastTouchDistance = null;
+
+                if (e.changedTouches.length === 1) {
+                    const t = e.changedTouches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    endDrag(t.clientX - rect.left, t.clientY - rect.top);
+                }
+
+                this.mouseDown = false;
+                this.isDragging = false;
             };
         }
 
-        checkHover(x, y) {
-            const rotated = this.shape.rotate(this.rotX, this.rotY);
-            let found = -1;
+        rebuildActiveSectionIfNeeded() {
+            const s = this.activeSection;
+            if (s.built && s.points.length >= 3) this.buildSectionFor(s, false);
+            this.updateIntersectionLinesAfterGeometryChange();
+        }
 
+        buildSectionFor(section, showAlert = true) {
+            if (section.points.length < 3) {
+                if (showAlert) alert('Нужно минимум 3 точки.');
+                return false;
+            }
+
+            const a = section.points[0];
+            const b = section.points[1];
+            const c = section.points[2];
+            const plane = planeFrom3Points(a, b, c);
+
+            if (!plane) {
+                section.built = false;
+                section.polygon = [];
+                section.area = 0;
+                section.plane = null;
+                if (showAlert) alert('Первые 3 точки лежат почти на одной прямой. Выберите другие точки.');
+                return false;
+            }
+
+            const polygon = buildSectionPolygon(this.shape, plane);
+            if (polygon.length < 3) {
+                section.built = false;
+                section.polygon = [];
+                section.area = 0;
+                section.plane = plane;
+                if (showAlert) alert('Не удалось построить корректное сечение для выбранных точек.');
+                return false;
+            }
+
+            section.polygon = polygon;
+            section.area = polygonArea3D(polygon);
+            section.built = true;
+            section.plane = plane;
+            return true;
+        }
+
+        buildActiveSection() {
+            this.buildSectionFor(this.activeSection, true);
+            this.updateIntersectionLinesAfterGeometryChange();
+            this.updateUI();
+        }
+
+        updateIntersectionLinesAfterGeometryChange() {
+            this.intersectionPairs = this.intersectionPairs.filter(pair => {
+                const a = this.getSectionById(pair.aId);
+                const b = this.getSectionById(pair.bId);
+                if (!a || !b || !a.built || !b.built) return false;
+                return !!this.computeIntersectionSegment(a, b);
+            });
+        }
+
+        updateHoverState(x, y) {
+            this.hoveredPointIdx = this.findPointNearScreen(x, y);
+            this.hoveredEdgeIdx = -1;
+            this.hoveredFaceIdx = -1;
+
+            if (this.hoveredPointIdx === -1) {
+                if (this.pointPlacementMode === 'edge') this.checkHoverEdge(x, y);
+                else {
+                    const hit = this.findFaceUnderCursor(x, y);
+                    this.hoveredFaceIdx = hit ? hit.faceIdx : -1;
+                }
+            }
+
+            if (this.draggingPointIdx !== -1 || this.hoveredPointIdx !== -1) this.canvas.style.cursor = 'grab';
+            else if (this.hoveredEdgeIdx !== -1 || this.hoveredFaceIdx !== -1) this.canvas.style.cursor = 'pointer';
+            else this.canvas.style.cursor = 'crosshair';
+        }
+
+        findPointNearScreen(x, y) {
+            const pts = this.activeSection.points;
+            for (let i = pts.length - 1; i >= 0; i--) {
+                const pt = pts[i];
+                const proj = pt.rotate(this.rotX, this.rotY).project(
+                    this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom
+                );
+                const dx = x - proj.x;
+                const dy = y - proj.y;
+                if (Math.sqrt(dx * dx + dy * dy) <= 9) return i;
+            }
+            return -1;
+        }
+
+        checkHoverEdge(x, y) {
+            const rotated = this.getRotatedVertices();
+            let found = -1;
             for (const edge of this.shape.edges) {
                 const rv1 = rotated[edge.v1Index];
                 const rv2 = rotated[edge.v2Index];
-
-                const proj1 = rv1.project(this.canvas.width, this.canvas.height);
-                const proj2 = rv2.project(this.canvas.width, this.canvas.height);
-
+                const proj1 = rv1.project(this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom);
+                const proj2 = rv2.project(this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom);
                 if (edge.isHovered(x, y, proj1, proj2, 12)) {
                     found = edge.idx;
                     break;
                 }
             }
-
             this.hoveredEdgeIdx = found;
-            this.canvas.style.cursor = found !== -1 ? 'pointer' : 'crosshair';
+        }
+
+        movePointAlongEdge(pointIndex, x, y) {
+            const pts = this.activeSection.points;
+            const pt = pts[pointIndex];
+            if (!pt) return;
+            const edge = this.shape.edges[pt.edgeIdx];
+            if (!edge) return;
+
+            const rotated = this.getRotatedVertices();
+            const rv1 = rotated[edge.v1Index];
+            const rv2 = rotated[edge.v2Index];
+            const proj1 = rv1.project(this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom);
+            const proj2 = rv2.project(this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom);
+
+            let param = edge.projectParamFromScreen(x, y, proj1, proj2);
+            param = Math.max(0, Math.min(1, param));
+
+            const moved = edge.getPointAt(param);
+            pt.x = moved.x;
+            pt.y = moved.y;
+            pt.z = moved.z;
+            pt.param = param;
+
+            this.rebuildActiveSectionIfNeeded();
+            this.updateUI();
+        }
+
+        movePointOnFace(pointIndex, x, y) {
+            const pts = this.activeSection.points;
+            const pt = pts[pointIndex];
+            if (!pt || pt.faceIdx == null) return;
+
+            const hit = this.findFaceUnderCursor(x, y);
+            if (!hit || hit.faceIdx !== pt.faceIdx) return;
+
+            const unrotated = this.inverseRotatePoint(hit.pointRotated);
+            pt.x = unrotated.x;
+            pt.y = unrotated.y;
+            pt.z = unrotated.z;
+
+            this.rebuildActiveSectionIfNeeded();
+            this.updateUI();
         }
 
         handleClick(x, y) {
-            if (this.hoveredEdgeIdx === -1) return;
+            const s = this.activeSection;
 
-            const edge = this.shape.edges[this.hoveredEdgeIdx];
-            const rotated = this.shape.rotate(this.rotX, this.rotY);
+            if (this.pointPlacementMode === 'edge') {
+                if (this.hoveredEdgeIdx === -1) return;
+                const edge = this.shape.edges[this.hoveredEdgeIdx];
+                const rotated = this.getRotatedVertices();
+                const rv1 = rotated[edge.v1Index];
+                const rv2 = rotated[edge.v2Index];
+                const proj1 = rv1.project(this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom);
+                const proj2 = rv2.project(this.canvas.width, this.canvas.height, this.cameraDistance, this.zoom);
 
-            const rv1 = rotated[edge.v1Index];
-            const rv2 = rotated[edge.v2Index];
-            const proj1 = rv1.project(this.canvas.width, this.canvas.height);
-            const proj2 = rv2.project(this.canvas.width, this.canvas.height);
+                let param = edge.projectParamFromScreen(x, y, proj1, proj2);
+                param = Math.max(0, Math.min(1, param));
 
-            const A = x - proj1.x;
-            const B = y - proj1.y;
-            const C = proj2.x - proj1.x;
-            const D = proj2.y - proj1.y;
-            const lenSq = C * C + D * D;
-
-            let param = 0;
-            if (lenSq > 1e-9) {
-                param = (A * C + B * D) / lenSq;
+                const newPoint = edge.getPointAt(param);
+                s.points.push(newPoint);
+                this.showFeedback(x, y);
+                this.updateUI();
+                return;
             }
 
-            const clampedParam = Math.max(0, Math.min(1, param));
-            const newPoint = edge.getPointAt(clampedParam);
+            if (this.pointPlacementMode === 'face') {
+                const hit = this.findFaceUnderCursor(x, y);
+                if (!hit) return;
 
-            this.points.push(newPoint);
-            edge.points.push(newPoint);
-
-            this.showFeedback(x, y);
-            this.updateUI();
+                const p = this.inverseRotatePoint(hit.pointRotated);
+                p.hostType = 'face';
+                p.faceIdx = hit.faceIdx;
+                s.points.push(p);
+                this.showFeedback(x, y);
+                this.updateUI();
+            }
         }
 
         showFeedback(x, y) {
@@ -1158,113 +1646,135 @@
             setTimeout(() => el.remove(), 800);
         }
 
-        buildSection() {
-            if (this.points.length < 3) {
-                alert('Нужно минимум 3 точки.');
-                return;
-            }
-
-            const a = this.points[0];
-            const b = this.points[1];
-            const c = this.points[2];
-
-            const plane = planeFrom3Points(a, b, c);
-            if (!plane) {
-                alert('Первые 3 точки лежат почти на одной прямой. Выберите другие точки.');
-                return;
-            }
-
-            const polygon = buildSectionPolygon(this.shape, plane);
-            if (polygon.length < 3) {
-                alert('Не удалось построить корректное сечение для выбранных точек.');
-                return;
-            }
-
-            this.sectionPoints = polygon;
-
-            const area = polygonArea3D(polygon);
-            this.ui.sectionArea.textContent = area.toFixed(1);
-            this.ui.sectionDetails.innerHTML =
-            `Вершин: ${polygon.length}<br>` +
-            `Площадь: ${area.toFixed(2)}<br>` +
-            `Плоскость задана точками 1, 2, 3`;
-
-            this.ui.sectionInfo.style.display = 'block';
-        }
-
-        updateUI() {
-            this.ui.pointsCount.textContent = this.points.length;
-
-            if (this.points.length === 0) {
-                this.ui.pointsList.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:1rem">Нет точек</p>';
-                return;
-            }
-
-            this.ui.pointsList.innerHTML = this.points.map((p, i) => `
-            <div class="point-item">
-                <span>
-                    Точка ${i + 1}<br>
-                    <small style="color: var(--text-secondary)">
-                        ребро ${p.edgeIdx + 1}, t=${p.param.toFixed(2)}
-                    </small>
-                </span>
-                <button class="remove-btn" onclick="app.removePoint(${i})">✕</button>
-            </div>
-        `).join('');
-        }
-
         removePoint(index) {
-            const p = this.points[index];
-            if (!p) return;
+            const s = this.activeSection;
+            if (!s.points[index]) return;
+            s.points.splice(index, 1);
 
-            const edge = this.shape.edges[p.edgeIdx];
-            if (edge) {
-                edge.points = edge.points.filter(pt => pt !== p);
+            if (this.draggingPointIdx === index) this.draggingPointIdx = -1;
+            if (this.hoveredPointIdx === index) this.hoveredPointIdx = -1;
+
+            if (s.points.length < 3) {
+                s.polygon = [];
+                s.built = false;
+                s.area = 0;
+                s.plane = null;
+            } else {
+                this.rebuildActiveSectionIfNeeded();
             }
 
-            this.points.splice(index, 1);
-            this.sectionPoints = [];
-            this.ui.sectionArea.textContent = '0';
-            this.ui.sectionInfo.style.display = 'none';
+            this.updateIntersectionLinesAfterGeometryChange();
             this.updateUI();
         }
 
-        pointInPolygon2D(x, y, poly) {
-            let inside = false;
-            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-                const xi = poly[i].x, yi = poly[i].y;
-                const xj = poly[j].x, yj = poly[j].y;
+        computeIntersectionLineOfPlanes(plane1, plane2) {
+            const n1 = plane1.n;
+            const n2 = plane2.n;
 
-                const intersect = ((yi > y) !== (yj > y)) &&
-                (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-9) + xi);
+            const dir = n1.cross(n2);
+            const denom = dir.dot(dir);
 
-                if (intersect) inside = !inside;
+            if (denom < 1e-10) return null;
+
+            const c1 = -plane1.d;
+            const c2 = -plane2.d;
+
+            const point = n2.cross(dir).scale(c1)
+                .add(dir.cross(n1).scale(c2))
+                .scale(1 / denom);
+
+            return { point, dir: dir.normalize() };
+        }
+
+        intersectLineWithSegment3D(linePoint, lineDir, a, b, eps = 1e-5) {
+            const segDir = b.sub(a);
+            const w0 = linePoint.sub(a);
+
+            const A = lineDir.dot(lineDir);
+            const B = lineDir.dot(segDir);
+            const C = segDir.dot(segDir);
+            const D = lineDir.dot(w0);
+            const E = segDir.dot(w0);
+
+            const denom = A * C - B * B;
+
+            if (Math.abs(denom) < eps) {
+                const distA = a.sub(linePoint).cross(lineDir).length();
+                const distB = b.sub(linePoint).cross(lineDir).length();
+
+                if (distA < eps && distB < eps) {
+                    const t1 = a.sub(linePoint).dot(lineDir);
+                    const t2 = b.sub(linePoint).dot(lineDir);
+                    return [
+                        linePoint.add(lineDir.scale(t1)),
+                        linePoint.add(lineDir.scale(t2))
+                    ];
+                }
+                return [];
             }
-            return inside;
+
+            const t = (B * E - C * D) / denom;
+            const u = (A * E - B * D) / denom;
+
+            if (u < -eps || u > 1 + eps) return [];
+
+            const pLine = linePoint.add(lineDir.scale(t));
+            const pSeg = a.add(segDir.scale(u));
+
+            if (pLine.distanceTo(pSeg) < 1e-4) {
+                return [pLine];
+            }
+
+            return [];
+        }
+
+        computeIntersectionSegment(sectionA, sectionB) {
+            if (!sectionA?.plane || !sectionB?.plane || !sectionA.built || !sectionB.built) {
+                return null;
+            }
+
+            const line = this.computeIntersectionLineOfPlanes(sectionA.plane, sectionB.plane);
+            if (!line) return null;
+
+            const pts = [];
+
+            for (const edge of this.shape.edges) {
+                const hits = this.intersectLineWithSegment3D(line.point, line.dir, edge.v1, edge.v2);
+                pts.push(...hits);
+            }
+
+            const unique = uniquePoints(pts, 1e-4);
+            if (unique.length < 2) return null;
+
+            unique.sort((p1, p2) => {
+                const t1 = p1.sub(line.point).dot(line.dir);
+                const t2 = p2.sub(line.point).dot(line.dir);
+                return t1 - t2;
+            });
+
+            return {
+                p1: unique[0],
+                p2: unique[unique.length - 1]
+            };
         }
 
         isPointVisible(point3D, rotated, faceVisible) {
             const w = this.canvas.width;
             const h = this.canvas.height;
-            const pProj = point3D.rotate(this.rotX, this.rotY).project(w, h);
+            const pProj = point3D.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom);
 
             for (let fIdx = 0; fIdx < this.shape.faces.length; fIdx++) {
                 if (!faceVisible[fIdx]) continue;
-
                 const face = this.shape.faces[fIdx];
-                const projFace = face.map(idx => rotated[idx].project(w, h));
-
+                const projFace = face.map(idx => rotated[idx].project(w, h, this.cameraDistance, this.zoom));
                 if (!this.pointInPolygon2D(pProj.x, pProj.y, projFace)) continue;
 
                 let avgZ = 0;
                 for (const idx of face) avgZ += rotated[idx].z;
                 avgZ /= face.length;
 
-                if (avgZ < pProj.z - 1e-6) {
-                    return false;
-                }
+                if (avgZ < pProj.z - 1e-6) return false;
             }
-
             return true;
         }
 
@@ -1286,10 +1796,7 @@
             const paddingX = 6;
             const width = this.ctx.measureText(text).width + paddingX * 2;
             const height = 20;
-
-            const rx = x;
-            const ry = y - height + 4;
-            const r = 6;
+            const rx = x, ry = y - height + 4, r = 6;
 
             this.ctx.fillStyle = bg;
             this.ctx.beginPath();
@@ -1310,6 +1817,97 @@
             this.ctx.restore();
         }
 
+        updateIntersectionTargetOptions() {
+            const activeId = this.activeSection.id;
+            const options = this.sections
+                .filter(s => s.id !== activeId)
+                .map(s => `<option value="${s.id}">${s.name}</option>`)
+                .join('');
+
+            this.ui.intersectionTargetSelect.innerHTML = options || '<option value="">Нет других сечений</option>';
+        }
+
+        updateUI() {
+            const s = this.activeSection;
+            this.ui.sectionsCount.textContent = String(this.sections.length);
+            this.ui.activePointsCount.textContent = String(s.points.length);
+            this.ui.intersectionCount.textContent = String(this.intersectionPairs.length);
+
+            this.ui.sectionsList.innerHTML = this.sections.map((section, idx) => `
+            <div class="section-item ${idx === this.activeSectionIndex ? 'active' : ''}" style="border-left-color:${section.color}">
+                <div>
+                    <button class="section-tab-btn ${idx === this.activeSectionIndex ? 'active' : ''}" onclick="app.selectSection(${idx})">
+                        <span class="section-badge" style="background:${section.color}"></span>${section.name}
+                    </button>
+                    <div class="section-meta">
+                        Точек: ${section.points.length} · ${section.built ? `Площадь: ${section.area.toFixed(2)}` : 'не построено'}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+            if (s.points.length === 0) {
+                this.ui.pointsList.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:1rem">Нет точек</p>';
+            } else {
+                this.ui.pointsList.innerHTML = s.points.map((p, i) => `
+                <div class="point-item">
+                    <span>
+                        Точка ${i + 1}<br>
+                        <small style="color: var(--text-secondary)">
+                            ${p.hostType === 'edge'
+                                ? `ребро ${p.edgeIdx + 1}, t=${p.param.toFixed(2)}`
+                                : `грань ${p.faceIdx + 1}`
+                            }
+                        </small>
+                    </span>
+                    <button class="remove-btn" onclick="app.removePoint(${i})">✕</button>
+                </div>
+            `).join('');
+            }
+
+            if (s.built) {
+                this.ui.sectionInfo.style.display = 'block';
+                this.ui.sectionDetails.innerHTML =
+                `Вершин: ${s.polygon.length}<br>` +
+                `Площадь: ${s.area.toFixed(2)}<br>` +
+                `Плоскость задана точками 1, 2, 3`;
+            } else {
+                this.ui.sectionInfo.style.display = 'none';
+            }
+
+            this.ui.intersectionsList.innerHTML = this.intersectionPairs.length === 0
+            ? '<p style="color:var(--text-secondary);text-align:center;padding:0.8rem">Нет линий пересечения</p>'
+            : this.intersectionPairs.map(pair => {
+                const a = this.getSectionById(pair.aId);
+                const b = this.getSectionById(pair.bId);
+                if (!a || !b) return '';
+                return `
+                    <div class="intersection-item" style="border-left-color:${pair.color}">
+                        <div>
+                            <div><span class="intersection-badge" style="background:${pair.color}"></span>${a.name} ∩ ${b.name}</div>
+                            <div class="intersection-meta">Линия пересечения построена</div>
+                        </div>
+                        <button class="remove-btn" onclick="app.removeIntersection('${pair.id}')">✕</button>
+                    </div>
+                `;
+            }).join('');
+
+            this.updateIntersectionTargetOptions();
+        }
+
+        removeIntersection(id) {
+            this.intersectionPairs = this.intersectionPairs.filter(p => String(p.id) !== String(id));
+            this.updateUI();
+        }
+
+        selectSection(index) {
+            this.activeSectionIndex = index;
+            this.draggingPointIdx = -1;
+            this.hoveredPointIdx = -1;
+            this.syncSectionControls();
+            this.updateUI();
+        }
+
         loop() {
             this.render();
             requestAnimationFrame(() => this.loop());
@@ -1320,61 +1918,97 @@
             const h = this.canvas.height;
             this.ctx.clearRect(0, 0, w, h);
 
-            const rotated = this.shape.rotate(this.rotX, this.rotY);
+            const rotated = this.getRotatedVertices();
 
             let shapeCenter = new Point3D(0, 0, 0);
-            for (const v of rotated) {
-                shapeCenter = shapeCenter.add(v);
-            }
+            for (const v of rotated) shapeCenter = shapeCenter.add(v);
             shapeCenter = shapeCenter.scale(1 / rotated.length);
 
-            const cameraPos = new Point3D(0, 0, -500);
+            const cameraPos = new Point3D(0, 0, -this.cameraDistance);
 
             const faceVisible = this.shape.faces.map(face => {
                 const v0 = rotated[face[0]];
                 const v1 = rotated[face[1]];
                 const v2 = rotated[face[2]];
-
                 const a = v1.sub(v0);
                 const b = v2.sub(v0);
                 let n = a.cross(b);
 
                 let center = new Point3D(0, 0, 0);
-                for (const idx of face) {
-                    center = center.add(rotated[idx]);
-                }
+                for (const idx of face) center = center.add(rotated[idx]);
                 center = center.scale(1 / face.length);
 
                 const fromShapeCenter = center.sub(shapeCenter);
-                if (n.dot(fromShapeCenter) < 0) {
-                    n = n.scale(-1);
-                }
+                if (n.dot(fromShapeCenter) < 0) n = n.scale(-1);
 
                 const toCamera = cameraPos.sub(center);
                 return n.dot(toCamera) > 0;
             });
 
+            if (this.warmLight) {
+                const centerProj = shapeCenter.project(w, h, this.cameraDistance, this.zoom);
+
+                let maxRadius = 80;
+                for (const v of rotated) {
+                    const pv = v.project(w, h, this.cameraDistance, this.zoom);
+                    const dx = pv.x - centerProj.x;
+                    const dy = pv.y - centerProj.y;
+                    maxRadius = Math.max(maxRadius, Math.sqrt(dx * dx + dy * dy));
+                }
+
+                const aura = this.ctx.createRadialGradient(
+                    centerProj.x, centerProj.y, maxRadius * 0.15,
+                    centerProj.x, centerProj.y, maxRadius * 1.9
+                );
+
+                aura.addColorStop(0.00, 'rgba(255, 210, 150, 0.20)');
+                aura.addColorStop(0.30, 'rgba(255, 180, 110, 0.14)');
+                aura.addColorStop(0.55, 'rgba(255, 145, 80, 0.08)');
+                aura.addColorStop(0.80, 'rgba(255, 120, 50, 0.035)');
+                aura.addColorStop(1.00, 'rgba(255, 120, 50, 0.00)');
+
+                this.ctx.save();
+                this.ctx.fillStyle = aura;
+                this.ctx.beginPath();
+                this.ctx.arc(centerProj.x, centerProj.y, maxRadius * 1.95, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+            }
+
             if (!this.wireframeOnly) {
                 this.shape.faces.forEach((face, idx) => {
                     if (!faceVisible[idx]) return;
-
-                    const proj = face.map(i => rotated[i].project(w, h));
+                    const proj = face.map(i => rotated[i].project(w, h, this.cameraDistance, this.zoom));
 
                     this.ctx.beginPath();
                     this.ctx.moveTo(proj[0].x, proj[0].y);
-                    for (let i = 1; i < proj.length; i++) {
-                        this.ctx.lineTo(proj[i].x, proj[i].y);
-                    }
+                    for (let i = 1; i < proj.length; i++) this.ctx.lineTo(proj[i].x, proj[i].y);
                     this.ctx.closePath();
 
-                    this.ctx.fillStyle = 'rgba(59, 130, 246, 0.12)';
+                    this.ctx.fillStyle = this.warmLight
+                    ? 'rgba(255, 235, 210, 0.05)'
+                    : 'rgba(59, 130, 246, 0.12)';
                     this.ctx.fill();
                 });
             }
 
+            if (this.pointPlacementMode === 'face' && this.hoveredFaceIdx !== -1) {
+                const face = this.shape.faces[this.hoveredFaceIdx];
+                const proj = face.map(i => rotated[i].project(w, h, this.cameraDistance, this.zoom));
+                this.ctx.beginPath();
+                this.ctx.moveTo(proj[0].x, proj[0].y);
+                for (let i = 1; i < proj.length; i++) this.ctx.lineTo(proj[i].x, proj[i].y);
+                this.ctx.closePath();
+                this.ctx.fillStyle = 'rgba(34, 197, 94, 0.18)';
+                this.ctx.fill();
+                this.ctx.strokeStyle = 'rgba(34, 197, 94, 0.9)';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+            }
+
             const edgeRenderData = this.shape.edges.map(edge => {
-                const p1 = rotated[edge.v1Index].project(w, h);
-                const p2 = rotated[edge.v2Index].project(w, h);
+                const p1 = rotated[edge.v1Index].project(w, h, this.cameraDistance, this.zoom);
+                const p2 = rotated[edge.v2Index].project(w, h, this.cameraDistance, this.zoom);
 
                 let isVisible = false;
                 for (const fIdx of edge.faceIndices) {
@@ -1389,13 +2023,11 @@
 
             edgeRenderData.forEach(({ edge, p1, p2, isVisible }) => {
                 if (isVisible || edge.idx === this.hoveredEdgeIdx) return;
-
                 this.ctx.beginPath();
                 this.ctx.moveTo(p1.x, p1.y);
                 this.ctx.lineTo(p2.x, p2.y);
-
-                this.ctx.strokeStyle = '#475569';
-                this.ctx.lineWidth = 1;
+                this.ctx.strokeStyle = this.warmLight ? 'rgba(160, 130, 95, 0.95)' : '#475569';
+                this.ctx.lineWidth = Math.max(0.8, this.edgeThickness * 0.6);
                 this.ctx.setLineDash([6, 6]);
                 this.ctx.stroke();
                 this.ctx.setLineDash([]);
@@ -1403,20 +2035,20 @@
 
             edgeRenderData.forEach(({ edge, p1, p2, isVisible }) => {
                 if (!isVisible && edge.idx !== this.hoveredEdgeIdx) return;
-
                 this.ctx.beginPath();
                 this.ctx.moveTo(p1.x, p1.y);
                 this.ctx.lineTo(p2.x, p2.y);
 
-                if (edge.idx === this.hoveredEdgeIdx) {
+                if (edge.idx === this.hoveredEdgeIdx && this.pointPlacementMode === 'edge') {
                     this.ctx.strokeStyle = '#3b82f6';
-                    this.ctx.lineWidth = 3;
+                    this.ctx.lineWidth = Math.max(this.edgeThickness + 1, 3);
                     this.ctx.shadowColor = '#3b82f6';
                     this.ctx.shadowBlur = 10;
                 } else {
-                    this.ctx.strokeStyle = '#94a3b8';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.shadowBlur = 0;
+                    this.ctx.strokeStyle = this.warmLight ? '#d8c2a2' : '#94a3b8';
+                    this.ctx.lineWidth = this.edgeThickness;
+                    this.ctx.shadowBlur = this.warmLight ? 2 : 0;
+                    this.ctx.shadowColor = this.warmLight ? 'rgba(255, 196, 120, 0.10)' : 'transparent';
                 }
 
                 this.ctx.setLineDash([]);
@@ -1424,31 +2056,31 @@
                 this.ctx.shadowBlur = 0;
             });
 
-            if (this.sectionPoints.length >= 3) {
-                const color = this.ui.color.value;
-                const opacity = parseFloat(this.ui.opacity.value);
+            this.sections.forEach((section, sIdx) => {
+                if (!section.built || section.polygon.length < 3) return;
 
+                const color = section.color;
+                const opacity = section.opacity;
                 const r = parseInt(color.substr(1, 2), 16);
                 const g = parseInt(color.substr(3, 2), 16);
                 const b = parseInt(color.substr(5, 2), 16);
 
-                const projPoints = this.sectionPoints.map(p => p.rotate(this.rotX, this.rotY).project(w, h));
+                const projPoints = section.polygon.map(
+                    p => p.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom)
+                );
 
                 this.ctx.beginPath();
                 this.ctx.moveTo(projPoints[0].x, projPoints[0].y);
-                for (let i = 1; i < projPoints.length; i++) {
-                    this.ctx.lineTo(projPoints[i].x, projPoints[i].y);
-                }
+                for (let i = 1; i < projPoints.length; i++) this.ctx.lineTo(projPoints[i].x, projPoints[i].y);
                 this.ctx.closePath();
                 this.ctx.fillStyle = `rgba(${r},${g},${b},${opacity})`;
                 this.ctx.fill();
 
-                for (let i = 0; i < this.sectionPoints.length; i++) {
-                    const a3 = this.sectionPoints[i];
-                    const b3 = this.sectionPoints[(i + 1) % this.sectionPoints.length];
-
+                for (let i = 0; i < section.polygon.length; i++) {
+                    const a3 = section.polygon[i];
+                    const b3 = section.polygon[(i + 1) % section.polygon.length];
                     const a2 = projPoints[i];
-                    const b2 = projPoints[(i + 1) % this.sectionPoints.length];
+                    const b2 = projPoints[(i + 1) % section.polygon.length];
 
                     const mid3 = new Point3D(
                         (a3.x + b3.x) / 2,
@@ -1457,30 +2089,27 @@
                     );
 
                     const visible = this.isPointVisible(mid3, rotated, faceVisible);
-
                     this.ctx.beginPath();
                     this.ctx.moveTo(a2.x, a2.y);
                     this.ctx.lineTo(b2.x, b2.y);
-
                     this.ctx.strokeStyle = color;
-                    this.ctx.lineWidth = 2.5;
+                    this.ctx.lineWidth = sIdx === this.activeSectionIndex ? 2.8 : 2.0;
                     this.ctx.setLineDash(visible ? [] : [6, 6]);
                     this.ctx.stroke();
                     this.ctx.setLineDash([]);
                 }
 
                 projPoints.forEach((p, i) => {
-                    const visible = this.isPointVisible(this.sectionPoints[i], rotated, faceVisible);
-
+                    const visible = this.isPointVisible(section.polygon[i], rotated, faceVisible);
                     this.ctx.beginPath();
                     this.ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
                     this.ctx.fillStyle = visible ? '#fff' : 'rgba(255,255,255,0.65)';
                     this.ctx.fill();
                 });
 
-                if (this.showLabels) {
+                if (this.showLabels && sIdx === this.activeSectionIndex) {
                     projPoints.forEach((p, i) => {
-                        const visible = this.isPointVisible(this.sectionPoints[i], rotated, faceVisible);
+                        const visible = this.isPointVisible(section.polygon[i], rotated, faceVisible);
                         this.drawLabel(
                             this.getSectionPointName(i),
                             p.x + 8,
@@ -1490,24 +2119,64 @@
                         );
                     });
                 }
-            }
+            });
 
-            this.shape.edges.forEach(edge => {
-                edge.points.forEach(pt => {
-                    const proj = pt.rotate(this.rotX, this.rotY).project(w, h);
+            this.intersectionPairs.forEach(pair => {
+                const a = this.getSectionById(pair.aId);
+                const b = this.getSectionById(pair.bId);
+                if (!a || !b || !a.built || !b.built) return;
 
-                    this.ctx.beginPath();
-                    this.ctx.arc(proj.x, proj.y, 5, 0, Math.PI * 2);
-                    this.ctx.fillStyle = '#3b82f6';
-                    this.ctx.fill();
-                    this.ctx.strokeStyle = '#fff';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.stroke();
-                });
+                const segment = this.computeIntersectionSegment(a, b);
+                if (!segment) return;
+
+                const p1 = segment.p1.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom);
+                const p2 = segment.p2.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom);
+
+                this.ctx.save();
+                this.ctx.beginPath();
+                this.ctx.moveTo(p1.x, p1.y);
+                this.ctx.lineTo(p2.x, p2.y);
+                this.ctx.strokeStyle = pair.color;
+                this.ctx.lineWidth = 4;
+                this.ctx.shadowColor = 'rgba(251, 191, 36, 0.55)';
+                this.ctx.shadowBlur = 12;
+                this.ctx.stroke();
+                this.ctx.restore();
+
+                this.ctx.beginPath();
+                this.ctx.arc(p1.x, p1.y, 4.2, 0, Math.PI * 2);
+                this.ctx.fillStyle = pair.color;
+                this.ctx.fill();
+
+                this.ctx.beginPath();
+                this.ctx.arc(p2.x, p2.y, 4.2, 0, Math.PI * 2);
+                this.ctx.fillStyle = pair.color;
+                this.ctx.fill();
+            });
+
+            const activePoints = this.activeSection.points;
+            activePoints.forEach((pt, idx) => {
+                const proj = pt.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom);
+                this.ctx.beginPath();
+                this.ctx.arc(proj.x, proj.y, 5, 0, Math.PI * 2);
+
+                const isDragged = idx === this.draggingPointIdx;
+                const isHovered = idx === this.hoveredPointIdx;
+
+                if (pt.hostType === 'face') {
+                    this.ctx.fillStyle = isDragged ? '#f59e0b' : (isHovered ? '#22c55e' : '#a855f7');
+                } else {
+                    this.ctx.fillStyle = isDragged ? '#f59e0b' : (isHovered ? '#22c55e' : '#3b82f6');
+                }
+
+                this.ctx.fill();
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
             });
 
             rotated.forEach((v, i) => {
-                const p = v.project(w, h);
+                const p = v.project(w, h, this.cameraDistance, this.zoom);
                 this.ctx.beginPath();
                 this.ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
                 this.ctx.fillStyle = '#f1f5f9';
@@ -1523,6 +2192,16 @@
                     );
                 }
             });
+        }
+
+        updateIntersectionTargetOptions() {
+            const activeId = this.activeSection.id;
+            const options = this.sections
+                .filter(s => s.id !== activeId)
+                .map(s => `<option value="${s.id}">${s.name}</option>`)
+                .join('');
+
+            this.ui.intersectionTargetSelect.innerHTML = options || '<option value="">Нет других сечений</option>';
         }
     }
 
