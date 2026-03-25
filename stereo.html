@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Сечения Геометрических Фигур</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle { color: var(--text-secondary); font-size: 0.9rem; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 1rem;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; overflow-y: auto; }
+            body { overflow: auto; }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .shape-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .shape-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .shape-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .shape-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .control-group { margin-bottom: 1rem; }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .canvas-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            flex-grow: 1;
+            min-height: 400px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #mainCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            flex-shrink: 0;
+        }
+
+        .tool-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tool-btn:hover { background: var(--accent); }
+
+        .tool-btn.danger {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .tool-btn.danger:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        .points-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            min-height: 100px;
+        }
+
+        .point-item {
+            background: var(--bg-secondary);
+            padding: 0.6rem;
+            border-radius: 6px;
+            margin-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .remove-btn {
+            background: var(--error);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+
+        .stat-item {
+            background: var(--bg-secondary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .instruction {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: #fcd34d;
+            flex-shrink: 0;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        .click-feedback {
+            position: absolute;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            animation: popIn 0.8s ease-out forwards;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🔷 3D Сечения</h1>
+        <p class="subtitle">Конструктор сечений многогранников</p>
+    </header>
+
+    <div class="main-grid">
+        <div class="panel">
+            <h2 class="panel-title">📐 Фигура</h2>
+            <div class="shape-selector">
+                <button class="shape-btn active" data-shape="cube">Куб</button>
+                <button class="shape-btn" data-shape="pyramid">Пирамида</button>
+                <button class="shape-btn" data-shape="prism">Призма</button>
+                <button class="shape-btn" data-shape="tetrahedron">Тетраэдр</button>
+            </div>
+
+            <h2 class="panel-title">⚙️ Параметры</h2>
+            <div class="control-group">
+                <label>Размер: <span id="sizeValue">200</span></label>
+                <input type="range" id="sizeSlider" min="100" max="300" value="200">
+            </div>
+            <div class="control-group">
+                <label>Поворот X: <span id="rotXValue">-30</span>°</label>
+                <input type="range" id="rotXSlider" min="-180" max="180" value="-30">
+            </div>
+            <div class="control-group">
+                <label>Поворот Y: <span id="rotYValue">45</span>°</label>
+                <input type="range" id="rotYSlider" min="-180" max="180" value="45">
+            </div>
+
+            <div class="toolbar">
+                <button class="tool-btn" id="buildSectionBtn">✂️ Сечение</button>
+                <button class="tool-btn danger" id="clearBtn">🗑️ Сброс</button>
+            </div>
+
+            <div class="instruction">
+                💡 <strong>Как работать:</strong><br>
+                1. Вращайте фигуру мышкой.<br>
+                2. Кликните на ребро, чтобы поставить точку.<br>
+                3. Поставьте минимум 3 точки.<br>
+                4. Нажмите «Сечение».
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="pointsCount">0</div>
+                    <div class="stat-label">Точек</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="sectionArea">0</div>
+                    <div class="stat-label">Площадь</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+            <div class="canvas-container">
+                <canvas id="mainCanvas"></canvas>
+            </div>
+            <div class="toolbar" style="background: var(--bg-card); padding: 1rem; border-radius: 12px; margin-top: 1rem; border: 1px solid var(--border);">
+                <button class="tool-btn" id="resetViewBtn">🔄 Вид спереди</button>
+                <button class="tool-btn" id="toggleWireframeBtn">👁️ Сплошной/Каркас</button>
+                <button class="tool-btn" id="toggleLabelsBtn">🔤 Подписи вершин/точек</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">📍 Точки</h2>
+            <div class="points-list" id="pointsList">
+                <p style="color: var(--text-secondary); text-align: center; padding: 1rem; font-size: 0.9rem;">
+                    Нет точек
+                </p>
+            </div>
+
+            <div id="sectionInfo" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <strong style="color: var(--accent);">Сечение построено</strong>
+                <p id="sectionDetails" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-secondary);"></p>
+            </div>
+
+            <h2 class="panel-title">🎨 Стиль</h2>
+            <div class="control-group">
+                <label>Прозрачность: <span id="opacityValue">0.6</span></label>
+                <input type="range" id="opacitySlider" min="0.1" max="1" step="0.1" value="0.6">
+            </div>
+            <div class="control-group">
+                <label>Цвет сечения:</label>
+                <input type="color" id="sectionColor" value="#3b82f6" style="width: 100%; height: 35px; border: none; background: none;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    class Point3D {
+        constructor(x, y, z) {
+            this.x = x; this.y = y; this.z = z;
+        }
+
+        clone() { return new Point3D(this.x, this.y, this.z); }
+        add(p) { return new Point3D(this.x + p.x, this.y + p.y, this.z + p.z); }
+        sub(p) { return new Point3D(this.x - p.x, this.y - p.y, this.z - p.z); }
+        scale(k) { return new Point3D(this.x * k, this.y * k, this.z * k); }
+        dot(p) { return this.x * p.x + this.y * p.y + this.z * p.z; }
+
+        cross(p) {
+            return new Point3D(
+                this.y * p.z - this.z * p.y,
+                this.z * p.x - this.x * p.z,
+                this.x * p.y - this.y * p.x
+            );
+        }
+
+        length() {
+            return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        }
+
+        normalize() {
+            const len = this.length();
+            if (len < 1e-9) return new Point3D(0, 0, 0);
+            return this.scale(1 / len);
+        }
+
+        distanceTo(p) { return this.sub(p).length(); }
+
+        rotateX(angle) {
+            const rad = angle * Math.PI / 180;
+            const c = Math.cos(rad), s = Math.sin(rad);
+            return new Point3D(
+                this.x,
+                this.y * c - this.z * s,
+                this.y * s + this.z * c
+            );
+        }
+
+        rotateY(angle) {
+            const rad = angle * Math.PI / 180;
+            const c = Math.cos(rad), s = Math.sin(rad);
+            return new Point3D(
+                this.x * c + this.z * s,
+                this.y,
+                -this.x * s + this.z * c
+            );
+        }
+
+        rotate(rx, ry) {
+            return this.rotateX(rx).rotateY(ry);
+        }
+
+        project(w, h, fov = 500) {
+            const z = this.z + fov;
+            const f = fov / z;
+            return {
+                x: w / 2 + this.x * f,
+                y: h / 2 - this.y * f,
+                z: this.z,
+                f
+            };
+        }
+    }
+
+    class Edge {
+        constructor(v1, v2, idx, v1Index, v2Index) {
+            this.v1 = v1;
+            this.v2 = v2;
+            this.idx = idx;
+            this.v1Index = v1Index;
+            this.v2Index = v2Index;
+            this.points = [];
+            this.faceIndices = [];
+        }
+
+        isHovered(x, y, projV1, projV2, threshold = 10) {
+            const A = x - projV1.x;
+            const B = y - projV1.y;
+            const C = projV2.x - projV1.x;
+            const D = projV2.y - projV1.y;
+
+            const dot = A * C + B * D;
+            const lenSq = C * C + D * D;
+            let param = -1;
+
+            if (lenSq !== 0) param = dot / lenSq;
+
+            let xx, yy;
+            if (param < 0) {
+                xx = projV1.x; yy = projV1.y;
+            } else if (param > 1) {
+                xx = projV2.x; yy = projV2.y;
+            } else {
+                xx = projV1.x + param * C;
+                yy = projV1.y + param * D;
+            }
+
+            const dx = x - xx;
+            const dy = y - yy;
+            return Math.sqrt(dx * dx + dy * dy) < threshold;
+        }
+
+        getPointAt(param) {
+            const p = new Point3D(
+                this.v1.x + (this.v2.x - this.v1.x) * param,
+                this.v1.y + (this.v2.y - this.v1.y) * param,
+                this.v1.z + (this.v2.z - this.v1.z) * param
+            );
+            p.edgeIdx = this.idx;
+            p.param = param;
+            return p;
+        }
+    }
+
+    class Shape {
+        constructor() {
+            this.vertices = [];
+            this.edges = [];
+            this.faces = [];
+        }
+
+        buildConnectivity() {
+            this.edges.forEach(e => e.faceIndices = []);
+            this.faces.forEach((face, fIdx) => {
+                for (let i = 0; i < face.length; i++) {
+                    const a = face[i];
+                    const b = face[(i + 1) % face.length];
+
+                    const edgeIdx = this.edges.findIndex(e =>
+                    (e.v1Index === a && e.v2Index === b) ||
+                    (e.v1Index === b && e.v2Index === a)
+                    );
+
+                    if (edgeIdx !== -1) {
+                        this.edges[edgeIdx].faceIndices.push(fIdx);
+                    }
+                }
+            });
+        }
+
+        rotate(rx, ry) {
+            return this.vertices.map(v => v.rotate(rx, ry));
+        }
+    }
+
+    class Cube extends Shape {
+        constructor(s) {
+            super();
+            const h = s / 2;
+            this.vertices = [
+                new Point3D(-h,-h,-h), new Point3D(h,-h,-h), new Point3D(h,h,-h), new Point3D(-h,h,-h),
+                new Point3D(-h,-h,h),  new Point3D(h,-h,h),  new Point3D(h,h,h),  new Point3D(-h,h,h)
+            ];
+            const idx = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+            this.edges = idx.map((pair, i) => new Edge(this.vertices[pair[0]], this.vertices[pair[1]], i, pair[0], pair[1]));
+            this.faces = [[0,1,2,3],[4,5,6,7],[0,1,5,4],[2,3,7,6],[0,3,7,4],[1,2,6,5]];
+            this.buildConnectivity();
+        }
+    }
+
+    class Pyramid extends Shape {
+        constructor(s) {
+            super();
+            const h = s / 2, H = s;
+            this.vertices = [
+                new Point3D(-h,-h,-h), new Point3D(h,-h,-h), new Point3D(h,-h,h), new Point3D(-h,-h,h),
+                new Point3D(0,H,0)
+            ];
+            const idx = [[0,1],[1,2],[2,3],[3,0],[0,4],[1,4],[2,4],[3,4]];
+            this.edges = idx.map((pair, i) => new Edge(this.vertices[pair[0]], this.vertices[pair[1]], i, pair[0], pair[1]));
+            this.faces = [[0,1,2,3],[0,1,4],[1,2,4],[2,3,4],[3,0,4]];
+            this.buildConnectivity();
+        }
+    }
+
+    class Prism extends Shape {
+        constructor(s) {
+            super();
+            const h = s / 2, H = s * 0.8;
+            this.vertices = [
+                new Point3D(-h,-H/2,-h), new Point3D(h,-H/2,-h), new Point3D(0,-H/2,h),
+                new Point3D(-h,H/2,-h),  new Point3D(h,H/2,-h),  new Point3D(0,H/2,h)
+            ];
+            const idx = [[0,1],[1,2],[2,0],[3,4],[4,5],[5,3],[0,3],[1,4],[2,5]];
+            this.edges = idx.map((pair, i) => new Edge(this.vertices[pair[0]], this.vertices[pair[1]], i, pair[0], pair[1]));
+            this.faces = [[0,1,2],[3,4,5],[0,1,4,3],[1,2,5,4],[2,0,3,5]];
+            this.buildConnectivity();
+        }
+    }
+
+    class Tetrahedron extends Shape {
+        constructor(s) {
+            super();
+            const h = s / 2, H = s * 0.866;
+            this.vertices = [
+                new Point3D(-h,-H/3,-h/1.732),
+                new Point3D(h,-H/3,-h/1.732),
+                new Point3D(0,-H/3,h*1.155),
+                new Point3D(0,H*2/3,0)
+            ];
+            const idx = [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]];
+            this.edges = idx.map((pair, i) => new Edge(this.vertices[pair[0]], this.vertices[pair[1]], i, pair[0], pair[1]));
+            this.faces = [[0,1,2],[0,1,3],[1,2,3],[2,0,3]];
+            this.buildConnectivity();
+        }
+    }
+
+    function planeFrom3Points(a, b, c) {
+        const ab = b.sub(a);
+        const ac = c.sub(a);
+        const normal = ab.cross(ac);
+        const len = normal.length();
+
+        if (len < 1e-6) return null;
+
+        const n = normal.scale(1 / len);
+        const d = -n.dot(a);
+        return { n, d };
+    }
+
+    function signedDistanceToPlane(plane, p) {
+        return plane.n.dot(p) + plane.d;
+    }
+
+    function intersectSegmentPlane(a, b, plane, eps = 1e-7) {
+        const da = signedDistanceToPlane(plane, a);
+        const db = signedDistanceToPlane(plane, b);
+
+        if (Math.abs(da) < eps && Math.abs(db) < eps) {
+            return [a.clone(), b.clone()];
+        }
+
+        if (Math.abs(da) < eps) return [a.clone()];
+        if (Math.abs(db) < eps) return [b.clone()];
+        if (da * db > 0) return [];
+
+        const t = da / (da - db);
+        if (t < -eps || t > 1 + eps) return [];
+
+        return [new Point3D(
+            a.x + (b.x - a.x) * t,
+            a.y + (b.y - a.y) * t,
+            a.z + (b.z - a.z) * t
+        )];
+    }
+
+    function samePoint(a, b, eps = 1e-4) {
+        return a.distanceTo(b) < eps;
+    }
+
+    function uniquePoints(points, eps = 1e-4) {
+        const result = [];
+        for (const p of points) {
+            if (!result.some(q => samePoint(p, q, eps))) {
+                result.push(p);
+            }
+        }
+        return result;
+    }
+
+    function buildSectionPolygon(shape, plane) {
+        const raw = [];
+
+        for (const edge of shape.edges) {
+            const pts = intersectSegmentPlane(edge.v1, edge.v2, plane);
+            raw.push(...pts);
+        }
+
+        const points = uniquePoints(raw);
+        if (points.length < 3) return [];
+
+        let center = new Point3D(0, 0, 0);
+        for (const p of points) center = center.add(p);
+        center = center.scale(1 / points.length);
+
+        const n = plane.n.normalize();
+        const helper = Math.abs(n.x) < 0.9 ? new Point3D(1, 0, 0) : new Point3D(0, 1, 0);
+        const u = n.cross(helper).normalize();
+        const v = n.cross(u).normalize();
+
+        const withAngles = points.map(p => {
+            const d = p.sub(center);
+            const x = d.dot(u);
+            const y = d.dot(v);
+            return { p, angle: Math.atan2(y, x) };
+        });
+
+        withAngles.sort((a, b) => a.angle - b.angle);
+        return withAngles.map(item => item.p);
+    }
+
+    function polygonArea3D(points) {
+        if (!points || points.length < 3) return 0;
+
+        const p0 = points[0];
+        let area = 0;
+
+        for (let i = 1; i < points.length - 1; i++) {
+            const a = points[i].sub(p0);
+            const b = points[i + 1].sub(p0);
+            area += a.cross(b).length() / 2;
+        }
+
+        return area;
+    }
+
+    class App {
+        constructor() {
+            this.canvas = document.getElementById('mainCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.container = this.canvas.parentElement;
+
+            this.shapeType = 'cube';
+            this.shape = new Cube(200);
+
+            this.points = [];
+            this.sectionPoints = [];
+
+            this.rotX = -30;
+            this.rotY = 45;
+            this.size = 200;
+
+            this.isDragging = false;
+            this.mouseDown = false;
+            this.lastX = 0;
+            this.lastY = 0;
+            this.hoveredEdgeIdx = -1;
+            this.wireframeOnly = false;
+            this.showLabels = false;
+
+            this.ui = {
+                size: document.getElementById('sizeSlider'),
+                rotX: document.getElementById('rotXSlider'),
+                rotY: document.getElementById('rotYSlider'),
+                opacity: document.getElementById('opacitySlider'),
+                color: document.getElementById('sectionColor'),
+                pointsList: document.getElementById('pointsList'),
+                pointsCount: document.getElementById('pointsCount'),
+                sectionArea: document.getElementById('sectionArea'),
+                sectionInfo: document.getElementById('sectionInfo'),
+                sectionDetails: document.getElementById('sectionDetails')
+            };
+
+            this.init();
+        }
+
+        init() {
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            this.setupInputs();
+            this.setupMouse();
+            this.loop();
+        }
+
+        resize() {
+            this.canvas.width = this.container.clientWidth;
+            this.canvas.height = this.container.clientHeight;
+        }
+
+        setupInputs() {
+            document.querySelectorAll('.shape-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    this.setShape(e.target.dataset.shape);
+                });
+            });
+
+            this.ui.size.oninput = (e) => {
+                this.size = parseInt(e.target.value, 10);
+                document.getElementById('sizeValue').textContent = this.size;
+                this.setShape(this.shapeType);
+            };
+
+            this.ui.rotX.oninput = (e) => {
+                this.rotX = parseFloat(e.target.value);
+                document.getElementById('rotXValue').textContent = Math.round(this.rotX);
+            };
+
+            this.ui.rotY.oninput = (e) => {
+                this.rotY = parseFloat(e.target.value);
+                document.getElementById('rotYValue').textContent = Math.round(this.rotY);
+            };
+
+            this.ui.opacity.oninput = (e) => {
+                document.getElementById('opacityValue').textContent = e.target.value;
+            };
+
+            document.getElementById('clearBtn').onclick = () => {
+                this.points = [];
+                this.sectionPoints = [];
+                this.shape.edges.forEach(e => e.points = []);
+                this.ui.sectionArea.textContent = '0';
+                this.ui.sectionInfo.style.display = 'none';
+                this.updateUI();
+            };
+
+            document.getElementById('buildSectionBtn').onclick = () => this.buildSection();
+
+            document.getElementById('resetViewBtn').onclick = () => {
+                this.rotX = -30;
+                this.rotY = 45;
+                this.ui.rotX.value = -30;
+                this.ui.rotY.value = 45;
+                document.getElementById('rotXValue').textContent = -30;
+                document.getElementById('rotYValue').textContent = 45;
+            };
+
+            document.getElementById('toggleWireframeBtn').onclick = () => {
+                this.wireframeOnly = !this.wireframeOnly;
+            };
+
+            document.getElementById('toggleLabelsBtn').onclick = () => {
+                this.showLabels = !this.showLabels;
+            };
+        }
+
+        setShape(type) {
+            this.shapeType = type;
+            this.points = [];
+            this.sectionPoints = [];
+
+            switch(type) {
+                case 'cube': this.shape = new Cube(this.size); break;
+                case 'pyramid': this.shape = new Pyramid(this.size); break;
+                case 'prism': this.shape = new Prism(this.size); break;
+                case 'tetrahedron': this.shape = new Tetrahedron(this.size); break;
+            }
+
+            this.ui.sectionArea.textContent = '0';
+            this.ui.sectionInfo.style.display = 'none';
+            this.updateUI();
+        }
+
+        setupMouse() {
+            const startDrag = (x, y) => {
+                this.mouseDown = true;
+                this.isDragging = false;
+                this.lastX = x;
+                this.lastY = y;
+            };
+
+            const moveDrag = (x, y) => {
+                if (this.mouseDown) {
+                    const dx = x - this.lastX;
+                    const dy = y - this.lastY;
+
+                    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+                        this.isDragging = true;
+                    }
+
+                    if (this.isDragging) {
+                        this.rotY += dx * 0.5;
+                        this.rotX -= dy * 0.5;
+
+                        this.ui.rotX.value = this.rotX;
+                        this.ui.rotY.value = this.rotY;
+                        document.getElementById('rotXValue').textContent = Math.round(this.rotX);
+                        document.getElementById('rotYValue').textContent = Math.round(this.rotY);
+
+                        this.lastX = x;
+                        this.lastY = y;
+                    }
+                }
+
+                this.checkHover(x, y);
+            };
+
+            const endDrag = (x, y) => {
+                if (!this.isDragging) {
+                    this.handleClick(x, y);
+                }
+                this.mouseDown = false;
+                this.isDragging = false;
+            };
+
+            this.canvas.onmousedown = e => startDrag(e.offsetX, e.offsetY);
+            this.canvas.onmousemove = e => moveDrag(e.offsetX, e.offsetY);
+            this.canvas.onmouseup = e => endDrag(e.offsetX, e.offsetY);
+            this.canvas.onmouseleave = () => {
+                this.hoveredEdgeIdx = -1;
+                this.mouseDown = false;
+                this.isDragging = false;
+            };
+
+            this.canvas.ontouchstart = e => {
+                e.preventDefault();
+                const t = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                startDrag(t.clientX - rect.left, t.clientY - rect.top);
+            };
+
+            this.canvas.ontouchmove = e => {
+                e.preventDefault();
+                const t = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                moveDrag(t.clientX - rect.left, t.clientY - rect.top);
+            };
+
+            this.canvas.ontouchend = e => {
+                e.preventDefault();
+                const t = e.changedTouches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                endDrag(t.clientX - rect.left, t.clientY - rect.top);
+            };
+        }
+
+        checkHover(x, y) {
+            const rotated = this.shape.rotate(this.rotX, this.rotY);
+            let found = -1;
+
+            for (const edge of this.shape.edges) {
+                const rv1 = rotated[edge.v1Index];
+                const rv2 = rotated[edge.v2Index];
+
+                const proj1 = rv1.project(this.canvas.width, this.canvas.height);
+                const proj2 = rv2.project(this.canvas.width, this.canvas.height);
+
+                if (edge.isHovered(x, y, proj1, proj2, 12)) {
+                    found = edge.idx;
+                    break;
+                }
+            }
+
+            this.hoveredEdgeIdx = found;
+            this.canvas.style.cursor = found !== -1 ? 'pointer' : 'crosshair';
+        }
+
+        handleClick(x, y) {
+            if (this.hoveredEdgeIdx === -1) return;
+
+            const edge = this.shape.edges[this.hoveredEdgeIdx];
+            const rotated = this.shape.rotate(this.rotX, this.rotY);
+
+            const rv1 = rotated[edge.v1Index];
+            const rv2 = rotated[edge.v2Index];
+            const proj1 = rv1.project(this.canvas.width, this.canvas.height);
+            const proj2 = rv2.project(this.canvas.width, this.canvas.height);
+
+            const A = x - proj1.x;
+            const B = y - proj1.y;
+            const C = proj2.x - proj1.x;
+            const D = proj2.y - proj1.y;
+            const lenSq = C * C + D * D;
+
+            let param = 0;
+            if (lenSq > 1e-9) {
+                param = (A * C + B * D) / lenSq;
+            }
+
+            const clampedParam = Math.max(0, Math.min(1, param));
+            const newPoint = edge.getPointAt(clampedParam);
+
+            this.points.push(newPoint);
+            edge.points.push(newPoint);
+
+            this.showFeedback(x, y);
+            this.updateUI();
+        }
+
+        showFeedback(x, y) {
+            const el = document.createElement('div');
+            el.className = 'click-feedback';
+            el.textContent = '+ Точка';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            this.container.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        buildSection() {
+            if (this.points.length < 3) {
+                alert('Нужно минимум 3 точки.');
+                return;
+            }
+
+            const a = this.points[0];
+            const b = this.points[1];
+            const c = this.points[2];
+
+            const plane = planeFrom3Points(a, b, c);
+            if (!plane) {
+                alert('Первые 3 точки лежат почти на одной прямой. Выберите другие точки.');
+                return;
+            }
+
+            const polygon = buildSectionPolygon(this.shape, plane);
+            if (polygon.length < 3) {
+                alert('Не удалось построить корректное сечение для выбранных точек.');
+                return;
+            }
+
+            this.sectionPoints = polygon;
+
+            const area = polygonArea3D(polygon);
+            this.ui.sectionArea.textContent = area.toFixed(1);
+            this.ui.sectionDetails.innerHTML =
+            `Вершин: ${polygon.length}<br>` +
+            `Площадь: ${area.toFixed(2)}<br>` +
+            `Плоскость задана точками 1, 2, 3`;
+
+            this.ui.sectionInfo.style.display = 'block';
+        }
+
+        updateUI() {
+            this.ui.pointsCount.textContent = this.points.length;
+
+            if (this.points.length === 0) {
+                this.ui.pointsList.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:1rem">Нет точек</p>';
+                return;
+            }
+
+            this.ui.pointsList.innerHTML = this.points.map((p, i) => `
+            <div class="point-item">
+                <span>
+                    Точка ${i + 1}<br>
+                    <small style="color: var(--text-secondary)">
+                        ребро ${p.edgeIdx + 1}, t=${p.param.toFixed(2)}
+                    </small>
+                </span>
+                <button class="remove-btn" onclick="app.removePoint(${i})">✕</button>
+            </div>
+        `).join('');
+        }
+
+        removePoint(index) {
+            const p = this.points[index];
+            if (!p) return;
+
+            const edge = this.shape.edges[p.edgeIdx];
+            if (edge) {
+                edge.points = edge.points.filter(pt => pt !== p);
+            }
+
+            this.points.splice(index, 1);
+            this.sectionPoints = [];
+            this.ui.sectionArea.textContent = '0';
+            this.ui.sectionInfo.style.display = 'none';
+            this.updateUI();
+        }
+
+        pointInPolygon2D(x, y, poly) {
+            let inside = false;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const xi = poly[i].x, yi = poly[i].y;
+                const xj = poly[j].x, yj = poly[j].y;
+
+                const intersect = ((yi > y) !== (yj > y)) &&
+                (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-9) + xi);
+
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        isPointVisible(point3D, rotated, faceVisible) {
+            const w = this.canvas.width;
+            const h = this.canvas.height;
+            const pProj = point3D.rotate(this.rotX, this.rotY).project(w, h);
+
+            for (let fIdx = 0; fIdx < this.shape.faces.length; fIdx++) {
+                if (!faceVisible[fIdx]) continue;
+
+                const face = this.shape.faces[fIdx];
+                const projFace = face.map(idx => rotated[idx].project(w, h));
+
+                if (!this.pointInPolygon2D(pProj.x, pProj.y, projFace)) continue;
+
+                let avgZ = 0;
+                for (const idx of face) avgZ += rotated[idx].z;
+                avgZ /= face.length;
+
+                if (avgZ < pProj.z - 1e-6) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        getVertexName(index) {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (index < letters.length) return letters[index];
+            return 'V' + (index + 1);
+        }
+
+        getSectionPointName(index) {
+            const letters = 'PQRSTUVWXYZ';
+            if (index < letters.length) return letters[index];
+            return 'S' + (index + 1);
+        }
+
+        drawLabel(text, x, y, color = '#ffffff', bg = 'rgba(15, 23, 42, 0.85)') {
+            this.ctx.font = 'bold 14px Segoe UI, Arial, sans-serif';
+            const paddingX = 6;
+            const paddingY = 4;
+            const metrics = this.ctx.measureText(text);
+            const width = metrics.width + paddingX * 2;
+            const height = 20;
+
+            this.ctx.fillStyle = bg;
+            this.ctx.beginPath();
+            this.ctx.roundRect(x, y - height + 4, width, height, 6);
+            this.ctx.fill();
+
+            this.ctx.fillStyle = color;
+            this.ctx.fillText(text, x + paddingX, y);
+        }
+
+        loop() {
+            this.render();
+            requestAnimationFrame(() => this.loop());
+        }
+
+        render() {
+            const w = this.canvas.width;
+            const h = this.canvas.height;
+            this.ctx.clearRect(0, 0, w, h);
+
+            const rotated = this.shape.rotate(this.rotX, this.rotY);
+
+            let shapeCenter = new Point3D(0, 0, 0);
+            for (const v of rotated) {
+                shapeCenter = shapeCenter.add(v);
+            }
+            shapeCenter = shapeCenter.scale(1 / rotated.length);
+
+            const cameraPos = new Point3D(0, 0, -500);
+
+            const faceVisible = this.shape.faces.map(face => {
+                const v0 = rotated[face[0]];
+                const v1 = rotated[face[1]];
+                const v2 = rotated[face[2]];
+
+                const a = v1.sub(v0);
+                const b = v2.sub(v0);
+                let n = a.cross(b);
+
+                let center = new Point3D(0, 0, 0);
+                for (const idx of face) {
+                    center = center.add(rotated[idx]);
+                }
+                center = center.scale(1 / face.length);
+
+                const fromShapeCenter = center.sub(shapeCenter);
+                if (n.dot(fromShapeCenter) < 0) {
+                    n = n.scale(-1);
+                }
+
+                const toCamera = cameraPos.sub(center);
+                return n.dot(toCamera) > 0;
+            });
+
+            if (!this.wireframeOnly) {
+                this.shape.faces.forEach((face, idx) => {
+                    if (!faceVisible[idx]) return;
+
+                    const proj = face.map(i => rotated[i].project(w, h));
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(proj[0].x, proj[0].y);
+                    for (let i = 1; i < proj.length; i++) {
+                        this.ctx.lineTo(proj[i].x, proj[i].y);
+                    }
+                    this.ctx.closePath();
+
+                    this.ctx.fillStyle = 'rgba(59, 130, 246, 0.12)';
+                    this.ctx.fill();
+                });
+            }
+
+            const edgeRenderData = this.shape.edges.map(edge => {
+                const p1 = rotated[edge.v1Index].project(w, h);
+                const p2 = rotated[edge.v2Index].project(w, h);
+
+                let isVisible = false;
+                for (const fIdx of edge.faceIndices) {
+                    if (faceVisible[fIdx]) {
+                        isVisible = true;
+                        break;
+                    }
+                }
+
+                return { edge, p1, p2, isVisible };
+            });
+
+            edgeRenderData.forEach(({ edge, p1, p2, isVisible }) => {
+                if (isVisible || edge.idx === this.hoveredEdgeIdx) return;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(p1.x, p1.y);
+                this.ctx.lineTo(p2.x, p2.y);
+
+                this.ctx.strokeStyle = '#475569';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([6, 6]);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+            });
+
+            edgeRenderData.forEach(({ edge, p1, p2, isVisible }) => {
+                if (!isVisible && edge.idx !== this.hoveredEdgeIdx) return;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(p1.x, p1.y);
+                this.ctx.lineTo(p2.x, p2.y);
+
+                if (edge.idx === this.hoveredEdgeIdx) {
+                    this.ctx.strokeStyle = '#3b82f6';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.shadowColor = '#3b82f6';
+                    this.ctx.shadowBlur = 10;
+                } else {
+                    this.ctx.strokeStyle = '#94a3b8';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.shadowBlur = 0;
+                }
+
+                this.ctx.setLineDash([]);
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+            });
+
+            if (this.sectionPoints.length >= 3) {
+                const color = this.ui.color.value;
+                const opacity = parseFloat(this.ui.opacity.value);
+
+                const r = parseInt(color.substr(1, 2), 16);
+                const g = parseInt(color.substr(3, 2), 16);
+                const b = parseInt(color.substr(5, 2), 16);
+
+                const projPoints = this.sectionPoints.map(p => p.rotate(this.rotX, this.rotY).project(w, h));
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(projPoints[0].x, projPoints[0].y);
+                for (let i = 1; i < projPoints.length; i++) {
+                    this.ctx.lineTo(projPoints[i].x, projPoints[i].y);
+                }
+                this.ctx.closePath();
+                this.ctx.fillStyle = `rgba(${r},${g},${b},${opacity})`;
+                this.ctx.fill();
+
+                for (let i = 0; i < this.sectionPoints.length; i++) {
+                    const a3 = this.sectionPoints[i];
+                    const b3 = this.sectionPoints[(i + 1) % this.sectionPoints.length];
+
+                    const a2 = projPoints[i];
+                    const b2 = projPoints[(i + 1) % this.sectionPoints.length];
+
+                    const mid3 = new Point3D(
+                        (a3.x + b3.x) / 2,
+                        (a3.y + b3.y) / 2,
+                        (a3.z + b3.z) / 2
+                    );
+
+                    const visible = this.isPointVisible(mid3, rotated, faceVisible);
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(a2.x, a2.y);
+                    this.ctx.lineTo(b2.x, b2.y);
+
+                    this.ctx.strokeStyle = color;
+                    this.ctx.lineWidth = 2.5;
+                    this.ctx.setLineDash(visible ? [] : [6, 6]);
+                    this.ctx.stroke();
+                    this.ctx.setLineDash([]);
+                }
+
+                projPoints.forEach((p, i) => {
+                    const visible = this.isPointVisible(this.sectionPoints[i], rotated, faceVisible);
+
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                    this.ctx.fillStyle = visible ? '#fff' : 'rgba(255,255,255,0.65)';
+                    this.ctx.fill();
+                });
+
+                if (this.showLabels) {
+                    projPoints.forEach((p, i) => {
+                        const visible = this.isPointVisible(this.sectionPoints[i], rotated, faceVisible);
+                        this.drawLabel(
+                            this.getSectionPointName(i),
+                            p.x + 8,
+                            p.y - 8,
+                            visible ? '#ffffff' : 'rgba(255,255,255,0.75)',
+                            visible ? 'rgba(37, 99, 235, 0.9)' : 'rgba(71, 85, 105, 0.85)'
+                        );
+                    });
+                }
+            }
+
+            this.shape.edges.forEach(edge => {
+                edge.points.forEach(pt => {
+                    const proj = pt.rotate(this.rotX, this.rotY).project(w, h);
+
+                    this.ctx.beginPath();
+                    this.ctx.arc(proj.x, proj.y, 5, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#3b82f6';
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#fff';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+                });
+            });
+
+            rotated.forEach((v, i) => {
+                const p = v.project(w, h);
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                this.ctx.fillStyle = '#f1f5f9';
+                this.ctx.fill();
+
+                if (this.showLabels) {
+                    this.drawLabel(
+                        this.getVertexName(i),
+                        p.x + 8,
+                        p.y - 8,
+                        '#f8fafc',
+                        'rgba(15, 23, 42, 0.88)'
+                    );
+                }
+            });
+        }
+    }
+
+    const app = new App();
+    window.app = app;
+</script>
+</body>
+</html>
