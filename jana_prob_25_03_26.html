@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вероятность попадания в интервал | Интерактивная лаборатория</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e27;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --glow-cyan: rgba(6, 182, 212, 0.4);
+            --glow-teal: rgba(20, 184, 166, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1e1b4b 50%, #0f172a 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 20% 80%, var(--glow-cyan) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, var(--glow-teal) 0%, transparent 40%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 50px;
+            color: var(--accent-cyan);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px var(--glow-cyan); }
+            to { box-shadow: 0 0 20px var(--glow-cyan), 0 0 40px var(--glow-teal); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            padding: 1.5rem 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Section Styles */
+        section {
+            margin: 4rem 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 32px;
+            background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-teal));
+            border-radius: 2px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(6, 182, 212, 0.1);
+        }
+
+        /* Visualizer */
+        .visualizer {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 27, 75, 0.6));
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visualizer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .number-line {
+            position: relative;
+            height: 200px;
+            margin: 2rem 0;
+            z-index: 1;
+        }
+
+        .axis {
+            position: absolute;
+            bottom: 100px;
+            left: 5%;
+            width: 90%;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-teal));
+            border-radius: 2px;
+        }
+
+        .point {
+            position: absolute;
+            bottom: 90px;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px var(--accent-pink);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .point:hover {
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        .point-label {
+            position: absolute;
+            bottom: 60px;
+            transform: translateX(-50%);
+            font-weight: 600;
+            color: var(--accent-cyan);
+            white-space: nowrap;
+        }
+
+        .region {
+            position: absolute;
+            height: 60px;
+            border-radius: 8px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            cursor: pointer;
+        }
+
+        .region:hover {
+            opacity: 1;
+        }
+
+        .region-red {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.6), rgba(239, 68, 68, 0.3));
+            border: 2px solid rgba(239, 68, 68, 0.8);
+        }
+
+        .region-green {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.6), rgba(20, 184, 166, 0.3));
+            border: 2px solid rgba(20, 184, 166, 0.8);
+        }
+
+        .region-yellow {
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.6), rgba(234, 179, 8, 0.3));
+            border: 2px solid rgba(234, 179, 8, 0.8);
+        }
+
+        .region-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Calculator */
+        .calculator {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .calc-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .calc-input label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .calc-input input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(10, 14, 39, 0.8);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1.125rem;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        .calc-input input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--glow-cyan);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(20, 184, 166, 0.2));
+            border: 2px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .result-value {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 1rem 0;
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 1rem 0;
+        }
+
+        .accordion-header {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .accordion-header:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .accordion-header h3 {
+            font-size: 1.125rem;
+            color: var(--text-primary);
+        }
+
+        .accordion-icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s;
+            color: var(--accent-cyan);
+        }
+
+        .accordion.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 1.5rem;
+        }
+
+        .accordion.active .accordion-content {
+            max-height: 500px;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 0 0 12px 12px;
+            margin-top: -1rem;
+        }
+
+        /* Task Generator */
+        .task-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .task-formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(10, 14, 39, 0.6);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .answer-reveal {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(20, 184, 166, 0.1);
+            border-left: 4px solid var(--accent-teal);
+            border-radius: 0 12px 12px 0;
+            display: none;
+        }
+
+        .answer-reveal.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Quiz */
+        .quiz-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .quiz-question h4 {
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            padding: 1rem 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid var(--border-glass);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--accent-teal);
+            background: rgba(20, 184, 166, 0.2);
+        }
+
+        .quiz-option.incorrect {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .quiz-option.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(20, 184, 166, 0.3));
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .error {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .success {
+            color: var(--accent-teal);
+            font-weight: 600;
+        }
+
+        /* Print styles */
+        @media print {
+            .bg-animation, nav, .btn, .quiz-option, .calculator {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .card, .visualizer {
+                background: white;
+                border: 1px solid #ddd;
+                box-shadow: none;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                margin-top: 60px;
+                padding: 2rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .calculator {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Step by step */
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(10, 14, 39, 0.6);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            display: inline-block;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 2px dotted var(--accent-cyan);
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-dark);
+            border: 1px solid var(--border-glass);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            z-index: 100;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+<div class="bg-animation"></div>
+
+<nav>
+    <div class="nav-container">
+        <div class="nav-logo">◈ Probability Lab</div>
+        <ul class="nav-links">
+            <li><a href="#visualizer">Визуализация</a></li>
+            <li><a href="#theory">Теория</a></li>
+            <li><a href="#calculator">Калькулятор</a></li>
+            <li><a href="#practice">Практика</a></li>
+            <li><a href="#quiz">Тест</a></li>
+        </ul>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-badge">Вероятность и статистика</div>
+    <h1>Попадание случайной величины в интервал</h1>
+    <p class="hero-subtitle">Интерактивное пособие по вычислению вероятностей попадания непрерывной случайной величины в заданный промежуток</p>
+    <div class="hero-formula">
+        P(a ≤ X < b) = P(X < b) − P(X < a)
+    </div>
+</section>
+
+<div class="container">
+    <!-- Visualizer Section -->
+    <section id="visualizer">
+        <h2 class="section-title">Геометрическая интерпретация</h2>
+
+        <div class="visualizer">
+            <div style="position: relative; z-index: 1; text-align: center; margin-bottom: 2rem;">
+                <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Числовая прямая вероятностей</h3>
+                <p style="color: var(--text-secondary);">Наведите на области для подробной информации</p>
+            </div>
+
+            <div class="number-line">
+                <div class="axis"></div>
+
+                <!-- Point 860 -->
+                <div class="point" style="left: 30%;" data-x="860"></div>
+                <div class="point-label" style="left: 30%;">860</div>
+
+                <!-- Point 900 -->
+                <div class="point" style="left: 70%;" data-x="900"></div>
+                <div class="point-label" style="left: 70%;">900</div>
+
+                <!-- Regions -->
+                <div class="region region-red" style="left: 5%; width: 25%; bottom: 140px;"
+                     data-prob="0.05" data-label="P(X < 860) = 0,05">
+                    <div class="region-info">
+                        <div>P(X < 860)</div>
+                        <div style="font-size: 0.75rem; opacity: 0.8;">0,05</div>
+                    </div>
+                </div>
+
+                <div class="region region-green" style="left: 30%; width: 40%; bottom: 140px;"
+                     data-prob="0.93" data-label="P(860 ≤ X < 900) = 0,93">
+                    <div class="region-info">
+                        <div>P(860 ≤ X < 900)</div>
+                        <div style="font-size: 0.75rem; opacity: 0.8;">0,93</div>
+                    </div>
+                </div>
+
+                <div class="region region-yellow" style="left: 70%; width: 25%; bottom: 140px;"
+                     data-prob="0.02" data-label="P(X ≥ 900) = 0,02">
+                    <div class="region-info">
+                        <div>P(X ≥ 900)</div>
+                        <div style="font-size: 0.75rem; opacity: 0.8;">0,02</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 3rem; position: relative; z-index: 1;">
+                <div class="card" style="border-left: 4px solid #ef4444;">
+                    <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Левая область</h4>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary);">
+                        P(X < 860) = 1 − P(X ≥ 860) = 1 − 0,95 = <span class="highlight">0,05</span>
+                    </p>
+                </div>
+
+                <div class="card" style="border-left: 4px solid var(--accent-teal);">
+                    <h4 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Искомая область</h4>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary);">
+                        P(860 ≤ X < 900) = 0,98 − 0,05 = <span class="highlight">0,93</span>
+                    </p>
+                </div>
+
+                <div class="card" style="border-left: 4px solid #eab308;">
+                    <h4 style="color: #eab308; margin-bottom: 0.5rem;">Правая область</h4>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary);">
+                        P(X ≥ 900) = 1 − P(X < 900) = 1 − 0,98 = <span class="highlight">0,02</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Theory Section -->
+    <section id="theory">
+        <h2 class="section-title">Теоретический материал</h2>
+
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <h3>Основная формула вероятности интервала</h3>
+                <svg class="accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="accordion-content">
+                <p>Для нахождения вероятности попадания непрерывной случайной величины X в полуинтервал [a; b) используется формула:</p>
+                <div class="step-formula" style="margin: 1rem 0; font-size: 1.25rem;">
+                    P(a ≤ X < b) = P(X < b) − P(X < a)
+                </div>
+                <p>Эта формула следует из свойств вероятности и аддитивности несовместных событий.</p>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <h3>Свойство противоположных событий</h3>
+                <svg class="accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="accordion-content">
+                <p>Если известна вероятность P(X ≥ a), то вероятность противоположного события вычисляется как:</p>
+                <div class="step-formula" style="margin: 1rem 0; font-size: 1.25rem;">
+                    P(X < a) = 1 − P(X ≥ a)
+                </div>
+                <p>Это свойство часто необходимо, когда в условии задачи дана вероятность одного события, а для решения требуется вероятность противоположного.</p>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <h3>Геометрический смысл</h3>
+                <svg class="accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="accordion-content">
+                <p>Вероятность попадания в интервал можно интерпретировать как площадь под кривой плотности распределения на этом промежутке. Чем больше площадь, тем выше вероятность.</p>
+                <p>Сумма вероятностей всех непересекающихся областей равна 1 (или 100%), что соответствует полной вероятности.</p>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <h3>Алгоритм решения задач</h3>
+                <svg class="accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="accordion-content">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>Проанализируйте данные</strong>
+                        <p>Определите, какие вероятности даны в условии: P(X < b), P(X ≥ a) и т.д.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Найдите недостающие вероятности</strong>
+                        <p>Если нужно P(X < a), а дано P(X ≥ a), используйте формулу противоположного события.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <strong>Примените основную формулу</strong>
+                        <p>Вычтите из P(X < b) вероятность P(X < a) для получения P(a ≤ X < b).</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <strong>Проверьте результат</strong>
+                        <p>Убедитесь, что полученная вероятность лежит в пределах от 0 до 1.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section id="calculator">
+        <h2 class="section-title">Интерактивный калькулятор</h2>
+
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem; color: var(--accent-cyan);">Вычисление вероятности интервала</h3>
+
+            <div class="calculator">
+                <div class="calc-input">
+                    <label>P(X < b) — вероятность меньше верхней границы</label>
+                    <input type="number" id="probLessB" step="0.01" min="0" max="1" value="0.98" placeholder="0.98">
+                </div>
+
+                <div class="calc-input">
+                    <label>P(X ≥ a) — вероятность больше-равно нижней границы</label>
+                    <input type="number" id="probGreaterA" step="0.01" min="0" max="1" value="0.95" placeholder="0.95">
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 2rem 0;">
+                <button class="btn" onclick="calculateProbability()">Вычислить вероятность</button>
+                <button class="btn btn-secondary" onclick="resetCalculator()">Сбросить</button>
+            </div>
+
+            <div id="calcResult" class="result-box" style="display: none;">
+                <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">P(a ≤ X < b) =</div>
+                <div class="result-value" id="resultValue">0.93</div>
+                <div id="resultSteps" style="color: var(--text-secondary); font-size: 0.875rem;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practice Section -->
+    <section id="practice">
+        <h2 class="section-title">Разбор задачи</h2>
+
+        <div class="task-card">
+            <h3 style="color: var(--accent-purple); margin-bottom: 1rem;">Исходная задача</h3>
+            <p style="margin-bottom: 1rem;">Известно, что:</p>
+            <div class="task-formula">
+                P(X < 900) = 0,98 &nbsp;&nbsp;&nbsp; P(X ≥ 860) = 0,95
+            </div>
+            <p style="margin: 1rem 0;">Найти:</p>
+            <div class="task-formula">
+                P(860 ≤ X < 900) = ?
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h4 style="color: var(--accent-cyan); margin-bottom: 1rem;">Пошаговое решение:</h4>
+
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>Найдём P(X < 860)</strong>
+                        <p>Используем свойство противоположных событий:</p>
+                        <div class="step-formula">
+                            P(X < 860) = 1 − P(X ≥ 860) = 1 − 0,95 = <span class="success">0,05</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Применим формулу вероятности интервала</strong>
+                        <p>Искомая вероятность равна разности:</p>
+                        <div class="step-formula">
+                            P(860 ≤ X < 900) = P(X < 900) − P(X < 860)
+                        </div>
+                        <div class="step-formula">
+                            P(860 ≤ X < 900) = 0,98 − 0,05 = <span class="success">0,93</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-box" style="margin-top: 2rem;">
+                    <div style="color: var(--text-secondary);">Ответ:</div>
+                    <div class="result-value">0,93</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin: 3rem 0 1.5rem; color: var(--accent-cyan);">Генератор тренировочных задач</h3>
+
+        <div class="task-card" id="generatedTask">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="color: var(--accent-teal);">Новая задача</h4>
+                <button class="btn btn-secondary" onclick="generateTask()" style="margin: 0;">Сгенерировать новую</button>
+            </div>
+
+            <div id="taskContent">
+                <p>Нажмите "Сгенерировать новую" для создания задачи</p>
+            </div>
+
+            <div id="taskAnswer" class="answer-reveal">
+                <h4 style="color: var(--accent-teal); margin-bottom: 1rem;">Решение:</h4>
+                <div id="answerContent"></div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <button class="btn" onclick="showAnswer()" id="showAnswerBtn">Показать ответ</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz">
+        <h2 class="section-title">Проверка знаний</h2>
+
+        <div class="quiz-container" id="quizContainer">
+            <div class="quiz-question" data-correct="1">
+                <h4>Вопрос 1: Чему равна вероятность противоположного события, если P(A) = 0,7?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">
+                        <span>0,7</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">
+                        <span>0,3</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">
+                        <span>1,7</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 3)">
+                        <span>0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <h4>Вопрос 2: Какая формула верна для P(a ≤ X < b)?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">
+                        <span>P(X < a) − P(X < b)</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">
+                        <span>P(X < a) + P(X < b)</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">
+                        <span>P(X < b) − P(X < a)</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 3)">
+                        <span>P(X < b) + P(X ≥ a)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <h4>Вопрос 3: Если P(X < 100) = 0,85, чему равно P(X ≥ 100)?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">
+                        <span>0,15</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">
+                        <span>0,85</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">
+                        <span>1,85</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 3)">
+                        <span>0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <h4>Вопрос 4: Дано: P(X < 50) = 0,6 и P(X ≥ 30) = 0,7. Чему равно P(30 ≤ X < 50)?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">
+                        <span>0,1</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">
+                        <span>0,3</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">
+                        <span>0,5</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 3)">
+                        <span>0,7</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <h4>Вопрос 5: Может ли вероятность быть равна 1,2?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">
+                        <span>Да, если событие достоверное</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">
+                        <span>Да, для непрерывных величин</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">
+                        <span>Нет, вероятность всегда от 0 до 1</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 3)">
+                        <span>Только для дискретных величин</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="quizResult" style="margin-top: 2rem; padding: 2rem; background: var(--bg-card); border-radius: 16px; text-align: center; display: none;">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Результат теста</h3>
+            <div class="result-value" id="quizScore">0/5</div>
+            <p id="quizMessage" style="color: var(--text-secondary);"></p>
+            <button class="btn" onclick="resetQuiz()" style="margin-top: 1rem;">Пройти ещё раз</button>
+        </div>
+    </section>
+
+    <!-- Cheat Sheet -->
+    <section id="cheatsheet">
+        <h2 class="section-title">Шпаргалка</h2>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Основные формулы</h3>
+                <div style="font-family: 'Courier New', monospace; line-height: 2;">
+                    <div>P(a ≤ X < b) = P(X < b) − P(X < a)</div>
+                    <div>P(X < a) = 1 − P(X ≥ a)</div>
+                    <div>P(X ≥ a) = 1 − P(X < a)</div>
+                    <div>P(X ≤ b) = P(X < b) (для непрерывных)</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="color: var(--accent-teal); margin-bottom: 1rem;">Важные свойства</h3>
+                <ul style="list-style: none; line-height: 2;">
+                    <li>✓ 0 ≤ P(A) ≤ 1</li>
+                    <li>✓ P(достоверное) = 1</li>
+                    <li>✓ P(невозможное) = 0</li>
+                    <li>✓ P(A) + P(не A) = 1</li>
+                    <li>✓ Сумма вероятностей всех исходов = 1</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    // Accordion functionality
+    function toggleAccordion(header) {
+        const accordion = header.parentElement;
+        const isActive = accordion.classList.contains('active');
+
+        // Close all accordions
+        document.querySelectorAll('.accordion').forEach(acc => {
+            acc.classList.remove('active');
+        });
+
+        // Open clicked if it wasn't active
+        if (!isActive) {
+            accordion.classList.add('active');
+        }
+    }
+
+    // Calculator
+    function calculateProbability() {
+        const probLessB = parseFloat(document.getElementById('probLessB').value);
+        const probGreaterA = parseFloat(document.getElementById('probGreaterA').value);
+
+        if (isNaN(probLessB) || isNaN(probGreaterA)) {
+            alert('Пожалуйста, введите корректные значения вероятностей');
+            return;
+        }
+
+        if (probLessB < 0 || probLessB > 1 || probGreaterA < 0 || probGreaterA > 1) {
+            alert('Вероятности должны быть в диапазоне от 0 до 1');
+            return;
+        }
+
+        const probLessA = 1 - probGreaterA;
+        const result = probLessB - probLessA;
+
+        document.getElementById('resultValue').textContent = result.toFixed(2);
+        document.getElementById('resultSteps').innerHTML = `
+                P(X < a) = 1 − ${probGreaterA} = ${probLessA.toFixed(2)}<br>
+                P(a ≤ X < b) = ${probLessB} − ${probLessA.toFixed(2)} = ${result.toFixed(2)}
+            `;
+        document.getElementById('calcResult').style.display = 'block';
+
+        // Smooth scroll to result
+        document.getElementById('calcResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function resetCalculator() {
+        document.getElementById('probLessB').value = '0.98';
+        document.getElementById('probGreaterA').value = '0.95';
+        document.getElementById('calcResult').style.display = 'none';
+    }
+
+    // Task Generator
+    const taskTemplates = [
+        {
+            generate: () => {
+                const p1 = (Math.floor(Math.random() * 40) + 60) / 100; // 0.60 - 0.99
+                const p2 = (Math.floor(Math.random() * 40) + 55) / 100; // 0.55 - 0.94
+                const a = Math.floor(Math.random() * 500) + 100;
+                const b = a + Math.floor(Math.random() * 100) + 50;
+
+                return {
+                    text: `P(X < ${b}) = ${p1}, P(X ≥ ${a}) = ${p2}. Найдите P(${a} ≤ X < ${b})`,
+                    solution: `P(X < ${a}) = 1 − ${p2} = ${(1-p2).toFixed(2)}\nP(${a} ≤ X < ${b}) = ${p1} − ${(1-p2).toFixed(2)} = ${(p1 - (1-p2)).toFixed(2)}`,
+                    answer: (p1 - (1-p2)).toFixed(2)
+                };
+            }
+        },
+        {
+            generate: () => {
+                const pLess = (Math.floor(Math.random() * 30) + 70) / 100;
+                const pGreater = (Math.floor(Math.random() * 35) + 60) / 100;
+                const val1 = Math.floor(Math.random() * 800) + 200;
+                const val2 = val1 + Math.floor(Math.random() * 150) + 50;
+
+                return {
+                    text: `P(X < ${val2}) = ${pLess}, P(X ≥ ${val1}) = ${pGreater}. Вычислите P(${val1} ≤ X < ${val2})`,
+                    solution: `P(X < ${val1}) = 1 − ${pGreater} = ${(1-pGreater).toFixed(2)}\nP(${val1} ≤ X < ${val2}) = ${pLess} − ${(1-pGreater).toFixed(2)} = ${(pLess - (1-pGreater)).toFixed(2)}`,
+                    answer: (pLess - (1-pGreater)).toFixed(2)
+                };
+            }
+        }
+    ];
+
+    let currentTask = null;
+
+    function generateTask() {
+        const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+        currentTask = template.generate();
+
+        document.getElementById('taskContent').innerHTML = `
+                <div class="task-formula">${currentTask.text}</div>
+            `;
+        document.getElementById('taskAnswer').classList.remove('show');
+        document.getElementById('showAnswerBtn').style.display = 'inline-block';
+    }
+
+    function showAnswer() {
+        if (!currentTask) generateTask();
+
+        document.getElementById('answerContent').innerHTML = `
+                <div class="step-formula">${currentTask.solution}</div>
+                <div class="result-box" style="margin-top: 1rem;">
+                    <div style="color: var(--text-secondary);">Ответ: ${currentTask.answer}</div>
+                </div>
+            `;
+        document.getElementById('taskAnswer').classList.add('show');
+        document.getElementById('showAnswerBtn').style.display = 'none';
+    }
+
+    // Quiz
+    let quizScore = 0;
+    let answeredQuestions = 0;
+
+    function checkAnswer(option, optionIndex) {
+        const question = option.closest('.quiz-question');
+        const correctIndex = parseInt(question.dataset.correct);
+        const options = question.querySelectorAll('.quiz-option');
+
+        // Disable all options
+        options.forEach(opt => opt.classList.add('disabled'));
+
+        // Check answer
+        if (optionIndex === correctIndex) {
+            option.classList.add('correct');
+            quizScore++;
+        } else {
+            option.classList.add('incorrect');
+            options[correctIndex].classList.add('correct');
+        }
+
+        answeredQuestions++;
+
+        if (answeredQuestions === 5) {
+            showQuizResult();
+        }
+    }
+
+    function showQuizResult() {
+        const resultDiv = document.getElementById('quizResult');
+        const scoreDiv = document.getElementById('quizScore');
+        const messageDiv = document.getElementById('quizMessage');
+
+        scoreDiv.textContent = `${quizScore}/5`;
+
+        if (quizScore === 5) {
+            messageDiv.textContent = 'Отлично! Вы прекрасно усвоили материал!';
+            messageDiv.style.color = 'var(--accent-teal)';
+        } else if (quizScore >= 3) {
+            messageDiv.textContent = 'Хороший результат! Но есть куда расти.';
+            messageDiv.style.color = 'var(--accent-cyan)';
+        } else {
+            messageDiv.textContent = 'Рекомендуем повторить теоретический материал.';
+            messageDiv.style.color = '#ef4444';
+        }
+
+        resultDiv.style.display = 'block';
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+        quizScore = 0;
+        answeredQuestions = 0;
+        document.getElementById('quizResult').style.display = 'none';
+
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.classList.remove('correct', 'incorrect', 'disabled');
+        });
+    }
+
+    // Smooth scroll for navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Interactive regions tooltip
+    document.querySelectorAll('.region').forEach(region => {
+        region.addEventListener('mouseenter', function() {
+            this.style.opacity = '1';
+            this.style.transform = 'scale(1.02)';
+        });
+
+        region.addEventListener('mouseleave', function() {
+            this.style.opacity = '0.7';
+            this.style.transform = 'scale(1)';
+        });
+    });
+
+    // Initialize with a task
+    generateTask();
+</script>
+</body>
+</html>

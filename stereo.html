@@ -31,7 +31,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1460px;
             margin: 0 auto;
             padding: 1rem;
             height: 100vh;
@@ -57,7 +57,7 @@
 
         .main-grid {
             display: grid;
-            grid-template-columns: 280px 1fr 320px;
+            grid-template-columns: 300px 1fr 320px;
             gap: 1rem;
             flex-grow: 1;
             min-height: 0;
@@ -149,7 +149,7 @@
             overflow: hidden;
             position: relative;
             flex-grow: 1;
-            min-height: 400px;
+            min-height: 420px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
 
@@ -284,7 +284,7 @@
 <div class="container">
     <header>
         <h1>🔷 3D Сечения</h1>
-        <p class="subtitle">Конструктор сечений многогранников</p>
+        <p class="subtitle">Конструктор сечений многогранников и тел вращения</p>
     </header>
 
     <div class="main-grid">
@@ -295,6 +295,9 @@
                 <button class="shape-btn" data-shape="pyramid">Пирамида</button>
                 <button class="shape-btn" data-shape="prism">Призма</button>
                 <button class="shape-btn" data-shape="tetrahedron">Тетраэдр</button>
+                <button class="shape-btn" data-shape="cylinder">Цилиндр</button>
+                <button class="shape-btn" data-shape="cone">Конус</button>
+                <button class="shape-btn" data-shape="sphere">Шар</button>
             </div>
 
             <h2 class="panel-title">⚙️ Параметры</h2>
@@ -319,9 +322,10 @@
             <div class="instruction">
                 💡 <strong>Как работать:</strong><br>
                 1. Вращайте фигуру мышкой.<br>
-                2. Кликните на ребро, чтобы поставить точку.<br>
+                2. Кликните на ребро/линию сетки, чтобы поставить точку.<br>
                 3. Поставьте минимум 3 точки.<br>
-                4. Нажмите «Сечение».
+                4. Нажмите «Сечение».<br><br>
+                Для цилиндра, конуса и шара используется сеточная аппроксимация.
             </div>
 
             <div class="stats">
@@ -584,6 +588,196 @@
         }
     }
 
+    class Cylinder extends Shape {
+        constructor(s, segments = 24) {
+            super();
+
+            const r = s / 2;
+            const h = s;
+            const topY = h / 2;
+            const bottomY = -h / 2;
+
+            for (let i = 0; i < segments; i++) {
+                const a = (2 * Math.PI * i) / segments;
+                this.vertices.push(new Point3D(
+                    r * Math.cos(a),
+                    topY,
+                    r * Math.sin(a)
+                ));
+            }
+
+            for (let i = 0; i < segments; i++) {
+                const a = (2 * Math.PI * i) / segments;
+                this.vertices.push(new Point3D(
+                    r * Math.cos(a),
+                    bottomY,
+                    r * Math.sin(a)
+                ));
+            }
+
+            for (let i = 0; i < segments; i++) {
+                const next = (i + 1) % segments;
+                this.edges.push(new Edge(this.vertices[i], this.vertices[next], this.edges.length, i, next));
+            }
+
+            for (let i = 0; i < segments; i++) {
+                const a = segments + i;
+                const b = segments + ((i + 1) % segments);
+                this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+            }
+
+            for (let i = 0; i < segments; i++) {
+                const a = i;
+                const b = segments + i;
+                this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+            }
+
+            this.faces.push([...Array(segments).keys()]);
+            this.faces.push([...Array(segments).keys()].map(i => segments + (segments - 1 - i)));
+
+            for (let i = 0; i < segments; i++) {
+                const next = (i + 1) % segments;
+                this.faces.push([i, next, segments + next, segments + i]);
+            }
+
+            this.buildConnectivity();
+        }
+    }
+
+    class Cone extends Shape {
+        constructor(s, segments = 24) {
+            super();
+
+            const r = s / 2;
+            const h = s;
+            const baseY = -h / 2;
+            const apexY = h / 2;
+
+            for (let i = 0; i < segments; i++) {
+                const a = (2 * Math.PI * i) / segments;
+                this.vertices.push(new Point3D(
+                    r * Math.cos(a),
+                    baseY,
+                    r * Math.sin(a)
+                ));
+            }
+
+            const apexIndex = this.vertices.length;
+            this.vertices.push(new Point3D(0, apexY, 0));
+
+            for (let i = 0; i < segments; i++) {
+                const next = (i + 1) % segments;
+                this.edges.push(new Edge(this.vertices[i], this.vertices[next], this.edges.length, i, next));
+            }
+
+            for (let i = 0; i < segments; i++) {
+                this.edges.push(new Edge(this.vertices[i], this.vertices[apexIndex], this.edges.length, i, apexIndex));
+            }
+
+            this.faces.push([...Array(segments).keys()]);
+
+            for (let i = 0; i < segments; i++) {
+                const next = (i + 1) % segments;
+                this.faces.push([i, next, apexIndex]);
+            }
+
+            this.buildConnectivity();
+        }
+    }
+
+    class Sphere extends Shape {
+        constructor(s, latSegments = 10, lonSegments = 16) {
+            super();
+
+            const r = s / 2;
+
+            const topIndex = this.vertices.length;
+            this.vertices.push(new Point3D(0, r, 0));
+
+            const ringIndices = [];
+            for (let lat = 1; lat < latSegments; lat++) {
+                const phi = Math.PI * lat / latSegments;
+                const y = r * Math.cos(phi);
+                const rr = r * Math.sin(phi);
+
+                const ring = [];
+                for (let lon = 0; lon < lonSegments; lon++) {
+                    const theta = 2 * Math.PI * lon / lonSegments;
+                    const x = rr * Math.cos(theta);
+                    const z = rr * Math.sin(theta);
+                    ring.push(this.vertices.length);
+                    this.vertices.push(new Point3D(x, y, z));
+                }
+                ringIndices.push(ring);
+            }
+
+            const bottomIndex = this.vertices.length;
+            this.vertices.push(new Point3D(0, -r, 0));
+
+            for (const ring of ringIndices) {
+                for (let i = 0; i < lonSegments; i++) {
+                    const a = ring[i];
+                    const b = ring[(i + 1) % lonSegments];
+                    this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                }
+            }
+
+            for (let k = 0; k < ringIndices.length - 1; k++) {
+                const ringA = ringIndices[k];
+                const ringB = ringIndices[k + 1];
+                for (let i = 0; i < lonSegments; i++) {
+                    const a = ringA[i];
+                    const b = ringB[i];
+                    this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                }
+            }
+
+            if (ringIndices.length > 0) {
+                for (let i = 0; i < lonSegments; i++) {
+                    const a = topIndex;
+                    const b = ringIndices[0][i];
+                    this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                }
+            }
+
+            if (ringIndices.length > 0) {
+                const lastRing = ringIndices[ringIndices.length - 1];
+                for (let i = 0; i < lonSegments; i++) {
+                    const a = lastRing[i];
+                    const b = bottomIndex;
+                    this.edges.push(new Edge(this.vertices[a], this.vertices[b], this.edges.length, a, b));
+                }
+            }
+
+            if (ringIndices.length > 0) {
+                const firstRing = ringIndices[0];
+                for (let i = 0; i < lonSegments; i++) {
+                    const next = (i + 1) % lonSegments;
+                    this.faces.push([topIndex, firstRing[next], firstRing[i]]);
+                }
+            }
+
+            for (let k = 0; k < ringIndices.length - 1; k++) {
+                const ringA = ringIndices[k];
+                const ringB = ringIndices[k + 1];
+                for (let i = 0; i < lonSegments; i++) {
+                    const next = (i + 1) % lonSegments;
+                    this.faces.push([ringA[i], ringA[next], ringB[next], ringB[i]]);
+                }
+            }
+
+            if (ringIndices.length > 0) {
+                const lastRing = ringIndices[ringIndices.length - 1];
+                for (let i = 0; i < lonSegments; i++) {
+                    const next = (i + 1) % lonSegments;
+                    this.faces.push([lastRing[i], lastRing[next], bottomIndex]);
+                }
+            }
+
+            this.buildConnectivity();
+        }
+    }
+
     function planeFrom3Points(a, b, c) {
         const ab = b.sub(a);
         const ac = c.sub(a);
@@ -800,10 +994,27 @@
             this.sectionPoints = [];
 
             switch(type) {
-                case 'cube': this.shape = new Cube(this.size); break;
-                case 'pyramid': this.shape = new Pyramid(this.size); break;
-                case 'prism': this.shape = new Prism(this.size); break;
-                case 'tetrahedron': this.shape = new Tetrahedron(this.size); break;
+                case 'cube':
+                    this.shape = new Cube(this.size);
+                    break;
+                case 'pyramid':
+                    this.shape = new Pyramid(this.size);
+                    break;
+                case 'prism':
+                    this.shape = new Prism(this.size);
+                    break;
+                case 'tetrahedron':
+                    this.shape = new Tetrahedron(this.size);
+                    break;
+                case 'cylinder':
+                    this.shape = new Cylinder(this.size, 28);
+                    break;
+                case 'cone':
+                    this.shape = new Cone(this.size, 28);
+                    break;
+                case 'sphere':
+                    this.shape = new Sphere(this.size, 12, 20);
+                    break;
             }
 
             this.ui.sectionArea.textContent = '0';
@@ -1070,20 +1281,33 @@
         }
 
         drawLabel(text, x, y, color = '#ffffff', bg = 'rgba(15, 23, 42, 0.85)') {
+            this.ctx.save();
             this.ctx.font = 'bold 14px Segoe UI, Arial, sans-serif';
             const paddingX = 6;
-            const paddingY = 4;
-            const metrics = this.ctx.measureText(text);
-            const width = metrics.width + paddingX * 2;
+            const width = this.ctx.measureText(text).width + paddingX * 2;
             const height = 20;
+
+            const rx = x;
+            const ry = y - height + 4;
+            const r = 6;
 
             this.ctx.fillStyle = bg;
             this.ctx.beginPath();
-            this.ctx.roundRect(x, y - height + 4, width, height, 6);
+            this.ctx.moveTo(rx + r, ry);
+            this.ctx.lineTo(rx + width - r, ry);
+            this.ctx.quadraticCurveTo(rx + width, ry, rx + width, ry + r);
+            this.ctx.lineTo(rx + width, ry + height - r);
+            this.ctx.quadraticCurveTo(rx + width, ry + height, rx + width - r, ry + height);
+            this.ctx.lineTo(rx + r, ry + height);
+            this.ctx.quadraticCurveTo(rx, ry + height, rx, ry + height - r);
+            this.ctx.lineTo(rx, ry + r);
+            this.ctx.quadraticCurveTo(rx, ry, rx + r, ry);
+            this.ctx.closePath();
             this.ctx.fill();
 
             this.ctx.fillStyle = color;
             this.ctx.fillText(text, x + paddingX, y);
+            this.ctx.restore();
         }
 
         loop() {
