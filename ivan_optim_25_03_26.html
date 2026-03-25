@@ -1,0 +1,1547 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Задачи на оптимизацию — интерактивная лаборатория</title>
+    <style>
+        :root{
+            --bg:#06111f;
+            --bg2:#0b1930;
+            --panel:rgba(15,27,48,.68);
+            --panel-strong:rgba(10,20,38,.88);
+            --line:rgba(255,255,255,.09);
+            --text:#ebf4ff;
+            --muted:#9eb2c9;
+            --soft:#6f86a3;
+            --accent:#67e8f9;
+            --accent2:#7c8cff;
+            --accent3:#5eead4;
+            --ok:#86efac;
+            --warn:#fde68a;
+            --danger:#fb7185;
+            --shadow:0 22px 70px rgba(0,0,0,.35);
+            --radius:24px;
+            --radius2:18px;
+            --max:1260px;
+            --sans:Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+            radial-gradient(1000px 700px at 10% -10%, rgba(103,232,249,.18), transparent 50%),
+            radial-gradient(900px 700px at 110% 0%, rgba(124,140,255,.16), transparent 48%),
+            radial-gradient(1000px 900px at 50% 120%, rgba(94,234,212,.12), transparent 38%),
+            linear-gradient(180deg, #040914 0%, #07101e 38%, #091424 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            background:
+            linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size:38px 38px;
+            mask-image:radial-gradient(circle at center, black 35%, transparent 82%);
+            opacity:.22;
+        }
+        a{text-decoration:none;color:inherit}
+        button,input,select{font:inherit}
+        .container{width:min(var(--max), calc(100% - 28px)); margin:0 auto}
+
+        .nav{
+            position:sticky; top:0; z-index:40;
+            backdrop-filter:blur(16px);
+            background:linear-gradient(180deg, rgba(4,8,16,.88), rgba(4,8,16,.55));
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .nav-inner{
+            display:flex; align-items:center; justify-content:space-between; gap:16px;
+            padding:14px 0;
+        }
+        .brand{display:flex; gap:12px; align-items:center; min-width:0}
+        .brand-icon{
+            width:42px; height:42px; border-radius:14px; flex:0 0 auto;
+            background:
+            radial-gradient(circle at 30% 25%, rgba(255,255,255,.34), transparent 26%),
+            linear-gradient(135deg, rgba(103,232,249,.26), rgba(124,140,255,.22));
+            border:1px solid rgba(255,255,255,.14);
+            box-shadow:inset 0 0 24px rgba(255,255,255,.05), 0 10px 26px rgba(0,0,0,.22);
+            position:relative;
+            overflow:hidden;
+        }
+        .brand-icon::before,.brand-icon::after{
+            content:""; position:absolute; inset:auto; border:1px solid rgba(255,255,255,.24); border-radius:999px;
+        }
+        .brand-icon::before{width:26px;height:26px;left:7px;top:7px}
+        .brand-icon::after{width:14px;height:14px;left:13px;top:13px}
+        .brand h1{margin:0;font-size:15px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+        .nav-links{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+        .chip,.btn{
+            display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            min-height:42px; padding:10px 14px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.04);
+            color:var(--text);
+            transition:.22s ease;
+            cursor:pointer;
+            backdrop-filter:blur(12px);
+        }
+        .chip:hover,.btn:hover{transform:translateY(-1px); border-color:rgba(103,232,249,.34); box-shadow:0 10px 24px rgba(0,0,0,.18)}
+        .btn.primary{
+            background:linear-gradient(135deg, rgba(103,232,249,.16), rgba(124,140,255,.18));
+            border-color:rgba(103,232,249,.25);
+        }
+
+        .hero{padding:62px 0 28px}
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.12fr .88fr;
+            gap:24px;
+            align-items:stretch;
+        }
+
+        .panel{
+            position:relative;
+            border-radius:var(--radius);
+            background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+            border:1px solid rgba(255,255,255,.10);
+            box-shadow:var(--shadow);
+            backdrop-filter:blur(18px);
+            overflow:hidden;
+        }
+        .panel::before{
+            content:"";
+            position:absolute; inset:0; pointer-events:none;
+            background:linear-gradient(140deg, rgba(103,232,249,.08), transparent 35%, rgba(124,140,255,.06) 70%, transparent);
+        }
+
+        .hero-copy{padding:34px}
+        .eyebrow{
+            display:inline-flex; gap:8px; align-items:center;
+            padding:8px 12px;
+            border-radius:999px;
+            border:1px solid rgba(103,232,249,.24);
+            background:rgba(103,232,249,.07);
+            color:var(--accent);
+            text-transform:uppercase;
+            letter-spacing:.12em;
+            font-size:12px;
+            margin-bottom:18px;
+        }
+        .hero h2{
+            margin:0 0 16px;
+            font-size:clamp(34px, 6vw, 72px);
+            line-height:.96;
+            letter-spacing:-.045em;
+            max-width:11ch;
+        }
+        .hero h2 .shine{
+            background:linear-gradient(135deg, #fff 0%, #c9f7ff 35%, #a8b7ff 70%, #bcffea 100%);
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+            text-shadow:0 0 28px rgba(103,232,249,.13);
+        }
+        .lead{
+            color:var(--muted);
+            font-size:18px;
+            line-height:1.72;
+            max-width:65ch;
+            margin:0;
+        }
+        .hero-actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:24px}
+        .hero-stats{
+            display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:24px;
+        }
+        .stat{
+            border-radius:18px; padding:14px 16px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .stat .k{font-size:12px; letter-spacing:.08em; color:var(--soft); text-transform:uppercase; margin-bottom:8px}
+        .stat .v{font-size:15px; line-height:1.5}
+
+        .hero-viz{
+            min-height:560px;
+            position:relative;
+            padding:18px;
+            background:
+            radial-gradient(circle at 22% 20%, rgba(103,232,249,.17), transparent 28%),
+            radial-gradient(circle at 76% 12%, rgba(124,140,255,.18), transparent 30%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+        }
+        .hero-viz svg{width:100%; height:100%; min-height:520px; filter:drop-shadow(0 16px 28px rgba(0,0,0,.24))}
+        .float-card{
+            position:absolute;
+            padding:14px 16px;
+            border-radius:18px;
+            background:rgba(6,18,34,.74);
+            border:1px solid rgba(255,255,255,.10);
+            box-shadow:0 14px 32px rgba(0,0,0,.25);
+            backdrop-filter:blur(12px);
+            font-size:13px;
+            color:var(--muted);
+            line-height:1.55;
+            max-width:220px;
+        }
+        .float-card strong{display:block; margin-bottom:6px; color:var(--text)}
+        .f1{right:18px; top:22px}
+        .f2{left:16px; bottom:24px}
+
+        main{padding-bottom:52px}
+        section{padding:24px 0}
+        .section-head{
+            display:flex; align-items:flex-end; justify-content:space-between; gap:18px;
+            margin-bottom:18px;
+        }
+        .section-head h3{
+            margin:0;
+            font-size:clamp(24px, 4vw, 42px);
+            line-height:1.05;
+            letter-spacing:-.03em;
+        }
+        .section-head p{
+            margin:0;
+            color:var(--muted);
+            max-width:70ch;
+            line-height:1.68;
+            font-size:15px;
+        }
+        .badge{
+            display:inline-flex; align-items:center; gap:8px;
+            padding:7px 11px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+            color:var(--muted);
+            font-size:12px;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+            margin-bottom:10px;
+        }
+
+        .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+        .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+        .card{
+            border-radius:var(--radius);
+            background:var(--panel);
+            border:1px solid rgba(255,255,255,.10);
+            box-shadow:var(--shadow);
+            backdrop-filter:blur(16px);
+            padding:22px;
+            position:relative;
+            overflow:hidden;
+        }
+        .card h4{margin:0 0 10px; font-size:22px; letter-spacing:-.02em}
+        .card p{margin:0; color:var(--muted); line-height:1.7}
+        .soft{color:var(--muted)}
+        .mono{font-family:var(--mono)}
+        .ok{color:var(--ok)}
+        .warn{color:var(--warn)}
+        .danger{color:var(--danger)}
+        .accent{color:var(--accent)}
+
+        .figure-shell{
+            border-radius:20px;
+            min-height:360px;
+            background:
+            radial-gradient(circle at 50% 35%, rgba(103,232,249,.08), transparent 36%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+            border:1px solid rgba(255,255,255,.08);
+            overflow:hidden;
+            position:relative;
+        }
+        .figure-shell svg{width:100%; height:100%}
+        .controls{display:grid; gap:14px}
+        .control{display:grid; gap:8px}
+        .control label{
+            font-size:13px; color:var(--soft); text-transform:uppercase; letter-spacing:.06em;
+        }
+        .control input[type="range"]{
+            width:100%;
+            accent-color:var(--accent);
+        }
+        .value-line{
+            display:flex; justify-content:space-between; gap:12px; align-items:center;
+            font-size:14px; color:var(--muted);
+        }
+        .math-box{
+            margin-top:8px;
+            border-radius:16px;
+            padding:14px 16px;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+            font-family:var(--mono);
+            color:#d6edff;
+            overflow:auto;
+            line-height:1.65;
+        }
+        .row{display:flex; gap:10px; flex-wrap:wrap}
+        .pill{
+            display:inline-flex; align-items:center; gap:8px;
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            font-size:13px; color:var(--muted);
+        }
+        .summary-list{display:grid; gap:12px; margin-top:14px}
+        .summary-item{
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .summary-item .title{font-weight:700; color:var(--text); margin-bottom:6px}
+        .summary-item .formula{font-family:var(--mono); color:#d6edff; overflow:auto; line-height:1.6}
+
+        details.acc{
+            border-radius:20px;
+            background:var(--panel);
+            border:1px solid rgba(255,255,255,.10);
+            box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+        details.acc + details.acc{margin-top:14px}
+        details.acc summary{
+            list-style:none;
+            cursor:pointer;
+            padding:20px 22px;
+            display:flex; align-items:center; justify-content:space-between; gap:16px;
+            font-weight:700; font-size:18px;
+        }
+        details.acc summary::-webkit-details-marker{display:none}
+        details.acc .body{
+            padding:0 22px 22px;
+            color:var(--muted);
+            line-height:1.72;
+        }
+        .body ul{margin:10px 0 0; padding-left:18px}
+        .body li{margin:7px 0}
+
+        .solve-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+        .step-list{display:grid; gap:10px; margin-top:14px}
+        .step{
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .step strong{display:block; color:var(--text); margin-bottom:6px}
+        .formula-line{font-family:var(--mono); color:#d6edff; overflow:auto; line-height:1.6}
+
+        .table-wrap{
+            overflow:auto;
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            margin-top:10px;
+        }
+        table{
+            width:100%;
+            border-collapse:collapse;
+            min-width:760px;
+        }
+        th,td{
+            padding:15px 16px;
+            text-align:left;
+            vertical-align:top;
+            border-bottom:1px solid rgba(255,255,255,.07);
+        }
+        th{
+            color:var(--soft);
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            font-size:12px;
+            background:rgba(255,255,255,.03);
+        }
+        td{color:var(--muted); line-height:1.58}
+        td strong{color:var(--text)}
+
+        .quiz-list{display:grid; gap:16px}
+        .quiz-item{
+            border-radius:20px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            padding:18px;
+        }
+        .quiz-item h5{margin:0 0 12px; font-size:17px; line-height:1.46}
+        .option-list{display:grid; gap:10px}
+        .option{
+            display:flex; gap:10px; align-items:flex-start;
+            padding:12px 14px;
+            border-radius:16px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.07);
+            cursor:pointer;
+            transition:.2s ease;
+        }
+        .option:hover{transform:translateY(-1px); border-color:rgba(103,232,249,.24)}
+        .option input{margin-top:3px; accent-color:var(--accent)}
+        .option.correct{background:rgba(134,239,172,.08); border-color:rgba(134,239,172,.40)}
+        .option.wrong{background:rgba(251,113,133,.08); border-color:rgba(251,113,133,.35)}
+        .score-box{
+            display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+            gap:12px; margin-top:16px;
+            border-radius:18px; padding:15px 16px;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .task-box{display:grid; gap:14px}
+        .task-output{
+            min-height:190px;
+            border-radius:18px;
+            padding:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            line-height:1.72;
+            color:var(--muted);
+        }
+        .task-output strong{color:var(--text)}
+        .hidden-answer{
+            display:none;
+            margin-top:12px;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(103,232,249,.08);
+            border:1px solid rgba(103,232,249,.18);
+            color:#d6edff;
+            font-family:var(--mono);
+            line-height:1.65;
+        }
+        .task-output.revealed .hidden-answer{display:block}
+
+        .footer{padding:24px 0 48px; color:var(--soft); font-size:14px}
+        .tiny{font-size:13px; line-height:1.68; color:var(--soft)}
+
+        @media (max-width:1080px){
+            .hero-grid,.grid-2,.solve-grid{grid-template-columns:1fr}
+            .section-head{flex-direction:column; align-items:flex-start}
+            .hero-stats{grid-template-columns:1fr}
+            .hero-viz{min-height:440px}
+            .hero-viz svg{min-height:400px}
+        }
+        @media (max-width:820px){
+            .nav-inner{flex-direction:column; align-items:stretch}
+            .nav-links{justify-content:flex-start}
+            .grid-3{grid-template-columns:1fr}
+            .hero-copy{padding:24px}
+            .card{padding:18px}
+        }
+        @media (max-width:560px){
+            .container{width:min(var(--max), calc(100% - 20px))}
+            .hero-actions,.row{display:grid}
+            .chip,.btn{width:100%}
+            .float-card{position:static; margin-top:12px; max-width:none}
+            .hero h2{max-width:none}
+        }
+
+        @media print{
+            body{
+                background:#fff !important;
+                color:#000 !important;
+            }
+            body::before,
+            .nav,
+            .hero-viz,
+            .hero-actions,
+            .btn,
+            .chip,
+            .float-card{
+                display:none !important;
+            }
+            .panel,.card,details.acc,.quiz-item,.task-output,.summary-item,.step{
+                background:#fff !important;
+                color:#000 !important;
+                box-shadow:none !important;
+                border:1px solid #bbb !important;
+                backdrop-filter:none !important;
+            }
+            .panel::before{display:none !important}
+            .math-box,.formula-line,.formula,.hidden-answer,.mono{
+                color:#000 !important;
+                background:#fff !important;
+                border:1px solid #ccc !important;
+            }
+            .hidden-answer{display:block !important}
+            .section-head h3,.card h4,.summary-item .title,details.acc summary,.hero h2{color:#000 !important}
+            .lead,.soft,.tiny,td,p,.body,.score-box,.value-line{color:#222 !important}
+            section{padding:12px 0}
+            .hero{padding:0}
+            .hero-grid{display:block}
+            .hero-copy{padding:0}
+        }
+    </style>
+</head>
+<body>
+<nav class="nav">
+    <div class="container nav-inner">
+        <div class="brand">
+            <div class="brand-icon" aria-hidden="true"></div>
+            <div>
+                <h1>Лаборатория оптимизации</h1>
+                <p>Производная · математическая модель · границы · прикладной ответ</p>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a class="chip" href="#visual">Визуализация</a>
+            <a class="chip" href="#calc">Калькулятор</a>
+            <a class="chip" href="#theory">Теория</a>
+            <a class="chip" href="#problems">Разбор</a>
+            <a class="chip" href="#cheat">Cheat sheet</a>
+            <a class="chip" href="#quiz">Квиз</a>
+            <a class="chip" href="#generator">Генератор</a>
+            <button class="btn primary" id="printBtn" type="button">Печать</button>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="container hero-grid">
+        <div class="panel hero-copy">
+            <div class="eyebrow">Интерактивное учебное пособие</div>
+            <h2><span class="shine">Задачи на оптимизацию</span><br>без хаоса и догадок</h2>
+            <p class="lead">
+                Здесь собрана вся логика темы: как перевести текст в математическую модель, как ввести переменную,
+                как поставить границы, когда искать критическую точку, а когда сравнивать соседние целые значения.
+                Всё подано как цифровая математическая лаборатория: строго, красиво и пригодно для реального решения задач.
+            </p>
+            <div class="hero-actions">
+                <a class="btn primary" href="#visual">Открыть визуальный блок</a>
+                <a class="btn" href="#quiz">Проверить себя</a>
+                <a class="btn" href="#generator">Сгенерировать задачу</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="k">Главная идея</div>
+                    <div class="v">Сначала модель, потом производная, потом возврат к смыслу текста.</div>
+                </div>
+                <div class="stat">
+                    <div class="k">Ключевой риск</div>
+                    <div class="v">Ошибиться не в вычислениях, а в интерпретации переменной и её границ.</div>
+                </div>
+                <div class="stat">
+                    <div class="k">Навык</div>
+                    <div class="v">Уметь объяснить, почему ответ именно такой, а не просто получить число.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel hero-viz">
+            <svg viewBox="0 0 720 560" aria-label="Декоративная композиция по теме оптимизации">
+                <defs>
+                    <linearGradient id="pathA" x1="0" x2="1">
+                        <stop offset="0%" stop-color="#67e8f9"/>
+                        <stop offset="100%" stop-color="#7c8cff"/>
+                    </linearGradient>
+                    <linearGradient id="pathB" x1="0" x2="1">
+                        <stop offset="0%" stop-color="#5eead4"/>
+                        <stop offset="100%" stop-color="#67e8f9"/>
+                    </linearGradient>
+                    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#80ecff" stop-opacity=".95"/>
+                        <stop offset="100%" stop-color="#80ecff" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+
+                <circle cx="540" cy="120" r="86" fill="url(#glow1)" opacity=".7"></circle>
+                <circle cx="160" cy="430" r="72" fill="url(#glow1)" opacity=".55"></circle>
+
+                <g fill="none" stroke="rgba(255,255,255,.10)">
+                    <path d="M70 470 C 180 430, 220 340, 310 250 S 520 120, 650 180" stroke-width="1.2"/>
+                    <path d="M70 470 C 180 450, 240 390, 310 320 S 520 210, 650 240" stroke-width=".8"/>
+                    <path d="M80 110 H 650" stroke-width=".8"/>
+                    <path d="M100 80 V 500" stroke-width=".8"/>
+                    <path d="M340 80 V 500" stroke-width=".8"/>
+                </g>
+
+                <g transform="translate(92,88)">
+                    <line x1="0" y1="330" x2="500" y2="330" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="50" y1="330" x2="50" y2="72" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+
+                    <path d="M70 285 C 150 210, 220 155, 290 145 S 420 200, 470 240" stroke="url(#pathA)" stroke-width="5" fill="none" stroke-linecap="round"/>
+                    <circle cx="287" cy="145" r="7" fill="#fff"></circle>
+                    <text x="296" y="135" fill="#eaf4ff" font-size="18">минимум</text>
+
+                    <line x1="287" y1="145" x2="287" y2="330" stroke="rgba(255,255,255,.22)" stroke-dasharray="6 7" stroke-width="1.2"/>
+                    <text x="278" y="356" fill="#d6edff" font-size="18">x₀</text>
+
+                    <path d="M82 100 L 132 100" stroke="#67e8f9" stroke-width="4" stroke-linecap="round"/>
+                    <text x="146" y="106" fill="#d6edff" font-size="17">S′(x) &lt; 0 слева</text>
+
+                    <path d="M82 128 L 132 128" stroke="#5eead4" stroke-width="4" stroke-linecap="round"/>
+                    <text x="146" y="134" fill="#d6edff" font-size="17">S′(x) &gt; 0 справа</text>
+                </g>
+
+                <g transform="translate(438,292)">
+                    <rect x="-10" y="-10" width="210" height="152" rx="20" fill="rgba(10,20,38,.56)" stroke="rgba(255,255,255,.10)"/>
+                    <text x="18" y="26" fill="#eaf4ff" font-size="18">Шаблон решения</text>
+                    <text x="18" y="54" fill="#9eb2c9" font-size="15">1. Вводим переменную</text>
+                    <text x="18" y="78" fill="#9eb2c9" font-size="15">2. Строим функцию S(x)</text>
+                    <text x="18" y="102" fill="#9eb2c9" font-size="15">3. Ставим границы</text>
+                    <text x="18" y="126" fill="#9eb2c9" font-size="15">4. Анализируем S′(x)</text>
+                </g>
+            </svg>
+
+            <div class="float-card f1">
+                <strong>Ключевой фильтр</strong>
+                Если в условии сказано «наибольший» или «наименьший», сначала найди, какая именно величина оптимизируется.
+            </div>
+            <div class="float-card f2">
+                <strong>Самая частая ошибка</strong>
+                Границы переменной берут формально и забывают учесть весь контекст задачи, а не только один объект.
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section id="visual">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <div class="badge">Интерактивный визуальный блок</div>
+                    <h3>Как работает анализ по производной</h3>
+                </div>
+                <p>
+                    Двигай ползунок и наблюдай, как меняется положение вершины квадратичной функции.
+                    Это визуальная модель большинства задач на минимум: строим функцию затрат и ищем наименьшее значение.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="figure-shell">
+                        <svg id="parabolaSvg" viewBox="0 0 760 380" aria-label="Интерактивный график квадратичной функции">
+                            <defs>
+                                <linearGradient id="curveGrad" x1="0" x2="1">
+                                    <stop offset="0%" stop-color="#67e8f9"/>
+                                    <stop offset="100%" stop-color="#7c8cff"/>
+                                </linearGradient>
+                            </defs>
+                            <g id="parabolaLayer"></g>
+                        </svg>
+                    </div>
+                    <div class="row" style="margin-top:14px">
+                        <div class="pill">Ось x — возможные значения переменной</div>
+                        <div class="pill">Ось y — значение функции S(x)</div>
+                        <div class="pill">Белая точка — текущий минимум</div>
+                    </div>
+                </div>
+
+                <div class="card controls">
+                    <h4>Пульт исследования</h4>
+                    <p>
+                        Рассматриваем модель вида <span class="mono">S(x) = a(x − h)² + k</span>, где вершина находится в точке <span class="mono">(h, k)</span>.
+                        При <span class="mono">a &gt; 0</span> это минимум.
+                    </p>
+
+                    <div class="control">
+                        <label for="hRange">Положение вершины h</label>
+                        <input id="hRange" type="range" min="1" max="23" step="0.1" value="4.8">
+                        <div class="value-line"><span>Критическая точка</span><strong id="hVal">4,8</strong></div>
+                    </div>
+
+                    <div class="control">
+                        <label for="aRange">Крутизна a</label>
+                        <input id="aRange" type="range" min="0.2" max="2.5" step="0.1" value="1.2">
+                        <div class="value-line"><span>Параметр a</span><strong id="aVal">1,2</strong></div>
+                    </div>
+
+                    <div class="control">
+                        <label for="intMode">Режим прикладной задачи</label>
+                        <select id="intMode" class="chip" style="border-radius:14px;justify-content:space-between;padding-inline:14px">
+                            <option value="real">Переменная вещественная</option>
+                            <option value="int" selected>Переменная целая</option>
+                        </select>
+                    </div>
+
+                    <div class="math-box" id="graphSummary"></div>
+
+                    <div class="summary-list">
+                        <div class="summary-item">
+                            <div class="title">Что нужно увидеть</div>
+                            <div>Если вершина нецелая, а переменная по смыслу должна быть целой, то сравниваются два соседних целых значения.</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="title">Модель из занятия</div>
+                            <div class="formula">S(t) = 4t² + (24 − t)² = 5t² − 48t + 576</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="title">Почему ответ 5, а не 4,8</div>
+                            <div class="formula">t — число рабочих, значит t ∈ ℤ. Нужно проверить t = 4 и t = 5.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="calc">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <div class="badge">Калькулятор</div>
+                    <h3>Оптимизация зарплаты для двух объектов</h3>
+                </div>
+                <p>
+                    Это живая версия одной из задач темы. Меняй коэффициенты при зарплате и общее число рабочих —
+                    калькулятор сам построит функцию, найдёт критическую точку и покажет оптимальное целое распределение.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card controls">
+                    <h4>Параметры модели</h4>
+
+                    <div class="control">
+                        <label for="workersRange">Всего рабочих N</label>
+                        <input id="workersRange" type="range" min="8" max="40" step="1" value="24">
+                        <div class="value-line"><span>Общее число рабочих</span><strong id="workersVal">24</strong></div>
+                    </div>
+
+                    <div class="control">
+                        <label for="c1Range">Коэффициент на первом объекте</label>
+                        <input id="c1Range" type="range" min="1" max="8" step="1" value="4">
+                        <div class="value-line"><span>k₁</span><strong id="c1Val">4</strong></div>
+                    </div>
+
+                    <div class="control">
+                        <label for="c2Range">Коэффициент на втором объекте</label>
+                        <input id="c2Range" type="range" min="1" max="8" step="1" value="1">
+                        <div class="value-line"><span>k₂</span><strong id="c2Val">1</strong></div>
+                    </div>
+
+                    <div class="math-box" id="optBox"></div>
+
+                    <div class="row">
+                        <div class="pill">Критическая точка может быть нецелой</div>
+                        <div class="pill">Ответ выбирается среди соседних целых</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4>Логика вычисления</h4>
+                    <div class="summary-list">
+                        <div class="summary-item">
+                            <div class="title">Функция затрат</div>
+                            <div class="formula" id="costFormula">S(t) = 4t² + 1(24 − t)²</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="title">Производная</div>
+                            <div class="formula" id="derFormula">S′(t) = 10t − 48</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="title">Критическая точка</div>
+                            <div class="formula" id="critFormula">t₀ = 4,8</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="title">Оптимальное целое распределение</div>
+                            <div class="formula" id="ansFormula">5 человек на первый объект, 19 — на второй, минимум 461 у. е.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="theory">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <div class="badge">Теория</div>
+                    <h3>Ключевые идеи темы в аккордеонах</h3>
+                </div>
+                <p>
+                    Это концентрат по теме оптимизации. Открывай блоки по очереди: сначала смысл, потом техника, потом типичные ловушки.
+                </p>
+            </div>
+
+            <details class="acc" open>
+                <summary>
+                    <span>1. Что в задаче оптимизируется</span>
+                    <span class="accent">старт анализа</span>
+                </summary>
+                <div class="body">
+                    <p>
+                        Сначала нужно найти величину, про которую сказано: «наибольшая», «наименьшая», «максимальная», «минимальная».
+                    </p>
+                    <ul>
+                        <li>Это может быть сумма процентов.</li>
+                        <li>Это может быть суммарная зарплата.</li>
+                        <li>Это может быть общая стоимость, расход или время.</li>
+                    </ul>
+                    <div class="math-box">Без этого шага производная почти всегда считается не от той функции.</div>
+                </div>
+            </details>
+
+            <details class="acc">
+                <summary>
+                    <span>2. Как вводить переменную</span>
+                    <span class="accent">модель</span>
+                </summary>
+                <div class="body">
+                    <p>
+                        Переменная должна иметь ясный физический или практический смысл.
+                    </p>
+                    <ul>
+                        <li>Пусть x — число девочек в первом классе.</li>
+                        <li>Пусть t — число рабочих на первом объекте.</li>
+                        <li>Пусть t — число приборов, выпускаемых первым заводом.</li>
+                    </ul>
+                    <p>
+                        После этого остальные величины выражаются через ту же переменную по условию суммы:
+                    </p>
+                    <div class="math-box">остаток = общее количество − выбранная переменная</div>
+                </div>
+            </details>
+
+            <details class="acc">
+                <summary>
+                    <span>3. Почему границы нельзя ставить формально</span>
+                    <span class="accent">ОДЗ и смысл</span>
+                </summary>
+                <div class="body">
+                    <p>
+                        В прикладных задачах ограничения идут не только от формулы, но и от текста.
+                    </p>
+                    <ul>
+                        <li>Если в классе 22 места, то число девочек не может быть больше 22.</li>
+                        <li>Если всего 25 девочек, а во втором классе 23 места, то в первый класс должно попасть хотя бы 2 девочки.</li>
+                        <li>Если переменная — число рабочих, то она должна быть целой.</li>
+                    </ul>
+                    <div class="math-box">Границы — это не формальность, а часть доказательства.</div>
+                </div>
+            </details>
+
+            <details class="acc">
+                <summary>
+                    <span>4. Когда ответ даёт край, а когда нужна критическая точка</span>
+                    <span class="accent">производная</span>
+                </summary>
+                <div class="body">
+                    <p>
+                        Если производная на всём промежутке положительна, функция возрастает. Если отрицательна — убывает.
+                    </p>
+                    <div class="math-box">
+                        S′(x) &gt; 0 ⇒ S(x) возрастает ⇒ максимум на правой границе
+                        <br>
+                        S′(x) &lt; 0 ⇒ S(x) убывает ⇒ минимум на правой границе
+                    </div>
+                    <p>
+                        Если производная обращается в ноль внутри промежутка, нужно исследовать критическую точку и затем вернуться к смыслу переменной.
+                    </p>
+                </div>
+            </details>
+
+            <details class="acc">
+                <summary>
+                    <span>5. Что делать, если критическая точка нецелая</span>
+                    <span class="accent">прикладной финал</span>
+                </summary>
+                <div class="body">
+                    <p>
+                        В текстовых задачах это происходит очень часто.
+                    </p>
+                    <div class="math-box">Если t₀ = 4,8, а t — число рабочих, то сравниваются t = 4 и t = 5.</div>
+                    <ul>
+                        <li>Сначала вычисляется нецелая точка минимума или максимума.</li>
+                        <li>Затем сравниваются ближайшие допустимые целые значения.</li>
+                        <li>И только после этого записывается прикладной ответ.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="acc">
+                <summary>
+                    <span>6. Как избавиться от двух переменных</span>
+                    <span class="accent">подстановка</span>
+                </summary>
+                <div class="body">
+                    <p>
+                        Если функция зависит от двух переменных, но между ними есть связь, одну переменную нужно исключить.
+                    </p>
+                    <div class="math-box">
+                        t₁ + t₂ = 20
+                        <br>
+                        t₂ = 20 − t₁
+                        <br>
+                        S(t₁, t₂) → S(t₁)
+                    </div>
+                    <p>
+                        Только после этого удобно находить производную.
+                    </p>
+                </div>
+            </details>
+        </div>
+    </section>
+
+    <section id="problems">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <div class="badge">Разбор задач</div>
+                    <h3>Два эталонных решения по теме</h3>
+                </div>
+                <p>
+                    Здесь важны не только вычисления, но и структура рассуждения: что выбрано за переменную, откуда берутся границы и почему ответ интерпретируется именно так.
+                </p>
+            </div>
+
+            <div class="solve-grid">
+                <article class="card">
+                    <h4>Задача 1. Максимум суммы процентов девочек</h4>
+                    <p>
+                        45 человек: 20 мальчиков и 25 девочек. Нужно распределить по двум классам на 22 и 23 человека так,
+                        чтобы сумма процентов девочек в классах была наибольшей.
+                    </p>
+                    <div class="step-list">
+                        <div class="step">
+                            <strong>Шаг 1. Переменная</strong>
+                            Пусть x — число девочек в классе из 22 человек. Тогда во втором классе девочек 25 − x.
+                        </div>
+                        <div class="step">
+                            <strong>Шаг 2. Функция</strong>
+                            <div class="formula-line">S(x) = 100·x / 22 + 100·(25 − x) / 23</div>
+                            Для исследования достаточно
+                            <div class="formula-line">f(x) = x / 22 + (25 − x) / 23</div>
+                        </div>
+                        <div class="step">
+                            <strong>Шаг 3. Границы</strong>
+                            Из второго класса: 25 − x ≤ 23, значит x ≥ 2. Также x ≤ 22.
+                            <div class="formula-line">2 ≤ x ≤ 22</div>
+                        </div>
+                        <div class="step">
+                            <strong>Шаг 4. Производная</strong>
+                            <div class="formula-line">f′(x) = 1/22 − 1/23 = 1/506 &gt; 0</div>
+                            Значит, функция возрастает на всём промежутке.
+                        </div>
+                        <div class="step">
+                            <strong>Ответ</strong>
+                            Максимум при x = 22. То есть в первый класс: 22 девочки, 0 мальчиков.
+                            Во второй: 3 девочки, 20 мальчиков.
+                        </div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h4>Задача 2. Минимальная зарплата на двух объектах</h4>
+                    <p>
+                        Есть 24 рабочих. Если на первом объекте t человек, то зарплата 4t² у. е.; на втором — (24 − t)² у. е.
+                        Нужно минимизировать общую сумму.
+                    </p>
+                    <div class="step-list">
+                        <div class="step">
+                            <strong>Шаг 1. Функция затрат</strong>
+                            <div class="formula-line">S(t) = 4t² + (24 − t)² = 5t² − 48t + 576</div>
+                        </div>
+                        <div class="step">
+                            <strong>Шаг 2. Производная</strong>
+                            <div class="formula-line">S′(t) = 10t − 48</div>
+                            Отсюда
+                            <div class="formula-line">10t − 48 = 0 ⇒ t = 4,8</div>
+                        </div>
+                        <div class="step">
+                            <strong>Шаг 3. Целочисленность</strong>
+                            Так как t — число рабочих, нужно проверить t = 4 и t = 5.
+                        </div>
+                        <div class="step">
+                            <strong>Шаг 4. Сравнение</strong>
+                            <div class="formula-line">S(4) = 464, S(5) = 461</div>
+                        </div>
+                        <div class="step">
+                            <strong>Ответ</strong>
+                            На первый объект нужно отправить 5 рабочих, на второй — 19.
+                            Минимальная зарплата: 461 у. е.
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="cheat">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <div class="badge">Cheat sheet</div>
+                    <h3>Краткая карта темы</h3>
+                </div>
+                <p>
+                    Быстрая таблица: какой тип задачи, какая модель, где появляется производная и какая ошибка встречается чаще всего.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Ситуация</th>
+                            <th>Переменная</th>
+                            <th>Функция</th>
+                            <th>Ключевой шаг</th>
+                            <th>Типичная ошибка</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><strong>Распределение по классам</strong></td>
+                            <td>x — число девочек в одном классе</td>
+                            <td class="mono">S(x) = x / 22 + (25 − x) / 23</td>
+                            <td>Поставить правильные границы 2 ≤ x ≤ 22</td>
+                            <td>Берут x от 0 до 22 и теряют ограничение второго класса</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Рабочие на двух объектах</strong></td>
+                            <td>t — число рабочих на первом объекте</td>
+                            <td class="mono">S(t) = k₁t² + k₂(N − t)²</td>
+                            <td>После t₀ проверить соседние целые</td>
+                            <td>Подставляют нецелую критическую точку в ответ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Два завода</strong></td>
+                            <td>t — выпуск первого завода</td>
+                            <td class="mono">S(t) = 4t³ + (20 − t)³</td>
+                            <td>Избавиться от второй переменной через условие суммы</td>
+                            <td>Пытаются искать производную от функции двух переменных</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Любая прикладная оптимизация</strong></td>
+                            <td>Переменная должна иметь смысл</td>
+                            <td class="mono">S(x) или f(x)</td>
+                            <td>Вернуться к формулировке ответа</td>
+                            <td>Пишут только число без интерпретации</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Монотонность</strong></td>
+                            <td>x на промежутке</td>
+                            <td class="mono">S′(x)</td>
+                            <td>Если S′(x) одного знака, ответ даёт граница</td>
+                            <td>Ищут несуществующий внутренний экстремум</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <div class="badge">Самопроверка</div>
+                    <h3>Мини-квиз по логике оптимизации</h3>
+                </div>
+                <p>
+                    Вопросы проверяют не только формулы, но и понимание структуры решения: где ставятся границы, когда нужны соседние целые и как работает подстановка.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="quiz-list" id="quizList"></div>
+                <div class="score-box">
+                    <div><strong>Результат:</strong> <span id="quizScore" class="accent">ещё не проверен</span></div>
+                    <div class="row">
+                        <button class="btn primary" type="button" id="checkQuizBtn">Проверить квиз</button>
+                        <button class="btn" type="button" id="resetQuizBtn">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <div class="badge">Генератор</div>
+                    <h3>Новые корректные задачи по теме</h3>
+                </div>
+                <p>
+                    Генератор использует только безопасные шаблоны: распределение по группам, квадратичные затраты, выбор между соседними целыми, и модель с суммой кубов.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card task-box">
+                    <h4>Выбери шаблон</h4>
+                    <p>
+                        Каждая задача сразу имеет проверенный ответ, но ответ скрыт до нажатия кнопки.
+                    </p>
+                    <div class="row">
+                        <button class="btn primary" type="button" data-task="classes">Классы</button>
+                        <button class="btn" type="button" data-task="workers">Рабочие</button>
+                        <button class="btn" type="button" data-task="plants">Заводы</button>
+                        <button class="btn" type="button" data-task="transport">Перевозка</button>
+                    </div>
+                    <div class="row">
+                        <button class="btn" type="button" id="randomTaskBtn">Случайный шаблон</button>
+                        <button class="btn" type="button" id="revealAnswerBtn">Показать ответ</button>
+                        <button class="btn" type="button" id="newTaskBtn">Новая задача</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="task-output" id="taskOutput">
+                        <strong>Готово к работе.</strong><br>
+                        Выбери шаблон, чтобы получить новую задачу на оптимизацию.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="panel" style="padding:22px">
+                <div class="grid-3">
+                    <div>
+                        <div class="badge">Методика</div>
+                        <p class="tiny">
+                            Сильное решение в задачах на оптимизацию начинается не с механической производной, а с грамотной модели:
+                            переменная, связь величин, ограничения, только затем исследование функции.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="badge">Возможностьизменение величин в режим реального времени</div>
+                        <p class="tiny">
+                            Лаборатроный режим позволяет изменять параметры системы прямо сейчас!
+                        </p>
+                    </div>
+                    <div>
+                        <div class="badge">Печать</div>
+                        <p class="tiny">
+                            Кнопка печати убирает декоративные слои и оставляет аккуратную учебную версию с теорией, разборами и результатами самопроверки.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</main>
+
+<script>
+    (() => {
+        const fmt = (n, d = 2) => Number(n).toFixed(d).replace('.', ',');
+        const fmtTrim = (n, d = 3) => {
+            let s = Number(n).toFixed(d);
+            s = s.replace(/0+$/,'').replace(/\.$/,'');
+            return s.replace('.', ',');
+        };
+        const randInt = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+
+        document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+        // ===== PARABOLA VIS =====
+        const hRange = document.getElementById('hRange');
+        const aRange = document.getElementById('aRange');
+        const intMode = document.getElementById('intMode');
+        const hVal = document.getElementById('hVal');
+        const aVal = document.getElementById('aVal');
+        const graphSummary = document.getElementById('graphSummary');
+        const parabolaLayer = document.getElementById('parabolaLayer');
+
+        function updateParabola(){
+            const h = parseFloat(hRange.value);
+            const a = parseFloat(aRange.value);
+            hVal.textContent = fmtTrim(h,1);
+            aVal.textContent = fmtTrim(a,1);
+
+            const w = 760, hsvg = 380;
+            const left = 50, right = 710, baseY = 320, top = 40;
+            const xMin = 0, xMax = 24;
+            const yMin = 0, yMax = 180;
+            const sx = x => left + (x - xMin) / (xMax - xMin) * (right - left);
+            const sy = y => baseY - (y - yMin) / (yMax - yMin) * (baseY - top);
+
+            const k = 18;
+            const f = x => a * Math.pow(x - h, 2) + k;
+
+            let d = '';
+            for(let px = xMin; px <= xMax; px += 0.12){
+                const X = sx(px);
+                const Y = sy(Math.min(yMax, f(px)));
+                d += (px === xMin ? 'M' : 'L') + X.toFixed(2) + ' ' + Y.toFixed(2) + ' ';
+            }
+
+            const vertexY = f(h);
+            const vx = sx(h), vy = sy(vertexY);
+
+            const lines = `
+          <line x1="${left}" y1="${baseY}" x2="${right}" y2="${baseY}" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+          <line x1="${left}" y1="${baseY}" x2="${left}" y2="${top}" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+          <path d="${d}" fill="none" stroke="url(#curveGrad)" stroke-width="5" stroke-linecap="round"/>
+          <line x1="${vx}" y1="${vy}" x2="${vx}" y2="${baseY}" stroke="rgba(255,255,255,.25)" stroke-width="1.3" stroke-dasharray="7 7"/>
+          <circle cx="${vx}" cy="${vy}" r="7" fill="#ffffff"/>
+          <text x="${Math.max(left+6, vx-18)}" y="${baseY+28}" fill="#d6edff" font-size="18">x₀</text>
+          <text x="${vx+10}" y="${vy-10}" fill="#eaf4ff" font-size="18">минимум</text>
+        `;
+
+            const tickXs = [0,4,8,12,16,20,24].map(v => `
+          <line x1="${sx(v)}" y1="${baseY-6}" x2="${sx(v)}" y2="${baseY+6}" stroke="rgba(255,255,255,.22)" stroke-width="1.2"/>
+          <text x="${sx(v)-8}" y="${baseY+26}" fill="#9eb2c9" font-size="16">${v}</text>
+        `).join('');
+
+            parabolaLayer.innerHTML = lines + tickXs;
+
+            if(intMode.value === 'int'){
+                const l = Math.floor(h), r = Math.ceil(h);
+                const fl = f(l), fr = f(r);
+                const best = fl <= fr ? l : r;
+                graphSummary.innerHTML = `
+            S(x) = ${fmtTrim(a,1)}·(x − ${fmtTrim(h,1)})² + 18
+            <br>
+            Нецелая вершина: x₀ = ${fmtTrim(h,1)}.
+            Проверяем соседние целые: x = ${l} и x = ${r}.
+            <br>
+            S(${l}) = ${fmtTrim(fl,2)}, S(${r}) = ${fmtTrim(fr,2)}.
+            <br>
+            <span class="ok">Лучшее целое значение: x = ${best}.</span>
+          `;
+            } else {
+                graphSummary.innerHTML = `
+            S(x) = ${fmtTrim(a,1)}·(x − ${fmtTrim(h,1)})² + 18
+            <br>
+            Вещественный режим: минимум достигается прямо в вершине.
+            <br>
+            <span class="ok">Ответ: x = ${fmtTrim(h,1)}, S<sub>min</sub> = 18.</span>
+          `;
+            }
+        }
+
+        [hRange, aRange, intMode].forEach(el => el.addEventListener('input', updateParabola));
+        updateParabola();
+
+        // ===== OPT CALC =====
+        const workersRange = document.getElementById('workersRange');
+        const c1Range = document.getElementById('c1Range');
+        const c2Range = document.getElementById('c2Range');
+        const workersVal = document.getElementById('workersVal');
+        const c1Val = document.getElementById('c1Val');
+        const c2Val = document.getElementById('c2Val');
+        const optBox = document.getElementById('optBox');
+        const costFormula = document.getElementById('costFormula');
+        const derFormula = document.getElementById('derFormula');
+        const critFormula = document.getElementById('critFormula');
+        const ansFormula = document.getElementById('ansFormula');
+
+        function updateOptimization(){
+            const N = parseInt(workersRange.value,10);
+            const k1 = parseInt(c1Range.value,10);
+            const k2 = parseInt(c2Range.value,10);
+
+            workersVal.textContent = N;
+            c1Val.textContent = k1;
+            c2Val.textContent = k2;
+
+            // S(t)=k1 t^2 + k2(N-t)^2
+            // S'(t)=2(k1+k2)t -2k2N
+            const A = k1 + k2;
+            const B = -2 * k2 * N;
+            const t0 = (k2 * N) / (k1 + k2);
+
+            const l = Math.max(0, Math.floor(t0));
+            const r = Math.min(N, Math.ceil(t0));
+            const S = t => k1*t*t + k2*(N-t)*(N-t);
+            const Sl = S(l);
+            const Sr = S(r);
+            const best = Sl <= Sr ? l : r;
+            const bestValue = S(best);
+
+            costFormula.textContent = `S(t) = ${k1}t² + ${k2}(${N} − t)²`;
+            derFormula.textContent = `S′(t) = ${2*A}t ${B < 0 ? '− ' + Math.abs(B) : '+ ' + B}`;
+            critFormula.textContent = `t₀ = ${fmtTrim(t0,3)}`;
+            ansFormula.textContent = `${best} человек на первый объект, ${N-best} — на второй, минимум ${bestValue} у. е.`;
+
+            optBox.innerHTML = `
+          S(t) = ${k1}t² + ${k2}(${N} − t)²
+          <br>
+          S′(t) = ${2*A}t ${B < 0 ? '− ' + Math.abs(B) : '+ ' + B}
+          <br>
+          Критическая точка: t₀ = ${fmtTrim(t0,3)}
+          <br>
+          Проверка соседних целых: t = ${l} и t = ${r}
+          <br>
+          S(${l}) = ${Sl}, S(${r}) = ${Sr}
+          <br>
+          <span class="ok">Оптимальное распределение: ${best} и ${N-best}; минимум = ${bestValue}.</span>
+        `;
+        }
+
+        [workersRange, c1Range, c2Range].forEach(el => el.addEventListener('input', updateOptimization));
+        updateOptimization();
+
+        // ===== QUIZ =====
+        const quizData = [
+            {
+                q:'1. Что нужно сделать в задаче на оптимизацию раньше всего?',
+                options:[
+                    'Сразу взять производную',
+                    'Найти, какая величина оптимизируется',
+                    'Подставить случайное значение переменной',
+                    'Составить таблицу без переменной'
+                ],
+                answer:1,
+                explain:'Первый шаг — понять, что именно нужно сделать наибольшим или наименьшим.'
+            },
+            {
+                q:'2. Почему в задаче про классы граница для x не равна 0?',
+                options:[
+                    'Потому что ноль запрещён по определению',
+                    'Потому что во втором классе только 23 места, а девочек всего 25',
+                    'Потому что производная не существует в нуле',
+                    'Потому что x должен быть положительным чётным'
+                ],
+                answer:1,
+                explain:'Если в первый класс не отправить хотя бы 2 девочек, во втором не хватит мест.'
+            },
+            {
+                q:'3. Что делать, если критическая точка равна 4,8, а переменная — число рабочих?',
+                options:[
+                    'Ответить 4,8',
+                    'Округлить вверх без проверки',
+                    'Проверить 4 и 5 и сравнить значения функции',
+                    'Проверить только 5'
+                ],
+                answer:2,
+                explain:'Нужно сравнить ближайшие допустимые целые значения.'
+            },
+            {
+                q:'4. В задаче с двумя переменными t₁ и t₂, если известно, что t₁ + t₂ = 20, то что делать?',
+                options:[
+                    'Искать две производные по отдельности в школьной схеме',
+                    'Исключить одну переменную: t₂ = 20 − t₁',
+                    'Считать, что t₁ = t₂',
+                    'Сразу брать вторую производную'
+                ],
+                answer:1,
+                explain:'Сначала сводим задачу к функции одной переменной.'
+            },
+            {
+                q:'5. Если S′(x) > 0 на всём допустимом промежутке, где достигается максимум?',
+                options:[
+                    'В левой границе',
+                    'Во внутренней критической точке',
+                    'В правой границе',
+                    'Максимума нет'
+                ],
+                answer:2,
+                explain:'Положительная производная означает возрастание.'
+            }
+        ];
+
+        const quizList = document.getElementById('quizList');
+        const quizScore = document.getElementById('quizScore');
+        const checkQuizBtn = document.getElementById('checkQuizBtn');
+        const resetQuizBtn = document.getElementById('resetQuizBtn');
+
+        function renderQuiz(){
+            quizList.innerHTML = quizData.map((item, i) => `
+          <div class="quiz-item" data-q="${i}">
+            <h5>${item.q}</h5>
+            <div class="option-list">
+              ${item.options.map((opt, j) => `
+                <label class="option">
+                  <input type="radio" name="q-${i}" value="${j}">
+                  <span>${opt}</span>
+                </label>
+              `).join('')}
+            </div>
+            <div class="soft" style="display:none;margin-top:12px" data-explain="${i}"></div>
+          </div>
+        `).join('');
+        }
+
+        function checkQuiz(){
+            let score = 0;
+            quizData.forEach((item, i) => {
+                const block = quizList.querySelector(`[data-q="${i}"]`);
+                const opts = [...block.querySelectorAll('.option')];
+                const checked = block.querySelector(`input[name="q-${i}"]:checked`);
+                const explain = block.querySelector(`[data-explain="${i}"]`);
+                opts.forEach((opt, j) => {
+                    opt.classList.remove('correct','wrong');
+                    if(j === item.answer) opt.classList.add('correct');
+                });
+                if(checked){
+                    const chosen = Number(checked.value);
+                    if(chosen === item.answer) score++;
+                    else checked.closest('.option').classList.add('wrong');
+                }
+                explain.style.display = 'block';
+                explain.textContent = 'Пояснение: ' + item.explain;
+            });
+            quizScore.innerHTML = `<span class="ok">${score} / ${quizData.length}</span>`;
+        }
+
+        function resetQuiz(){
+            renderQuiz();
+            quizScore.textContent = 'ещё не проверен';
+        }
+
+        checkQuizBtn.addEventListener('click', checkQuiz);
+        resetQuizBtn.addEventListener('click', resetQuiz);
+        renderQuiz();
+
+        // ===== GENERATOR =====
+        const taskOutput = document.getElementById('taskOutput');
+        const revealAnswerBtn = document.getElementById('revealAnswerBtn');
+        const randomTaskBtn = document.getElementById('randomTaskBtn');
+        const newTaskBtn = document.getElementById('newTaskBtn');
+        let currentType = null;
+
+        function setTask(content, answer, type){
+            currentType = type;
+            taskOutput.classList.remove('revealed');
+            taskOutput.innerHTML = `${content}<div class="hidden-answer"><strong>Ответ:</strong><br>${answer}</div>`;
+        }
+
+        function genClasses(){
+            const totalBoys = randInt(10,18);
+            const totalGirls = randInt(16,26);
+            const total = totalBoys + totalGirls;
+            const size1 = randInt(Math.max(12, totalGirls - (total - 12)), total - 12);
+            const size2 = total - size1;
+            const xMin = Math.max(0, totalGirls - size2);
+            const xMax = Math.min(size1, totalGirls);
+            const best = xMax;
+            const boys1 = size1 - best;
+            const girls2 = totalGirls - best;
+            const boys2 = totalBoys - boys1;
+
+            const content = `
+          <strong>Шаблон: распределение по классам</strong><br>
+          В параллель поступает ${total} человек: ${totalBoys} мальчиков и ${totalGirls} девочек.
+          Их распределяют по двум классам: в одном должно быть ${size1} человек, в другом — ${size2}.
+          После распределения считают процент девочек в каждом классе и складывают полученные числа.
+          Как нужно распределить детей, чтобы эта сумма была наибольшей?
+        `;
+            const answer = `
+          Пусть x — число девочек в классе из ${size1} человек.
+          Тогда S(x) = 100·x / ${size1} + 100·(${totalGirls} − x) / ${size2}.<br>
+          Производная: S′(x) = 100·(1/${size1} − 1/${size2}) ${size1 < size2 ? '&gt;' : '&lt;'} 0.
+          Значит, максимум достигается при ${size1 < size2 ? 'наибольшем' : 'наименьшем'} допустимом x.<br>
+          Допустимые границы: ${xMin} ≤ x ≤ ${xMax}.<br>
+          Ответ: в класс из ${size1} человек — ${best} девочек и ${boys1} мальчиков; во второй — ${girls2} девочек и ${boys2} мальчиков.
+        `;
+            setTask(content, answer, 'classes');
+        }
+
+        function genWorkers(){
+            const N = randInt(14,34);
+            const k1 = randInt(2,7);
+            const k2 = randInt(1,4);
+            const t0 = k2 * N / (k1 + k2);
+            const l = Math.floor(t0);
+            const r = Math.ceil(t0);
+            const S = t => k1*t*t + k2*(N-t)*(N-t);
+            const best = S(l) <= S(r) ? l : r;
+            const bestVal = S(best);
+
+            const content = `
+          <strong>Шаблон: рабочие на двух объектах</strong><br>
+          Имеется ${N} рабочих. Если на первом объекте работает t человек, то суточная зарплата равна ${k1}t² у. е.
+          Если на втором объекте работает t человек, то суточная зарплата равна ${k2}t² у. е.
+          Как нужно распределить рабочих, чтобы суммарная суточная зарплата была наименьшей?
+        `;
+            const answer = `
+          S(t) = ${k1}t² + ${k2}(${N} − t)².<br>
+          S′(t) = ${2*(k1+k2)}t − ${2*k2*N}. Отсюда t₀ = ${fmtTrim(t0,3)}.<br>
+          Так как t — целое число, сравниваем t = ${l} и t = ${r}.<br>
+          Получаем минимум при t = ${best}.<br>
+          Ответ: ${best} человек на первый объект и ${N-best} — на второй; минимальная зарплата ${bestVal} у. е.
+        `;
+            setTask(content, answer, 'workers');
+        }
+
+        function genPlants(){
+            const total = randInt(10,18);
+            const a = randInt(2,5); // a t^3 + (total-t)^3
+            const t0 = total / (1 + Math.sqrt(a));
+            const minVal = a*Math.pow(t0,3) + Math.pow(total - t0, 3);
+
+            const content = `
+          <strong>Шаблон: два предприятия</strong><br>
+          Если на первом предприятии суммарно отработано ${a}t³ часов, то выпускается t изделий.
+          Если на втором предприятии отработано t³ часов, то выпускается t изделий.
+          Оплата составляет 1 тысячу рублей за час. Нужно выпустить ${total} изделий.
+          Какую наименьшую сумму придётся заплатить?
+        `;
+            const answer = `
+          Пусть первое предприятие выпускает t изделий, тогда второе — ${total} − t.<br>
+          Функция затрат: S(t) = ${a}t³ + (${total} − t)³.<br>
+          Производная: S′(t) = ${3*a}t² − 3(${total} − t)² = 0.<br>
+          Отсюда √${a}·t = ${total} − t, значит t = ${fmtTrim(t0,4)}.<br>
+          Минимальная сумма: S<sub>min</sub> ≈ ${fmtTrim(minVal,3)} тыс. руб.
+        `;
+            setTask(content, answer, 'plants');
+        }
+
+        function genTransport(){
+            const total = randInt(12,24);
+            const a = randInt(2,5);
+            const b = randInt(2,5);
+            const x0 = b * total / (a + b);
+            const l = Math.floor(x0);
+            const r = Math.ceil(x0);
+            const S = x => a*x*x + b*(total-x)*(total-x);
+            const best = S(l) <= S(r) ? l : r;
+            const bestVal = S(best);
+
+            const content = `
+          <strong>Шаблон: минимальная стоимость перевозки</strong><br>
+          На первый склад отправляют x машин, и стоимость составляет ${a}x² тыс. руб.
+          На второй склад отправляют y машин, и стоимость составляет ${b}y² тыс. руб.
+          Всего нужно отправить ${total} машин. Как распределить машины, чтобы общая стоимость была наименьшей?
+        `;
+            const answer = `
+          y = ${total} − x, поэтому S(x) = ${a}x² + ${b}(${total} − x)².<br>
+          Критическая точка: x₀ = ${fmtTrim(x0,3)}.<br>
+          Так как x — целое число, сравниваем x = ${l} и x = ${r}.<br>
+          Минимум достигается при x = ${best}.<br>
+          Ответ: ${best} машин на первый склад и ${total-best} — на второй; минимальная стоимость ${bestVal} тыс. руб.
+        `;
+            setTask(content, answer, 'transport');
+        }
+
+        const makers = {
+            classes: genClasses,
+            workers: genWorkers,
+            plants: genPlants,
+            transport: genTransport
+        };
+
+        document.querySelectorAll('[data-task]').forEach(btn => {
+            btn.addEventListener('click', () => makers[btn.dataset.task]());
+        });
+
+        revealAnswerBtn.addEventListener('click', () => taskOutput.classList.add('revealed'));
+        randomTaskBtn.addEventListener('click', () => {
+            const keys = Object.keys(makers);
+            makers[keys[randInt(0, keys.length - 1)]]();
+        });
+        newTaskBtn.addEventListener('click', () => {
+            if(currentType && makers[currentType]) makers[currentType]();
+            else randomTaskBtn.click();
+        });
+
+        genWorkers();
+    })();
+</script>
+</body>
+</html>
