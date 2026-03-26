@@ -137,7 +137,8 @@
             border-radius: 50%;
             cursor: pointer;
         }
-        select {
+        select,
+        input[type="number"] {
             width: 100%;
             background: var(--bg-secondary);
             color: var(--text-primary);
@@ -145,6 +146,18 @@
             border-radius: 6px;
             padding: 0.55rem;
             font-size: 0.84rem;
+        }
+        .equation-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .equation-help {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            margin-top: -0.3rem;
+            margin-bottom: 1rem;
         }
         .canvas-container {
             background: var(--bg-secondary);
@@ -202,8 +215,7 @@
             flex-shrink: 0;
         }
         .sections-list,
-        .points-list,
-        .intersections-list {
+        .points-list {
             background: rgba(15, 23, 42, 0.18);
             border-radius: 8px;
             padding: 0.4rem;
@@ -218,12 +230,7 @@
             min-height: 120px;
             max-height: 260px;
         }
-        .intersections-list {
-            min-height: 70px;
-            max-height: 140px;
-        }
-        .section-item,
-        .intersection-item {
+        .section-item {
             background: var(--bg-secondary);
             padding: 0.55rem;
             border-radius: 6px;
@@ -237,13 +244,11 @@
         .section-item.active {
             outline: 1px solid var(--accent);
         }
-        .section-meta,
-        .intersection-meta {
+        .section-meta {
             font-size: 0.82rem;
             color: var(--text-secondary);
         }
-        .section-badge,
-        .intersection-badge {
+        .section-badge {
             width: 14px;
             height: 14px;
             border-radius: 50%;
@@ -354,6 +359,18 @@
                 <label>Толщина линий фигуры: <span id="edgeThicknessValue">2</span></label>
                 <input type="range" id="edgeThicknessSlider" min="1" max="6" step="0.5" value="2">
             </div>
+            <h2 class="panel-title">🧮 Построение по уравнению</h2>
+            <div class="equation-grid">
+                <input type="number" id="planeA" value="1" step="1" placeholder="A">
+                <input type="number" id="planeB" value="1" step="1" placeholder="B">
+                <input type="number" id="planeC" value="1" step="1" placeholder="C">
+                <input type="number" id="planeD" value="0" step="1" placeholder="D">
+            </div>
+            <div class="equation-help">Уравнение задаётся в виде Ax + By + Cz + D = 0, где A, B, C, D — целые числа.</div>
+            <div class="toolbar" style="margin-top:0; margin-bottom:1rem;">
+                <button class="tool-btn" id="buildEquationBtn">🧮 Построить по уравнению</button>
+                <button class="tool-btn danger" id="clearCurrentBtn">🧹 Очистить текущее</button>
+            </div>
             <div class="toolbar">
                 <button class="tool-btn" id="newSectionBtn">➕ Новое сечение</button>
                 <button class="tool-btn" id="buildSectionBtn">✂️ Построить текущее</button>
@@ -362,9 +379,9 @@
             <div class="instruction">
                 💡 <strong>Как работать:</strong><br>
                 1. Создайте новое сечение.<br>
-                2. Поставьте его точки по рёбрам или по граням.<br>
+                2. Либо поставьте точки по рёбрам/граням, либо задайте уравнение плоскости.<br>
                 3. Постройте текущее сечение.<br>
-                4. Выберите второе сечение справа и постройте линию пересечения.<br>
+                4. Уравнение плоскости всегда выводится с целыми коэффициентами.<br>
                 5. Можно включить тёплую подсветку и настроить толщину линий фигуры.
             </div>
             <div class="stats">
@@ -377,8 +394,8 @@
                     <div class="stat-label">Точек в текущем</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="intersectionCount">0</div>
-                    <div class="stat-label">Линий пересеч.</div>
+                    <div class="stat-value" id="builtCount">0</div>
+                    <div class="stat-label">Построено</div>
                 </div>
             </div>
         </div>
@@ -414,16 +431,6 @@
                 <label>Цвет текущего сечения:</label>
                 <input type="color" id="sectionColor" value="#3b82f6" style="width: 100%; height: 35px; border: none; background: none;">
             </div>
-            <h2 class="panel-title">📏 Линия пересечения</h2>
-            <div class="control-group">
-                <label>Второе сечение:</label>
-                <select id="intersectionTargetSelect"></select>
-            </div>
-            <div class="toolbar" style="margin-top:0; margin-bottom:1rem;">
-                <button class="tool-btn" id="buildIntersectionBtn">📏 Построить линию</button>
-                <button class="tool-btn danger" id="clearIntersectionBtn">🗑️ Очистить линии</button>
-            </div>
-            <div class="intersections-list" id="intersectionsList"></div>
         </div>
     </div>
 </div>
@@ -831,6 +838,82 @@
         }
         return area;
     }
+    function gcd2(a, b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b !== 0) {
+            const t = a % b;
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+    function gcdArray(arr) {
+        const nums = arr.map(v => Math.abs(Math.round(v))).filter(v => v !== 0);
+        if (nums.length === 0) return 1;
+        return nums.reduce((acc, v) => gcd2(acc, v), nums[0]);
+    }
+    function lcm2(a, b) {
+        if (a === 0 || b === 0) return 0;
+        return Math.abs(a * b) / gcd2(a, b);
+    }
+    function approximateFraction(x, maxDen = 1000) {
+        if (!isFinite(x)) return { num: 0, den: 1 };
+        if (Math.abs(x) < 1e-12) return { num: 0, den: 1 };
+        let bestNum = Math.round(x);
+        let bestDen = 1;
+        let bestErr = Math.abs(x - bestNum);
+        for (let den = 1; den <= maxDen; den++) {
+            const num = Math.round(x * den);
+            const err = Math.abs(x - num / den);
+            if (err < bestErr) {
+                bestErr = err;
+                bestNum = num;
+                bestDen = den;
+                if (err < 1e-10) break;
+            }
+        }
+        const g = gcd2(bestNum, bestDen);
+        return { num: bestNum / g, den: bestDen / g };
+    }
+    function planeToIntegerCoefficients(plane) {
+        const fracs = [plane.n.x, plane.n.y, plane.n.z, plane.d].map(v => approximateFraction(v, 1000));
+        let lcm = 1;
+        for (const f of fracs) lcm = lcm2(lcm, f.den);
+        let coeffs = fracs.map(f => f.num * (lcm / f.den));
+        coeffs = coeffs.map(v => Math.round(v));
+        const g = gcdArray(coeffs);
+        coeffs = coeffs.map(v => v / g);
+        const firstNonZero = coeffs.find(v => v !== 0) || 1;
+        if (firstNonZero < 0) coeffs = coeffs.map(v => -v);
+        return { A: coeffs[0], B: coeffs[1], C: coeffs[2], D: coeffs[3] };
+    }
+    function planeFromIntegerCoefficients(A, B, C, D) {
+        const len = Math.sqrt(A * A + B * B + C * C);
+        if (len < 1e-9) return null;
+        return {
+            n: new Point3D(A / len, B / len, C / len),
+            d: D / len
+        };
+    }
+    function formatSignedTerm(value, variable, isFirst = false) {
+        if (value === 0) return '';
+        const sign = value < 0 ? '-' : (isFirst ? '' : '+');
+        const abs = Math.abs(value);
+        const coeff = abs === 1 ? '' : String(abs);
+        return `${sign}${coeff}${variable}`;
+    }
+    function formatPlaneEquation(coeffs) {
+        const terms = [];
+        if (coeffs.A !== 0) terms.push(formatSignedTerm(coeffs.A, 'x', terms.length === 0));
+        if (coeffs.B !== 0) terms.push(formatSignedTerm(coeffs.B, 'y', terms.length === 0));
+        if (coeffs.C !== 0) terms.push(formatSignedTerm(coeffs.C, 'z', terms.length === 0));
+        if (coeffs.D !== 0 || terms.length === 0) {
+            const sign = coeffs.D < 0 ? '-' : (terms.length === 0 ? '' : '+');
+            terms.push(`${sign}${Math.abs(coeffs.D)}`);
+        }
+        return `${terms.join(' ')} = 0`;
+    }
     class App {
         constructor() {
             this.canvas = document.getElementById('mainCanvas');
@@ -865,7 +948,6 @@
                 '#3b82f6', '#ef4444', '#10b981', '#a855f7',
                 '#f59e0b', '#06b6d4', '#ec4899', '#84cc16'
             ];
-            this.intersectionPairs = [];
             this.ui = {
                 size: document.getElementById('sizeSlider'),
                 rotX: document.getElementById('rotXSlider'),
@@ -873,13 +955,15 @@
                 edgeThickness: document.getElementById('edgeThicknessSlider'),
                 opacity: document.getElementById('opacitySlider'),
                 color: document.getElementById('sectionColor'),
+                planeA: document.getElementById('planeA'),
+                planeB: document.getElementById('planeB'),
+                planeC: document.getElementById('planeC'),
+                planeD: document.getElementById('planeD'),
                 pointsList: document.getElementById('pointsList'),
                 sectionsList: document.getElementById('sectionsList'),
-                intersectionsList: document.getElementById('intersectionsList'),
-                intersectionTargetSelect: document.getElementById('intersectionTargetSelect'),
                 sectionsCount: document.getElementById('sectionsCount'),
                 activePointsCount: document.getElementById('activePointsCount'),
-                intersectionCount: document.getElementById('intersectionCount'),
+                builtCount: document.getElementById('builtCount'),
                 sectionInfo: document.getElementById('sectionInfo'),
                 sectionDetails: document.getElementById('sectionDetails')
             };
@@ -903,14 +987,13 @@
                 polygon: [],
                 built: false,
                 area: 0,
-                plane: null
+                plane: null,
+                planeCoeffs: null,
+                buildSource: 'points'
             };
         }
         get activeSection() {
             return this.sections[this.activeSectionIndex];
-        }
-        getSectionById(id) {
-            return this.sections.find(s => s.id === id) || null;
         }
         init() {
             this.resize();
@@ -973,8 +1056,9 @@
                 this.updateUI();
             };
             document.getElementById('buildSectionBtn').onclick = () => this.buildActiveSection();
+            document.getElementById('buildEquationBtn').onclick = () => this.buildActiveSectionFromEquation();
+            document.getElementById('clearCurrentBtn').onclick = () => this.clearActiveSection();
             document.getElementById('deleteSectionBtn').onclick = () => {
-                const activeId = this.activeSection.id;
                 if (this.sections.length === 1) {
                     this.sections[0] = this.createEmptySection();
                     this.activeSectionIndex = 0;
@@ -982,40 +1066,7 @@
                     this.sections.splice(this.activeSectionIndex, 1);
                     this.activeSectionIndex = Math.max(0, this.activeSectionIndex - 1);
                 }
-                this.intersectionPairs = this.intersectionPairs.filter(p => p.aId !== activeId && p.bId !== activeId);
                 this.syncSectionControls();
-                this.updateUI();
-            };
-            document.getElementById('buildIntersectionBtn').onclick = () => {
-                const targetId = Number(this.ui.intersectionTargetSelect.value);
-                if (!targetId) return;
-                const a = this.activeSection;
-                const b = this.getSectionById(targetId);
-                if (!a || !b || a.id === b.id) return;
-                if (!a.built || !b.built) {
-                    alert('Оба сечения должны быть построены.');
-                    return;
-                }
-                const segment = this.computeIntersectionSegment(a, b);
-                if (!segment) {
-                    alert('Для этих сечений не удалось получить линию пересечения внутри фигуры.');
-                    return;
-                }
-                const exists = this.intersectionPairs.some(p =>
-                (p.aId === a.id && p.bId === b.id) || (p.aId === b.id && p.bId === a.id)
-                );
-                if (!exists) {
-                    this.intersectionPairs.push({
-                        id: Date.now() + Math.random(),
-                        aId: a.id,
-                        bId: b.id,
-                        color: '#fbbf24'
-                    });
-                }
-                this.updateUI();
-            };
-            document.getElementById('clearIntersectionBtn').onclick = () => {
-                this.intersectionPairs = [];
                 this.updateUI();
             };
             document.getElementById('resetViewBtn').onclick = () => {
@@ -1044,6 +1095,11 @@
             this.ui.color.value = s.color;
             this.ui.opacity.value = s.opacity;
             document.getElementById('opacityValue').textContent = String(s.opacity);
+            const coeffs = s.planeCoeffs || { A: 1, B: 1, C: 1, D: 0 };
+            this.ui.planeA.value = coeffs.A;
+            this.ui.planeB.value = coeffs.B;
+            this.ui.planeC.value = coeffs.C;
+            this.ui.planeD.value = coeffs.D;
         }
         setShape(type) {
             this.shapeType = type;
@@ -1059,7 +1115,6 @@
             }
             this.sections = [this.createEmptySection()];
             this.activeSectionIndex = 0;
-            this.intersectionPairs = [];
             this.draggingPointIdx = -1;
             this.hoveredPointIdx = -1;
             this.hoveredFaceIdx = -1;
@@ -1267,8 +1322,7 @@
         }
         rebuildActiveSectionIfNeeded() {
             const s = this.activeSection;
-            if (s.built && s.points.length >= 3) this.buildSectionFor(s, false);
-            this.updateIntersectionLinesAfterGeometryChange();
+            if (s.built && s.points.length >= 3 && s.buildSource === 'points') this.buildSectionFor(s, false);
         }
         buildSectionFor(section, showAlert = true) {
             if (section.points.length < 3) {
@@ -1284,6 +1338,7 @@
                 section.polygon = [];
                 section.area = 0;
                 section.plane = null;
+                section.planeCoeffs = null;
                 if (showAlert) alert('Первые 3 точки лежат почти на одной прямой. Выберите другие точки.');
                 return false;
             }
@@ -1293,6 +1348,7 @@
                 section.polygon = [];
                 section.area = 0;
                 section.plane = plane;
+                section.planeCoeffs = planeToIntegerCoefficients(plane);
                 if (showAlert) alert('Не удалось построить корректное сечение для выбранных точек.');
                 return false;
             }
@@ -1300,20 +1356,61 @@
             section.area = polygonArea3D(polygon);
             section.built = true;
             section.plane = plane;
+            section.planeCoeffs = planeToIntegerCoefficients(plane);
+            section.buildSource = 'points';
             return true;
         }
         buildActiveSection() {
             this.buildSectionFor(this.activeSection, true);
-            this.updateIntersectionLinesAfterGeometryChange();
+            this.syncSectionControls();
             this.updateUI();
         }
-        updateIntersectionLinesAfterGeometryChange() {
-            this.intersectionPairs = this.intersectionPairs.filter(pair => {
-                const a = this.getSectionById(pair.aId);
-                const b = this.getSectionById(pair.bId);
-                if (!a || !b || !a.built || !b.built) return false;
-                return !!this.computeIntersectionSegment(a, b);
-            });
+        buildActiveSectionFromEquation() {
+            const A = parseInt(this.ui.planeA.value, 10) || 0;
+            const B = parseInt(this.ui.planeB.value, 10) || 0;
+            const C = parseInt(this.ui.planeC.value, 10) || 0;
+            const D = parseInt(this.ui.planeD.value, 10) || 0;
+            if (A === 0 && B === 0 && C === 0) {
+                alert('Хотя бы один из коэффициентов A, B, C должен быть ненулевым.');
+                return;
+            }
+            const plane = planeFromIntegerCoefficients(A, B, C, D);
+            const polygon = buildSectionPolygon(this.shape, plane);
+            if (polygon.length < 3) {
+                alert('Эта плоскость не даёт корректного сечения для выбранной фигуры.');
+                return;
+            }
+            const s = this.activeSection;
+            const g = gcdArray([A, B, C, D]);
+            let coeffs = { A: A / g, B: B / g, C: C / g, D: D / g };
+            const firstNonZero = [coeffs.A, coeffs.B, coeffs.C, coeffs.D].find(v => v !== 0) || 1;
+            if (firstNonZero < 0) {
+                coeffs = { A: -coeffs.A, B: -coeffs.B, C: -coeffs.C, D: -coeffs.D };
+            }
+            s.points = [];
+            s.plane = plane;
+            s.planeCoeffs = coeffs;
+            s.polygon = polygon;
+            s.area = polygonArea3D(polygon);
+            s.built = true;
+            s.buildSource = 'equation';
+            this.syncSectionControls();
+            this.updateUI();
+        }
+        clearActiveSection() {
+            const fresh = this.createEmptySection();
+            const current = this.activeSection;
+            current.points = fresh.points;
+            current.polygon = fresh.polygon;
+            current.built = fresh.built;
+            current.area = fresh.area;
+            current.plane = fresh.plane;
+            current.planeCoeffs = fresh.planeCoeffs;
+            current.buildSource = fresh.buildSource;
+            this.draggingPointIdx = -1;
+            this.hoveredPointIdx = -1;
+            this.syncSectionControls();
+            this.updateUI();
         }
         updateHoverState(x, y) {
             this.hoveredPointIdx = this.findPointNearScreen(x, y);
@@ -1406,6 +1503,7 @@
                 param = Math.max(0, Math.min(1, param));
                 const newPoint = edge.getPointAt(param);
                 s.points.push(newPoint);
+                s.buildSource = 'points';
                 this.showFeedback(x, y);
                 this.updateUI();
                 return;
@@ -1417,6 +1515,7 @@
                 p.hostType = 'face';
                 p.faceIdx = hit.faceIdx;
                 s.points.push(p);
+                s.buildSource = 'points';
                 this.showFeedback(x, y);
                 this.updateUI();
             }
@@ -1436,95 +1535,17 @@
             s.points.splice(index, 1);
             if (this.draggingPointIdx === index) this.draggingPointIdx = -1;
             if (this.hoveredPointIdx === index) this.hoveredPointIdx = -1;
+            s.buildSource = 'points';
             if (s.points.length < 3) {
                 s.polygon = [];
                 s.built = false;
                 s.area = 0;
                 s.plane = null;
+                s.planeCoeffs = null;
             } else {
                 this.rebuildActiveSectionIfNeeded();
             }
-            this.updateIntersectionLinesAfterGeometryChange();
             this.updateUI();
-        }
-        computeIntersectionLineOfPlanes(plane1, plane2) {
-            const n1 = plane1.n;
-            const n2 = plane2.n;
-            const dir = n1.cross(n2);
-            const denom = dir.dot(dir);
-            if (denom < 1e-10) return null;
-            const c1 = -plane1.d;
-            const c2 = -plane2.d;
-            const point = n2.cross(dir).scale(c1)
-                .add(dir.cross(n1).scale(c2))
-                .scale(1 / denom);
-            return { point, dir: dir.normalize() };
-        }
-        intersectLineWithEdge(linePoint, lineDir, edge, eps = 1e-6) {
-            const a = edge.v1;
-            const b = edge.v2;
-            const segDir = b.sub(a);
-            const w0 = linePoint.sub(a);
-            const A = lineDir.dot(lineDir);
-            const B = lineDir.dot(segDir);
-            const C = segDir.dot(segDir);
-            const D = lineDir.dot(w0);
-            const E = segDir.dot(w0);
-            const denom = A * C - B * B;
-            if (Math.abs(denom) < eps) {
-                const distA = a.sub(linePoint).cross(lineDir).length();
-                const distB = b.sub(linePoint).cross(lineDir).length();
-                if (distA < 1e-4 && distB < 1e-4) {
-                    const t1 = a.sub(linePoint).dot(lineDir);
-                    const t2 = b.sub(linePoint).dot(lineDir);
-                    return [
-                        linePoint.add(lineDir.scale(t1)),
-                        linePoint.add(lineDir.scale(t2))
-                    ];
-                }
-                return [];
-            }
-            const t = (B * E - C * D) / denom;
-            const u = (A * E - B * D) / denom;
-            if (u < -eps || u > 1 + eps) return [];
-            const pLine = linePoint.add(lineDir.scale(t));
-            const pSeg = a.add(segDir.scale(u));
-            if (pLine.distanceTo(pSeg) < 1e-4) {
-                return [pLine];
-            }
-            return [];
-        }
-        computeIntersectionSegment(sectionA, sectionB) {
-            if (!sectionA?.plane || !sectionB?.plane || !sectionA.built || !sectionB.built) {
-                return null;
-            }
-            const line = this.computeIntersectionLineOfPlanes(sectionA.plane, sectionB.plane);
-            if (!line) return null;
-            const pts = [];
-            for (const edge of this.shape.edges) {
-                const hits = this.intersectLineWithEdge(line.point, line.dir, edge);
-                if (hits.length > 0) {
-                    for (const hit of hits) {
-                        const distToV1 = hit.distanceTo(edge.v1);
-                        const distToV2 = hit.distanceTo(edge.v2);
-                        const edgeLen = edge.v1.distanceTo(edge.v2);
-                        if (distToV1 + distToV2 <= edgeLen + 1e-3) {
-                            pts.push(hit);
-                        }
-                    }
-                }
-            }
-            const unique = uniquePoints(pts, 1e-3);
-            if (unique.length < 2) return null;
-            unique.sort((p1, p2) => {
-                const t1 = p1.sub(line.point).dot(line.dir);
-                const t2 = p2.sub(line.point).dot(line.dir);
-                return t1 - t2;
-            });
-            return {
-                p1: unique[0],
-                p2: unique[unique.length - 1]
-            };
         }
         isPointVisible(point3D, rotated, faceVisible) {
             const w = this.canvas.width;
@@ -1576,19 +1597,11 @@
             this.ctx.fillText(text, x + paddingX, y);
             this.ctx.restore();
         }
-        updateIntersectionTargetOptions() {
-            const activeId = this.activeSection.id;
-            const options = this.sections
-                .filter(s => s.id !== activeId)
-                .map(s => `<option value="${s.id}">${s.name}</option>`)
-                .join('');
-            this.ui.intersectionTargetSelect.innerHTML = options || '<option value="">Нет других сечений</option>';
-        }
         updateUI() {
             const s = this.activeSection;
             this.ui.sectionsCount.textContent = String(this.sections.length);
             this.ui.activePointsCount.textContent = String(s.points.length);
-            this.ui.intersectionCount.textContent = String(this.intersectionPairs.length);
+            this.ui.builtCount.textContent = String(this.sections.filter(section => section.built).length);
             this.ui.sectionsList.innerHTML = this.sections.map((section, idx) => `
 <div class="section-item ${idx === this.activeSectionIndex ? 'active' : ''}" style="border-left-color:${section.color}">
 <div>
@@ -1619,36 +1632,16 @@ ${p.hostType === 'edge'
 </div>
 `).join('');
             }
-            if (s.built) {
+            if (s.built && s.planeCoeffs) {
                 this.ui.sectionInfo.style.display = 'block';
                 this.ui.sectionDetails.innerHTML =
                 `Вершин: ${s.polygon.length}<br>` +
                 `Площадь: ${s.area.toFixed(2)}<br>` +
-                `Плоскость задана точками 1, 2, 3`;
+                `Уравнение: ${formatPlaneEquation(s.planeCoeffs)}<br>` +
+                `Источник: ${s.buildSource === 'equation' ? 'по уравнению' : 'по 3 точкам'}`;
             } else {
                 this.ui.sectionInfo.style.display = 'none';
             }
-            this.ui.intersectionsList.innerHTML = this.intersectionPairs.length === 0
-            ? '<p style="color:var(--text-secondary);text-align:center;padding:0.8rem">Нет линий пересечения</p>'
-            : this.intersectionPairs.map(pair => {
-                const a = this.getSectionById(pair.aId);
-                const b = this.getSectionById(pair.bId);
-                if (!a || !b) return '';
-                return `
-<div class="intersection-item" style="border-left-color:${pair.color}">
-<div>
-<div><span class="intersection-badge" style="background:${pair.color}"></span>${a.name} ∩ ${b.name}</div>
-<div class="intersection-meta">Линия пересечения построена</div>
-</div>
-<button class="remove-btn" onclick="app.removeIntersection('${pair.id}')">✕</button>
-</div>
-`;
-            }).join('');
-            this.updateIntersectionTargetOptions();
-        }
-        removeIntersection(id) {
-            this.intersectionPairs = this.intersectionPairs.filter(p => String(p.id) !== String(id));
-            this.updateUI();
         }
         selectSection(index) {
             this.activeSectionIndex = index;
@@ -1836,33 +1829,6 @@ ${p.hostType === 'edge'
                     });
                 }
             });
-            this.intersectionPairs.forEach(pair => {
-                const a = this.getSectionById(pair.aId);
-                const b = this.getSectionById(pair.bId);
-                if (!a || !b || !a.built || !b.built) return;
-                const segment = this.computeIntersectionSegment(a, b);
-                if (!segment) return;
-                const p1 = segment.p1.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom);
-                const p2 = segment.p2.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom);
-                this.ctx.save();
-                this.ctx.beginPath();
-                this.ctx.moveTo(p1.x, p1.y);
-                this.ctx.lineTo(p2.x, p2.y);
-                this.ctx.strokeStyle = pair.color;
-                this.ctx.lineWidth = 4;
-                this.ctx.shadowColor = 'rgba(251, 191, 36, 0.55)';
-                this.ctx.shadowBlur = 12;
-                this.ctx.stroke();
-                this.ctx.restore();
-                this.ctx.beginPath();
-                this.ctx.arc(p1.x, p1.y, 4.2, 0, Math.PI * 2);
-                this.ctx.fillStyle = pair.color;
-                this.ctx.fill();
-                this.ctx.beginPath();
-                this.ctx.arc(p2.x, p2.y, 4.2, 0, Math.PI * 2);
-                this.ctx.fillStyle = pair.color;
-                this.ctx.fill();
-            });
             const activePoints = this.activeSection.points;
             activePoints.forEach((pt, idx) => {
                 const proj = pt.rotate(this.rotX, this.rotY).project(w, h, this.cameraDistance, this.zoom);
@@ -1896,14 +1862,6 @@ ${p.hostType === 'edge'
                     );
                 }
             });
-        }
-        updateIntersectionTargetOptions() {
-            const activeId = this.activeSection.id;
-            const options = this.sections
-                .filter(s => s.id !== activeId)
-                .map(s => `<option value="${s.id}">${s.name}</option>`)
-                .join('');
-            this.ui.intersectionTargetSelect.innerHTML = options || '<option value="">Нет других сечений</option>';
         }
     }
     const app = new App();
