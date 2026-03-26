@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D Сечения Геометрических Фигур</title>
+    <title>🔷 3D Сечения Геометрических Фигур</title>
     <style>
         :root {
             --bg-primary: #0f172a;
@@ -195,6 +195,11 @@
             text-align: center;
         }
         .tool-btn:hover { background: var(--accent); }
+        .tool-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
         .tool-btn.danger {
             background: rgba(239, 68, 68, 0.2);
             border-color: var(--error);
@@ -376,14 +381,6 @@
                 <button class="tool-btn" id="buildSectionBtn">✂️ Построить текущее</button>
                 <button class="tool-btn danger" id="deleteSectionBtn">🗑️ Удалить текущее</button>
             </div>
-            <div class="instruction">
-                💡 <strong>Как работать:</strong><br>
-                1. Создайте новое сечение.<br>
-                2. Либо поставьте точки по рёбрам/граням, либо задайте уравнение плоскости.<br>
-                3. Постройте текущее сечение.<br>
-                4. Уравнение плоскости всегда выводится с целыми коэффициентами.<br>
-                5. Можно включить тёплую подсветку и настроить толщину линий фигуры.
-            </div>
             <div class="stats">
                 <div class="stat-item">
                     <div class="stat-value" id="sectionsCount">1</div>
@@ -405,10 +402,17 @@
             </div>
             <div class="toolbar" style="background: var(--bg-card); padding: 1rem; border-radius: 12px; margin-top: 1rem; border: 1px solid var(--border);">
                 <button class="tool-btn" id="resetViewBtn">🔄 Вид спереди</button>
+                <button class="tool-btn" id="autoRotateBtn">🌀 Автовращение</button>
                 <button class="tool-btn" id="resetZoomBtn">🔍 Сброс зума</button>
                 <button class="tool-btn" id="toggleWireframeBtn">👁️ Сплошной/Каркас</button>
                 <button class="tool-btn" id="toggleWarmLightBtn">☀️ Тёплая подсветка</button>
                 <button class="tool-btn" id="toggleLabelsBtn">🔤 Подписи вершин/точек</button>
+            </div>
+            <div style="background: var(--bg-card); padding: 1rem; border-radius: 12px; margin-top: 1rem; border: 1px solid var(--border);">
+                <div class="control-group" style="margin-bottom:0;">
+                    <label>Скорость вращения: <span id="autoRotateSpeedValue">0.6</span></label>
+                    <input type="range" id="autoRotateSpeedSlider" min="0.1" max="5" step="0.1" value="0.6">
+                </div>
             </div>
         </div>
         <div class="panel">
@@ -417,6 +421,14 @@
             <div id="sectionInfo" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
                 <strong style="color: var(--accent);">Текущее сечение</strong>
                 <p id="sectionDetails" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-secondary);"></p>
+            </div>
+            <div class="instruction">
+                💡 <strong>Как работать:</strong><br>
+                1. Создайте новое сечение.<br>
+                2. Либо поставьте точки по рёбрам/граням, либо задайте уравнение плоскости.<br>
+                3. Постройте текущее сечение.<br>
+                4. Уравнение плоскости всегда выводится с целыми коэффициентами.<br>
+                5. Можно включить тёплую подсветку, автоповорот и настроить скорость вращения.
             </div>
             <h2 class="panel-title">📍 Точки текущего сечения</h2>
             <div class="points-list" id="pointsList">
@@ -941,6 +953,8 @@
             this.draggingPointIdx = -1;
             this.wireframeOnly = false;
             this.showLabels = false;
+            this.autoRotate = false;
+            this.autoRotateSpeed = 0.6;
             this.lastTouchDistance = null;
             this.sections = [];
             this.activeSectionIndex = 0;
@@ -952,6 +966,7 @@
                 size: document.getElementById('sizeSlider'),
                 rotX: document.getElementById('rotXSlider'),
                 rotY: document.getElementById('rotYSlider'),
+                autoRotateSpeed: document.getElementById('autoRotateSpeedSlider'),
                 edgeThickness: document.getElementById('edgeThicknessSlider'),
                 opacity: document.getElementById('opacitySlider'),
                 color: document.getElementById('sectionColor'),
@@ -1040,6 +1055,10 @@
                 this.edgeThickness = parseFloat(e.target.value);
                 document.getElementById('edgeThicknessValue').textContent = e.target.value;
             };
+            this.ui.autoRotateSpeed.oninput = (e) => {
+                this.autoRotateSpeed = parseFloat(e.target.value);
+                document.getElementById('autoRotateSpeedValue').textContent = e.target.value;
+            };
             this.ui.opacity.oninput = (e) => {
                 const val = parseFloat(e.target.value);
                 document.getElementById('opacityValue').textContent = e.target.value;
@@ -1088,6 +1107,10 @@
             };
             document.getElementById('toggleLabelsBtn').onclick = () => {
                 this.showLabels = !this.showLabels;
+            };
+            document.getElementById('autoRotateBtn').onclick = () => {
+                this.autoRotate = !this.autoRotate;
+                document.getElementById('autoRotateBtn').classList.toggle('active', this.autoRotate);
             };
         }
         syncSectionControls() {
@@ -1655,6 +1678,11 @@ ${p.hostType === 'edge'
             requestAnimationFrame(() => this.loop());
         }
         render() {
+            if (this.autoRotate && !this.mouseDown && this.draggingPointIdx === -1) {
+                this.rotY += this.autoRotateSpeed;
+                this.ui.rotY.value = this.rotY;
+                document.getElementById('rotYValue').textContent = Math.round(this.rotY);
+            }
             const w = this.canvas.width;
             const h = this.canvas.height;
             this.ctx.clearRect(0, 0, w, h);
