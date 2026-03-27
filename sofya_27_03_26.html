@@ -1,0 +1,1575 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Интерактивная лаборатория: задачи на работу и проценты</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0b1830;
+            --panel:rgba(15,28,53,.72);
+            --panel-2:rgba(12,22,42,.88);
+            --line:rgba(150,205,255,.14);
+            --text:#eaf3ff;
+            --muted:#a9bbd7;
+            --accent:#68d5ff;
+            --accent-2:#7b8cff;
+            --accent-3:#78f0c8;
+            --danger:#ff7c9b;
+            --ok:#8ef7b2;
+            --warn:#ffd480;
+            --shadow:0 14px 48px rgba(0,0,0,.36);
+            --radius:24px;
+            --radius-sm:16px;
+            --max:1260px;
+            --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+            --sans:Inter,Segoe UI,Arial,sans-serif;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+            radial-gradient(circle at 15% 20%, rgba(104,213,255,.18), transparent 22%),
+            radial-gradient(circle at 80% 10%, rgba(123,140,255,.16), transparent 24%),
+            radial-gradient(circle at 70% 80%, rgba(120,240,200,.12), transparent 18%),
+            linear-gradient(180deg, #06101d 0%, #07111f 35%, #0a1530 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            background:
+            linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size:40px 40px;
+            mask-image:linear-gradient(180deg, rgba(0,0,0,.55), transparent 90%);
+            pointer-events:none;
+            opacity:.28;
+        }
+
+        a{color:inherit;text-decoration:none}
+        .wrap{width:min(var(--max), calc(100vw - 28px)); margin:0 auto}
+        .section{padding:72px 0}
+        .eyebrow{
+            display:inline-flex; align-items:center; gap:10px;
+            padding:10px 14px; border:1px solid var(--line);
+            background:rgba(255,255,255,.04);
+            border-radius:999px; color:var(--accent);
+            font-size:13px; letter-spacing:.12em; text-transform:uppercase;
+            backdrop-filter:blur(12px);
+        }
+        .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 20px var(--accent)}
+        h1,h2,h3{margin:0 0 14px}
+        h1{
+            font-size:clamp(38px, 5vw, 72px);
+            line-height:.98;
+            letter-spacing:-.04em;
+            max-width:980px;
+        }
+        h2{
+            font-size:clamp(28px, 3vw, 44px);
+            letter-spacing:-.03em;
+        }
+        h3{
+            font-size:clamp(20px, 2vw, 28px);
+            letter-spacing:-.02em;
+        }
+        p{margin:0 0 14px; color:var(--muted); line-height:1.72}
+        .hero{
+            position:relative;
+            padding:28px 0 62px;
+            overflow:hidden;
+        }
+        .hero-inner{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:28px;
+            align-items:stretch;
+            min-height:80vh;
+        }
+        .hero-copy{
+            position:relative;
+            padding:44px 0 0;
+            z-index:2;
+        }
+        .lead{
+            font-size:clamp(17px, 1.9vw, 21px);
+            max-width:760px;
+            color:#d8e7ff;
+            margin:18px 0 26px;
+        }
+        .hero-actions{
+            display:flex; flex-wrap:wrap; gap:14px; margin-top:28px;
+        }
+        .btn{
+            appearance:none; border:none; cursor:pointer;
+            color:#07111f; background:linear-gradient(135deg, var(--accent), #9ef0ff);
+            border-radius:18px; padding:14px 18px; font-weight:700;
+            box-shadow:0 10px 28px rgba(104,213,255,.18);
+            transition:.2s transform,.2s box-shadow,.2s opacity;
+        }
+        .btn:hover{transform:translateY(-2px); box-shadow:0 16px 34px rgba(104,213,255,.22)}
+        .btn.secondary{
+            color:var(--text); background:rgba(255,255,255,.04); border:1px solid var(--line); box-shadow:none;
+            backdrop-filter:blur(8px);
+        }
+        .btn.ghost{
+            background:transparent; color:var(--accent); border:1px solid rgba(104,213,255,.28)
+        }
+        .hero-orbit{
+            position:relative;
+            min-height:620px;
+            display:grid;
+            place-items:center;
+        }
+
+        .glass{
+            background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+            border:1px solid rgba(180,220,255,.12);
+            border-radius:var(--radius);
+            backdrop-filter:blur(22px);
+            box-shadow:var(--shadow);
+        }
+
+        .hero-card{
+            position:absolute;
+            inset:auto;
+            width:min(100%, 520px);
+            padding:24px;
+            overflow:hidden;
+        }
+
+        .hero-card.main{
+            inset:60px 20px auto auto;
+            min-height:480px;
+            background:
+            radial-gradient(circle at 20% 20%, rgba(104,213,255,.16), transparent 30%),
+            linear-gradient(180deg, rgba(18,34,64,.92), rgba(10,18,34,.78));
+        }
+        .hero-card.small{
+            inset:auto auto 18px 14px;
+            width:260px; padding:18px;
+            background:linear-gradient(180deg, rgba(13,25,46,.9), rgba(11,21,38,.75));
+        }
+        .hero-grid{
+            display:grid;
+            grid-template-columns:repeat(2, 1fr);
+            gap:12px; margin-top:14px;
+        }
+        .mini{
+            padding:14px; border-radius:18px;
+            border:1px solid var(--line);
+            background:rgba(255,255,255,.04);
+        }
+        .mini .k{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+        .mini .v{font-size:22px; font-weight:800; margin-top:8px}
+        .formula{
+            font-family:var(--mono);
+            color:#e7fbff;
+            font-size:14px;
+            padding:10px 12px;
+            border-radius:14px;
+            background:rgba(104,213,255,.08);
+            border:1px solid rgba(104,213,255,.16);
+            display:inline-block;
+            margin:8px 0 0;
+            max-width:100%;
+            overflow:auto;
+            white-space:nowrap;
+        }
+        .hero-badge{
+            display:inline-flex; align-items:center; gap:10px;
+            padding:9px 12px; border-radius:999px; font-size:13px;
+            background:rgba(120,240,200,.10); color:var(--accent-3); border:1px solid rgba(120,240,200,.16);
+        }
+
+        nav.topbar{
+            position:sticky;
+            top:0;
+            z-index:40;
+            backdrop-filter:blur(16px);
+            background:linear-gradient(180deg, rgba(7,17,31,.88), rgba(7,17,31,.55));
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .topbar-inner{
+            display:flex; align-items:center; justify-content:space-between;
+            gap:16px; padding:14px 0;
+        }
+        .brand{display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.02em}
+        .brand-mark{
+            width:36px;height:36px;border-radius:12px;
+            background:conic-gradient(from 180deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
+            box-shadow:0 0 28px rgba(104,213,255,.18);
+            position:relative;
+        }
+        .brand-mark::after{
+            content:"";
+            position:absolute; inset:4px; border-radius:10px;
+            background:#0a1530;
+        }
+        .nav-links{
+            display:flex; gap:10px; flex-wrap:wrap;
+        }
+        .nav-links a{
+            padding:10px 12px; border-radius:12px; color:var(--muted);
+            border:1px solid transparent;
+        }
+        .nav-links a:hover{color:var(--text); background:rgba(255,255,255,.04); border-color:var(--line)}
+        .print-btn{white-space:nowrap}
+
+        .stats{
+            margin-top:28px;
+            display:grid; gap:14px; grid-template-columns:repeat(3, 1fr);
+            max-width:760px;
+        }
+        .stat{
+            padding:18px;
+            border-radius:20px;
+            background:rgba(255,255,255,.04);
+            border:1px solid var(--line);
+            min-height:112px;
+        }
+        .stat-num{
+            font-size:28px; font-weight:800; color:#fff; margin-bottom:8px
+        }
+
+        .grid-2{
+            display:grid; gap:22px; grid-template-columns:1.05fr .95fr;
+            align-items:start;
+        }
+        .grid-3{
+            display:grid; gap:18px; grid-template-columns:repeat(3, 1fr);
+        }
+        .card{
+            padding:24px;
+            border-radius:var(--radius);
+            border:1px solid rgba(180,220,255,.12);
+            background:linear-gradient(180deg, rgba(16,28,50,.86), rgba(9,18,34,.86));
+            box-shadow:var(--shadow);
+        }
+        .card.soft{
+            background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+            backdrop-filter:blur(18px);
+        }
+
+        .anchor{scroll-margin-top:92px}
+        .section-title{
+            display:flex; justify-content:space-between; gap:18px; align-items:end; margin-bottom:26px;
+        }
+        .section-title p{max-width:780px}
+
+        .diagram-wrap{
+            position:relative;
+            min-height:540px;
+            overflow:hidden;
+        }
+
+        .controls{
+            display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;
+        }
+        .chip{
+            display:inline-flex; align-items:center; gap:10px;
+            padding:10px 14px; border-radius:999px;
+            border:1px solid var(--line); background:rgba(255,255,255,.04);
+            color:var(--text); user-select:none;
+        }
+        .chip input{accent-color:var(--accent)}
+        .slider-card{
+            display:grid; grid-template-columns:1fr auto; gap:14px;
+            padding:18px; border-radius:18px;
+            background:rgba(255,255,255,.04); border:1px solid var(--line);
+            align-items:center;
+        }
+        .slider-card input[type=range]{width:100%}
+        .big-metric{
+            font-size:34px; font-weight:900; text-align:right;
+            color:var(--accent);
+            min-width:120px;
+        }
+
+        .legend{
+            display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:16px;
+        }
+        .legend-item{
+            display:flex; align-items:center; gap:10px;
+            padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.04); border:1px solid var(--line);
+            font-size:14px; color:var(--muted);
+        }
+        .sw{width:14px;height:14px;border-radius:50%}
+
+        .table-wrap{
+            overflow:auto;
+            border-radius:20px;
+            border:1px solid var(--line);
+        }
+        table{
+            width:100%; border-collapse:collapse; min-width:560px;
+            background:rgba(255,255,255,.03);
+        }
+        th,td{
+            padding:14px 16px;
+            text-align:left;
+            border-bottom:1px solid rgba(255,255,255,.05);
+        }
+        th{font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+        td strong{color:#fff}
+        .mono{font-family:var(--mono)}
+        .muted{color:var(--muted)}
+        .accent{color:var(--accent)}
+        .ok{color:var(--ok)}
+        .danger{color:var(--danger)}
+        .warn{color:var(--warn)}
+
+        .calc-grid{
+            display:grid; gap:20px; grid-template-columns:repeat(2, 1fr);
+        }
+        .field{
+            display:grid; gap:8px;
+        }
+        .field label{
+            font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)
+        }
+        .input, select{
+            width:100%; padding:14px 16px; border-radius:16px;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.04); color:var(--text);
+            outline:none;
+        }
+        .input:focus, select:focus{border-color:rgba(104,213,255,.36); box-shadow:0 0 0 4px rgba(104,213,255,.08)}
+        .result-box{
+            margin-top:16px;
+            padding:18px; border-radius:18px;
+            background:rgba(104,213,255,.08); border:1px solid rgba(104,213,255,.18);
+        }
+        .result-big{
+            font-size:34px; font-weight:900; color:#fff; margin-top:8px;
+            word-break:break-word;
+        }
+
+        .accordion{
+            display:grid; gap:12px;
+        }
+        .acc{
+            border-radius:18px; overflow:hidden;
+            border:1px solid var(--line);
+            background:rgba(255,255,255,.04);
+        }
+        .acc-btn{
+            width:100%; padding:18px 20px; cursor:pointer;
+            background:none; color:var(--text); border:none;
+            display:flex; align-items:center; justify-content:space-between; gap:18px;
+            font-size:18px; font-weight:700; text-align:left;
+        }
+        .acc-btn span:last-child{
+            width:34px; height:34px; border-radius:50%;
+            display:grid; place-items:center;
+            background:rgba(255,255,255,.06);
+            border:1px solid var(--line);
+            flex:0 0 auto;
+        }
+        .acc-panel{
+            display:none; padding:0 20px 20px;
+        }
+        .acc.open .acc-panel{display:block}
+        .acc.open .acc-btn span:last-child{transform:rotate(45deg)}
+
+        .steps{
+            display:grid; gap:12px;
+        }
+        .step{
+            display:grid; grid-template-columns:44px 1fr; gap:14px;
+            padding:16px; border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid var(--line);
+        }
+        .step-num{
+            width:44px;height:44px;border-radius:14px;
+            display:grid;place-items:center;font-weight:900;
+            color:#07111f;background:linear-gradient(135deg, var(--accent), #b9fbff);
+        }
+
+        .sheet{
+            display:grid; gap:16px; grid-template-columns:repeat(2,1fr);
+        }
+        .sheet .card{padding:20px}
+        .line{
+            display:flex; justify-content:space-between; gap:16px; padding:12px 0;
+            border-bottom:1px dashed rgba(255,255,255,.08);
+        }
+        .line:last-child{border-bottom:none}
+
+        .quiz-list{
+            display:grid; gap:18px;
+        }
+        .q{
+            padding:20px; border-radius:22px;
+            border:1px solid var(--line);
+            background:rgba(255,255,255,.04);
+        }
+        .answers{
+            display:grid; gap:10px; margin-top:14px;
+        }
+        .answer{
+            display:flex; gap:12px; align-items:flex-start;
+            border:1px solid var(--line);
+            border-radius:16px; padding:12px 14px;
+            background:rgba(255,255,255,.03);
+            cursor:pointer;
+            transition:.15s;
+        }
+        .answer:hover{background:rgba(255,255,255,.05)}
+        .answer input{margin-top:3px; accent-color:var(--accent)}
+        .answer.correct{
+            border-color:rgba(142,247,178,.35);
+            background:rgba(142,247,178,.10);
+        }
+        .answer.wrong{
+            border-color:rgba(255,124,155,.35);
+            background:rgba(255,124,155,.10);
+        }
+        .score{
+            display:flex; align-items:center; justify-content:space-between; gap:16px;
+            padding:18px; border-radius:18px;
+            border:1px solid var(--line);
+            background:linear-gradient(180deg, rgba(16,28,50,.86), rgba(9,18,34,.86));
+        }
+
+        .gen-layout{
+            display:grid; gap:20px; grid-template-columns:.9fr 1.1fr;
+        }
+        .task-box{
+            min-height:260px;
+            display:grid; gap:16px; align-content:start;
+        }
+        .task-text{
+            font-size:20px; line-height:1.6; color:#f4f8ff;
+        }
+        .answer-box{
+            display:none;
+            padding:16px; border-radius:16px;
+            background:rgba(120,240,200,.10);
+            border:1px solid rgba(120,240,200,.18);
+        }
+
+        .footer{
+            padding:34px 0 54px; color:var(--muted)
+        }
+        .footer-inner{
+            display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap;
+            border-top:1px solid rgba(255,255,255,.08); padding-top:20px;
+        }
+
+        .float-glow{
+            position:absolute; border-radius:50%; filter:blur(40px); opacity:.28; pointer-events:none;
+        }
+        .g1{width:220px;height:220px;background:var(--accent);top:40px;right:-40px}
+        .g2{width:260px;height:260px;background:var(--accent-2);bottom:20px;left:-70px}
+        .g3{width:180px;height:180px;background:var(--accent-3);bottom:140px;right:80px}
+
+        .tiny{font-size:13px}
+        .spacer{height:4px}
+        .center{text-align:center}
+
+        @media (max-width:1100px){
+            .hero-inner,.grid-2,.gen-layout,.calc-grid{grid-template-columns:1fr}
+            .hero-orbit{min-height:520px}
+            .hero-card.main{position:relative; inset:auto; width:100%}
+            .hero-card.small{position:absolute}
+            .stats,.grid-3,.sheet{grid-template-columns:1fr 1fr}
+        }
+
+        @media (max-width:760px){
+            .topbar-inner{padding:12px 0}
+            .nav-links{display:none}
+            .stats,.grid-3,.sheet,.legend{grid-template-columns:1fr}
+            .hero{padding-top:10px}
+            .hero-copy{padding-top:24px}
+            .section{padding:58px 0}
+            .card{padding:18px}
+            .hero-card.main{padding:18px}
+            .big-metric{font-size:26px}
+            .hero-orbit{min-height:460px}
+            .hero-card.small{width:min(70vw,250px)}
+            .section-title{align-items:start; flex-direction:column}
+            .slider-card{grid-template-columns:1fr}
+        }
+
+        @media print{
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+            body::before,.float-glow,.hero-orbit,.hero-actions,.controls,.btn,.topbar,.print-hide{
+                display:none !important;
+            }
+            .section{padding:20px 0}
+            .wrap{width:100%; max-width:none}
+            .card,.glass,.q,.acc,.score,.result-box,.slider-card,.stat,.mini,.legend-item,.table-wrap{
+                background:#fff !important;
+                color:#111 !important;
+                border:1px solid #d9d9d9 !important;
+                box-shadow:none !important;
+                backdrop-filter:none !important;
+            }
+            .muted,p,.nav-links a,.footer,.tiny{color:#333 !important}
+            .formula{
+                color:#111 !important;
+                background:#f5f5f5 !important;
+                border-color:#ddd !important;
+            }
+            .answer.correct,.answer.wrong{
+                background:#fff !important;
+            }
+            .acc-panel{display:block !important}
+            .acc-btn span:last-child{display:none}
+            svg text{fill:#111 !important}
+            svg line,svg circle,svg path,svg polygon{stroke:#111 !important}
+            .brand-mark{background:#111 !important; box-shadow:none !important}
+            .brand-mark::after{background:#fff !important}
+        }
+    </style>
+</head>
+<body>
+<nav class="topbar print-hide">
+    <div class="wrap topbar-inner">
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true"></div>
+            <div>Лаборатория задач</div>
+        </div>
+        <div class="nav-links">
+            <a href="#visual">Визуализация</a>
+            <a href="#calc">Калькуляторы</a>
+            <a href="#theory">Теория</a>
+            <a href="#examples">Разборы</a>
+            <a href="#sheet">Cheat sheet</a>
+            <a href="#quiz">Квиз</a>
+            <a href="#generator">Генератор</a>
+        </div>
+        <button class="btn secondary print-btn" onclick="window.print()">Печать</button>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="wrap hero-inner">
+        <div class="hero-copy">
+            <div class="eyebrow"><span class="dot"></span> Интерактивная математическая лаборатория</div>
+            <div class="spacer"></div>
+            <h1>Задачи на работу и проценты — быстро, красиво и без путаницы</h1>
+            <p class="lead">
+                Эта страница превращает типовые школьные задачи в наглядную систему: таблицы, формулы, интерактивные модели,
+                калькуляторы, проверочный квиз и генератор тренировочных заданий. Всё построено вокруг двух идей:
+                <strong>работа = производительность · время</strong> и <strong>до изменения = 100%</strong>.
+            </p>
+            <div class="hero-badge">Тема занятия: совместная работа, этапы работы, проценты, последовательные изменения, быстрый корень из полного квадрата</div>
+
+            <div class="hero-actions">
+                <a class="btn" href="#visual">Открыть визуальную модель</a>
+                <a class="btn secondary" href="#quiz">Перейти к самопроверке</a>
+                <a class="btn ghost" href="#generator">Сгенерировать новую задачу</a>
+            </div>
+
+            <div class="stats">
+                <div class="stat glass">
+                    <div class="stat-num">1 / t</div>
+                    <div>Производительность, если вся работа принята за <strong>1</strong> заказ.</div>
+                </div>
+                <div class="stat glass">
+                    <div class="stat-num">100%</div>
+                    <div>Всегда стартовая величина в задачах на проценты.</div>
+                </div>
+                <div class="stat glass">
+                    <div class="stat-num">√7921 = 89</div>
+                    <div>Пример полного квадрата, который удобно узнавать без калькулятора.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-orbit">
+            <div class="float-glow g1"></div>
+            <div class="float-glow g2"></div>
+            <div class="float-glow g3"></div>
+
+            <div class="hero-card main glass">
+                <svg viewBox="0 0 520 480" width="100%" height="100%" aria-label="Схема задач на работу и проценты">
+                    <defs>
+                        <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#68d5ff" stop-opacity=".8"/>
+                            <stop offset="100%" stop-color="#7b8cff" stop-opacity=".7"/>
+                        </linearGradient>
+                        <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#78f0c8" stop-opacity=".8"/>
+                            <stop offset="100%" stop-color="#68d5ff" stop-opacity=".7"/>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="6" result="b"/>
+                            <feMerge>
+                                <feMergeNode in="b"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <rect x="18" y="18" width="484" height="444" rx="28" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"/>
+                    <text x="42" y="60" fill="#eaf3ff" font-size="24" font-weight="800">Карта темы</text>
+                    <text x="42" y="87" fill="#a9bbd7" font-size="14">Две оси: работа и проценты</text>
+
+                    <g transform="translate(46 130)">
+                        <rect width="170" height="110" rx="22" fill="rgba(104,213,255,.08)" stroke="rgba(104,213,255,.22)"/>
+                        <text x="18" y="34" fill="#68d5ff" font-size="16" font-weight="700">Работа</text>
+                        <text x="18" y="60" fill="#eaf3ff" font-size="14">работа = производительность · время</text>
+                        <text x="18" y="88" fill="#eaf3ff" font-size="14">p = 1 / t, если вся работа = 1</text>
+                    </g>
+
+                    <g transform="translate(302 130)">
+                        <rect width="170" height="110" rx="22" fill="rgba(120,240,200,.08)" stroke="rgba(120,240,200,.22)"/>
+                        <text x="18" y="34" fill="#78f0c8" font-size="16" font-weight="700">Проценты</text>
+                        <text x="18" y="60" fill="#eaf3ff" font-size="14">до = 100%</text>
+                        <text x="18" y="88" fill="#eaf3ff" font-size="14">после = 100% ± p%</text>
+                    </g>
+
+                    <path d="M216 185 C246 185, 272 185, 302 185" stroke="url(#lg1)" stroke-width="4" fill="none" filter="url(#glow)"/>
+                    <path d="M130 240 C130 290, 210 305, 260 305" stroke="url(#lg2)" stroke-width="4" fill="none" filter="url(#glow)"/>
+                    <path d="M387 240 C387 290, 310 305, 260 305" stroke="url(#lg1)" stroke-width="4" fill="none" filter="url(#glow)"/>
+
+                    <g transform="translate(165 278)">
+                        <circle cx="95" cy="46" r="44" fill="rgba(123,140,255,.10)" stroke="rgba(123,140,255,.24)"/>
+                        <text x="57" y="41" fill="#eaf3ff" font-size="14">Общий</text>
+                        <text x="44" y="62" fill="#eaf3ff" font-size="14">алгоритм</text>
+                    </g>
+
+                    <g transform="translate(42 376)">
+                        <text x="0" y="0" fill="#a9bbd7" font-size="13">1) Выбери x</text>
+                        <text x="0" y="24" fill="#a9bbd7" font-size="13">2) Составь таблицу</text>
+                        <text x="0" y="48" fill="#a9bbd7" font-size="13">3) Вырази величины через x</text>
+                    </g>
+
+                    <g transform="translate(287 376)">
+                        <text x="0" y="0" fill="#a9bbd7" font-size="13">4) Построй уравнение</text>
+                        <text x="0" y="24" fill="#a9bbd7" font-size="13">5) Реши и проверь смысл</text>
+                        <text x="0" y="48" fill="#a9bbd7" font-size="13">6) Не перепутай, что спрашивают</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="hero-card small glass">
+                <div class="tiny muted">Мини-памятка</div>
+                <div style="font-size:26px;font-weight:900;margin-top:8px">1/x = 1/3 + 1/6</div>
+                <div class="formula">1/x = 1/2 → x = 2</div>
+                <div style="height:10px"></div>
+                <div class="tiny muted">Если новая цена — 87,7% от старой</div>
+                <div class="formula">снижение = 100% − 87,7% = 12,3%</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="section anchor" id="visual">
+        <div class="wrap">
+            <div class="section-title">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Интерактивная визуализация</div>
+                    <h2>Смотри, как меняется задача, когда меняется время</h2>
+                </div>
+                <p>
+                    Ниже — динамическая модель совместной работы двух мастеров. Можно включать слои,
+                    менять время первого и второго исполнителя и сразу видеть общую производительность, формулу и ответ.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card diagram-wrap">
+                    <div class="controls">
+                        <label class="chip"><input type="checkbox" id="toggleRates" checked /> Показывать производительности</label>
+                        <label class="chip"><input type="checkbox" id="toggleTogether" checked /> Показывать совместную работу</label>
+                        <label class="chip"><input type="checkbox" id="toggleFormula" checked /> Показывать формулу</label>
+                    </div>
+
+                    <svg id="workSvg" viewBox="0 0 760 460" width="100%" height="100%" aria-label="Визуализация совместной работы">
+                        <defs>
+                            <linearGradient id="barA" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#68d5ff"/>
+                                <stop offset="100%" stop-color="#8ce6ff"/>
+                            </linearGradient>
+                            <linearGradient id="barB" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#7b8cff"/>
+                                <stop offset="100%" stop-color="#a7b3ff"/>
+                            </linearGradient>
+                            <linearGradient id="barC" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#78f0c8"/>
+                                <stop offset="100%" stop-color="#a8f6de"/>
+                            </linearGradient>
+                        </defs>
+
+                        <rect x="16" y="16" width="728" height="428" rx="24" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"/>
+                        <text x="36" y="54" fill="#eaf3ff" font-size="24" font-weight="800">Модель совместной работы</text>
+                        <text x="36" y="80" fill="#a9bbd7" font-size="14">Длина полосы показывает скорость выполнения заказа</text>
+
+                        <line x1="170" y1="150" x2="660" y2="150" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+                        <line x1="170" y1="240" x2="660" y2="240" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+                        <line x1="170" y1="330" x2="660" y2="330" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+
+                        <text x="36" y="155" fill="#eaf3ff" font-size="16">Первый</text>
+                        <text x="36" y="245" fill="#eaf3ff" font-size="16">Второй</text>
+                        <text x="36" y="335" fill="#eaf3ff" font-size="16">Вместе</text>
+
+                        <rect id="rectA" x="170" y="128" width="0" height="44" rx="20" fill="url(#barA)"/>
+                        <rect id="rectB" x="170" y="218" width="0" height="44" rx="20" fill="url(#barB)"/>
+                        <rect id="rectC" x="170" y="308" width="0" height="44" rx="20" fill="url(#barC)"/>
+
+                        <text id="txtA" x="180" y="155" fill="#07111f" font-size="15" font-weight="800"></text>
+                        <text id="txtB" x="180" y="245" fill="#07111f" font-size="15" font-weight="800"></text>
+                        <text id="txtC" x="180" y="335" fill="#07111f" font-size="15" font-weight="800"></text>
+
+                        <text id="formulaText" x="36" y="405" fill="#dffaff" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"></text>
+                    </svg>
+
+                    <div class="legend">
+                        <div class="legend-item"><span class="sw" style="background:#68d5ff"></span> Первый мастер: скорость = 1 / t₁</div>
+                        <div class="legend-item"><span class="sw" style="background:#7b8cff"></span> Второй мастер: скорость = 1 / t₂</div>
+                        <div class="legend-item"><span class="sw" style="background:#78f0c8"></span> Совместная скорость = 1 / t₁ + 1 / t₂</div>
+                        <div class="legend-item"><span class="sw" style="background:#fff"></span> Чем длиннее полоса, тем быстрее выполняется заказ</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Параметры модели</h3>
+                    <p>Перемещай ползунки и сразу наблюдай, как меняется ответ.</p>
+
+                    <div class="slider-card">
+                        <div>
+                            <div class="tiny muted">Время первого мастера, часов</div>
+                            <input type="range" id="t1" min="2" max="18" value="3" step="1" />
+                        </div>
+                        <div class="big-metric" id="t1v">3 ч</div>
+                    </div>
+
+                    <div class="spacer"></div>
+
+                    <div class="slider-card">
+                        <div>
+                            <div class="tiny muted">Время второго мастера, часов</div>
+                            <input type="range" id="t2" min="2" max="18" value="6" step="1" />
+                        </div>
+                        <div class="big-metric" id="t2v">6 ч</div>
+                    </div>
+
+                    <div class="result-box">
+                        <div class="tiny muted">Время совместной работы</div>
+                        <div class="result-big" id="togetherTime">2 ч</div>
+                        <div class="formula" id="togetherFormula">1/x = 1/3 + 1/6 = 1/2, значит x = 2</div>
+                    </div>
+
+                    <div class="table-wrap" style="margin-top:18px">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Исполнитель</th>
+                                <th>Производительность</th>
+                                <th>Время</th>
+                                <th>Работа</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><strong>Первый</strong></td>
+                                <td class="mono" id="tabP1">1/3</td>
+                                <td id="tabT1">3 ч</td>
+                                <td>1 заказ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Второй</strong></td>
+                                <td class="mono" id="tabP2">1/6</td>
+                                <td id="tabT2">6 ч</td>
+                                <td>1 заказ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Вместе</strong></td>
+                                <td class="mono" id="tabP3">1/2</td>
+                                <td id="tabT3">2 ч</td>
+                                <td>1 заказ</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section anchor" id="calc">
+        <div class="wrap">
+            <div class="section-title">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Вычислительные блоки</div>
+                    <h2>Два калькулятора: работа и проценты</h2>
+                </div>
+                <p>
+                    Эти блоки повторяют стандартные действия из задач: совместная работа, исходная цена, новая цена,
+                    процент увеличения или уменьшения.
+                </p>
+            </div>
+
+            <div class="calc-grid">
+                <div class="card">
+                    <h3>Калькулятор совместной работы</h3>
+                    <p>Введите время, за которое каждый исполнитель выполняет работу один.</p>
+
+                    <div class="field">
+                        <label for="workA">Первый выполняет заказ за</label>
+                        <input class="input" id="workA" type="number" min="0.1" step="0.1" value="3" />
+                    </div>
+                    <div class="field">
+                        <label for="workB">Второй выполняет заказ за</label>
+                        <input class="input" id="workB" type="number" min="0.1" step="0.1" value="6" />
+                    </div>
+
+                    <div class="result-box">
+                        <div class="tiny muted">Ответ</div>
+                        <div class="result-big" id="workCalcResult">2 ч</div>
+                        <div class="formula" id="workCalcFormula">1/x = 1/3 + 1/6 = 1/2, x = 2</div>
+                    </div>
+
+                    <div class="hero-actions" style="margin-top:16px">
+                        <button class="btn secondary" id="workCalcReset">Сбросить</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Калькулятор процентов</h3>
+                    <p>Выбери режим и получи ответ без лишних шагов.</p>
+
+                    <div class="field">
+                        <label for="percentMode">Режим</label>
+                        <select id="percentMode">
+                            <option value="orig">Найти исходную цену по новой</option>
+                            <option value="new">Найти новую цену по исходной</option>
+                            <option value="drop">Найти процент изменения</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="pA" id="labelA">Новая цена</label>
+                        <input class="input" id="pA" type="number" step="0.1" value="1443" />
+                    </div>
+
+                    <div class="field">
+                        <label for="pB" id="labelB">Изменение, %</label>
+                        <input class="input" id="pB" type="number" step="0.1" value="11" />
+                    </div>
+
+                    <div class="field" id="extraField" style="display:none">
+                        <label for="pC">Старая цена</label>
+                        <input class="input" id="pC" type="number" step="0.1" value="2322" />
+                    </div>
+
+                    <div class="result-box">
+                        <div class="tiny muted">Результат</div>
+                        <div class="result-big" id="percentResult">1300 руб.</div>
+                        <div class="formula" id="percentFormula">старая цена = 1443 / 1,11 = 1300</div>
+                    </div>
+
+                    <div class="hero-actions" style="margin-top:16px">
+                        <button class="btn secondary" id="percentReset">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section anchor" id="theory">
+        <div class="wrap">
+            <div class="section-title">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Теория</div>
+                    <h2>Ключевые правила в форме аккордеонов</h2>
+                </div>
+                <p>
+                    Открой только те блоки, которые хочешь повторить прямо сейчас: работу, проценты,
+                    этапы решения, типичные ловушки и быстрый способ узнать корень из полного квадрата.
+                </p>
+            </div>
+
+            <div class="accordion">
+                <div class="acc open">
+                    <button class="acc-btn"><span>1. Задачи на работу: базовая схема</span><span>＋</span></button>
+                    <div class="acc-panel">
+                        <p>Основа одна:</p>
+                        <div class="formula">работа = производительность · время</div>
+                        <p style="margin-top:12px">
+                            Если вся работа принята за 1 заказ, то производительность исполнителя, который делает заказ за t часов, равна:
+                        </p>
+                        <div class="formula">p = 1 / t</div>
+                        <p style="margin-top:12px">
+                            Если два исполнителя работают вместе, то их производительности складываются:
+                        </p>
+                        <div class="formula">1 / x = 1 / a + 1 / b</div>
+                        <p style="margin-top:12px">
+                            Здесь x — время совместной работы, a и b — времена, за которые каждый выполняет работу один.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="acc">
+                    <button class="acc-btn"><span>2. Если работа шла в несколько этапов</span><span>＋</span></button>
+                    <div class="acc-panel">
+                        <p>
+                            Тогда нужно складывать не времена, а выполненные части работы.
+                            Например, если один рабочий работал 2 часа, а потом оба продолжили вместе x часов, то уравнение строится так:
+                        </p>
+                        <div class="formula">p₁ · 2 + (p₁ + p₂) · x = 1</div>
+                        <p style="margin-top:12px">
+                            Если рабочие одинаковые и каждый выполняет заказ за 12 часов, то:
+                        </p>
+                        <div class="formula">1/12 · 2 + (1/12 + 1/12) · x = 1</div>
+                        <div class="formula">1/6 + x/6 = 1 → x = 5</div>
+                        <p style="margin-top:12px">После этого нужно ещё проверить, что спрашивают: время совместной работы или общее время первого рабочего.</p>
+                    </div>
+                </div>
+
+                <div class="acc">
+                    <button class="acc-btn"><span>3. Задачи на проценты: главный ориентир</span><span>＋</span></button>
+                    <div class="acc-panel">
+                        <p>В любой задаче на проценты стартовая величина — это 100%.</p>
+                        <div class="formula">до изменения = 100%</div>
+                        <p style="margin-top:12px">Если цену повысили на 11%, новая цена составляет:</p>
+                        <div class="formula">111% от старой</div>
+                        <p style="margin-top:12px">Если цену снизили на 12,3%, новая цена составляет:</p>
+                        <div class="formula">87,7% от старой</div>
+                        <p style="margin-top:12px">
+                            Очень частая ошибка: найти, что новая цена — это 87,7% от старой, и принять это число за ответ.
+                            На самом деле процент снижения — это:
+                        </p>
+                        <div class="formula">100% − 87,7% = 12,3%</div>
+                    </div>
+                </div>
+
+                <div class="acc">
+                    <button class="acc-btn"><span>4. Два последовательных изменения</span><span>＋</span></button>
+                    <div class="acc-panel">
+                        <p>
+                            Если изменение происходит в несколько лет или в несколько шагов, нужно точно понимать, от чего берётся каждый следующий процент.
+                        </p>
+                        <p>Пример 1. Население выросло с 40000 на 8%, потом ещё на 9% относительно нового значения:</p>
+                        <div class="formula">40000 · 1,08 = 43200</div>
+                        <div class="formula">43200 · 1,09 = 47088</div>
+                        <p style="margin-top:12px">Пример 2. Если второй рост 9% дан относительно исходного 2008 года, то:</p>
+                        <div class="formula">40000 · 0,09 = 3600</div>
+                        <div class="formula">43200 + 3600 = 46800</div>
+                        <p style="margin-top:12px">Одинаковые числа процентов не гарантируют одинаковый способ решения. Всё решает база сравнения.</p>
+                    </div>
+                </div>
+
+                <div class="acc">
+                    <button class="acc-btn"><span>5. Быстрый корень из полного квадрата</span><span>＋</span></button>
+                    <div class="acc-panel">
+                        <p>
+                            Иногда в задачах после преобразований получается квадрат:
+                        </p>
+                        <div class="formula">x² = 7921</div>
+                        <p style="margin-top:12px">Как быстро понять, что x = 89?</p>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-num">1</div>
+                                <div>
+                                    <strong>Оцени десятки.</strong><br/>
+                                    80² = 6400, 90² = 8100, значит число лежит между квадратами 80 и 90.
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">2</div>
+                                <div>
+                                    <strong>Посмотри на последнюю цифру.</strong><br/>
+                                    Квадрат оканчивается на 1, если число оканчивается на 1 или 9.
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">3</div>
+                                <div>
+                                    <strong>Проверь близость.</strong><br/>
+                                    Из вариантов 81 и 89 подходит 89, потому что 89² = 7921.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="acc">
+                    <button class="acc-btn"><span>6. Типичные ошибки</span><span>＋</span></button>
+                    <div class="acc-panel">
+                        <ul style="margin:0; padding-left:18px; color:var(--muted); line-height:1.8">
+                            <li>Складывают времена вместо производительностей.</li>
+                            <li>Неправильно выбирают x: время, работа или количество вопросов.</li>
+                            <li>Забывают, что в задачах на проценты нужно выяснить, от чего берётся процент.</li>
+                            <li>Путают «новая цена составляет 90% от старой» и «цена уменьшилась на 90%».</li>
+                            <li>После решения уравнения не проверяют, что именно требуется в ответе.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section anchor" id="examples">
+        <div class="wrap">
+            <div class="section-title">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Разборы задач</div>
+                    <h2>Два полностью разобранных примера</h2>
+                </div>
+                <p>
+                    Здесь сохранён метод занятия: сначала определить, что является x, затем составить таблицу,
+                    потом вывести уравнение и только после этого считать.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card soft">
+                    <h3>Пример 1. Совместная работа</h3>
+                    <p><strong>Условие.</strong> Первый мастер выполняет заказ за 3 часа, второй — за 6 часов. За сколько часов они выполнят заказ вместе?</p>
+                    <div class="steps" style="margin-top:14px">
+                        <div class="step">
+                            <div class="step-num">1</div>
+                            <div>
+                                <strong>Выбираем x.</strong><br/>
+                                Пусть x — время совместной работы.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">2</div>
+                            <div>
+                                <strong>Находим производительности.</strong><br/>
+                                Первый: 1/3 заказа в час. Второй: 1/6 заказа в час.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">3</div>
+                            <div>
+                                <strong>Складываем скорости.</strong><br/>
+                                Вместе они делают 1/3 + 1/6 = 1/2 заказа в час.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">4</div>
+                            <div>
+                                <strong>Получаем ответ.</strong><br/>
+                                Если за час выполняется 1/2 заказа, то весь заказ будет выполнен за 2 часа.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="formula" style="margin-top:14px">1/x = 1/3 + 1/6 = 1/2 → x = 2</div>
+                </div>
+
+                <div class="card soft">
+                    <h3>Пример 2. Процент снижения</h3>
+                    <p><strong>Условие.</strong> Цена товара была снижена с 2322 руб. до 2037 руб. На сколько процентов снизилась цена?</p>
+                    <div class="steps" style="margin-top:14px">
+                        <div class="step">
+                            <div class="step-num">1</div>
+                            <div>
+                                <strong>Берём старую цену за 100%.</strong><br/>
+                                2322 руб. — это 100%.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">2</div>
+                            <div>
+                                <strong>Считаем, сколько процентов составляет новая цена.</strong><br/>
+                                2037 / 2322 · 100 ≈ 87,7%.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">3</div>
+                            <div>
+                                <strong>Находим именно снижение.</strong><br/>
+                                100% − 87,7% = 12,3%.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="formula" style="margin-top:14px">снижение = 100% − (2037 / 2322 · 100%) ≈ 12,3%</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section anchor" id="sheet">
+        <div class="wrap">
+            <div class="section-title">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Cheat sheet</div>
+                    <h2>Краткая сводка для повторения перед решением</h2>
+                </div>
+                <p>Это концентрат темы: минимум текста, максимум опорных формул и решений-ориентиров.</p>
+            </div>
+
+            <div class="sheet">
+                <div class="card">
+                    <h3>Работа</h3>
+                    <div class="line"><span>Главная формула</span><strong class="mono">A = p · t</strong></div>
+                    <div class="line"><span>Если вся работа — 1</span><strong class="mono">p = 1 / t</strong></div>
+                    <div class="line"><span>Совместная работа</span><strong class="mono">p = p₁ + p₂</strong></div>
+                    <div class="line"><span>Если первый за a ч, второй за b ч</span><strong class="mono">1 / x = 1 / a + 1 / b</strong></div>
+                    <div class="line"><span>Если этапов несколько</span><strong class="mono">A₁ + A₂ + ... = 1</strong></div>
+                </div>
+
+                <div class="card">
+                    <h3>Проценты</h3>
+                    <div class="line"><span>Исходная величина</span><strong class="mono">100%</strong></div>
+                    <div class="line"><span>Повышение на p%</span><strong class="mono">новое = старое · (1 + p/100)</strong></div>
+                    <div class="line"><span>Снижение на p%</span><strong class="mono">новое = старое · (1 − p/100)</strong></div>
+                    <div class="line"><span>Если известно, что новая — q%</span><strong class="mono">изменение = 100% − q%</strong></div>
+                    <div class="line"><span>Два года подряд</span><strong class="mono">каждый шаг считается отдельно</strong></div>
+                </div>
+
+                <div class="card">
+                    <h3>Как выбрать x</h3>
+                    <div class="line"><span>Если спрашивают «за сколько часов вместе?»</span><strong>x — время</strong></div>
+                    <div class="line"><span>Если спрашивают «сколько вопросов в тесте?»</span><strong>x — результат работы</strong></div>
+                    <div class="line"><span>Если спрашивают «какова исходная цена?»</span><strong>x — старая цена</strong></div>
+                    <div class="line"><span>Если сравнивают года</span><strong>уточни базу процента</strong></div>
+                </div>
+
+                <div class="card">
+                    <h3>Быстрый корень</h3>
+                    <div class="line"><span>80²</span><strong class="mono">6400</strong></div>
+                    <div class="line"><span>90²</span><strong class="mono">8100</strong></div>
+                    <div class="line"><span>Если число между ними</span><strong>корень между 80 и 90</strong></div>
+                    <div class="line"><span>7921</span><strong class="mono">89²</strong></div>
+                    <div class="line"><span>2704</span><strong class="mono">52²</strong></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section anchor" id="quiz">
+        <div class="wrap">
+            <div class="section-title">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Мини-квиз</div>
+                    <h2>Проверь, насколько уверенно держишь тему</h2>
+                </div>
+                <p>Выбери ответы, затем нажми кнопку проверки. Подсветка покажет, где логика уже устойчива, а где ещё нужна тренировка.</p>
+            </div>
+
+            <div class="quiz-list" id="quizList">
+                <div class="q" data-answer="1">
+                    <h3>1. Первый мастер делает заказ за 4 часа, второй — за 12 часов. Их совместная производительность равна:</h3>
+                    <div class="answers">
+                        <label class="answer"><input type="radio" name="q1" value="0"><span>1/16 заказа в час</span></label>
+                        <label class="answer"><input type="radio" name="q1" value="1"><span>1/3 заказа в час</span></label>
+                        <label class="answer"><input type="radio" name="q1" value="2"><span>1/8 заказа в час</span></label>
+                    </div>
+                </div>
+
+                <div class="q" data-answer="2">
+                    <h3>2. Если цена выросла на 15%, то новая цена составляет:</h3>
+                    <div class="answers">
+                        <label class="answer"><input type="radio" name="q2" value="0"><span>85% от старой</span></label>
+                        <label class="answer"><input type="radio" name="q2" value="1"><span>15% от старой</span></label>
+                        <label class="answer"><input type="radio" name="q2" value="2"><span>115% от старой</span></label>
+                    </div>
+                </div>
+
+                <div class="q" data-answer="0">
+                    <h3>3. В задаче «второй закончил тест на 1,3 часа раньше» при скоростях 6 и 7 вопросов в час уравнение имеет вид:</h3>
+                    <div class="answers">
+                        <label class="answer"><input type="radio" name="q3" value="0"><span>x/6 − x/7 = 1,3</span></label>
+                        <label class="answer"><input type="radio" name="q3" value="1"><span>6/x − 7/x = 1,3</span></label>
+                        <label class="answer"><input type="radio" name="q3" value="2"><span>6x − 7x = 1,3</span></label>
+                    </div>
+                </div>
+
+                <div class="q" data-answer="1">
+                    <h3>4. Если новая цена составляет 90% от старой, то снижение равно:</h3>
+                    <div class="answers">
+                        <label class="answer"><input type="radio" name="q4" value="0"><span>90%</span></label>
+                        <label class="answer"><input type="radio" name="q4" value="1"><span>10%</span></label>
+                        <label class="answer"><input type="radio" name="q4" value="2"><span>110%</span></label>
+                    </div>
+                </div>
+
+                <div class="q" data-answer="2">
+                    <h3>5. Если x² = 7921, то x равно:</h3>
+                    <div class="answers">
+                        <label class="answer"><input type="radio" name="q5" value="0"><span>81</span></label>
+                        <label class="answer"><input type="radio" name="q5" value="1"><span>91</span></label>
+                        <label class="answer"><input type="radio" name="q5" value="2"><span>89</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="score" style="margin-top:18px">
+                <div>
+                    <div class="tiny muted">Итог</div>
+                    <div id="quizResult" class="result-big" style="font-size:28px;margin-top:6px">Пока без проверки</div>
+                </div>
+                <div class="hero-actions" style="margin:0">
+                    <button class="btn" id="checkQuiz">Проверить</button>
+                    <button class="btn secondary" id="resetQuiz">Сбросить</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section anchor" id="generator">
+        <div class="wrap">
+            <div class="section-title">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Генератор задач</div>
+                    <h2>Новые корректные задачи для тренировки</h2>
+                </div>
+                <p>
+                    Генератор использует безопасные шаблоны. Каждая задача заранее имеет корректный ответ.
+                    Можно тренировать разные типы: совместная работа, этапы работы, проценты, последовательные изменения.
+                </p>
+            </div>
+
+            <div class="gen-layout">
+                <div class="card">
+                    <h3>Выбери шаблон</h3>
+                    <div class="field">
+                        <label for="taskType">Тип задачи</label>
+                        <select id="taskType">
+                            <option value="workTogether">Совместная работа</option>
+                            <option value="workStages">Работа по этапам</option>
+                            <option value="percentOrig">Исходная цена по новой</option>
+                            <option value="percentDrop">Процент снижения</option>
+                            <option value="percentTwoYears">Два одинаковых изменения подряд</option>
+                        </select>
+                    </div>
+
+                    <div class="hero-actions" style="margin-top:18px">
+                        <button class="btn" id="generateTask">Сгенерировать</button>
+                        <button class="btn secondary" id="showTaskAnswer">Показать ответ</button>
+                        <button class="btn ghost" id="hideTaskAnswer">Скрыть ответ</button>
+                    </div>
+
+                    <div style="margin-top:18px" class="tiny muted">
+                        Подсказка: сначала попробуй решить задачу самостоятельно по схеме:
+                        выбери x → составь таблицу → вырази величины → построй уравнение → проверь, что спрашивают.
+                    </div>
+                </div>
+
+                <div class="card task-box">
+                    <div class="tiny muted">Текущая задача</div>
+                    <div class="task-text" id="taskText">
+                        Нажми «Сгенерировать», чтобы получить новую тренировочную задачу.
+                    </div>
+                    <div class="answer-box" id="taskAnswer"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="wrap footer-inner">
+        <div>Интерактивное учебное пособие по теме «Задачи на работу и проценты»</div>
+        <div>Сделано в одном автономном HTML-файле</div>
+    </div>
+</footer>
+
+<script>
+    (function(){
+        const $ = (sel, root=document) => root.querySelector(sel);
+        const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+        function gcd(a,b){
+            a = Math.abs(a); b = Math.abs(b);
+            while(b){ const t = a % b; a = b; b = t; }
+            return a || 1;
+        }
+
+        function fracStringFromTimes(a,b){
+            const den = a * b;
+            const num = a + b;
+            const g = gcd(num, den);
+            return { num:num/g, den:den/g };
+        }
+
+        function formatDecimal(n, digits=2){
+            const rounded = Number(n.toFixed(digits));
+            return String(rounded).replace('.', ',');
+        }
+
+        function updateWorkModel(){
+            const t1 = Number($("#t1").value);
+            const t2 = Number($("#t2").value);
+            $("#t1v").textContent = t1 + " ч";
+            $("#t2v").textContent = t2 + " ч";
+
+            const widthBase = 430;
+            const scale = 1 / Math.min(t1, t2, 2);
+            const w1 = widthBase * ((1/t1) / scale) * 0.18;
+            const w2 = widthBase * ((1/t2) / scale) * 0.18;
+            const w3 = widthBase * (((1/t1)+(1/t2)) / scale) * 0.18;
+
+            $("#rectA").setAttribute("width", Math.max(80, w1));
+            $("#rectB").setAttribute("width", Math.max(80, w2));
+            $("#rectC").setAttribute("width", Math.max(80, w3));
+
+            $("#txtA").textContent = "1/" + t1 + " заказа/ч";
+            $("#txtB").textContent = "1/" + t2 + " заказа/ч";
+
+            const together = fracStringFromTimes(t1,t2);
+            $("#txtC").textContent = together.num + "/" + together.den + " заказа/ч";
+
+            const x = 1 / (1/t1 + 1/t2);
+            $("#togetherTime").textContent = formatDecimal(x,2) + " ч";
+            $("#togetherFormula").textContent = "1/x = 1/" + t1 + " + 1/" + t2 + " = " + together.num + "/" + together.den + ", значит x = " + formatDecimal(x,2);
+
+            $("#tabP1").textContent = "1/" + t1;
+            $("#tabP2").textContent = "1/" + t2;
+            $("#tabP3").textContent = together.num + "/" + together.den;
+            $("#tabT1").textContent = t1 + " ч";
+            $("#tabT2").textContent = t2 + " ч";
+            $("#tabT3").textContent = formatDecimal(x,2) + " ч";
+
+            const frText = "1/x = 1/" + t1 + " + 1/" + t2 + " = " + together.num + "/" + together.den + "  →  x = " + formatDecimal(x,2) + " ч";
+            $("#formulaText").textContent = $("#toggleFormula").checked ? frText : "";
+
+            $("#rectA").style.display = $("#toggleRates").checked ? "block" : "none";
+            $("#rectB").style.display = $("#toggleRates").checked ? "block" : "none";
+            $("#txtA").style.display = $("#toggleRates").checked ? "block" : "none";
+            $("#txtB").style.display = $("#toggleRates").checked ? "block" : "none";
+            $("#rectC").style.display = $("#toggleTogether").checked ? "block" : "none";
+            $("#txtC").style.display = $("#toggleTogether").checked ? "block" : "none";
+        }
+
+        ["#t1", "#t2", "#toggleRates", "#toggleTogether", "#toggleFormula"].forEach(sel=>{
+            $(sel).addEventListener("input", updateWorkModel);
+            $(sel).addEventListener("change", updateWorkModel);
+        });
+        updateWorkModel();
+
+        function updateWorkCalc(){
+            const a = Number($("#workA").value);
+            const b = Number($("#workB").value);
+            const out = $("#workCalcResult");
+            const f = $("#workCalcFormula");
+
+            if(!(a>0) || !(b>0)){
+                out.textContent = "Введите числа > 0";
+                f.textContent = "Время должно быть положительным.";
+                return;
+            }
+            const x = 1 / (1/a + 1/b);
+            const fr = fracStringFromTimes(a,b);
+            out.textContent = formatDecimal(x,2) + " ч";
+            f.textContent = "1/x = 1/" + a + " + 1/" + b + " = " + fr.num + "/" + fr.den + ", x = " + formatDecimal(x,2);
+        }
+
+        $("#workA").addEventListener("input", updateWorkCalc);
+        $("#workB").addEventListener("input", updateWorkCalc);
+        $("#workCalcReset").addEventListener("click", ()=>{
+            $("#workA").value = 3;
+            $("#workB").value = 6;
+            updateWorkCalc();
+        });
+        updateWorkCalc();
+
+        function syncPercentFields(){
+            const mode = $("#percentMode").value;
+            const extra = $("#extraField");
+            const labelA = $("#labelA");
+            const labelB = $("#labelB");
+            if(mode === "orig"){
+                labelA.textContent = "Новая цена";
+                labelB.textContent = "Повышение, %";
+                extra.style.display = "none";
+                $("#pA").value = 1443;
+                $("#pB").value = 11;
+            } else if(mode === "new"){
+                labelA.textContent = "Старая цена";
+                labelB.textContent = "Изменение, %";
+                extra.style.display = "none";
+                $("#pA").value = 1300;
+                $("#pB").value = 11;
+            } else {
+                labelA.textContent = "Новая цена";
+                labelB.textContent = "Старая цена";
+                extra.style.display = "none";
+                $("#pA").value = 2037;
+                $("#pB").value = 2322;
+            }
+            updatePercentCalc();
+        }
+
+        function updatePercentCalc(){
+            const mode = $("#percentMode").value;
+            const a = Number($("#pA").value);
+            const b = Number($("#pB").value);
+            const out = $("#percentResult");
+            const f = $("#percentFormula");
+
+            if(mode === "orig"){
+                if(!(a>=0) || !(b>-100)){
+                    out.textContent = "Проверь данные";
+                    f.textContent = "Новая цена должна быть неотрицательной.";
+                    return;
+                }
+                const old = a / (1 + b/100);
+                out.textContent = formatDecimal(old,2) + " руб.";
+                f.textContent = "старая цена = " + formatDecimal(a,2) + " / " + formatDecimal(1 + b/100,4) + " = " + formatDecimal(old,2);
+            }
+            if(mode === "new"){
+                if(!(a>=0) || !(b>-100)){
+                    out.textContent = "Проверь данные";
+                    f.textContent = "Старая цена должна быть неотрицательной.";
+                    return;
+                }
+                const newPrice = a * (1 + b/100);
+                out.textContent = formatDecimal(newPrice,2) + " руб.";
+                f.textContent = "новая цена = " + formatDecimal(a,2) + " · " + formatDecimal(1 + b/100,4) + " = " + formatDecimal(newPrice,2);
+            }
+            if(mode === "drop"){
+                if(!(a>=0) || !(b>0)){
+                    out.textContent = "Проверь данные";
+                    f.textContent = "Старая цена должна быть больше 0.";
+                    return;
+                }
+                const q = a / b * 100;
+                const drop = 100 - q;
+                out.textContent = formatDecimal(drop,2) + " %";
+                f.textContent = "новая цена составляет " + formatDecimal(q,2) + "% от старой, значит снижение = 100% − " + formatDecimal(q,2) + "% = " + formatDecimal(drop,2) + "%";
+            }
+        }
+
+        $("#percentMode").addEventListener("change", syncPercentFields);
+        $("#pA").addEventListener("input", updatePercentCalc);
+        $("#pB").addEventListener("input", updatePercentCalc);
+        $("#percentReset").addEventListener("click", syncPercentFields);
+        syncPercentFields();
+
+        $$(".acc-btn").forEach(btn=>{
+            btn.addEventListener("click", ()=>{
+                btn.parentElement.classList.toggle("open");
+            });
+        });
+
+        $("#checkQuiz").addEventListener("click", ()=>{
+            let score = 0;
+            $$("#quizList .q").forEach((q, idx)=>{
+                const correct = q.dataset.answer;
+                const selected = $('input[type="radio"]:checked', q);
+                $$(".answer", q).forEach(ans => ans.classList.remove("correct","wrong"));
+                if(!selected) return;
+                const selectedWrap = selected.closest(".answer");
+                const correctWrap = $('input[value="' + correct + '"]', q).closest(".answer");
+                if(selected.value === correct){
+                    selectedWrap.classList.add("correct");
+                    score++;
+                } else {
+                    selectedWrap.classList.add("wrong");
+                    correctWrap.classList.add("correct");
+                }
+            });
+
+            const total = $$("#quizList .q").length;
+            let text = score + " / " + total;
+            if(score === total) text += " — идеально";
+            else if(score >= total - 1) text += " — очень уверенно";
+            else if(score >= Math.ceil(total/2)) text += " — база есть, но стоит повторить ловушки";
+            else text += " — нужен ещё один круг повторения";
+            $("#quizResult").textContent = text;
+        });
+
+        $("#resetQuiz").addEventListener("click", ()=>{
+            $$("#quizList input[type=radio]").forEach(i => i.checked = false);
+            $$(".answer").forEach(a => a.classList.remove("correct","wrong"));
+            $("#quizResult").textContent = "Пока без проверки";
+        });
+
+        const generatorState = { answer:"" };
+
+        function randomInt(min,max){
+            return Math.floor(Math.random()*(max-min+1))+min;
+        }
+
+        function pick(arr){
+            return arr[randomInt(0, arr.length-1)];
+        }
+
+        function genWorkTogether(){
+            const pairs = [
+                [3,6],[4,12],[5,20],[6,15],[8,24],[9,18]
+            ];
+            const [a,b] = pick(pairs);
+            const x = 1 / (1/a + 1/b);
+            return {
+                text:`Первый мастер выполняет заказ за ${a} ч, а второй — за ${b} ч. За сколько часов они выполнят заказ вместе?`,
+                answer:`Ответ: ${formatDecimal(x,2)} ч. Решение-ориентир: 1/x = 1/${a} + 1/${b}, откуда x = ${formatDecimal(x,2)}.`
+            };
+        }
+
+        function genWorkStages(){
+            const t = pick([8,10,12,14]);
+            const solo = pick([2,3,4]);
+            const x = t - solo/2;
+            return {
+                text:`Один рабочий может выполнить заказ за ${t} ч. Он работал один ${solo} ч, после чего к нему присоединился второй рабочий такой же производительности. Через сколько часов после начала работы заказ будет выполнен?`,
+                answer:`Ответ: ${formatDecimal(x,2)} ч. Сначала выполнено ${solo}/${t} заказа. Затем два одинаковых рабочих делают 2/${t} заказа в час. Остаток закрывается за ${formatDecimal((1 - solo/t)/(2/t),2)} ч. Итого ${solo} + ${formatDecimal((1 - solo/t)/(2/t),2)} = ${formatDecimal(x,2)} ч.`
+            };
+        }
+
+        function genPercentOrig(){
+            const old = pick([800,900,1200,1500,2000,2400]);
+            const p = pick([10,12,15,20,25]);
+            const newer = old * (1 + p/100);
+            return {
+                text:`После повышения цены на ${p}% товар стал стоить ${formatDecimal(newer,2)} руб. Найдите первоначальную цену товара.`,
+                answer:`Ответ: ${formatDecimal(old,2)} руб. Потому что новая цена = старая · ${formatDecimal(1 + p/100,2)}.`
+            };
+        }
+
+        function genPercentDrop(){
+            const old = pick([1000,1200,1500,2000,2500,3000]);
+            const p = pick([10,12,15,20,25]);
+            const newer = old * (1 - p/100);
+            return {
+                text:`Цена товара была снижена с ${formatDecimal(old,2)} руб. до ${formatDecimal(newer,2)} руб. На сколько процентов снизилась цена?`,
+                answer:`Ответ: ${p}%. Новая цена составляет ${100 - p}% от старой, значит снижение равно ${p}%.`
+            };
+        }
+
+        function genPercentTwoYears(){
+            const old = pick([10000,16000,20000,25000]);
+            const p = pick([10,20]);
+            const final = old * Math.pow(1 - p/100, 2);
+            return {
+                text:`Цена товара сначала снизилась на ${p}%, а затем ещё раз снизилась на ${p}% от новой цены. Первоначально товар стоил ${formatDecimal(old,2)} руб. Какой стала цена после двух снижений?`,
+                answer:`Ответ: ${formatDecimal(final,2)} руб. Сначала ${formatDecimal(old,2)} · ${formatDecimal(1 - p/100,2)}, затем ещё раз умножаем на ${formatDecimal(1 - p/100,2)}.`
+            };
+        }
+
+        function generateTask(){
+            const type = $("#taskType").value;
+            let task;
+            if(type === "workTogether") task = genWorkTogether();
+            if(type === "workStages") task = genWorkStages();
+            if(type === "percentOrig") task = genPercentOrig();
+            if(type === "percentDrop") task = genPercentDrop();
+            if(type === "percentTwoYears") task = genPercentTwoYears();
+
+            $("#taskText").textContent = task.text;
+            $("#taskAnswer").innerHTML = "<strong>Разбор и ответ.</strong><br>" + task.answer;
+            $("#taskAnswer").style.display = "none";
+        }
+
+        $("#generateTask").addEventListener("click", generateTask);
+        $("#showTaskAnswer").addEventListener("click", ()=> $("#taskAnswer").style.display = "block");
+        $("#hideTaskAnswer").addEventListener("click", ()=> $("#taskAnswer").style.display = "none");
+
+        generateTask();
+    })();
+</script>
+</body>
+</html>
