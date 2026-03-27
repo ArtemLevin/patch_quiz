@@ -1,0 +1,1567 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Интерактивная лаборатория — графики и метод узловых точек</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0b1730;
+            --panel:rgba(15,24,45,.62);
+            --panel-2:rgba(9,18,35,.78);
+            --stroke:rgba(166,213,255,.16);
+            --text:#eef6ff;
+            --muted:#9fb2c9;
+            --accent:#62e6ff;
+            --accent-2:#8d7dff;
+            --accent-3:#8fffc5;
+            --danger:#ff7e9e;
+            --warn:#ffd37e;
+            --good:#7dffba;
+            --shadow:0 20px 60px rgba(0,0,0,.35);
+            --radius:22px;
+            --radius-sm:14px;
+            --max:1280px;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family: Inter, Arial, Helvetica, sans-serif;
+            color:var(--text);
+            background:
+            radial-gradient(circle at 15% 20%, rgba(98,230,255,.16), transparent 22%),
+            radial-gradient(circle at 84% 18%, rgba(141,125,255,.16), transparent 20%),
+            radial-gradient(circle at 76% 75%, rgba(143,255,197,.10), transparent 18%),
+            linear-gradient(180deg, #07101e 0%, #091526 38%, #07111f 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before,
+        body::after{
+            content:"";
+            position:fixed;
+            inset:auto;
+            pointer-events:none;
+            z-index:-1;
+            filter:blur(40px);
+            opacity:.75;
+        }
+        body::before{
+            width:32rem;height:32rem;left:-8rem;top:8rem;
+            background:radial-gradient(circle, rgba(98,230,255,.18), transparent 60%);
+        }
+        body::after{
+            width:28rem;height:28rem;right:-6rem;top:14rem;
+            background:radial-gradient(circle, rgba(141,125,255,.18), transparent 60%);
+        }
+
+        .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+        .nav{
+            position:sticky;top:0;z-index:20;
+            backdrop-filter: blur(16px);
+            background:linear-gradient(180deg, rgba(4,10,20,.82), rgba(4,10,20,.54));
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .nav-inner{
+            max-width:var(--max);margin:0 auto;padding:14px 20px;
+            display:flex;gap:18px;align-items:center;justify-content:space-between;
+        }
+        .brand{
+            display:flex;gap:12px;align-items:center;min-width:0;
+        }
+        .brand-badge{
+            width:42px;height:42px;border-radius:14px;
+            background:
+            linear-gradient(135deg, rgba(98,230,255,.22), rgba(141,125,255,.22)),
+            rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            display:grid;place-items:center;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.08), var(--shadow);
+            flex:0 0 auto;
+        }
+        .brand-badge svg{width:23px;height:23px}
+        .brand-title{
+            font-weight:800;letter-spacing:.01em;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        }
+        .brand-sub{
+            color:var(--muted);font-size:.88rem;margin-top:2px;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        }
+
+        .nav-links{
+            display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;
+        }
+        .chip{
+            appearance:none;border:none;cursor:pointer;
+            color:var(--text);text-decoration:none;font-size:.92rem;font-weight:700;
+            padding:10px 14px;border-radius:999px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.06);
+            transition:.25s ease;
+            display:inline-flex;align-items:center;gap:8px;
+        }
+        .chip:hover{transform:translateY(-1px);border-color:rgba(98,230,255,.35);background:rgba(98,230,255,.08)}
+        .hero{
+            position:relative;
+            padding:62px 0 28px;
+        }
+        .hero-grid{
+            display:grid;grid-template-columns:1.12fr .88fr;gap:22px;align-items:stretch;
+        }
+        .card{
+            position:relative;
+            background:
+            linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
+            var(--panel);
+            border:1px solid var(--stroke);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            overflow:hidden;
+            backdrop-filter: blur(16px);
+        }
+        .card::before{
+            content:"";
+            position:absolute;inset:0;
+            background:linear-gradient(140deg, rgba(255,255,255,.08), transparent 28%, transparent 72%, rgba(255,255,255,.04));
+            pointer-events:none;
+        }
+        .hero-main{padding:34px 30px 30px}
+        .eyebrow{
+            display:inline-flex;align-items:center;gap:10px;
+            color:#d7f4ff;
+            font-weight:800;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;
+            padding:9px 13px;border-radius:999px;
+            background:rgba(98,230,255,.08);
+            border:1px solid rgba(98,230,255,.18);
+            margin-bottom:18px;
+        }
+        .dot{
+            width:8px;height:8px;border-radius:50%;
+            background:var(--accent);
+            box-shadow:0 0 14px var(--accent);
+        }
+        h1,h2,h3{margin:0;line-height:1.05}
+        h1{
+            font-size:clamp(2.2rem, 5.6vw, 4.5rem);
+            letter-spacing:-.035em;
+            margin-bottom:16px;
+        }
+        .hero p{
+            color:var(--muted);
+            line-height:1.75;
+            font-size:1.02rem;
+            margin:0 0 20px;
+            max-width:68ch;
+        }
+        .hero-actions{
+            display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;
+        }
+        .btn{
+            appearance:none;border:none;cursor:pointer;
+            padding:13px 18px;border-radius:14px;
+            font-weight:800;font-size:.96rem;
+            color:var(--text);
+            transition:.25s ease;
+            text-decoration:none;
+            display:inline-flex;align-items:center;justify-content:center;gap:10px;
+        }
+        .btn-primary{
+            background:linear-gradient(135deg, rgba(98,230,255,.22), rgba(141,125,255,.22));
+            border:1px solid rgba(98,230,255,.22);
+            box-shadow:0 12px 30px rgba(98,230,255,.12);
+        }
+        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 18px 40px rgba(98,230,255,.16)}
+        .btn-secondary{
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .btn-secondary:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.18)}
+        .hero-side{
+            padding:20px;display:grid;grid-template-rows:auto 1fr;gap:18px;
+        }
+        .stat-grid{
+            display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+        }
+        .stat{
+            padding:16px;border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.06);
+            min-height:102px;
+        }
+        .stat strong{
+            display:block;font-size:1.6rem;letter-spacing:-.03em;margin-bottom:8px;
+            color:#fff;
+        }
+        .stat span{color:var(--muted);font-size:.92rem;line-height:1.45}
+        .mini-lab{
+            padding:18px;border-radius:20px;
+            background:
+            radial-gradient(circle at 75% 10%, rgba(98,230,255,.08), transparent 26%),
+            rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.06);
+            min-height:310px;
+            display:flex;flex-direction:column;gap:14px;
+        }
+        .mini-head{
+            display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+        }
+        .mini-head h3{font-size:1.1rem}
+        .mini-head p{font-size:.92rem;margin:6px 0 0;color:var(--muted);line-height:1.5}
+        .formula-strip{
+            display:flex;flex-wrap:wrap;gap:10px;
+        }
+        .formula-pill{
+            padding:10px 12px;border-radius:999px;
+            background:rgba(98,230,255,.08);
+            border:1px solid rgba(98,230,255,.14);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color:#d9fbff;
+            font-size:.92rem;
+        }
+
+        main{padding:14px 0 70px}
+        section{margin:18px 0 28px}
+        .section-head{
+            display:flex;justify-content:space-between;align-items:end;gap:16px;
+            margin-bottom:14px;
+        }
+        .section-head h2{
+            font-size:clamp(1.4rem, 3vw, 2rem);
+            letter-spacing:-.03em;
+        }
+        .section-head p{
+            margin:8px 0 0;color:var(--muted);line-height:1.65;max-width:72ch;
+        }
+
+        .grid-2{display:grid;grid-template-columns:1.02fr .98fr;gap:20px}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+        .stack{display:flex;flex-direction:column;gap:16px}
+
+        .panel{
+            padding:22px;
+            background:
+            linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+            var(--panel-2);
+            border:1px solid var(--stroke);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+        }
+        .panel h3{
+            font-size:1.15rem;margin-bottom:10px;letter-spacing:-.02em;
+        }
+        .panel p{
+            margin:0;color:var(--muted);line-height:1.7;
+        }
+
+        .svg-wrap{
+            position:relative;
+            border-radius:18px;
+            overflow:hidden;
+            background:
+            radial-gradient(circle at 50% 50%, rgba(98,230,255,.07), transparent 40%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+            border:1px solid rgba(255,255,255,.06);
+            min-height:480px;
+        }
+        svg{display:block;width:100%;height:auto}
+        .control-bar{
+            display:flex;flex-wrap:wrap;gap:10px;
+            margin-top:12px;
+        }
+        .toggle{
+            user-select:none;
+            display:inline-flex;align-items:center;gap:10px;
+            padding:10px 12px;border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.06);
+            cursor:pointer;
+            color:var(--text);
+            font-weight:700;
+            font-size:.93rem;
+        }
+        .toggle input{accent-color:var(--accent)}
+        .legend{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px
+        }
+        .legend-item{
+            display:flex;align-items:center;gap:10px;
+            padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);
+            color:var(--muted);font-size:.93rem;
+        }
+        .swatch{
+            width:14px;height:14px;border-radius:50%;
+            flex:0 0 auto;
+            box-shadow:0 0 16px currentColor;
+        }
+
+        .range-row{
+            display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:12px
+        }
+        .value-badge{
+            min-width:84px;text-align:center;
+            padding:10px 12px;border-radius:12px;
+            background:rgba(98,230,255,.08);border:1px solid rgba(98,230,255,.16);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color:#e9feff;font-weight:800;
+        }
+        input[type="range"]{
+            width:100%;
+            accent-color:var(--accent);
+            cursor:pointer;
+        }
+
+        .calc-grid{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px
+        }
+        .calc-card{
+            padding:16px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)
+        }
+        .calc-label{
+            color:var(--muted);font-size:.9rem;margin-bottom:8px
+        }
+        .calc-value{
+            font-size:1.24rem;font-weight:800;letter-spacing:-.02em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            word-break:break-word;
+        }
+
+        .code{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color:#d7fcff;
+            white-space:normal;
+            word-break:break-word;
+        }
+
+        .accordion{
+            display:flex;flex-direction:column;gap:12px;
+        }
+        .acc{
+            border-radius:18px;overflow:hidden;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.06);
+        }
+        .acc-btn{
+            width:100%;padding:18px 20px;background:none;border:none;cursor:pointer;
+            display:flex;align-items:center;justify-content:space-between;gap:14px;
+            color:var(--text);font-size:1rem;font-weight:800;text-align:left;
+        }
+        .acc-btn span:last-child{
+            color:var(--accent);font-size:1.25rem;transition:transform .25s ease;
+        }
+        .acc.open .acc-btn span:last-child{transform:rotate(45deg)}
+        .acc-body{
+            max-height:0;overflow:hidden;transition:max-height .32s ease;
+            padding:0 20px;
+        }
+        .acc.open .acc-body{padding:0 20px 18px}
+        .acc-body p,.acc-body li{color:var(--muted);line-height:1.7}
+        .acc-body ul{margin:0;padding-left:18px}
+        .math-line{
+            margin:10px 0 0;
+            padding:12px 14px;border-radius:14px;
+            background:rgba(98,230,255,.06);
+            border:1px solid rgba(98,230,255,.12);
+            font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color:#e8fdff;
+            overflow-wrap:anywhere;
+        }
+
+        .problem-card{
+            padding:20px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)
+        }
+        .problem-card h3{margin-bottom:10px}
+        .problem-card p, .problem-card li{color:var(--muted);line-height:1.7}
+        .steps{margin:12px 0 0;padding-left:18px}
+        .steps li+li{margin-top:7px}
+        .answer-box{
+            margin-top:14px;padding:14px 16px;border-radius:14px;
+            background:rgba(143,255,197,.07);border:1px solid rgba(143,255,197,.14);
+            color:#edfff5;font-weight:700;display:none;
+        }
+        .answer-box.show{display:block}
+
+        .cheat-grid{
+            display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px
+        }
+        .cheat{
+            min-height:150px;
+            padding:18px;border-radius:18px;
+            background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .cheat h4{margin:0 0 10px;font-size:1rem}
+        .cheat p{margin:0;color:var(--muted);line-height:1.6;font-size:.95rem}
+        .cheat .code{display:block;margin-top:12px;font-size:.95rem}
+
+        .quiz-questions{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px
+        }
+        .question{
+            padding:18px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)
+        }
+        .question h4{margin:0 0 10px;font-size:1rem}
+        .opts{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+        .opt{
+            display:flex;gap:10px;align-items:flex-start;
+            padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+            cursor:pointer;transition:.2s ease;
+        }
+        .opt:hover{border-color:rgba(98,230,255,.18);transform:translateY(-1px)}
+        .opt input{margin-top:2px;accent-color:var(--accent)}
+        .question.correct{border-color:rgba(125,255,186,.35);box-shadow:inset 0 0 0 1px rgba(125,255,186,.10)}
+        .question.wrong{border-color:rgba(255,126,158,.32);box-shadow:inset 0 0 0 1px rgba(255,126,158,.08)}
+        .feedback{
+            margin-top:12px;font-weight:800;font-size:.95rem;display:none
+        }
+        .feedback.show{display:block}
+        .feedback.good{color:var(--good)}
+        .feedback.bad{color:var(--danger)}
+
+        .score-panel{
+            display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;
+            margin-top:16px;padding:16px 18px;border-radius:18px;
+            background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)
+        }
+        .score{
+            font-size:1.15rem;font-weight:900;letter-spacing:-.02em
+        }
+
+        .taskgen{
+            display:grid;grid-template-columns:1fr .95fr;gap:18px
+        }
+        .task-card{
+            padding:20px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);min-height:260px
+        }
+        .task-meta{
+            display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px
+        }
+        .tag{
+            padding:8px 10px;border-radius:999px;font-size:.83rem;font-weight:800;
+            background:rgba(141,125,255,.10);border:1px solid rgba(141,125,255,.18);color:#ece9ff
+        }
+        .task-text{
+            font-size:1.04rem;line-height:1.8;color:#edf7ff
+        }
+        .task-answer{
+            margin-top:16px;padding:14px 15px;border-radius:14px;
+            background:rgba(143,255,197,.07);border:1px solid rgba(143,255,197,.14);
+            color:#edfff5;display:none
+        }
+        .task-answer.show{display:block}
+        .task-controls{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+
+        .footer-note{
+            text-align:center;color:var(--muted);font-size:.92rem;padding:14px 0 0
+        }
+
+        .small{font-size:.93rem}
+        .muted{color:var(--muted)}
+        .hidden{display:none !important}
+
+        @media (max-width: 1100px){
+            .hero-grid,.grid-2,.taskgen,.quiz-questions{grid-template-columns:1fr}
+            .grid-3,.cheat-grid{grid-template-columns:repeat(2,1fr)}
+            .hero{padding-top:34px}
+        }
+        @media (max-width: 760px){
+            .nav-inner{align-items:flex-start;flex-direction:column}
+            .nav-links{justify-content:flex-start}
+            h1{font-size:2.2rem}
+            .hero-main,.hero-side,.panel{padding:18px}
+            .stat-grid,.calc-grid,.grid-3,.cheat-grid,.legend{grid-template-columns:1fr}
+            .svg-wrap{min-height:380px}
+            .mini-lab{min-height:auto}
+            .section-head{flex-direction:column;align-items:flex-start}
+            .chip,.btn{width:100%;justify-content:center}
+            .hero-actions{display:grid;grid-template-columns:1fr}
+        }
+
+        @media print{
+            body{
+                background:#fff !important;
+                color:#000 !important;
+            }
+            body::before, body::after, .nav, .hero-actions, .control-bar, .task-controls, .score-panel .btn, #printBtn{
+                display:none !important;
+            }
+            .card, .panel, .acc, .question, .task-card, .cheat, .problem-card{
+                background:#fff !important;
+                color:#000 !important;
+                border:1px solid #cfd8e3 !important;
+                box-shadow:none !important;
+                backdrop-filter:none !important;
+            }
+            .muted, .panel p, .acc-body p, .acc-body li, .problem-card p, .problem-card li, .footer-note, .section-head p{
+                color:#333 !important;
+            }
+            .brand-title, .brand-sub, .section-head h2, h1, h2, h3, h4, .score{
+                color:#000 !important;
+            }
+            .math-line, .formula-pill, .value-badge, .answer-box, .task-answer{
+                background:#f5f7fb !important;
+                color:#000 !important;
+                border-color:#d9e1ec !important;
+            }
+            .answer-box, .task-answer{display:block !important}
+            .acc-body{max-height:none !important;padding:0 20px 18px !important}
+            .acc{break-inside:avoid}
+            .wrap{max-width:none}
+        }
+    </style>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav-inner">
+        <div class="brand">
+            <div class="brand-badge" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M4 17.5 12 4l8 13.5" stroke="url(#g)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7.2 12.5h9.6" stroke="rgba(255,255,255,.8)" stroke-width="1.2" stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="g" x1="4" y1="4" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#62E6FF"/>
+                            <stop offset="1" stop-color="#8D7DFF"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div>
+                <div class="brand-title">Интерактивная математическая лаборатория</div>
+                <div class="brand-sub">Графики функций • метод узловых точек • пересечения • квадратные корни</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a class="chip" href="#visual">Визуализация</a>
+            <a class="chip" href="#calc">Калькулятор</a>
+            <a class="chip" href="#theory">Теория</a>
+            <a class="chip" href="#problems">Разбор</a>
+            <a class="chip" href="#quiz">Квиз</a>
+            <a class="chip" href="#generator">Генератор</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="wrap">
+        <div class="hero-grid">
+            <div class="card hero-main">
+                <div class="eyebrow"><span class="dot"></span>Цифровой учебный модуль</div>
+                <h1>Графики без хаоса: <br>узловые точки, формулы и быстрые проверки</h1>
+                <p>
+                    Эта страница собрана как интерактивный учебный стенд по теме занятия:
+                    как восстанавливать формулы по графику, как аккуратно считывать масштаб,
+                    как находить точки пересечения, как делать замену t = √x и как быстро распознавать
+                    корни из натуральных четырёхзначных чисел.
+                </p>
+                <p>
+                    Внутри — визуальный блок, калькулятор с автоматическим пересчётом, теория в карточках,
+                    два подробных разбора, мини-квиз и генератор новых тренировочных задач.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#visual">Открыть визуальную лабораторию</a>
+                    <a class="btn btn-secondary" href="#quiz">Перейти к самопроверке</a>
+                    <button class="btn btn-secondary" id="printBtn" type="button">Печать страницы</button>
+                </div>
+            </div>
+
+            <div class="card hero-side">
+                <div class="stat-grid">
+                    <div class="stat">
+                        <strong>1</strong>
+                        <span>ключевой метод: подставляем координаты узловых точек в общую формулу</span>
+                    </div>
+                    <div class="stat">
+                        <strong>2</strong>
+                        <span>важнейшие сюжеты: корень + прямая, тригонометрия, показательная функция</span>
+                    </div>
+                    <div class="stat">
+                        <strong>3</strong>
+                        <span>основные ловушки: масштаб, знак коэффициента, замена t = √x, забытая ордината</span>
+                    </div>
+                </div>
+
+                <div class="mini-lab">
+                    <div class="mini-head">
+                        <div>
+                            <h3>Опорные формулы занятия</h3>
+                            <p>Все формулы даны в браузерном виде: без сырого LaTeX и без внешних библиотек.</p>
+                        </div>
+                    </div>
+                    <div class="formula-strip">
+                        <div class="formula-pill">y = a√x</div>
+                        <div class="formula-pill">y = kx + b</div>
+                        <div class="formula-pill">y = ax² + bx + c</div>
+                        <div class="formula-pill">y = k / x + a</div>
+                        <div class="formula-pill">y = aˣ</div>
+                        <div class="formula-pill">y = a·cos x + b</div>
+                    </div>
+                    <div class="panel" style="padding:16px;border-radius:18px;background:rgba(255,255,255,.03)">
+                        <h3 style="margin-bottom:8px">Мгновенная памятка</h3>
+                        <p>
+                            Если неизвестен один коэффициент — нужна одна точка. Если неизвестны два коэффициента — нужны две точки.
+                            Если просят ординату точки пересечения, нельзя останавливаться после нахождения x: нужно обязательно подставить x в формулу и найти y.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="wrap">
+    <section id="visual">
+        <div class="section-head">
+            <div>
+                <h2>Интерактивный визуальный блок</h2>
+                <p>
+                    Ниже показан тот самый типовой сюжет: корневая функция и прямая.
+                    Можно включать и отключать слои, двигать ползунок и наблюдать,
+                    как меняется формула y = a√x и её пересечение с прямой.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <h3>Живой чертёж</h3>
+                <div class="svg-wrap">
+                    <svg id="labSvg" viewBox="0 0 760 520" aria-label="Интерактивный график функций">
+                        <defs>
+                            <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#8D7DFF"/>
+                                <stop offset="100%" stop-color="#62E6FF"/>
+                            </linearGradient>
+                            <filter id="glowA">
+                                <feGaussianBlur stdDeviation="4" result="blur"/>
+                                <feMerge>
+                                    <feMergeNode in="blur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                            <filter id="glowB">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feMerge>
+                                    <feMergeNode in="blur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        <g id="gridLayer"></g>
+                        <g id="axesLayer"></g>
+                        <g id="curveLayer"></g>
+                        <g id="lineLayer"></g>
+                        <g id="pointsLayer"></g>
+                        <g id="labelLayer"></g>
+                        <g id="intersectionLayer"></g>
+                    </svg>
+                </div>
+
+                <div class="control-bar">
+                    <label class="toggle"><input type="checkbox" id="toggleGrid" checked>Сетка</label>
+                    <label class="toggle"><input type="checkbox" id="toggleRoot" checked>График y = a√x</label>
+                    <label class="toggle"><input type="checkbox" id="toggleLine" checked>График y = (5/8)x − 4</label>
+                    <label class="toggle"><input type="checkbox" id="togglePoints" checked>Узловые точки</label>
+                    <label class="toggle"><input type="checkbox" id="toggleInter" checked>Точка пересечения</label>
+                </div>
+
+                <div class="range-row">
+                    <input type="range" id="aSlider" min="0.5" max="2.5" step="0.125" value="1.5" />
+                    <div class="value-badge">a = <span id="aBadge">1.5</span></div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="swatch" style="color:#62e6ff;background:#62e6ff"></span>Корневая функция</div>
+                    <div class="legend-item"><span class="swatch" style="color:#8d7dff;background:#8d7dff"></span>Линейная функция</div>
+                    <div class="legend-item"><span class="swatch" style="color:#8fffc5;background:#8fffc5"></span>Узловые точки</div>
+                    <div class="legend-item"><span class="swatch" style="color:#ffd37e;background:#ffd37e"></span>Пересечение</div>
+                </div>
+            </div>
+
+            <div class="stack">
+                <div class="panel" id="calc">
+                    <h3>Вычислительный блок</h3>
+                    <p>
+                        Этот модуль пересчитывает формулы и координаты автоматически. Для прямой используется
+                        формула y = (5/8)x − 4, а для корневой функции — y = a√x, где a задаётся ползунком.
+                    </p>
+
+                    <div class="calc-grid">
+                        <div class="calc-card">
+                            <div class="calc-label">Корневая функция</div>
+                            <div class="calc-value" id="rootFormula">y = 1.5√x</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="calc-label">Линейная функция</div>
+                            <div class="calc-value">y = (5 / 8)x − 4</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="calc-label">Проверка узловой точки</div>
+                            <div class="calc-value" id="nodeCheck">При a = 1.5 точка (4; 3) лежит на графике</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="calc-label">Абсцисса пересечения</div>
+                            <div class="calc-value" id="xIntersection">x ≈ 11.160</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="calc-label">Ордината пересечения</div>
+                            <div class="calc-value" id="yIntersection">y ≈ 2.975</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="calc-label">Замена переменной</div>
+                            <div class="calc-value">t = √x, тогда x = t²</div>
+                        </div>
+                    </div>
+
+                    <div class="math-line">
+                        Если приравниваем 1.5√x и (5/8)x − 4, удобно вводить t = √x. Тогда x = t², и уравнение становится квадратным относительно t.
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Отдельный мини-инструмент: корень из четырёхзначного числа</h3>
+                    <p>
+                        В занятии отдельно обсуждался быстрый способ распознавать √N для натуральных четырёхзначных чисел.
+                        Ниже можно ввести число и увидеть, является ли оно полным квадратом.
+                    </p>
+
+                    <div class="range-row" style="grid-template-columns:1fr auto auto;">
+                        <input id="sqrtInput" type="number" min="1000" max="9999" step="1" value="1296"
+                               style="width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:var(--text);font-weight:700;">
+                        <button class="btn btn-primary" id="sqrtCheckBtn" type="button">Проверить</button>
+                        <button class="btn btn-secondary" id="sqrtRandomBtn" type="button">Случайный квадрат</button>
+                    </div>
+
+                    <div class="calc-grid">
+                        <div class="calc-card">
+                            <div class="calc-label">Результат</div>
+                            <div class="calc-value" id="sqrtResult">√1296 = 36</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="calc-label">Комментарий</div>
+                            <div class="calc-value small" id="sqrtComment">1296 — полный квадрат, потому что 36² = 1296.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="theory">
+        <div class="section-head">
+            <div>
+                <h2>Теория в аккордеонах</h2>
+                <p>
+                    Ниже собран компактный теоретический блок: метод узловых точек, работа с масштабом,
+                    поиск точки пересечения, замена переменной и алгоритм распознавания квадратного корня.
+                </p>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="acc open">
+                <button class="acc-btn" type="button">
+                    <span>1. Метод узловых точек: основная идея</span>
+                    <span>+</span>
+                </button>
+                <div class="acc-body">
+                    <p>
+                        Узловая точка — это точка графика, координаты которой удобно считать. Если функция известна с точностью до коэффициентов,
+                        то эти координаты подставляются в общую формулу, и дальше решается уравнение или система.
+                    </p>
+                    <ul>
+                        <li>Один неизвестный коэффициент → достаточно одной точки.</li>
+                        <li>Два неизвестных коэффициента → нужны две точки.</li>
+                        <li>Перед вычислениями нужно убедиться, что точка действительно удобна.</li>
+                    </ul>
+                    <div class="math-line">Пример: y = a√x, точка (4; 3). Тогда 3 = a√4 = 2a, значит a = 3 / 2.</div>
+                </div>
+            </div>
+
+            <div class="acc">
+                <button class="acc-btn" type="button">
+                    <span>2. Масштаб осей: самая частая ловушка</span>
+                    <span>+</span>
+                </button>
+                <div class="acc-body">
+                    <p>
+                        Одна клетка не всегда равна единице. На графиках с тригонометрией особенно важно смотреть,
+                        сколько клеток соответствует π, π / 2 или π / 4.
+                    </p>
+                    <ul>
+                        <li>Если 4 клетки соответствуют π, то 1 клетка = π / 4.</li>
+                        <li>Если точка отстоит на 2 клетки от нуля, то x = 2·(π / 4) = π / 2.</li>
+                        <li>Масштаб по оси x и по оси y может быть разным.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="acc">
+                <button class="acc-btn" type="button">
+                    <span>3. Как искать точку пересечения графиков</span>
+                    <span>+</span>
+                </button>
+                <div class="acc-body">
+                    <p>
+                        После восстановления формул двух графиков нужно приравнять функции: f(x) = g(x).
+                        Решение этого уравнения даёт абсциссу точки пересечения.
+                    </p>
+                    <ul>
+                        <li>Сначала ищем x.</li>
+                        <li>Потом обязательно подставляем x в любую из формул.</li>
+                        <li>Только после этого получаем ординату y.</li>
+                    </ul>
+                    <div class="math-line">Если спрашивают ординату точки пересечения, нельзя останавливаться на найденном x.</div>
+                </div>
+            </div>
+
+            <div class="acc">
+                <button class="acc-btn" type="button">
+                    <span>4. Замена t = √x: где часто ошибаются</span>
+                    <span>+</span>
+                </button>
+                <div class="acc-body">
+                    <p>
+                        Когда в уравнении встречается √x и x, удобно ввести замену t = √x.
+                        Тогда x выражается как t², а не наоборот.
+                    </p>
+                    <div class="math-line">t = √x  ⇒  x = t²</div>
+                    <p>
+                        После замены получается квадратное уравнение относительно t. После его решения нужно помнить,
+                        что t = √x ≥ 0, поэтому отрицательные значения t сразу исключаются.
+                    </p>
+                </div>
+            </div>
+
+            <div class="acc">
+                <button class="acc-btn" type="button">
+                    <span>5. Как быстро найти √N для четырёхзначного числа</span>
+                    <span>+</span>
+                </button>
+                <div class="acc-body">
+                    <p>
+                        В занятии отдельно разбирался быстрый приём распознавания квадратного корня из натурального четырёхзначного числа.
+                    </p>
+                    <ul>
+                        <li>Сначала ищем, между какими квадратами лежит число.</li>
+                        <li>Потом смотрим на последнюю цифру числа.</li>
+                        <li>Подбираем возможную последнюю цифру корня.</li>
+                        <li>Подтверждаем обычной проверкой умножением.</li>
+                    </ul>
+                    <div class="math-line">Пример: 784 лежит между 20² = 400 и 30² = 900, последняя цифра 4, проверка даёт 28² = 784.</div>
+                </div>
+            </div>
+
+            <div class="acc">
+                <button class="acc-btn" type="button">
+                    <span>6. Быстрые проверки здравого смысла</span>
+                    <span>+</span>
+                </button>
+                <div class="acc-body">
+                    <ul>
+                        <li>Если прямая убывает, её коэффициент k должен быть отрицательным.</li>
+                        <li>Если график показывает положительную точку пересечения, а вычисления дают отрицательную, надо искать ошибку.</li>
+                        <li>Если точка заявлена как узловая, но даёт слишком громоздкие числа, возможно, выбрана неудачная точка.</li>
+                        <li>Если найденный корень после замены не удовлетворяет t = √x ≥ 0, его нельзя брать.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="problems">
+        <div class="section-head">
+            <div>
+                <h2>Разборы задач</h2>
+                <p>
+                    Два типовых разбора по теме: сначала восстановление корневой функции и прямой,
+                    затем задача на тригонометрический график с учётом масштаба.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <article class="problem-card">
+                <h3>Разбор 1. Корневая функция и прямая</h3>
+                <p>
+                    Пусть корневая функция проходит через точку (4; 3), а прямая — через точки (0; −4) и (8; 1).
+                    Найдём формулы графиков.
+                </p>
+                <ol class="steps">
+                    <li>Для корневой функции берём общий вид: <span class="code">y = a√x</span>.</li>
+                    <li>Подставляем точку (4; 3): <span class="code">3 = a√4 = 2a</span>, значит <span class="code">a = 3 / 2</span>.</li>
+                    <li>Получаем корневую функцию: <span class="code">y = (3 / 2)√x</span>.</li>
+                    <li>Для прямой берём общий вид: <span class="code">y = kx + b</span>.</li>
+                    <li>Из точки (0; −4) сразу получаем <span class="code">b = −4</span>.</li>
+                    <li>Подставляем точку (8; 1): <span class="code">1 = 8k − 4</span>, значит <span class="code">8k = 5</span>, то есть <span class="code">k = 5 / 8</span>.</li>
+                </ol>
+                <button class="btn btn-primary reveal-btn" type="button" data-target="ans1">Показать итог</button>
+                <div class="answer-box" id="ans1">
+                    Ответ: <span class="code">y = (3 / 2)√x</span> и <span class="code">y = (5 / 8)x − 4</span>.
+                </div>
+            </article>
+
+            <article class="problem-card">
+                <h3>Разбор 2. Тригонометрическая функция y = a·cos x + b</h3>
+                <p>
+                    Пусть график проходит через точки (0; 1/2) и (π/2; −1). Найдём коэффициенты a и b.
+                </p>
+                <ol class="steps">
+                    <li>Записываем общий вид: <span class="code">y = a·cos x + b</span>.</li>
+                    <li>Подставляем точку (0; 1/2): <span class="code">1/2 = a·cos 0 + b = a + b</span>.</li>
+                    <li>Подставляем точку (π/2; −1): <span class="code">−1 = a·cos(π/2) + b = b</span>.</li>
+                    <li>Получаем <span class="code">b = −1</span>.</li>
+                    <li>Тогда из первого уравнения: <span class="code">a − 1 = 1/2</span>, значит <span class="code">a = 3/2</span>.</li>
+                </ol>
+                <button class="btn btn-primary reveal-btn" type="button" data-target="ans2">Показать итог</button>
+                <div class="answer-box" id="ans2">
+                    Ответ: <span class="code">a = 3 / 2</span>, <span class="code">b = −1</span>, поэтому
+                    <span class="code">y = (3 / 2)·cos x − 1</span>.
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section id="cheat">
+        <div class="section-head">
+            <div>
+                <h2>Cheat sheet</h2>
+                <p>Сводка, которую удобно прокрутить перед самостоятельным решением.</p>
+            </div>
+        </div>
+
+        <div class="cheat-grid">
+            <div class="cheat">
+                <h4>Количество точек</h4>
+                <p>Один неизвестный коэффициент → одна точка. Два неизвестных коэффициента → две точки.</p>
+                <span class="code">y = a√x → достаточно одной узловой точки</span>
+            </div>
+            <div class="cheat">
+                <h4>Линейная функция</h4>
+                <p>Сначала считываем b по оси Oy, затем находим k по второй точке.</p>
+                <span class="code">y = kx + b</span>
+            </div>
+            <div class="cheat">
+                <h4>Замена переменной</h4>
+                <p>В задачах с √x удобнее перейти к квадратному уравнению по новой переменной.</p>
+                <span class="code">t = √x, x = t²</span>
+            </div>
+            <div class="cheat">
+                <h4>Ордината пересечения</h4>
+                <p>После найденного x нужно обязательно подставить его в формулу.</p>
+                <span class="code">Сначала x, потом y</span>
+            </div>
+            <div class="cheat">
+                <h4>Тригонометрия</h4>
+                <p>Если по оси x клетками отложено π, сначала переводим клетки в радианы.</p>
+                <span class="code">4 клетки = π → 1 клетка = π / 4</span>
+            </div>
+            <div class="cheat">
+                <h4>Табличные значения</h4>
+                <p>Без них решения становятся медленными и уязвимыми для ошибок.</p>
+                <span class="code">tg 0 = 0, tg(π / 4) = 1, cos 0 = 1, cos(π / 2) = 0</span>
+            </div>
+            <div class="cheat">
+                <h4>Корень из 4-значного числа</h4>
+                <p>Оцени диапазон, проверь последнюю цифру, потом быстро подтверди умножением.</p>
+                <span class="code">Например: √1296 = 36</span>
+            </div>
+            <div class="cheat">
+                <h4>Контроль знака</h4>
+                <p>Убывающая прямая не может иметь положительный коэффициент наклона.</p>
+                <span class="code">Убывает → k &lt; 0</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz">
+        <div class="section-head">
+            <div>
+                <h2>Самопроверка: мини-квиз</h2>
+                <p>
+                    Шесть вопросов по теме. После проверки каждый пункт подсветится, а ниже появится итоговый счёт.
+                </p>
+            </div>
+        </div>
+
+        <div class="quiz-questions" id="quizBox">
+            <div class="question" data-answer="b">
+                <h4>1. Сколько узловых точек нужно, если в формуле два неизвестных коэффициента?</h4>
+                <div class="opts">
+                    <label class="opt"><input type="radio" name="q1" value="a">Одной точки всегда достаточно</label>
+                    <label class="opt"><input type="radio" name="q1" value="b">Нужно не меньше двух точек</label>
+                    <label class="opt"><input type="radio" name="q1" value="c">Нужно три точки</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-answer="c">
+                <h4>2. Если t = √x, чему равен x?</h4>
+                <div class="opts">
+                    <label class="opt"><input type="radio" name="q2" value="a">x = 2t</label>
+                    <label class="opt"><input type="radio" name="q2" value="b">x = √t</label>
+                    <label class="opt"><input type="radio" name="q2" value="c">x = t²</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-answer="a">
+                <h4>3. Чему равно cos(π / 2)?</h4>
+                <div class="opts">
+                    <label class="opt"><input type="radio" name="q3" value="a">0</label>
+                    <label class="opt"><input type="radio" name="q3" value="b">1</label>
+                    <label class="opt"><input type="radio" name="q3" value="c">−1</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-answer="b">
+                <h4>4. После нахождения x точки пересечения графиков что делаем дальше, если нужна ордината?</h4>
+                <div class="opts">
+                    <label class="opt"><input type="radio" name="q4" value="a">Останавливаемся: x уже найден</label>
+                    <label class="opt"><input type="radio" name="q4" value="b">Подставляем x в любую из формул и находим y</label>
+                    <label class="opt"><input type="radio" name="q4" value="c">Умножаем x на 2</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-answer="c">
+                <h4>5. Если прямая убывает, то коэффициент k…</h4>
+                <div class="opts">
+                    <label class="opt"><input type="radio" name="q5" value="a">обязательно равен 0</label>
+                    <label class="opt"><input type="radio" name="q5" value="b">обязательно положителен</label>
+                    <label class="opt"><input type="radio" name="q5" value="c">отрицателен</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-answer="a">
+                <h4>6. Чему равно √2025?</h4>
+                <div class="opts">
+                    <label class="opt"><input type="radio" name="q6" value="a">45</label>
+                    <label class="opt"><input type="radio" name="q6" value="b">44</label>
+                    <label class="opt"><input type="radio" name="q6" value="c">46</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+        </div>
+
+        <div class="score-panel">
+            <div class="score" id="quizScore">Пока нет результата</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <button class="btn btn-primary" id="checkQuizBtn" type="button">Проверить квиз</button>
+                <button class="btn btn-secondary" id="resetQuizBtn" type="button">Сбросить ответы</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator">
+        <div class="section-head">
+            <div>
+                <h2>Генератор тренировочных задач</h2>
+                <p>
+                    Генератор использует только безопасные шаблоны с корректными ответами. Можно получать новые задания
+                    четырёх типов: корневая функция, прямая, показательная функция и поиск квадратного корня.
+                </p>
+            </div>
+        </div>
+
+        <div class="taskgen">
+            <div class="task-card">
+                <div class="task-meta">
+                    <span class="tag" id="genType">Тип: корневая функция</span>
+                    <span class="tag" id="genDifficulty">Уровень: базовый</span>
+                </div>
+                <div class="task-text" id="generatedTask">
+                    Точка (9; 6) лежит на графике функции y = a√x. Найдите коэффициент a.
+                </div>
+                <div class="task-answer" id="generatedAnswer">Ответ: a = 2.</div>
+                <div class="task-controls">
+                    <button class="btn btn-primary" id="genBtn" type="button">Новая задача</button>
+                    <button class="btn btn-secondary" id="showGenAnsBtn" type="button">Показать ответ</button>
+                    <button class="btn btn-secondary" id="hideGenAnsBtn" type="button">Скрыть ответ</button>
+                </div>
+            </div>
+
+            <div class="task-card">
+                <h3 style="margin-bottom:10px">Какие шаблоны используются</h3>
+                <div class="accordion" style="gap:10px">
+                    <div class="acc open">
+                        <button class="acc-btn" type="button">
+                            <span>Корневая функция</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-body">
+                            <p>Выбирается точка (x; y), где x — полный квадрат. Тогда a находится по формуле a = y / √x.</p>
+                        </div>
+                    </div>
+                    <div class="acc">
+                        <button class="acc-btn" type="button">
+                            <span>Линейная функция</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-body">
+                            <p>Используются две точки с целыми координатами. Ответ даётся в виде y = kx + b.</p>
+                        </div>
+                    </div>
+                    <div class="acc">
+                        <button class="acc-btn" type="button">
+                            <span>Показательная функция</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-body">
+                            <p>Даётся точка (2; a²), после чего требуется найти f(3) = a³.</p>
+                        </div>
+                    </div>
+                    <div class="acc">
+                        <button class="acc-btn" type="button">
+                            <span>Квадратный корень</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-body">
+                            <p>Выбирается точный квадрат четырёхзначного числа. Нужно найти его корень.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="footer-note">
+        Учебная тема страницы: графики функций, метод узловых точек, вычисление ординаты точки пересечения, замена t = √x и распознавание квадратных корней.
+    </div>
+</main>
+
+<script>
+    (() => {
+        const ns = "http://www.w3.org/2000/svg";
+        const svg = document.getElementById("labSvg");
+        const layers = {
+            grid: document.getElementById("gridLayer"),
+            axes: document.getElementById("axesLayer"),
+            curve: document.getElementById("curveLayer"),
+            line: document.getElementById("lineLayer"),
+            points: document.getElementById("pointsLayer"),
+            labels: document.getElementById("labelLayer"),
+            inter: document.getElementById("intersectionLayer")
+        };
+
+        const W = 760, H = 520;
+        const margin = {left: 58, right: 24, top: 20, bottom: 44};
+        const plot = {xMin: -1, xMax: 14, yMin: -5, yMax: 6};
+        const plotW = W - margin.left - margin.right;
+        const plotH = H - margin.top - margin.bottom;
+
+        const xToPx = x => margin.left + (x - plot.xMin) / (plot.xMax - plot.xMin) * plotW;
+        const yToPx = y => margin.top + (plot.yMax - y) / (plot.yMax - plot.yMin) * plotH;
+
+        function make(tag, attrs = {}, parent) {
+            const el = document.createElementNS(ns, tag);
+            Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
+            if (parent) parent.appendChild(el);
+            return el;
+        }
+
+        function clear(el){ while(el.firstChild) el.removeChild(el.firstChild); }
+
+        function drawStatic() {
+            clear(layers.grid); clear(layers.axes); clear(layers.labels);
+
+            for (let x = Math.ceil(plot.xMin); x <= Math.floor(plot.xMax); x++) {
+                make("line", {
+                    x1: xToPx(x), y1: yToPx(plot.yMin),
+                    x2: xToPx(x), y2: yToPx(plot.yMax),
+                    stroke: x === 0 ? "rgba(255,255,255,.22)" : "rgba(255,255,255,.06)",
+                    "stroke-width": x === 0 ? 1.5 : 1
+                }, layers.grid);
+            }
+            for (let y = Math.ceil(plot.yMin); y <= Math.floor(plot.yMax); y++) {
+                make("line", {
+                    x1: xToPx(plot.xMin), y1: yToPx(y),
+                    x2: xToPx(plot.xMax), y2: yToPx(y),
+                    stroke: y === 0 ? "rgba(255,255,255,.22)" : "rgba(255,255,255,.06)",
+                    "stroke-width": y === 0 ? 1.5 : 1
+                }, layers.grid);
+            }
+
+            make("line", {
+                x1: xToPx(plot.xMin), y1: yToPx(0), x2: xToPx(plot.xMax), y2: yToPx(0),
+                stroke: "rgba(255,255,255,.35)", "stroke-width": 1.6
+            }, layers.axes);
+
+            make("line", {
+                x1: xToPx(0), y1: yToPx(plot.yMin), x2: xToPx(0), y2: yToPx(plot.yMax),
+                stroke: "rgba(255,255,255,.35)", "stroke-width": 1.6
+            }, layers.axes);
+
+            const arrowX = make("path", {
+                d: `M ${xToPx(plot.xMax)-10} ${yToPx(0)-5} L ${xToPx(plot.xMax)} ${yToPx(0)} L ${xToPx(plot.xMax)-10} ${yToPx(0)+5}`,
+                fill: "none", stroke: "rgba(255,255,255,.45)", "stroke-width": 1.5
+            }, layers.axes);
+            const arrowY = make("path", {
+                d: `M ${xToPx(0)-5} ${yToPx(plot.yMax)+10} L ${xToPx(0)} ${yToPx(plot.yMax)} L ${xToPx(0)+5} ${yToPx(plot.yMax)+10}`,
+                fill: "none", stroke: "rgba(255,255,255,.45)", "stroke-width": 1.5
+            }, layers.axes);
+            arrowX; arrowY;
+
+            for (let x = 0; x <= 12; x += 2) {
+                const t = make("text", {
+                    x: xToPx(x), y: yToPx(0) + 22,
+                    fill: "rgba(255,255,255,.62)", "font-size": 12,
+                    "text-anchor": "middle"
+                }, layers.labels);
+                t.textContent = x;
+            }
+            for (let y = -4; y <= 6; y += 2) {
+                if (y === 0) continue;
+                const t = make("text", {
+                    x: xToPx(0) - 14, y: yToPx(y) + 4,
+                    fill: "rgba(255,255,255,.62)", "font-size": 12,
+                    "text-anchor": "end"
+                }, layers.labels);
+                t.textContent = y;
+            }
+
+            const tx = make("text", {
+                x: xToPx(plot.xMax) - 8, y: yToPx(0) - 10,
+                fill: "rgba(255,255,255,.75)", "font-size": 14, "font-weight": 700
+            }, layers.labels);
+            tx.textContent = "x";
+
+            const ty = make("text", {
+                x: xToPx(0) + 10, y: yToPx(plot.yMax) + 14,
+                fill: "rgba(255,255,255,.75)", "font-size": 14, "font-weight": 700
+            }, layers.labels);
+            ty.textContent = "y";
+        }
+
+        function formatA(a){
+            return Number(a).toFixed(3).replace(/\.?0+$/, "");
+        }
+
+        function lineY(x){ return 0.625 * x - 4; }
+
+        function rootY(x, a){ return a * Math.sqrt(Math.max(0, x)); }
+
+        function findIntersection(a){
+            // Solve a√x = 0.625x - 4 using t = √x => 0.625 t² - a t - 4 = 0
+            // 5t² - 8a t - 32 = 0
+            const A = 5, B = -8 * a, C = -32;
+            const D = B*B - 4*A*C;
+            const sqrtD = Math.sqrt(D);
+            const t1 = (-B + sqrtD) / (2*A);
+            const t2 = (-B - sqrtD) / (2*A);
+            const candidates = [t1, t2].filter(t => t >= 0);
+            if (!candidates.length) return null;
+            const t = Math.max(...candidates);
+            const x = t * t;
+            const y = a * t;
+            return {x, y, t};
+        }
+
+        function drawDynamic() {
+            clear(layers.curve); clear(layers.line); clear(layers.points); clear(layers.inter);
+            const a = parseFloat(document.getElementById("aSlider").value);
+            document.getElementById("aBadge").textContent = formatA(a);
+            document.getElementById("rootFormula").textContent = `y = ${formatA(a)}√x`;
+
+            const showGrid = document.getElementById("toggleGrid").checked;
+            const showRoot = document.getElementById("toggleRoot").checked;
+            const showLine = document.getElementById("toggleLine").checked;
+            const showPoints = document.getElementById("togglePoints").checked;
+            const showInter = document.getElementById("toggleInter").checked;
+
+            layers.grid.style.display = showGrid ? "" : "none";
+
+            if (showRoot) {
+                let d = "";
+                for (let x = 0; x <= plot.xMax; x += 0.08) {
+                    const X = xToPx(x), Y = yToPx(rootY(x, a));
+                    d += (x === 0 ? `M ${X} ${Y}` : ` L ${X} ${Y}`);
+                }
+                make("path", {
+                    d,
+                    fill: "none",
+                    stroke: "#62e6ff",
+                    "stroke-width": 4,
+                    "stroke-linecap": "round",
+                    "stroke-linejoin": "round",
+                    filter: "url(#glowA)"
+                }, layers.curve);
+            }
+
+            if (showLine) {
+                const x1 = plot.xMin, x2 = plot.xMax;
+                make("line", {
+                    x1: xToPx(x1), y1: yToPx(lineY(x1)),
+                    x2: xToPx(x2), y2: yToPx(lineY(x2)),
+                    stroke: "url(#lineGrad)",
+                    "stroke-width": 4,
+                    "stroke-linecap": "round",
+                    filter: "url(#glowB)"
+                }, layers.line);
+            }
+
+            if (showPoints) {
+                const points = [
+                    {x:4, y:rootY(4, a), label:"(4; " + formatA(rootY(4, a)) + ")", color:"#8fffc5"},
+                    {x:0, y:-4, label:"(0; −4)", color:"#8fffc5"},
+                    {x:8, y:1, label:"(8; 1)", color:"#8fffc5"}
+                ];
+                points.forEach((p, i) => {
+                    make("circle", {
+                        cx: xToPx(p.x), cy: yToPx(p.y), r: 6.4,
+                        fill: p.color, stroke: "rgba(255,255,255,.9)", "stroke-width": 1.2
+                    }, layers.points);
+                    const txt = make("text", {
+                        x: xToPx(p.x) + (i === 0 ? 10 : 12),
+                        y: yToPx(p.y) - 10,
+                        fill: "rgba(255,255,255,.86)",
+                        "font-size": 13,
+                        "font-weight": 700
+                    }, layers.points);
+                    txt.textContent = p.label;
+                });
+            }
+
+            const inter = findIntersection(a);
+            if (inter) {
+                document.getElementById("xIntersection").textContent = `x ≈ ${inter.x.toFixed(3)}`;
+                document.getElementById("yIntersection").textContent = `y ≈ ${inter.y.toFixed(3)}`;
+
+                if (Math.abs(a - 1.5) < 1e-9) {
+                    document.getElementById("nodeCheck").textContent = "При a = 1.5 точка (4; 3) лежит на графике";
+                } else {
+                    document.getElementById("nodeCheck").textContent = `При a = ${formatA(a)} точка (4; ${formatA(rootY(4,a))}) лежит на графике`;
+                }
+
+                if (showInter) {
+                    make("circle", {
+                        cx: xToPx(inter.x), cy: yToPx(inter.y), r: 7.5,
+                        fill: "#ffd37e", stroke: "rgba(255,255,255,.95)", "stroke-width": 1.6
+                    }, layers.inter);
+                    make("line", {
+                        x1: xToPx(inter.x), y1: yToPx(inter.y), x2: xToPx(inter.x), y2: yToPx(0),
+                        stroke: "rgba(255,211,126,.28)", "stroke-dasharray": "6 6", "stroke-width": 1.2
+                    }, layers.inter);
+                    make("line", {
+                        x1: xToPx(inter.x), y1: yToPx(inter.y), x2: xToPx(0), y2: yToPx(inter.y),
+                        stroke: "rgba(255,211,126,.28)", "stroke-dasharray": "6 6", "stroke-width": 1.2
+                    }, layers.inter);
+                    const txt = make("text", {
+                        x: xToPx(inter.x) + 12,
+                        y: yToPx(inter.y) - 12,
+                        fill: "#ffe8b3",
+                        "font-size": 13,
+                        "font-weight": 800
+                    }, layers.inter);
+                    txt.textContent = `≈ (${inter.x.toFixed(2)}; ${inter.y.toFixed(2)})`;
+                }
+            }
+        }
+
+        drawStatic();
+        drawDynamic();
+
+        ["aSlider","toggleGrid","toggleRoot","toggleLine","togglePoints","toggleInter"].forEach(id => {
+            document.getElementById(id).addEventListener("input", drawDynamic);
+            document.getElementById(id).addEventListener("change", drawDynamic);
+        });
+
+        document.querySelectorAll(".acc-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const acc = btn.parentElement;
+                acc.classList.toggle("open");
+                const body = acc.querySelector(".acc-body");
+                if (acc.classList.contains("open")) {
+                    body.style.maxHeight = body.scrollHeight + "px";
+                } else {
+                    body.style.maxHeight = "0px";
+                }
+            });
+        });
+
+        function syncOpenAcc() {
+            document.querySelectorAll(".acc").forEach(acc => {
+                const body = acc.querySelector(".acc-body");
+                body.style.maxHeight = acc.classList.contains("open") ? body.scrollHeight + "px" : "0px";
+            });
+        }
+        window.addEventListener("load", syncOpenAcc);
+        window.addEventListener("resize", syncOpenAcc);
+
+        document.querySelectorAll(".reveal-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const target = document.getElementById(btn.dataset.target);
+                target.classList.toggle("show");
+                btn.textContent = target.classList.contains("show") ? "Скрыть итог" : "Показать итог";
+            });
+        });
+
+        const sqrtInput = document.getElementById("sqrtInput");
+        const sqrtResult = document.getElementById("sqrtResult");
+        const sqrtComment = document.getElementById("sqrtComment");
+
+        function checkSqrtValue(val) {
+            const n = Number(val);
+            if (!Number.isInteger(n) || n < 1000 || n > 9999) {
+                sqrtResult.textContent = "Введите натуральное четырёхзначное число";
+                sqrtComment.textContent = "Допустимый диапазон: от 1000 до 9999.";
+                return;
+            }
+            const r = Math.sqrt(n);
+            const rr = Math.round(r);
+            if (rr * rr === n) {
+                sqrtResult.textContent = `√${n} = ${rr}`;
+                sqrtComment.textContent = `${n} — полный квадрат, потому что ${rr}² = ${n}.`;
+            } else {
+                const lo = Math.floor(r), hi = Math.ceil(r);
+                sqrtResult.textContent = `√${n} ≈ ${r.toFixed(4)}`;
+                sqrtComment.textContent = `${n} не является полным квадратом: ${lo}² = ${lo*lo}, ${hi}² = ${hi*hi}.`;
+            }
+        }
+
+        document.getElementById("sqrtCheckBtn").addEventListener("click", () => checkSqrtValue(sqrtInput.value));
+        sqrtInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") checkSqrtValue(sqrtInput.value);
+        });
+
+        document.getElementById("sqrtRandomBtn").addEventListener("click", () => {
+            const roots = [32,33,34,35,36,37,38,39,40,42,45,48,50,55,60,70,75,90,95];
+            const r = roots[Math.floor(Math.random() * roots.length)];
+            sqrtInput.value = r * r;
+            checkSqrtValue(sqrtInput.value);
+        });
+
+        checkSqrtValue(1296);
+
+        document.getElementById("checkQuizBtn").addEventListener("click", () => {
+            let score = 0;
+            document.querySelectorAll(".question").forEach((q, idx) => {
+                const correct = q.dataset.answer;
+                const chosen = q.querySelector('input[type="radio"]:checked');
+                const feedback = q.querySelector(".feedback");
+                q.classList.remove("correct","wrong");
+                feedback.classList.remove("good","bad","show");
+
+                if (!chosen) {
+                    feedback.textContent = "Ответ не выбран.";
+                    feedback.classList.add("bad","show");
+                    q.classList.add("wrong");
+                    return;
+                }
+
+                if (chosen.value === correct) {
+                    score++;
+                    q.classList.add("correct");
+                    feedback.textContent = "Верно.";
+                    feedback.classList.add("good","show");
+                } else {
+                    q.classList.add("wrong");
+                    feedback.textContent = "Неверно.";
+                    feedback.classList.add("bad","show");
+                }
+            });
+
+            const total = document.querySelectorAll(".question").length;
+            const scoreEl = document.getElementById("quizScore");
+            scoreEl.textContent = `Результат: ${score} из ${total}`;
+        });
+
+        document.getElementById("resetQuizBtn").addEventListener("click", () => {
+            document.querySelectorAll('.question input[type="radio"]').forEach(i => i.checked = false);
+            document.querySelectorAll(".question").forEach(q => {
+                q.classList.remove("correct","wrong");
+                const feedback = q.querySelector(".feedback");
+                feedback.classList.remove("good","bad","show");
+                feedback.textContent = "";
+            });
+            document.getElementById("quizScore").textContent = "Пока нет результата";
+        });
+
+        const genTypeEl = document.getElementById("genType");
+        const genTaskEl = document.getElementById("generatedTask");
+        const genAnswerEl = document.getElementById("generatedAnswer");
+        const genDiffEl = document.getElementById("genDifficulty");
+
+        function randint(a,b){ return Math.floor(Math.random() * (b-a+1)) + a; }
+
+        const templates = [
+            function rootTask() {
+                const roots = [2,3,4,5,6,7,8,9,10,12];
+                const s = roots[randint(0, roots.length-1)];
+                const aVals = [0.5, 1, 1.5, 2, 2.5, 3];
+                const a = aVals[randint(0, aVals.length-1)];
+                const x = s * s;
+                const y = a * s;
+                const text = `Точка (${x}; ${Number(y).toFixed(3).replace(/\.?0+$/,"")}) лежит на графике функции y = a√x. Найдите коэффициент a.`;
+                const answer = `Ответ: a = ${Number(a).toFixed(3).replace(/\.?0+$/,"")}.`;
+                return {type:"Тип: корневая функция", diff:"Уровень: базовый", text, answer};
+            },
+            function lineTask() {
+                const b = randint(-6,3);
+                const kOptions = [-2,-1.5,-1,-0.5,0.5,1,1.5,2];
+                const k = kOptions[randint(0, kOptions.length-1)];
+                const x1 = 0;
+                const y1 = b;
+                const x2 = randint(2,8);
+                const y2 = k * x2 + b;
+                const kText = Number.isInteger(k) ? String(k) : String(k).replace(".5","/2");
+                const text = `Прямая проходит через точки (${x1}; ${y1}) и (${x2}; ${Number(y2).toFixed(3).replace(/\.?0+$/,"")}). Найдите её формулу в виде y = kx + b.`;
+                const answer = `Ответ: y = ${kText}x ${b < 0 ? "− " + Math.abs(b) : "+ " + b}.`;
+                return {type:"Тип: линейная функция", diff:"Уровень: базовый", text, answer};
+            },
+            function expTask() {
+                const aVals = [2,3,4,5];
+                const a = aVals[randint(0,aVals.length-1)];
+                const y = a * a;
+                const text = `Точка (2; ${y}) лежит на графике функции y = aˣ. Найдите f(3).`;
+                const answer = `Ответ: a = ${a}, поэтому f(3) = ${a*a*a}.`;
+                return {type:"Тип: показательная функция", diff:"Уровень: базовый", text, answer};
+            },
+            function sqrtTask() {
+                const roots = [];
+                for (let r = 32; r <= 99; r++) roots.push(r);
+                const r = roots[randint(0, roots.length-1)];
+                const n = r * r;
+                const text = `Найдите √${n}.`;
+                const answer = `Ответ: √${n} = ${r}.`;
+                return {type:"Тип: квадратный корень", diff:"Уровень: тренировка скорости", text, answer};
+            },
+            function interTask() {
+                const x = [1,4,9,16][randint(0,3)];
+                const root = Math.sqrt(x);
+                const y = root;
+                const m = 0.5;
+                const b = y - m*x;
+                const bText = b < 0 ? `− ${Math.abs(b)}` : `+ ${b}`;
+                const text = `Найдите ординату точки пересечения графиков y = √x и y = x / 2 ${b < 0 ? "− " + Math.abs(b) : "+ " + b}.`;
+                const answer = `Ответ: при x = ${x} получаем y = ${y}. Ордината точки пересечения равна ${y}.`;
+                return {type:"Тип: точка пересечения", diff:"Уровень: базовый", text, answer};
+            }
+        ];
+
+        function generateTask() {
+            const item = templates[randint(0, templates.length - 1)]();
+            genTypeEl.textContent = item.type;
+            genDiffEl.textContent = item.diff;
+            genTaskEl.textContent = item.text;
+            genAnswerEl.textContent = item.answer;
+            genAnswerEl.classList.remove("show");
+        }
+
+        document.getElementById("genBtn").addEventListener("click", generateTask);
+        document.getElementById("showGenAnsBtn").addEventListener("click", () => genAnswerEl.classList.add("show"));
+        document.getElementById("hideGenAnsBtn").addEventListener("click", () => genAnswerEl.classList.remove("show"));
+        generateTask();
+
+        document.getElementById("printBtn").addEventListener("click", () => window.print());
+    })();
+</script>
+</body>
+</html>
