@@ -1,0 +1,1875 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Закон Ома и сопротивление проводника — интерактивная лаборатория</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0b1730;
+            --panel:rgba(15,26,48,.72);
+            --panel-strong:rgba(15,26,48,.9);
+            --text:#eef5ff;
+            --muted:#9fb3d1;
+            --soft:#cfe2ff;
+            --line:rgba(142,180,255,.18);
+            --accent:#67d8ff;
+            --accent2:#8c7bff;
+            --accent3:#63f5c8;
+            --danger:#ff7d93;
+            --warn:#ffd36b;
+            --ok:#76f2a2;
+            --shadow:0 18px 60px rgba(0,0,0,.35);
+            --radius:24px;
+            --radius-sm:16px;
+            --max:1220px;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family: Inter, Arial, Helvetica, sans-serif;
+            color:var(--text);
+            background:
+            radial-gradient(circle at 20% 15%, rgba(103,216,255,.14), transparent 28%),
+            radial-gradient(circle at 80% 10%, rgba(140,123,255,.14), transparent 24%),
+            radial-gradient(circle at 50% 80%, rgba(99,245,200,.1), transparent 26%),
+            linear-gradient(180deg, #07111f 0%, #091427 50%, #06101d 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            background:
+            linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+            background-size:32px 32px;
+            mask-image:linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.16));
+            z-index:-1;
+        }
+
+        a{color:inherit;text-decoration:none}
+        .container{width:min(var(--max), calc(100% - 32px)); margin:0 auto}
+
+        .topbar{
+            position:sticky;
+            top:0;
+            z-index:30;
+            backdrop-filter: blur(18px);
+            background:linear-gradient(180deg, rgba(7,17,31,.85), rgba(7,17,31,.55));
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+
+        .topbar-inner{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            padding:12px 0;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            font-weight:800;
+            letter-spacing:.02em;
+        }
+
+        .brand-mark{
+            width:40px;height:40px;border-radius:14px;
+            background:
+            radial-gradient(circle at 30% 30%, #b8f4ff, #67d8ff 40%, transparent 41%),
+            radial-gradient(circle at 70% 70%, #a59bff, #8c7bff 40%, transparent 41%),
+            rgba(255,255,255,.04);
+            box-shadow: inset 0 0 20px rgba(255,255,255,.06), 0 0 24px rgba(103,216,255,.16);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .nav{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+        }
+
+        .nav a{
+            padding:10px 14px;
+            border-radius:999px;
+            color:var(--muted);
+            font-size:14px;
+            transition:.2s ease;
+            border:1px solid transparent;
+        }
+
+        .nav a:hover{
+            color:var(--text);
+            background:rgba(255,255,255,.04);
+            border-color:rgba(255,255,255,.08);
+        }
+
+        .hero{
+            position:relative;
+            padding:52px 0 36px;
+        }
+
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:22px;
+            align-items:stretch;
+        }
+
+        .glass{
+            position:relative;
+            background:linear-gradient(180deg, rgba(20,33,61,.72), rgba(11,20,38,.76));
+            border:1px solid var(--line);
+            box-shadow:var(--shadow);
+            border-radius:var(--radius);
+            overflow:hidden;
+        }
+
+        .glass::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:
+            linear-gradient(135deg, rgba(255,255,255,.08), transparent 22%, transparent 75%, rgba(255,255,255,.04));
+            pointer-events:none;
+        }
+
+        .hero-card{padding:34px 30px 28px}
+        .hero-kicker{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:10px 14px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            color:var(--soft);
+            border:1px solid rgba(255,255,255,.08);
+            font-size:14px;
+            margin-bottom:18px;
+        }
+
+        .dot{
+            width:10px;height:10px;border-radius:50%;
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
+            box-shadow:0 0 16px rgba(103,216,255,.7);
+        }
+
+        h1{
+            margin:0 0 14px;
+            font-size:clamp(34px, 6vw, 64px);
+            line-height:1.02;
+            letter-spacing:-.03em;
+            max-width:12ch;
+        }
+
+        .hero-lead{
+            margin:0 0 22px;
+            color:var(--muted);
+            font-size:clamp(16px, 2vw, 19px);
+            line-height:1.7;
+            max-width:62ch;
+        }
+
+        .hero-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-top:18px;
+        }
+
+        .btn{
+            appearance:none;
+            border:none;
+            cursor:pointer;
+            color:var(--text);
+            background:linear-gradient(135deg, rgba(103,216,255,.18), rgba(140,123,255,.2));
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:14px;
+            padding:13px 16px;
+            font-weight:700;
+            transition:transform .18s ease, border-color .18s ease, background .18s ease;
+            box-shadow:0 12px 24px rgba(0,0,0,.18);
+        }
+
+        .btn:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.22)}
+        .btn.secondary{background:rgba(255,255,255,.04); color:var(--soft)}
+        .btn.ghost{background:transparent}
+        .btn.small{padding:10px 12px; font-size:14px; border-radius:12px}
+
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:12px;
+            margin-top:24px;
+        }
+
+        .stat{
+            padding:16px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:18px;
+        }
+
+        .stat .label{color:var(--muted); font-size:13px; margin-bottom:8px}
+        .stat .value{font-size:23px; font-weight:800}
+        .stat .sub{margin-top:4px; color:var(--muted); font-size:13px}
+
+        .hero-side{
+            padding:20px;
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+            min-height:100%;
+        }
+
+        .mini-panel{
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:22px;
+            padding:18px;
+        }
+
+        .mini-title{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            margin-bottom:12px;
+        }
+
+        .mini-title h3{
+            margin:0;
+            font-size:18px;
+            letter-spacing:-.02em;
+        }
+
+        .formula{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:16px;
+            padding:12px 14px;
+            color:#f8fbff;
+            line-height:1.75;
+            font-size:15px;
+            overflow:auto;
+            white-space:nowrap;
+        }
+
+        .formula-stack{display:grid; gap:10px}
+        .chip-row{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:10px;
+        }
+
+        .chip{
+            padding:8px 10px;
+            border-radius:999px;
+            font-size:13px;
+            color:var(--soft);
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.07);
+        }
+
+        .section{
+            padding:18px 0 10px;
+        }
+
+        .section-title{
+            display:flex;
+            align-items:end;
+            justify-content:space-between;
+            gap:20px;
+            margin-bottom:18px;
+        }
+
+        .section-title h2{
+            margin:0;
+            font-size:clamp(26px, 3.5vw, 42px);
+            line-height:1.05;
+            letter-spacing:-.03em;
+        }
+
+        .section-title p{
+            margin:0;
+            color:var(--muted);
+            max-width:48ch;
+            line-height:1.6;
+        }
+
+        .grid-2{
+            display:grid;
+            grid-template-columns:1.05fr .95fr;
+            gap:22px;
+        }
+
+        .grid-3{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:18px;
+        }
+
+        .pad{padding:24px}
+
+        .control-row{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:16px;
+        }
+
+        .toggle{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:10px 12px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            user-select:none;
+        }
+
+        .toggle input{accent-color:var(--accent)}
+
+        .range-wrap{
+            display:grid;
+            gap:10px;
+            margin-top:14px;
+        }
+
+        .range-head{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:center;
+            color:var(--soft);
+            font-weight:700;
+        }
+
+        input[type="range"]{
+            width:100%;
+            accent-color:var(--accent);
+            cursor:pointer;
+        }
+
+        .readout{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:12px;
+            margin-top:16px;
+        }
+
+        .readout .cell{
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:18px;
+            padding:16px;
+        }
+
+        .cell .k{
+            font-size:13px;
+            color:var(--muted);
+            margin-bottom:8px;
+        }
+
+        .cell .v{
+            font-size:28px;
+            font-weight:800;
+        }
+
+        .cell .desc{
+            color:var(--muted);
+            font-size:13px;
+            margin-top:6px;
+            line-height:1.45;
+        }
+
+        .note{
+            margin-top:14px;
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+            color:var(--muted);
+            line-height:1.6;
+            font-size:14px;
+        }
+
+        .svg-shell{
+            width:100%;
+            aspect-ratio: 16 / 10;
+            background:
+            radial-gradient(circle at 50% 50%, rgba(103,216,255,.08), transparent 40%),
+            linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:20px;
+            overflow:hidden;
+            position:relative;
+        }
+
+        svg{width:100%;height:100%;display:block}
+
+        .legend{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:14px;
+        }
+
+        .legend span{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 10px;
+            border-radius:999px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+            color:var(--soft);
+            font-size:13px;
+        }
+
+        .sw{width:12px;height:12px;border-radius:99px;display:inline-block}
+
+        .theory{
+            display:grid;
+            gap:14px;
+        }
+
+        details.card{
+            background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:20px;
+            overflow:hidden;
+        }
+
+        details.card[open]{border-color:rgba(103,216,255,.26)}
+        details.card summary{
+            list-style:none;
+            cursor:pointer;
+            padding:18px 20px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:14px;
+            font-weight:800;
+        }
+        details.card summary::-webkit-details-marker{display:none}
+        details.card .content{
+            padding:0 20px 20px;
+            color:var(--muted);
+            line-height:1.7;
+        }
+
+        .content ul{
+            margin:10px 0 0 18px;
+            padding:0;
+        }
+
+        .content li{margin:8px 0}
+        .content .formula{margin-top:10px; white-space:normal}
+
+        .calc-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:22px;
+        }
+
+        .tabs{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:14px;
+        }
+
+        .tab{
+            padding:10px 14px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+            cursor:pointer;
+            color:var(--soft);
+            font-weight:700;
+        }
+
+        .tab.active{
+            color:#091427;
+            background:linear-gradient(135deg, var(--accent), #b8f4ff);
+            border-color:transparent;
+        }
+
+        .calc-form{
+            display:grid;
+            gap:14px;
+        }
+
+        .field{
+            display:grid;
+            gap:8px;
+        }
+
+        .field label{
+            color:var(--soft);
+            font-weight:700;
+            font-size:14px;
+        }
+
+        .field input, .field select{
+            width:100%;
+            border:none;
+            outline:none;
+            border-radius:14px;
+            padding:14px 14px;
+            background:rgba(255,255,255,.05);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.08);
+            font-size:15px;
+        }
+
+        .field input::placeholder{color:#8fa5c7}
+        .calc-result{
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;
+            padding:16px;
+            line-height:1.7;
+        }
+
+        .steps{
+            display:grid;
+            gap:12px;
+            margin-top:12px;
+        }
+
+        .step{
+            border-left:2px solid rgba(103,216,255,.35);
+            padding-left:12px;
+            color:var(--muted);
+            line-height:1.65;
+        }
+
+        .example-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:22px;
+        }
+
+        .example-card{
+            padding:24px;
+            display:grid;
+            gap:14px;
+        }
+
+        .eyebrow{
+            color:var(--accent3);
+            text-transform:uppercase;
+            letter-spacing:.16em;
+            font-size:12px;
+            font-weight:800;
+        }
+
+        .example-card h3{margin:0; font-size:22px}
+        .example-card p{margin:0; color:var(--muted); line-height:1.7}
+        .solution{display:none}
+        .solution.show{display:block}
+
+        .cheat-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:18px;
+        }
+
+        .cheat{
+            padding:20px;
+            min-height:100%;
+        }
+
+        .cheat h3{margin:0 0 12px; font-size:18px}
+        .cheat ul{margin:0 0 0 18px; color:var(--muted); line-height:1.7}
+        .cheat .formula{margin-top:12px}
+
+        .quiz-list{
+            display:grid;
+            gap:16px;
+        }
+
+        .q-card{
+            padding:20px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:20px;
+        }
+
+        .q-card h3{
+            margin:0 0 14px;
+            font-size:18px;
+            line-height:1.45;
+        }
+
+        .options{
+            display:grid;
+            gap:10px;
+        }
+
+        .option{
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:14px;
+            background:rgba(255,255,255,.03);
+            padding:12px 14px;
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            transition:.2s ease;
+        }
+
+        .option:hover{background:rgba(255,255,255,.05)}
+        .option.correct{border-color:rgba(118,242,162,.55); background:rgba(118,242,162,.12)}
+        .option.wrong{border-color:rgba(255,125,147,.5); background:rgba(255,125,147,.12)}
+        .option input{margin-top:3px; accent-color:var(--accent)}
+
+        .quiz-footer{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            align-items:center;
+            justify-content:space-between;
+            margin-top:16px;
+        }
+
+        .scorebox{
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--soft);
+            font-weight:700;
+        }
+
+        .generator-layout{
+            display:grid;
+            grid-template-columns:1.05fr .95fr;
+            gap:22px;
+        }
+
+        .task-box{
+            padding:22px;
+            display:grid;
+            gap:14px;
+        }
+
+        .task-meta{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+        }
+
+        .task-text{
+            font-size:20px;
+            line-height:1.6;
+            color:#f7fbff;
+        }
+
+        .answer-box{
+            display:none;
+            color:var(--soft);
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+            line-height:1.7;
+        }
+
+        .answer-box.show{display:block}
+
+        .footer{
+            padding:36px 0 56px;
+            color:var(--muted);
+            text-align:center;
+        }
+
+        .muted{color:var(--muted)}
+        .ok{color:var(--ok)}
+        .warn{color:var(--warn)}
+        .danger{color:var(--danger)}
+        .hidden{display:none!important}
+
+        .print-note{
+            margin-top:10px;
+            font-size:13px;
+            color:var(--muted);
+        }
+
+        @media (max-width: 1080px){
+            .hero-grid, .grid-2, .generator-layout, .calc-grid, .example-grid{grid-template-columns:1fr}
+            .grid-3, .cheat-grid{grid-template-columns:1fr 1fr}
+        }
+
+        @media (max-width: 760px){
+            .nav{display:none}
+            .hero-card, .pad, .example-card, .task-box{padding:20px}
+            .hero-stats, .readout, .grid-3, .cheat-grid{grid-template-columns:1fr}
+            .section-title{flex-direction:column; align-items:flex-start}
+            h1{max-width:none}
+            .task-text{font-size:18px}
+        }
+
+        @media print{
+            :root{
+                --bg:#ffffff;
+                --bg2:#ffffff;
+                --panel:#ffffff;
+                --panel-strong:#ffffff;
+                --text:#111111;
+                --muted:#444444;
+                --soft:#222222;
+                --line:#dddddd;
+                --shadow:none;
+            }
+
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+
+            body::before,
+            .topbar,
+            .hero-actions,
+            .control-row,
+            .tabs,
+            .quiz-footer .btn,
+            .generator-controls,
+            .print-hide{
+                display:none !important;
+            }
+
+            .glass, .mini-panel, .q-card, .option, .stat, .cell, .cheat, .task-box, details.card{
+                background:#fff !important;
+                border:1px solid #ddd !important;
+                box-shadow:none !important;
+            }
+
+            .solution, .answer-box{display:block !important}
+            .container{width:100%}
+            a{color:#111 !important}
+            .topbar{position:static}
+        }
+    </style>
+</head>
+<body>
+<header class="topbar print-hide">
+    <div class="container topbar-inner">
+        <div class="brand">
+            <div class="brand-mark"></div>
+            <div>Электрическая лаборатория: Закон Ома</div>
+        </div>
+        <nav class="nav">
+            <a href="#visual">Визуализация</a>
+            <a href="#calc">Калькуляторы</a>
+            <a href="#theory">Теория</a>
+            <a href="#examples">Разбор задач</a>
+            <a href="#cheat">Шпаргалка</a>
+            <a href="#quiz">Квиз</a>
+            <a href="#generator">Генератор</a>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="glass hero-card">
+            <div class="hero-kicker">
+                <span class="dot"></span>
+                <span>Интерактивное учебное пособие по физике</span>
+            </div>
+            <h1>Закон Ома и сопротивление проводника</h1>
+            <p class="hero-lead">
+                Здесь можно не просто прочитать формулы, а буквально <strong>пощупать связь</strong> между напряжением, силой тока,
+                сопротивлением, длиной провода, площадью сечения и материалом. Ползунки длины, сечения и удельного сопротивления
+                пересчитывают R, а вместе с ним сразу меняют и график ВАХ.
+            </p>
+            <div class="hero-actions">
+                <a class="btn" href="#visual">Открыть лабораторию</a>
+                <a class="btn secondary" href="#quiz">Проверить себя</a>
+                <button class="btn ghost" onclick="window.print()">Печать страницы</button>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="label">Главная формула</div>
+                    <div class="value">U = I · R</div>
+                    <div class="sub">напряжение, ток и сопротивление</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Проводник</div>
+                    <div class="value">R = ρl / S</div>
+                    <div class="sub">геометрия и материал задают R</div>
+                </div>
+                <div class="stat">
+                    <div class="label">ВАХ</div>
+                    <div class="value">I = U / R</div>
+                    <div class="sub">если меняется R, меняется и наклон</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass hero-side">
+            <div class="mini-panel">
+                <div class="mini-title">
+                    <h3>Ключевые обозначения</h3>
+                    <span class="chip">школьный уровень</span>
+                </div>
+                <div class="formula-stack">
+                    <div class="formula">I = q / t</div>
+                    <div class="formula">U = A / q</div>
+                    <div class="formula">U = I · R</div>
+                    <div class="formula">R = U / I</div>
+                    <div class="formula">R = ρl / S</div>
+                </div>
+                <div class="chip-row">
+                    <span class="chip">I — амперы</span>
+                    <span class="chip">U — вольты</span>
+                    <span class="chip">R — омы</span>
+                    <span class="chip">ρ — Ом·мм²/м</span>
+                </div>
+            </div>
+
+            <div class="mini-panel">
+                <div class="mini-title">
+                    <h3>Что ты здесь сделаешь</h3>
+                </div>
+                <div class="steps">
+                    <div class="step">Посмотришь, как меняется ток при изменении напряжения.</div>
+                    <div class="step">Увидишь, как длина l, площадь S и удельное сопротивление ρ меняют R, а значит и наклон ВАХ.</div>
+                    <div class="step">Решишь задачи на закон Ома, ВАХ и изменение сопротивления при разрезании провода.</div>
+                    <div class="step">Проверишь себя в квизе и сгенерируешь новые тренировки.</div>
+                </div>
+                <div class="print-note">Страница адаптирована и для экрана, и для печати.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<main>
+    <section id="visual" class="section">
+        <div class="container">
+            <div class="section-title">
+                <div>
+                    <h2>Визуальная лаборатория</h2>
+                </div>
+                <p>
+                    Здесь сопротивление графика вычисляется по формуле R = ρl / S. Поэтому при движении ползунка длины, площади сечения
+                    или удельного сопротивления график ВАХ сразу меняется.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="glass pad">
+                    <div class="control-row print-hide">
+                        <label class="toggle"><input type="checkbox" id="showGrid" checked> Сетка</label>
+                        <label class="toggle"><input type="checkbox" id="showPoint" checked> Контрольная точка</label>
+                        <label class="toggle"><input type="checkbox" id="showGuide" checked> Проекции точки</label>
+                        <label class="toggle"><input type="checkbox" id="showFormulaOnGraph" checked> Формула на графике</label>
+                    </div>
+
+                    <div class="svg-shell">
+                        <svg id="vahSvg" viewBox="0 0 760 470" aria-label="График зависимости силы тока от напряжения">
+                            <defs>
+                                <linearGradient id="lineGrad" x1="0" x2="1">
+                                    <stop offset="0%" stop-color="#67d8ff"/>
+                                    <stop offset="100%" stop-color="#8c7bff"/>
+                                </linearGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="4.5" result="b"/>
+                                    <feMerge>
+                                        <feMergeNode in="b"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <rect x="0" y="0" width="760" height="470" fill="transparent"></rect>
+                            <g id="gridLayer"></g>
+                            <g id="axisLayer"></g>
+                            <g id="curveLayer"></g>
+                            <g id="guideLayer"></g>
+                            <g id="pointLayer"></g>
+                            <g id="labelLayer"></g>
+                        </svg>
+                    </div>
+
+                    <div class="legend">
+                        <span><i class="sw" style="background:#67d8ff"></i> ВАХ: I = U / R</span>
+                        <span><i class="sw" style="background:#8c7bff"></i> Контрольная точка</span>
+                        <span><i class="sw" style="background:#63f5c8"></i> Проекции на оси</span>
+                    </div>
+                </div>
+
+                <div class="glass pad">
+                    <div class="range-wrap">
+                        <div class="range-head">
+                            <span>Напряжение U</span>
+                            <span id="uValue">10 В</span>
+                        </div>
+                        <input id="uRange" type="range" min="0" max="24" step="0.5" value="10">
+
+                        <div class="range-head">
+                            <span>Длина провода l</span>
+                            <span id="lValue">2 м</span>
+                        </div>
+                        <input id="lRange" type="range" min="0.5" max="12" step="0.1" value="2">
+
+                        <div class="range-head">
+                            <span>Площадь сечения S</span>
+                            <span id="sValue">1 мм²</span>
+                        </div>
+                        <input id="sRange" type="range" min="0.2" max="4" step="0.1" value="1">
+
+                        <div class="range-head">
+                            <span>Удельное сопротивление ρ</span>
+                            <span id="rhoValue">0,017 Ом·мм²/м</span>
+                        </div>
+                        <input id="rhoRange" type="range" min="0.017" max="0.14" step="0.001" value="0.017">
+                    </div>
+
+                    <div class="readout">
+                        <div class="cell">
+                            <div class="k">Сопротивление проводника</div>
+                            <div class="v" id="geomReadout">0.03 Ом</div>
+                            <div class="desc">R = ρl / S — именно это R двигает график</div>
+                        </div>
+                        <div class="cell">
+                            <div class="k">Сила тока на графике</div>
+                            <div class="v" id="iReadout">588.24 А</div>
+                            <div class="desc">Считается по формуле I = U / R</div>
+                        </div>
+                        <div class="cell">
+                            <div class="k">Наклон графика I(U)</div>
+                            <div class="v" id="slopeReadout">58.824 А/В</div>
+                            <div class="desc">Равен 1 / R и меняется вместе с R</div>
+                        </div>
+                        <div class="cell">
+                            <div class="k">Контрольная формула</div>
+                            <div class="v" id="formulaReadout" style="font-size:18px">R = 0,017 · 2 / 1 = 0,034 Ом</div>
+                            <div class="desc">Сначала считаем R, потом по нему строим ВАХ</div>
+                        </div>
+                    </div>
+
+                    <div class="note">
+                        В этой лаборатории логика такая: <strong>l, S и ρ → задают R</strong>, а затем это сопротивление определяет график по формуле
+                        <strong>I = U / R</strong>. Поэтому при изменении длины, площади сечения или удельного сопротивления график ВАХ действительно движется.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="calc" class="section">
+        <div class="container">
+            <div class="section-title">
+                <div><h2>Калькуляторы</h2></div>
+                <p>Вычисляй неизвестную величину из закона Ома или длину провода по удельному сопротивлению. Все расчёты — сразу на странице.</p>
+            </div>
+
+            <div class="calc-grid">
+                <div class="glass pad">
+                    <div class="tabs print-hide">
+                        <button class="tab active" data-tab="ohm-u">Найти U</button>
+                        <button class="tab" data-tab="ohm-i">Найти I</button>
+                        <button class="tab" data-tab="ohm-r">Найти R</button>
+                    </div>
+
+                    <div class="calc-form" id="ohmCalculator">
+                        <div class="field" id="fieldI">
+                            <label for="calcI">Сила тока I, А</label>
+                            <input id="calcI" type="number" step="any" value="2" />
+                        </div>
+                        <div class="field" id="fieldR">
+                            <label for="calcR">Сопротивление R, Ом</label>
+                            <input id="calcR" type="number" step="any" value="15" />
+                        </div>
+                        <div class="field hidden" id="fieldU">
+                            <label for="calcU">Напряжение U, В</label>
+                            <input id="calcU" type="number" step="any" value="30" />
+                        </div>
+
+                        <div class="control-row print-hide">
+                            <button class="btn small" id="calcButton">Вычислить</button>
+                            <button class="btn small secondary" id="calcReset">Сбросить</button>
+                        </div>
+
+                        <div class="calc-result" id="calcResult">
+                            Выбери режим и нажми «Вычислить».
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass pad">
+                    <h3 style="margin-top:0">Проводник: длина по формуле R = ρl / S</h3>
+                    <div class="calc-form">
+                        <div class="field">
+                            <label for="wireR">Сопротивление R, Ом</label>
+                            <input id="wireR" type="number" step="any" value="180">
+                        </div>
+                        <div class="field">
+                            <label for="wireRho">Удельное сопротивление ρ, Ом·мм²/м</label>
+                            <input id="wireRho" type="number" step="any" value="0.055">
+                        </div>
+                        <div class="field">
+                            <label for="wireS">Площадь сечения S, мм²</label>
+                            <input id="wireS" type="number" step="any" value="0.1">
+                        </div>
+                        <div class="control-row print-hide">
+                            <button class="btn small" id="wireCalc">Найти длину</button>
+                            <button class="btn small secondary" id="wireReset">Сбросить</button>
+                        </div>
+                        <div class="calc-result" id="wireResult">
+                            Здесь будет расчёт длины провода.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="theory" class="section">
+        <div class="container">
+            <div class="section-title">
+                <div><h2>Теория в карточках</h2></div>
+                <p>Коротко, строго и без перегруза: только то, что нужно для понимания и решения задач по теме.</p>
+            </div>
+
+            <div class="theory">
+                <details class="card" open>
+                    <summary>
+                        <span>1. Что такое сила тока, напряжение и сопротивление</span>
+                        <span class="muted">основа темы</span>
+                    </summary>
+                    <div class="content">
+                        <p>
+                            Сила тока показывает, какой заряд проходит через поперечное сечение проводника за единицу времени:
+                        </p>
+                        <div class="formula">I = q / t</div>
+                        <p>
+                            Напряжение связано с работой электрического поля по переносу заряда:
+                        </p>
+                        <div class="formula">U = A / q</div>
+                        <p>
+                            Сопротивление показывает, насколько проводник препятствует току. Основная связь величин:
+                        </p>
+                        <div class="formula">U = I · R</div>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary>
+                        <span>2. Закон Ома для участка цепи</span>
+                        <span class="muted">три формы одной формулы</span>
+                    </summary>
+                    <div class="content">
+                        <p>Главная формула темы:</p>
+                        <div class="formula">U = I · R</div>
+                        <p>Из неё получаются две удобные формы:</p>
+                        <div class="formula">I = U / R</div>
+                        <div class="formula">R = U / I</div>
+                        <ul>
+                            <li>Если известны I и R, ищем напряжение U.</li>
+                            <li>Если известны U и R, ищем силу тока I.</li>
+                            <li>Если известны U и I, ищем сопротивление R.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary>
+                        <span>3. Вольт-амперная характеристика (ВАХ)</span>
+                        <span class="muted">график зависимости I от U</span>
+                    </summary>
+                    <div class="content">
+                        <p>
+                            Для проводника с постоянным сопротивлением график зависимости силы тока от напряжения — прямая линия, проходящая через начало координат.
+                        </p>
+                        <div class="formula">I = U / R</div>
+                        <ul>
+                            <li>Чем больше сопротивление, тем меньше наклон графика.</li>
+                            <li>По любой точке графика можно найти сопротивление: R = U / I.</li>
+                            <li>Если меняется сопротивление проводника, то меняется и наклон ВАХ.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary>
+                        <span>4. Сопротивление проводника через материал и размеры</span>
+                        <span class="muted">длина, сечение, удельное сопротивление</span>
+                    </summary>
+                    <div class="content">
+                        <div class="formula">R = ρl / S</div>
+                        <ul>
+                            <li>ρ — удельное сопротивление материала.</li>
+                            <li>l — длина проводника.</li>
+                            <li>S — площадь поперечного сечения.</li>
+                        </ul>
+                        <p>Следствия:</p>
+                        <ul>
+                            <li>Если l увеличивается, то R увеличивается.</li>
+                            <li>Если S увеличивается, то R уменьшается.</li>
+                            <li>Если материал хуже проводит ток, то ρ больше, значит и R больше.</li>
+                            <li>Так как I = U / R, изменение этих параметров приводит и к изменению ВАХ.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary>
+                        <span>5. Как сравнивать сопротивления двух проводников</span>
+                        <span class="muted">метод отношения</span>
+                    </summary>
+                    <div class="content">
+                        <p>Если у двух проводников одинаковы материал и площадь сечения, то:</p>
+                        <div class="formula">R₁ = ρl₁ / S, &nbsp;&nbsp; R₂ = ρl₂ / S</div>
+                        <p>Делим одно на другое:</p>
+                        <div class="formula">R₂ / R₁ = l₂ / l₁</div>
+                        <p>
+                            Значит, в таких задачах сопротивления относятся так же, как длины.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="card">
+                    <summary>
+                        <span>6. Разрезание провода и свивание в жгут</span>
+                        <span class="muted">очень частая задача</span>
+                    </summary>
+                    <div class="content">
+                        <p>
+                            Если провод разрезали на n равных частей и затем сложили их в один жгут, то:
+                        </p>
+                        <div class="formula">l<sub>нов</sub> = l / n, &nbsp;&nbsp; S<sub>нов</sub> = nS</div>
+                        <p>Тогда сопротивление станет:</p>
+                        <div class="formula">R<sub>нов</sub> = ρ(l / n) / (nS) = R<sub>стар</sub> / n²</div>
+                        <ul>
+                            <li>При n = 2: сопротивление уменьшается в 4 раза.</li>
+                            <li>При n = 3: сопротивление уменьшается в 9 раз.</li>
+                        </ul>
+                        <p>
+                            Это важный момент: после свивания жгута длина рабочей части уменьшается, а площадь сечения увеличивается.
+                        </p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section id="examples" class="section">
+        <div class="container">
+            <div class="section-title">
+                <div><h2>Разбор задач</h2></div>
+                <p>Два типовых сюжета из темы: прямой закон Ома и изменение сопротивления при изменении формы проводника.</p>
+            </div>
+
+            <div class="example-grid">
+                <div class="glass example-card">
+                    <div class="eyebrow">Задача 1</div>
+                    <h3>Найти напряжение по силе тока и сопротивлению</h3>
+                    <p>
+                        В цепи сила тока равна 2 А, сопротивление участка 15 Ом. Найти напряжение.
+                    </p>
+                    <div class="formula">U = I · R = 2 · 15 = 30 В</div>
+                    <div class="control-row print-hide">
+                        <button class="btn small" data-solution="sol1">Показать решение</button>
+                    </div>
+                    <div class="solution" id="sol1">
+                        <div class="steps">
+                            <div class="step">Что дано: I = 2 А, R = 15 Ом.</div>
+                            <div class="step">Нужно найти напряжение U.</div>
+                            <div class="step">Используем закон Ома: U = I · R.</div>
+                            <div class="step">Подставляем значения: U = 2 · 15 = 30 В.</div>
+                            <div class="step"><span class="ok">Ответ: 30 В.</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass example-card">
+                    <div class="eyebrow">Задача 2</div>
+                    <h3>Провод разрезали на 3 части и свили вместе</h3>
+                    <p>
+                        Как изменится сопротивление провода, если его разрезали на 3 равные части и затем сложили эти части в один жгут?
+                    </p>
+                    <div class="formula">R<sub>нов</sub> = R<sub>стар</sub> / 3² = R<sub>стар</sub> / 9</div>
+                    <div class="control-row print-hide">
+                        <button class="btn small" data-solution="sol2">Показать решение</button>
+                    </div>
+                    <div class="solution" id="sol2">
+                        <div class="steps">
+                            <div class="step">После разрезания длина одной рабочей части станет в 3 раза меньше: l<sub>нов</sub> = l / 3.</div>
+                            <div class="step">После свивания трёх частей вместе площадь сечения станет в 3 раза больше: S<sub>нов</sub> = 3S.</div>
+                            <div class="step">Используем формулу R = ρl / S.</div>
+                            <div class="step">Тогда R<sub>нов</sub> = ρ(l / 3) / (3S) = ρl / 9S = R<sub>стар</sub> / 9.</div>
+                            <div class="step"><span class="ok">Ответ: сопротивление уменьшится в 9 раз.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="cheat" class="section">
+        <div class="container">
+            <div class="section-title">
+                <div><h2>Шпаргалка</h2></div>
+                <p>Сжатая сводка формул, идей и типичных ловушек — для быстрого повторения перед задачами.</p>
+            </div>
+
+            <div class="cheat-grid">
+                <div class="glass cheat">
+                    <h3>Формулы</h3>
+                    <div class="formula">U = I · R</div>
+                    <div class="formula">I = U / R</div>
+                    <div class="formula">R = U / I</div>
+                    <div class="formula">R = ρl / S</div>
+                    <div class="formula">l = RS / ρ</div>
+                </div>
+
+                <div class="glass cheat">
+                    <h3>Как меняются величины</h3>
+                    <ul>
+                        <li>Больше l → больше R.</li>
+                        <li>Больше S → меньше R.</li>
+                        <li>Больше ρ → больше R.</li>
+                        <li>Больше R при том же U → меньше I.</li>
+                    </ul>
+                </div>
+
+                <div class="glass cheat">
+                    <h3>График ВАХ</h3>
+                    <ul>
+                        <li>Для постоянного сопротивления — прямая через начало координат.</li>
+                        <li>По точке графика можно найти сопротивление: R = U / I.</li>
+                        <li>Если через R меняются l, S или ρ, то наклон ВАХ тоже меняется.</li>
+                    </ul>
+                </div>
+
+                <div class="glass cheat">
+                    <h3>Типичные ошибки</h3>
+                    <ul>
+                        <li>Путать I = q / t и U = I · R.</li>
+                        <li>Забывать единицы измерения.</li>
+                        <li>Неверно понимать, что происходит с длиной и площадью при свивании жгута.</li>
+                        <li>Не использовать отношение R₂ / R₁ в задачах на сравнение.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz" class="section">
+        <div class="container">
+            <div class="section-title">
+                <div><h2>Самопроверка</h2></div>
+                <p>Мини-квиз на понимание формул, графика и проводников. После проверки увидишь правильные и неправильные ответы.</p>
+            </div>
+
+            <div class="glass pad">
+                <div class="quiz-list" id="quizList">
+                    <div class="q-card" data-correct="2">
+                        <h3>1. Если U = 12 В и R = 4 Ом, то сила тока равна:</h3>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q1" value="0"><span>48 А</span></label>
+                            <label class="option"><input type="radio" name="q1" value="1"><span>16 А</span></label>
+                            <label class="option"><input type="radio" name="q1" value="2"><span>3 А</span></label>
+                            <label class="option"><input type="radio" name="q1" value="3"><span>0,33 А</span></label>
+                        </div>
+                    </div>
+
+                    <div class="q-card" data-correct="1">
+                        <h3>2. По точке ВАХ: U = 10 В, I = 2,5 А. Чему равно сопротивление?</h3>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q2" value="0"><span>25 Ом</span></label>
+                            <label class="option"><input type="radio" name="q2" value="1"><span>4 Ом</span></label>
+                            <label class="option"><input type="radio" name="q2" value="2"><span>7,5 Ом</span></label>
+                            <label class="option"><input type="radio" name="q2" value="3"><span>12,5 Ом</span></label>
+                        </div>
+                    </div>
+
+                    <div class="q-card" data-correct="0">
+                        <h3>3. Что произойдёт с сопротивлением провода, если увеличить его длину в 2 раза при неизменных ρ и S?</h3>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q3" value="0"><span>Увеличится в 2 раза</span></label>
+                            <label class="option"><input type="radio" name="q3" value="1"><span>Уменьшится в 2 раза</span></label>
+                            <label class="option"><input type="radio" name="q3" value="2"><span>Не изменится</span></label>
+                            <label class="option"><input type="radio" name="q3" value="3"><span>Увеличится в 4 раза</span></label>
+                        </div>
+                    </div>
+
+                    <div class="q-card" data-correct="3">
+                        <h3>4. Как записывается формула сопротивления однородного проводника?</h3>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q4" value="0"><span>R = ρS / l</span></label>
+                            <label class="option"><input type="radio" name="q4" value="1"><span>R = U · I</span></label>
+                            <label class="option"><input type="radio" name="q4" value="2"><span>R = l / ρS</span></label>
+                            <label class="option"><input type="radio" name="q4" value="3"><span>R = ρl / S</span></label>
+                        </div>
+                    </div>
+
+                    <div class="q-card" data-correct="2">
+                        <h3>5. Провод разрезали на 2 равные части и свили в один жгут. Новое сопротивление:</h3>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q5" value="0"><span>Увеличится в 2 раза</span></label>
+                            <label class="option"><input type="radio" name="q5" value="1"><span>Не изменится</span></label>
+                            <label class="option"><input type="radio" name="q5" value="2"><span>Уменьшится в 4 раза</span></label>
+                            <label class="option"><input type="radio" name="q5" value="3"><span>Уменьшится в 2 раза</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quiz-footer print-hide">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap">
+                        <button class="btn" id="checkQuiz">Проверить квиз</button>
+                        <button class="btn secondary" id="resetQuiz">Сбросить ответы</button>
+                    </div>
+                    <div class="scorebox" id="quizScore">Результат: —</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator" class="section">
+        <div class="container">
+            <div class="section-title">
+                <div><h2>Генератор тренировочных задач</h2></div>
+                <p>Новые корректные задачи по теме — с готовым ответом, который можно раскрыть после попытки решить самостоятельно.</p>
+            </div>
+
+            <div class="generator-layout">
+                <div class="glass task-box">
+                    <div class="task-meta">
+                        <span class="chip" id="taskTypeChip">Тип: —</span>
+                        <span class="chip">Без случайных противоречий</span>
+                        <span class="chip">С ответом и пояснением</span>
+                    </div>
+                    <div class="task-text" id="taskText">Нажми «Новая задача», чтобы сгенерировать задание.</div>
+                    <div class="answer-box" id="taskAnswer"></div>
+                    <div class="control-row generator-controls print-hide">
+                        <button class="btn" id="newTask">Новая задача</button>
+                        <button class="btn secondary" id="showTaskAnswer">Показать ответ</button>
+                        <button class="btn ghost" id="hideTaskAnswer">Скрыть ответ</button>
+                    </div>
+                </div>
+
+                <div class="glass pad">
+                    <h3 style="margin-top:0">Какие типы задач генерируются</h3>
+                    <div class="grid-3" style="grid-template-columns:1fr; margin-top:14px">
+                        <div class="mini-panel">
+                            <strong>1. Прямой закон Ома</strong>
+                            <div class="muted" style="margin-top:8px; line-height:1.6">Найти U, I или R по двум известным величинам.</div>
+                        </div>
+                        <div class="mini-panel">
+                            <strong>2. ВАХ и сопротивление</strong>
+                            <div class="muted" style="margin-top:8px; line-height:1.6">По точке графика вычислить сопротивление проводника.</div>
+                        </div>
+                        <div class="mini-panel">
+                            <strong>3. Формула R = ρl / S</strong>
+                            <div class="muted" style="margin-top:8px; line-height:1.6">Найти длину или сравнить сопротивления проводников.</div>
+                        </div>
+                        <div class="mini-panel">
+                            <strong>4. Разрезание и жгут</strong>
+                            <div class="muted" style="margin-top:8px; line-height:1.6">Понять, как меняется сопротивление после деления на части и свивания.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    Интерактивная страница по теме «Закон Ома и сопротивление проводника».
+</footer>
+
+<script>
+    const $ = (s, root = document) => root.querySelector(s);
+    const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+
+    const fmt = (n, digits = 2) => {
+        if (!isFinite(n)) return "—";
+        const v = Number(n);
+        const fixed = Math.abs(v) >= 100 ? v.toFixed(1) : v.toFixed(digits);
+        return fixed.replace(".", ",").replace(/,?0+$/,'').replace(/,$/, '');
+    };
+
+    const ui = {
+        uRange: $("#uRange"),
+        lRange: $("#lRange"),
+        sRange: $("#sRange"),
+        rhoRange: $("#rhoRange"),
+        uValue: $("#uValue"),
+        lValue: $("#lValue"),
+        sValue: $("#sValue"),
+        rhoValue: $("#rhoValue"),
+        iReadout: $("#iReadout"),
+        geomReadout: $("#geomReadout"),
+        slopeReadout: $("#slopeReadout"),
+        formulaReadout: $("#formulaReadout"),
+        showGrid: $("#showGrid"),
+        showPoint: $("#showPoint"),
+        showGuide: $("#showGuide"),
+        showFormulaOnGraph: $("#showFormulaOnGraph"),
+        svg: $("#vahSvg"),
+        layers: {
+            grid: $("#gridLayer"),
+            axis: $("#axisLayer"),
+            curve: $("#curveLayer"),
+            guide: $("#guideLayer"),
+            point: $("#pointLayer"),
+            label: $("#labelLayer")
+        }
+    };
+
+    function svgEl(name, attrs = {}) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", name);
+        for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+        return el;
+    }
+
+    function clearLayer(layer){ while (layer.firstChild) layer.removeChild(layer.firstChild); }
+
+    function drawVAH(){
+        const U = parseFloat(ui.uRange.value);
+        const l = parseFloat(ui.lRange.value);
+        const S = parseFloat(ui.sRange.value);
+        const rho = parseFloat(ui.rhoRange.value);
+
+        const R = rho * l / S;
+        const I = U / R;
+        const slope = 1 / R;
+
+        ui.uValue.textContent = `${fmt(U,1)} В`;
+        ui.lValue.textContent = `${fmt(l,1)} м`;
+        ui.sValue.textContent = `${fmt(S,1)} мм²`;
+        ui.rhoValue.textContent = `${fmt(rho,3)} Ом·мм²/м`;
+
+        ui.geomReadout.textContent = `${fmt(R,3)} Ом`;
+        ui.iReadout.textContent = `${fmt(I,2)} А`;
+        ui.slopeReadout.textContent = `${fmt(slope,3)} А/В`;
+        ui.formulaReadout.textContent = `R = ${fmt(rho,3)} · ${fmt(l,1)} / ${fmt(S,1)} = ${fmt(R,3)} Ом`;
+
+        const W = 760, H = 470;
+        const m = {l:72, r:28, t:28, b:58};
+        const gx0 = m.l, gy0 = H - m.b;
+        const gw = W - m.l - m.r, gh = H - m.t - m.b;
+        const maxU = 24;
+
+        let maxI = Math.max(6, Math.ceil((maxU / R) * 1.15));
+        maxI = Math.min(maxI, 800);
+
+        const x = (u) => gx0 + (u / maxU) * gw;
+        const y = (i) => gy0 - (i / maxI) * gh;
+
+        clearLayer(ui.layers.grid);
+        clearLayer(ui.layers.axis);
+        clearLayer(ui.layers.curve);
+        clearLayer(ui.layers.guide);
+        clearLayer(ui.layers.point);
+        clearLayer(ui.layers.label);
+
+        if (ui.showGrid.checked) {
+            for(let u=0; u<=maxU; u+=2){
+                ui.layers.grid.appendChild(svgEl("line", {
+                    x1:x(u), y1:m.t, x2:x(u), y2:gy0,
+                    stroke:"rgba(255,255,255,.08)", "stroke-width":"1"
+                }));
+            }
+            const ySteps = 6;
+            for(let k=0; k<=ySteps; k++){
+                const iVal = (maxI / ySteps) * k;
+                ui.layers.grid.appendChild(svgEl("line", {
+                    x1:gx0, y1:y(iVal), x2:W-m.r, y2:y(iVal),
+                    stroke:"rgba(255,255,255,.07)", "stroke-width":"1"
+                }));
+            }
+        }
+
+        ui.layers.axis.appendChild(svgEl("line", {
+            x1:gx0, y1:gy0, x2:W-m.r+6, y2:gy0,
+            stroke:"rgba(235,245,255,.8)", "stroke-width":"2"
+        }));
+        ui.layers.axis.appendChild(svgEl("line", {
+            x1:gx0, y1:gy0, x2:gx0, y2:m.t-6,
+            stroke:"rgba(235,245,255,.8)", "stroke-width":"2"
+        }));
+
+        ui.layers.axis.appendChild(svgEl("polygon", {
+            points:`${W-m.r+6},${gy0} ${W-m.r-8},${gy0-5} ${W-m.r-8},${gy0+5}`,
+            fill:"rgba(235,245,255,.8)"
+        }));
+        ui.layers.axis.appendChild(svgEl("polygon", {
+            points:`${gx0},${m.t-6} ${gx0-5},${m.t+8} ${gx0+5},${m.t+8}`,
+            fill:"rgba(235,245,255,.8)"
+        }));
+
+        for(let u=0; u<=maxU; u+=4){
+            const tx = svgEl("text", {
+                x:x(u), y:gy0+28, fill:"#bfd2ef", "font-size":"13", "text-anchor":"middle"
+            });
+            tx.textContent = u;
+            ui.layers.axis.appendChild(tx);
+        }
+
+        const ySteps = 6;
+        for(let k=0; k<=ySteps; k++){
+            const val = (maxI / ySteps) * k;
+            const ty = svgEl("text", {
+                x:gx0-14, y:y(val)+4, fill:"#bfd2ef", "font-size":"13", "text-anchor":"end"
+            });
+            ty.textContent = fmt(val, maxI < 20 ? 2 : 0);
+            ui.layers.axis.appendChild(ty);
+        }
+
+        const xlabel = svgEl("text", {
+            x:W-m.r-2, y:gy0+44, fill:"#eef5ff", "font-size":"14", "text-anchor":"end", "font-weight":"700"
+        });
+        xlabel.textContent = "U, В";
+        ui.layers.axis.appendChild(xlabel);
+
+        const ylabel = svgEl("text", {
+            x:gx0-22, y:m.t+8, fill:"#eef5ff", "font-size":"14", "text-anchor":"middle", "font-weight":"700"
+        });
+        ylabel.textContent = "I, А";
+        ui.layers.axis.appendChild(ylabel);
+
+        let path = "";
+        const step = 0.25;
+        for(let u=0; u<=maxU; u+=step){
+            const i = u / R;
+            path += (path ? " L " : "M ") + `${x(u)} ${y(i)}`;
+        }
+
+        const glowPath = svgEl("path", {
+            d:path, fill:"none", stroke:"url(#lineGrad)", "stroke-width":"8", opacity:"0.18", filter:"url(#glow)"
+        });
+        const curvePath = svgEl("path", {
+            d:path, fill:"none", stroke:"url(#lineGrad)", "stroke-width":"3.2", "stroke-linecap":"round"
+        });
+        ui.layers.curve.appendChild(glowPath);
+        ui.layers.curve.appendChild(curvePath);
+
+        const px = x(U), py = y(I);
+
+        if (ui.showGuide.checked) {
+            ui.layers.guide.appendChild(svgEl("line", {
+                x1:px, y1:gy0, x2:px, y2:py,
+                stroke:"#63f5c8", "stroke-width":"2", "stroke-dasharray":"7 7", opacity:"0.95"
+            }));
+            ui.layers.guide.appendChild(svgEl("line", {
+                x1:gx0, y1:py, x2:px, y2:py,
+                stroke:"#63f5c8", "stroke-width":"2", "stroke-dasharray":"7 7", opacity:"0.95"
+            }));
+        }
+
+        if (ui.showPoint.checked) {
+            ui.layers.point.appendChild(svgEl("circle", {
+                cx:px, cy:py, r:"8", fill:"#8c7bff"
+            }));
+            ui.layers.point.appendChild(svgEl("circle", {
+                cx:px, cy:py, r:"15", fill:"none", stroke:"#8c7bff", opacity:"0.35", "stroke-width":"2"
+            }));
+        }
+
+        const label = svgEl("text", {
+            x:Math.min(px + 18, W - 140), y:Math.max(py - 18, 28),
+            fill:"#eef5ff", "font-size":"14", "font-weight":"700"
+        });
+        label.textContent = `(${fmt(U,1)} В; ${fmt(I,2)} А)`;
+        ui.layers.label.appendChild(label);
+
+        if (ui.showFormulaOnGraph.checked) {
+            const boxW = 210, boxH = 72;
+            const bx = W - m.r - boxW - 12, by = m.t + 12;
+            const rect = svgEl("rect", {
+                x:bx, y:by, rx:"14", ry:"14", width:boxW, height:boxH,
+                fill:"rgba(10,18,34,.72)", stroke:"rgba(255,255,255,.11)"
+            });
+            const txt1 = svgEl("text", {
+                x:bx+16, y:by+22, fill:"#d7e7ff", "font-size":"13", "font-family":"ui-monospace, monospace"
+            });
+            txt1.textContent = "R = ρl / S";
+            const txt2 = svgEl("text", {
+                x:bx+16, y:by+41, fill:"#d7e7ff", "font-size":"13", "font-family":"ui-monospace, monospace"
+            });
+            txt2.textContent = `R = ${fmt(R,3)} Ом`;
+            const txt3 = svgEl("text", {
+                x:bx+16, y:by+61, fill:"#67d8ff", "font-size":"13", "font-weight":"800", "font-family":"ui-monospace, monospace"
+            });
+            txt3.textContent = `I = U / R = ${fmt(I,2)} А`;
+            ui.layers.label.append(rect, txt1, txt2, txt3);
+        }
+    }
+
+    [ui.uRange, ui.lRange, ui.sRange, ui.rhoRange, ui.showGrid, ui.showPoint, ui.showGuide, ui.showFormulaOnGraph]
+        .forEach(el => el.addEventListener("input", drawVAH));
+
+    drawVAH();
+
+    const tabs = $$(".tab");
+    let currentMode = "ohm-u";
+
+    function setMode(mode){
+        currentMode = mode;
+        tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === mode));
+        $("#fieldI").classList.remove("hidden");
+        $("#fieldR").classList.remove("hidden");
+        $("#fieldU").classList.remove("hidden");
+
+        if(mode === "ohm-u"){
+            $("#fieldU").classList.add("hidden");
+        }else if(mode === "ohm-i"){
+            $("#fieldI").classList.add("hidden");
+        }else if(mode === "ohm-r"){
+            $("#fieldR").classList.add("hidden");
+        }
+        $("#calcResult").innerHTML = "Выбери режим и нажми «Вычислить».";
+    }
+
+    tabs.forEach(t => t.addEventListener("click", () => setMode(t.dataset.tab)));
+    setMode("ohm-u");
+
+    $("#calcButton").addEventListener("click", () => {
+        const I = parseFloat($("#calcI").value);
+        const R = parseFloat($("#calcR").value);
+        const U = parseFloat($("#calcU").value);
+        let html = "";
+
+        if (currentMode === "ohm-u"){
+            if (!(I > 0) || !(R > 0)) {
+                html = `<span class="danger">Введите положительные I и R.</span>`;
+            } else {
+                const ans = I * R;
+                html = `
+            <strong>Результат:</strong> U = ${fmt(ans,2)} В<br>
+            <div class="steps">
+              <div class="step">Используем формулу U = I · R.</div>
+              <div class="step">Подставляем: U = ${fmt(I,2)} · ${fmt(R,2)}.</div>
+              <div class="step"><span class="ok">Получаем: U = ${fmt(ans,2)} В.</span></div>
+            </div>
+          `;
+            }
+        }
+
+        if (currentMode === "ohm-i"){
+            if (!(U >= 0) || !(R > 0)) {
+                html = `<span class="danger">Введите U ≥ 0 и R > 0.</span>`;
+            } else {
+                const ans = U / R;
+                html = `
+            <strong>Результат:</strong> I = ${fmt(ans,3)} А<br>
+            <div class="steps">
+              <div class="step">Используем формулу I = U / R.</div>
+              <div class="step">Подставляем: I = ${fmt(U,2)} / ${fmt(R,2)}.</div>
+              <div class="step"><span class="ok">Получаем: I = ${fmt(ans,3)} А.</span></div>
+            </div>
+          `;
+            }
+        }
+
+        if (currentMode === "ohm-r"){
+            if (!(U >= 0) || !(I > 0)) {
+                html = `<span class="danger">Введите U ≥ 0 и I > 0. Делить на ноль нельзя.</span>`;
+            } else {
+                const ans = U / I;
+                html = `
+            <strong>Результат:</strong> R = ${fmt(ans,3)} Ом<br>
+            <div class="steps">
+              <div class="step">Используем формулу R = U / I.</div>
+              <div class="step">Подставляем: R = ${fmt(U,2)} / ${fmt(I,2)}.</div>
+              <div class="step"><span class="ok">Получаем: R = ${fmt(ans,3)} Ом.</span></div>
+            </div>
+          `;
+            }
+        }
+
+        $("#calcResult").innerHTML = html;
+    });
+
+    $("#calcReset").addEventListener("click", () => {
+        $("#calcI").value = 2;
+        $("#calcR").value = 15;
+        $("#calcU").value = 30;
+        setMode("ohm-u");
+    });
+
+    $("#wireCalc").addEventListener("click", () => {
+        const R = parseFloat($("#wireR").value);
+        const rho = parseFloat($("#wireRho").value);
+        const S = parseFloat($("#wireS").value);
+
+        if (!(R > 0) || !(rho > 0) || !(S > 0)) {
+            $("#wireResult").innerHTML = `<span class="danger">Все величины должны быть положительными.</span>`;
+            return;
+        }
+
+        const l = R * S / rho;
+        $("#wireResult").innerHTML = `
+        <strong>Результат:</strong> l = ${fmt(l,2)} м
+        <div class="steps">
+          <div class="step">Формула: R = ρl / S.</div>
+          <div class="step">Выражаем длину: l = RS / ρ.</div>
+          <div class="step">Подставляем: l = ${fmt(R,2)} · ${fmt(S,2)} / ${fmt(rho,3)}.</div>
+          <div class="step"><span class="ok">Получаем: l = ${fmt(l,2)} м.</span></div>
+        </div>
+      `;
+    });
+
+    $("#wireReset").addEventListener("click", () => {
+        $("#wireR").value = 180;
+        $("#wireRho").value = 0.055;
+        $("#wireS").value = 0.1;
+        $("#wireResult").innerHTML = "Здесь будет расчёт длины провода.";
+    });
+
+    $$("[data-solution]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const target = $("#" + btn.dataset.solution);
+            target.classList.toggle("show");
+            btn.textContent = target.classList.contains("show") ? "Скрыть решение" : "Показать решение";
+        });
+    });
+
+    $("#checkQuiz").addEventListener("click", () => {
+        const cards = $$(".q-card");
+        let score = 0;
+        let answered = 0;
+
+        cards.forEach((card, idx) => {
+            const correct = card.dataset.correct;
+            const options = $$(".option", card);
+            const checked = $(`input[name="q${idx+1}"]:checked`, card);
+
+            options.forEach(op => op.classList.remove("correct", "wrong"));
+
+            if (checked) answered++;
+
+            options.forEach((op, i) => {
+                const input = $("input", op);
+                if (String(i) === correct) op.classList.add("correct");
+                if (checked && input.checked && String(i) !== correct) op.classList.add("wrong");
+            });
+
+            if (checked && checked.value === correct) score++;
+        });
+
+        $("#quizScore").textContent = `Результат: ${score} / ${cards.length}${answered < cards.length ? " (не все вопросы заполнены)" : ""}`;
+    });
+
+    $("#resetQuiz").addEventListener("click", () => {
+        $$('input[type="radio"]').forEach(r => r.checked = false);
+        $$(".option").forEach(op => op.classList.remove("correct", "wrong"));
+        $("#quizScore").textContent = "Результат: —";
+    });
+
+    const taskText = $("#taskText");
+    const taskAnswer = $("#taskAnswer");
+    const taskTypeChip = $("#taskTypeChip");
+
+    function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+    function pick(arr){ return arr[randInt(0, arr.length-1)]; }
+
+    function generateTask(){
+        const type = randInt(1,4);
+        let text = "", answer = "", label = "";
+
+        if (type === 1){
+            label = "Тип: закон Ома";
+            const sub = randInt(1,3);
+
+            if (sub === 1){
+                const I = pick([1,2,3,4,5,6]);
+                const R = pick([2,4,5,8,10,12,15]);
+                const U = I*R;
+                text = `В цепи сила тока равна ${I} А, сопротивление участка ${R} Ом. Найдите напряжение.`;
+                answer = `Используем формулу U = I · R. Получаем U = ${I} · ${R} = ${U} В.`;
+            }
+
+            if (sub === 2){
+                const U = pick([6,8,10,12,18,20,24,30]);
+                const R = pick([2,3,4,5,6,8,10]);
+                const I = U / R;
+                if (!Number.isInteger(I)) return generateTask();
+                text = `Напряжение на участке цепи равно ${U} В, сопротивление равно ${R} Ом. Найдите силу тока.`;
+                answer = `Используем формулу I = U / R. Получаем I = ${U} / ${R} = ${I} А.`;
+            }
+
+            if (sub === 3){
+                const U = pick([10,12,15,18,20,24,30]);
+                const I = pick([1,2,3,4,5,6]);
+                const R = U / I;
+                if (!Number.isInteger(R)) return generateTask();
+                text = `Известно, что напряжение равно ${U} В, а сила тока — ${I} А. Найдите сопротивление.`;
+                answer = `Используем формулу R = U / I. Получаем R = ${U} / ${I} = ${R} Ом.`;
+            }
+        }
+
+        if (type === 2){
+            label = "Тип: ВАХ";
+            const U = pick([6,8,10,12,14,16,18]);
+            const I = pick([1,2,2.5,3,4]);
+            const R = U / I;
+            if (!isFinite(R) || Math.round(R*10) !== R*10) return generateTask();
+            text = `Для некоторой точки вольт-амперной характеристики известно: U = ${fmt(U,1)} В, I = ${fmt(I,1)} А. Найдите сопротивление проводника.`;
+            answer = `На ВАХ сопротивление находим по формуле R = U / I. Получаем R = ${fmt(U,1)} / ${fmt(I,1)} = ${fmt(R,1)} Ом.`;
+        }
+
+        if (type === 3){
+            label = "Тип: проводник";
+            const sub = randInt(1,2);
+
+            if (sub === 1){
+                const R = pick([44,55,88,110,165,180,220]);
+                const rho = pick([0.017,0.028,0.055,0.1]);
+                const S = pick([0.1,0.2,0.5,1]);
+                const l = R * S / rho;
+                if (Math.abs(l) > 5000) return generateTask();
+                text = `Для провода известно: сопротивление ${fmt(R,1)} Ом, удельное сопротивление ρ = ${fmt(rho,3)} Ом·мм²/м, площадь сечения ${fmt(S,1)} мм². Найдите длину провода.`;
+                answer = `Используем формулу l = RS / ρ. Получаем l = ${fmt(R,1)} · ${fmt(S,1)} / ${fmt(rho,3)} = ${fmt(l,2)} м.`;
+            }
+
+            if (sub === 2){
+                const l1 = pick([0.1,0.2,0.3,0.4]);
+                const k = pick([2,3,4,5,6]);
+                const l2 = l1 * k;
+                text = `Два проводника сделаны из одного материала и имеют одинаковую площадь поперечного сечения. Длина первого проводника ${fmt(l1,1)} м, длина второго ${fmt(l2,1)} м. Во сколько раз сопротивление второго больше сопротивления первого?`;
+                answer = `Так как материал и площадь одинаковы, то R₂ / R₁ = l₂ / l₁. Получаем R₂ / R₁ = ${fmt(l2,1)} / ${fmt(l1,1)} = ${k}. Значит, сопротивление второго больше в ${k} раз.`;
+            }
+        }
+
+        if (type === 4){
+            label = "Тип: разрезание и жгут";
+            const n = pick([2,3,4]);
+            const factor = n*n;
+            text = `Провод разрезали на ${n} равные части и затем сложили эти части в один жгут. Во сколько раз изменилось сопротивление?`;
+            answer = `После разрезания и свивания: l уменьшается в ${n} раз, S увеличивается в ${n} раз. Поэтому Rнов = Rстар / ${n}² = Rстар / ${factor}. Значит, сопротивление уменьшилось в ${factor} раз.`;
+        }
+
+        taskTypeChip.textContent = label;
+        taskText.textContent = text;
+        taskAnswer.innerHTML = answer;
+        taskAnswer.classList.remove("show");
+    }
+
+    $("#newTask").addEventListener("click", generateTask);
+    $("#showTaskAnswer").addEventListener("click", () => taskAnswer.classList.add("show"));
+    $("#hideTaskAnswer").addEventListener("click", () => taskAnswer.classList.remove("show"));
+
+    generateTask();
+</script>
+</body>
+</html>

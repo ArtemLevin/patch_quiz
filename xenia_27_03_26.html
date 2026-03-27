@@ -1,0 +1,1259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>График функции с модулем | Интерактивная лаборатория</title>
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #121826;
+            --bg-glass: rgba(18, 24, 38, 0.85);
+            --accent: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.4);
+            --secondary: #7b68ee;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff4466;
+            --text: #e8ecf1;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .background-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--secondary);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--success);
+            top: 50%;
+            left: 50%;
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .graph-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        #graphCanvas {
+            width: 100%;
+            height: 450px;
+            border-radius: 12px;
+            background: #0d1117;
+        }
+
+        .slider-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .slider-value {
+            color: var(--accent);
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .formula-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            border-left: 4px solid var(--accent);
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+
+        .formula-main {
+            font-size: 1.3rem;
+            color: var(--accent);
+            text-align: center;
+            padding: 16px;
+            background: rgba(0, 212, 255, 0.08);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .case-box {
+            background: rgba(123, 104, 238, 0.08);
+            border: 1px solid rgba(123, 104, 238, 0.3);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .case-title {
+            color: var(--secondary);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .point-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .point-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .point-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .answer-box {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            border: 2px solid var(--success);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .answer-title {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .answer-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--success);
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .quiz-container {
+            margin-top: 40px;
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .option {
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .option:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.08);
+        }
+
+        .option.selected {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.15);
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .option.incorrect {
+            border-color: var(--danger);
+            background: rgba(255, 68, 102, 0.15);
+        }
+
+        .quiz-result {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-top: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .generator-section {
+            margin-top: 40px;
+        }
+
+        .generated-task {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .task-text {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .task-formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.3rem;
+            color: var(--accent);
+            background: rgba(0, 212, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 12px 0;
+        }
+
+        .solution-toggle {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .solution-toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .solution-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            margin-top: 16px;
+            padding: 0 16px;
+        }
+
+        .solution-content.open {
+            max-height: 1000px;
+            padding: 16px;
+            background: rgba(0, 255, 136, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .intersection-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .intersection-card {
+            background: rgba(255, 170, 0, 0.08);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .intersection-count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .branch-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .branch-left {
+            background: rgba(123, 104, 238, 0.2);
+            color: var(--secondary);
+        }
+
+        .branch-right {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent);
+        }
+
+        @media print {
+            .background-effect,
+            .slider-container,
+            .btn,
+            .quiz-container,
+            .generator-section {
+                display: none !important;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+            .card {
+                background: white;
+                border: 1px solid #ccc;
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            #graphCanvas {
+                height: 350px;
+            }
+            .answer-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="background-effect">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<div class="container">
+    <header>
+        <h1>График функции с модулем</h1>
+        <p class="subtitle">Интерактивное исследование функции y = |x|·(x−1) − 2x и нахождение параметров для заданного количества точек пересечения</p>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Интерактивный график</div>
+            </div>
+            <div class="graph-container">
+                <canvas id="graphCanvas"></canvas>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #7b68ee;"></div>
+                        <span>Ветвь x &lt; 0</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #00d4ff;"></div>
+                        <span>Ветвь x ≥ 0</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffaa00;"></div>
+                        <span>Прямая y = m</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #00ff88;"></div>
+                        <span>Точки пересечения</span>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Значение параметра m</span>
+                    <span class="slider-value" id="mValue">0.25</span>
+                </div>
+                <input type="range" id="mSlider" min="-3" max="1" step="0.05" value="0.25">
+                <div class="intersection-points" id="intersectionInfo"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">📐</div>
+                <div class="card-title">Аналитическое решение</div>
+            </div>
+            <div class="formula-main">y = |x|·(x − 1) − 2x</div>
+
+            <div class="case-box">
+                <div class="case-title">
+                    Случай 1: x ≥ 0
+                    <span class="branch-indicator branch-right">Правая ветвь</span>
+                </div>
+                <div class="formula-box">
+                    |x| = x<br>
+                    y = x·(x − 1) − 2x<br>
+                    y = x² − x − 2x<br>
+                    <strong>y = x² − 3x</strong>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">
+                    Парабола ветвями вверх, вершина в точке <strong>(1.5; −2.25)</strong>
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px;">
+                    Нули: x = 0 и x = 3
+                </p>
+            </div>
+
+            <div class="case-box">
+                <div class="case-title">
+                    Случай 2: x &lt; 0
+                    <span class="branch-indicator branch-left">Левая ветвь</span>
+                </div>
+                <div class="formula-box">
+                    |x| = −x<br>
+                    y = −x·(x − 1) − 2x<br>
+                    y = −x² + x − 2x<br>
+                    <strong>y = −x² − x</strong>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">
+                    Парабола ветвями вниз, вершина в точке <strong>(−0.5; 0.25)</strong>
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px;">
+                    Нули: x = 0 и x = −1
+                </p>
+            </div>
+
+            <div class="key-points">
+                <div class="point-card">
+                    <div class="point-value">(−0.5; 0.25)</div>
+                    <div class="point-label">Максимум левой ветви</div>
+                </div>
+                <div class="point-card">
+                    <div class="point-value">(0; 0)</div>
+                    <div class="point-label">Точка соединения</div>
+                </div>
+                <div class="point-card">
+                    <div class="point-value">(1.5; −2.25)</div>
+                    <div class="point-label">Минимум правой ветви</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">✅</div>
+            <div class="card-title">Ответ задачи</div>
+        </div>
+        <p style="margin-bottom: 20px; color: var(--text-muted);">
+            Прямая y = m имеет ровно две общие точки с графиком функции только в двух случаях — когда она проходит через вершины парабол:
+        </p>
+        <div class="answer-box">
+            <div class="answer-title">Итоговый ответ</div>
+            <div class="answer-value">m = 0.25 или m = −2.25</div>
+            <div style="margin-top: 12px; color: var(--text-muted); font-family: 'Courier New', monospace;">
+                (или m = 1/4 и m = −9/4)
+            </div>
+        </div>
+    </div>
+
+    <div class="card quiz-container">
+        <div class="card-header">
+            <div class="card-icon">🎯</div>
+            <div class="card-title">Проверь себя</div>
+        </div>
+        <div id="quizQuestions"></div>
+        <div class="quiz-result" id="quizResult" style="display: none;">
+            <div class="answer-title">Ваш результат</div>
+            <div class="score" id="quizScore">0/5</div>
+            <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top: 16px;">
+                🔄 Пройти заново
+            </button>
+        </div>
+        <button class="btn btn-primary" onclick="submitQuiz()" style="margin-top: 16px;">
+            ✅ Проверить ответы
+        </button>
+    </div>
+
+    <div class="card generator-section">
+        <div class="card-header">
+            <div class="card-icon">🎲</div>
+            <div class="card-title">Генератор задач</div>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">
+            Сгенерируйте новую тренировочную задачу аналогичного типа с готовым решением
+        </p>
+        <div class="generated-task" id="generatedTask">
+            <div class="task-text">
+                Нажмите кнопку ниже, чтобы получить новую задачу
+            </div>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn btn-primary" onclick="generateTask()">
+                🎲 Новая задача
+            </button>
+            <button class="btn btn-secondary" onclick="window.print()">
+                🖨️ Печать
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функция для вычисления y
+    function calculateY(x) {
+        return Math.abs(x) * (x - 1) - 2 * x;
+    }
+
+    // Поиск точек пересечения с y = m
+    function findIntersections(m) {
+        const points = [];
+        const epsilon = 0.001;
+
+        // Для x >= 0: x² - 3x = m → x² - 3x - m = 0
+        const D1 = 9 + 4 * m;
+        if (D1 >= 0) {
+            const sqrtD1 = Math.sqrt(D1);
+            const x1 = (3 + sqrtD1) / 2;
+            const x2 = (3 - sqrtD1) / 2;
+            if (x1 >= 0) points.push({x: x1, y: m, branch: 'right'});
+            if (x2 >= 0 && Math.abs(x1 - x2) > epsilon) points.push({x: x2, y: m, branch: 'right'});
+        }
+
+        // Для x < 0: -x² - x = m → x² + x + m = 0
+        const D2 = 1 - 4 * m;
+        if (D2 >= 0) {
+            const sqrtD2 = Math.sqrt(D2);
+            const x3 = (-1 + sqrtD2) / 2;
+            const x4 = (-1 - sqrtD2) / 2;
+            if (x3 < -epsilon) points.push({x: x3, y: m, branch: 'left'});
+            if (x4 < -epsilon && Math.abs(x3 - x4) > epsilon) points.push({x: x4, y: m, branch: 'left'});
+        }
+
+        return points;
+    }
+
+    // Отрисовка графика
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const mSlider = document.getElementById('mSlider');
+    const mValue = document.getElementById('mValue');
+    const intersectionInfo = document.getElementById('intersectionInfo');
+
+    // Настройки масштаба для полного отображения обеих ветвей
+    const graphConfig = {
+        xMin: -2.5,
+        xMax: 4.5,
+        yMin: -3.5,
+        yMax: 1.5,
+        padding: 60
+    };
+
+    function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width - 40;
+        canvas.height = 450;
+        drawGraph();
+    }
+
+    function drawGraph() {
+        const width = canvas.width;
+        const height = canvas.height;
+        const { xMin, xMax, yMin, yMax, padding } = graphConfig;
+
+        const graphWidth = width - 2 * padding;
+        const graphHeight = height - 2 * padding;
+
+        const scaleX = graphWidth / (xMax - xMin);
+        const scaleY = graphHeight / (yMax - yMin);
+
+        const originX = padding - xMin * scaleX;
+        const originY = height - padding + yMin * scaleY;
+
+        // Очистка
+        ctx.fillStyle = '#0d1117';
+        ctx.fillRect(0, 0, width, height);
+
+        // Сетка
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+
+        // Вертикальные линии сетки
+        for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+            const px = originX + x * scaleX;
+            ctx.beginPath();
+            ctx.moveTo(px, padding);
+            ctx.lineTo(px, height - padding);
+            ctx.stroke();
+        }
+
+        // Горизонтальные линии сетки
+        for (let y = Math.ceil(yMin); y <= Math.floor(yMax); y++) {
+            const py = originY - y * scaleY;
+            ctx.beginPath();
+            ctx.moveTo(padding, py);
+            ctx.lineTo(width - padding, py);
+            ctx.stroke();
+        }
+
+        // Оси координат
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 2;
+
+        // Ось X
+        ctx.beginPath();
+        ctx.moveTo(padding, originY);
+        ctx.lineTo(width - padding, originY);
+        ctx.stroke();
+
+        // Ось Y
+        ctx.beginPath();
+        ctx.moveTo(originX, padding);
+        ctx.lineTo(originX, height - padding);
+        ctx.stroke();
+
+        // Подписи осей
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillText('x', width - padding - 20, originY + 25);
+        ctx.fillText('y', originX + 15, padding + 20);
+
+        // Метки на оси X
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        for (let i = Math.ceil(xMin); i <= Math.floor(xMax); i++) {
+            if (i === 0) continue;
+            const px = originX + i * scaleX;
+            ctx.fillText(i.toString(), px, originY + 20);
+        }
+
+        // Метки на оси Y
+        ctx.textAlign = 'right';
+        for (let i = Math.ceil(yMin); i <= Math.floor(yMax); i++) {
+            if (i === 0) continue;
+            const py = originY - i * scaleY;
+            ctx.fillText(i.toString(), originX - 10, py + 5);
+        }
+
+        // Левая ветвь (x < 0) - фиолетовая
+        ctx.strokeStyle = '#7b68ee';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        let started = false;
+        for (let px = padding; px <= originX; px += 1) {
+            const x = (px - originX) / scaleX;
+            const y = calculateY(x);
+            const py = originY - y * scaleY;
+
+            if (py >= padding && py <= height - padding) {
+                if (!started) {
+                    ctx.moveTo(px, py);
+                    started = true;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+        }
+        ctx.stroke();
+
+        // Правая ветвь (x >= 0) - голубая
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        started = false;
+        for (let px = originX; px <= width - padding; px += 1) {
+            const x = (px - originX) / scaleX;
+            const y = calculateY(x);
+            const py = originY - y * scaleY;
+
+            if (py >= padding && py <= height - padding) {
+                if (!started) {
+                    ctx.moveTo(px, py);
+                    started = true;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+        }
+        ctx.stroke();
+
+        // Прямая y = m
+        const m = parseFloat(mSlider.value);
+        const mY = originY - m * scaleY;
+
+        if (mY >= padding - 10 && mY <= height - padding + 10) {
+            ctx.strokeStyle = '#ffaa00';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.moveTo(padding, mY);
+            ctx.lineTo(width - padding, mY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Подпись прямой
+            ctx.fillStyle = '#ffaa00';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`y = ${m.toFixed(2)}`, width - padding - 80, mY - 8);
+
+            // Точки пересечения
+            const points = findIntersections(m);
+            points.forEach(point => {
+                const px = originX + point.x * scaleX;
+                const py = originY - point.y * scaleY;
+
+                // Свечение вокруг точки
+                const gradient = ctx.createRadialGradient(px, py, 0, px, py, 15);
+                gradient.addColorStop(0, 'rgba(0, 255, 136, 0.8)');
+                gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(px, py, 15, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Сама точка
+                ctx.fillStyle = '#00ff88';
+                ctx.beginPath();
+                ctx.arc(px, py, 7, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Координаты точки
+                ctx.fillStyle = '#00ff88';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`(${point.x.toFixed(2)}; ${point.y.toFixed(2)})`, px, py - 15);
+            });
+
+            // Информация о пересечениях
+            updateIntersectionInfo(points);
+        }
+
+        // Вершины парабол
+        // Левая вершина (-0.5, 0.25)
+        const v1x = originX - 0.5 * scaleX;
+        const v1y = originY - 0.25 * scaleY;
+
+        const gradient1 = ctx.createRadialGradient(v1x, v1y, 0, v1x, v1y, 12);
+        gradient1.addColorStop(0, 'rgba(123, 104, 238, 0.8)');
+        gradient1.addColorStop(1, 'rgba(123, 104, 238, 0)');
+        ctx.fillStyle = gradient1;
+        ctx.beginPath();
+        ctx.arc(v1x, v1y, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#7b68ee';
+        ctx.beginPath();
+        ctx.arc(v1x, v1y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#7b68ee';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('(−0.5; 0.25)', v1x, v1y - 15);
+
+        // Правая вершина (1.5, -2.25)
+        const v2x = originX + 1.5 * scaleX;
+        const v2y = originY + 2.25 * scaleY;
+
+        const gradient2 = ctx.createRadialGradient(v2x, v2y, 0, v2x, v2y, 12);
+        gradient2.addColorStop(0, 'rgba(0, 212, 255, 0.8)');
+        gradient2.addColorStop(1, 'rgba(0, 212, 255, 0)');
+        ctx.fillStyle = gradient2;
+        ctx.beginPath();
+        ctx.arc(v2x, v2y, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#00d4ff';
+        ctx.beginPath();
+        ctx.arc(v2x, v2y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#00d4ff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('(1.5; −2.25)', v2x, v2y + 20);
+
+        // Точка соединения (0, 0)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(originX, originY, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('(0; 0)', originX, originY + 20);
+
+        // Нули функции
+        // x = -1 (левая ветвь)
+        const zero1x = originX - 1 * scaleX;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.beginPath();
+        ctx.arc(zero1x, originY, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // x = 3 (правая ветвь)
+        const zero2x = originX + 3 * scaleX;
+        ctx.beginPath();
+        ctx.arc(zero2x, originY, 4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function updateIntersectionInfo(points) {
+        const count = points.length;
+        let html = '';
+
+        if (count === 2) {
+            html = `<div class="intersection-card">
+                    <div class="intersection-count">${count} точки</div>
+                    <div style="color: var(--success); font-size: 0.85rem;">✓ Ровно две!</div>
+                </div>`;
+        } else {
+            const word = count === 1 ? 'точка' : count <= 4 ? 'точки' : 'точек';
+            html = `<div class="intersection-card">
+                    <div class="intersection-count">${count} ${word}</div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem;">Переместите ползунок</div>
+                </div>`;
+        }
+
+        intersectionInfo.innerHTML = html;
+    }
+
+    mSlider.addEventListener('input', () => {
+        mValue.textContent = parseFloat(mSlider.value).toFixed(2);
+        drawGraph();
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // Квиз
+    const quizQuestions = [
+        {
+            question: "Какова вершина параболы для x ≥ 0?",
+            options: ["(1.5; −2.25)", "(−0.5; 0.25)", "(0; 0)", "(3; 0)"],
+            correct: 0
+        },
+        {
+            question: "Сколько точек пересечения при m = 0?",
+            options: ["1", "2", "3", "4"],
+            correct: 2
+        },
+        {
+            question: "При каком m прямая имеет ровно 2 точки пересечения?",
+            options: ["m = 0", "m = 0.25 или m = −2.25", "m = 1", "m = −1"],
+            correct: 1
+        },
+        {
+            question: "Какое уравнение для x < 0?",
+            options: ["y = x² − 3x", "y = −x² − x", "y = x² + x", "y = −x² + x"],
+            correct: 1
+        },
+        {
+            question: "Где находится точка соединения ветвей?",
+            options: ["(1; −1)", "(−1; 1)", "(0; 0)", "(0.5; −0.5)"],
+            correct: 2
+        }
+    ];
+
+    let quizAnswers = [];
+    let quizSubmitted = false;
+
+    function renderQuiz() {
+        const container = document.getElementById('quizQuestions');
+        container.innerHTML = '';
+
+        quizQuestions.forEach((q, qIndex) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'quiz-question';
+
+            const questionText = document.createElement('div');
+            questionText.className = 'question-text';
+            questionText.textContent = `${qIndex + 1}. ${q.question}`;
+            questionDiv.appendChild(questionText);
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+
+            q.options.forEach((opt, oIndex) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = opt;
+                optionDiv.onclick = () => selectOption(qIndex, oIndex);
+
+                if (quizAnswers[qIndex] === oIndex) {
+                    optionDiv.classList.add('selected');
+                }
+
+                if (quizSubmitted) {
+                    if (oIndex === q.correct) {
+                        optionDiv.classList.add('correct');
+                    } else if (quizAnswers[qIndex] === oIndex) {
+                        optionDiv.classList.add('incorrect');
+                    }
+                }
+
+                optionsDiv.appendChild(optionDiv);
+            });
+
+            questionDiv.appendChild(optionsDiv);
+            container.appendChild(questionDiv);
+        });
+    }
+
+    function selectOption(qIndex, oIndex) {
+        if (quizSubmitted) return;
+        quizAnswers[qIndex] = oIndex;
+        renderQuiz();
+    }
+
+    function submitQuiz() {
+        quizSubmitted = true;
+        let score = 0;
+
+        quizQuestions.forEach((q, i) => {
+            if (quizAnswers[i] === q.correct) score++;
+        });
+
+        document.getElementById('quizScore').textContent = `${score}/${quizQuestions.length}`;
+        document.getElementById('quizResult').style.display = 'block';
+        renderQuiz();
+
+        document.getElementById('quizResult').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+        quizAnswers = [];
+        quizSubmitted = false;
+        document.getElementById('quizResult').style.display = 'none';
+        renderQuiz();
+    }
+
+    // Генератор задач
+    const taskTemplates = [
+        {
+            func: "y = |x|·(x − 2) − 3x",
+            solve: () => {
+                return "m = 0.25 или m = −6.25";
+            }
+        },
+        {
+            func: "y = |x|·(x + 1) − x",
+            solve: () => {
+                return "m = 0 или m = 1";
+            }
+        },
+        {
+            func: "y = |x|·(x − 1) − x",
+            solve: () => {
+                return "m = 0 или m = −1";
+            }
+        },
+        {
+            func: "y = |x|·(x + 2) − 2x",
+            solve: () => {
+                return "m = 0 или m = 4";
+            }
+        },
+        {
+            func: "y = |x|·(x − 3) − x",
+            solve: () => {
+                return "m = 0 или m = −4";
+            }
+        }
+    ];
+
+    function generateTask() {
+        const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+        const container = document.getElementById('generatedTask');
+
+        container.innerHTML = `
+                <div class="task-text">
+                    <strong>Задача:</strong> Постройте график функции и определите, при каких значениях m прямая y = m имеет с графиком ровно две общие точки.
+                </div>
+                <div class="task-formula">${template.func}</div>
+                <div class="solution-toggle" onclick="toggleSolution(this)">
+                    👁️ Показать/скрыть решение
+                </div>
+                <div class="solution-content">
+                    <div style="margin-bottom: 12px;"><strong>Решение:</strong></div>
+                    <p style="margin-bottom: 12px;">Раскрываем модуль и получаем две параболы. Находим вершины каждой параболы — именно при этих значениях y прямая будет иметь ровно 2 точки пересечения.</p>
+                    <div class="answer-box" style="margin-top: 16px;">
+                        <div class="answer-title">Ответ</div>
+                        <div class="answer-value" style="font-size: 1.5rem;">${template.solve()}</div>
+                    </div>
+                </div>
+            `;
+    }
+
+    function toggleSolution(element) {
+        const content = element.nextElementSibling;
+        content.classList.toggle('open');
+    }
+
+    // Инициализация
+    setTimeout(() => {
+        resizeCanvas();
+        renderQuiz();
+        generateTask();
+    }, 100);
+</script>
+</body>
+</html>

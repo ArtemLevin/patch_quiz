@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Параметр в системах: графический метод | Полное интерактивное пособие</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient: radial-gradient(circle at 20% 30%, #0b1120, #03060f);
+            --card-bg: rgba(15, 25, 45, 0.55);
+            --border-color: rgba(64, 224, 208, 0.2);
+            --accent: #2cc5c0;
+            --accent-glow: rgba(44, 197, 192, 0.3);
+            --text: #eef2ff;
+            --text-secondary: #b6e6e3;
+            --grid: #2f405b;
+            --canvas-bg: #0a0f1c;
+            --quiz-bg: #0f1825;
+            --highlight: #f5b042;
+            --danger: #ff8a7a;
+        }
+
+        body.light {
+            --bg-gradient: radial-gradient(circle at 20% 30%, #f0f4fa, #e6ecf3);
+            --card-bg: rgba(245, 248, 250, 0.85);
+            --border-color: rgba(44, 197, 192, 0.4);
+            --accent: #008080;
+            --text: #1a2a3a;
+            --text-secondary: #2c5a6e;
+            --grid: #c0d0e0;
+            --canvas-bg: #fefefe;
+            --quiz-bg: #eef2f7;
+            --highlight: #d98c2f;
+            --danger: #c23b22;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            line-height: 1.5;
+            padding: 1.5rem;
+            transition: background 0.3s, color 0.2s;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .math-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .math-symbol {
+            position: absolute;
+            font-size: 1.8rem;
+            opacity: 0.08;
+            font-family: monospace;
+            user-select: none;
+            animation: float 15s infinite linear;
+            color: var(--accent);
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.08; }
+            90% { opacity: 0.08; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Glass cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.3);
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            transform-style: preserve-3d;
+        }
+        .card:hover {
+            box-shadow: 0 25px 40px -14px var(--accent-glow);
+        }
+
+        /* Progress bar */
+        .progress-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 1rem;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .progress-bar-container {
+            flex: 1;
+            height: 8px;
+            background: #1e2a3a;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #7fdbda);
+            transition: width 0.3s ease;
+        }
+
+        /* Controls row */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            background: rgba(44,197,192,0.15);
+            border: 1px solid var(--accent);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover {
+            background: var(--accent);
+            color: #0a0f1c;
+            box-shadow: 0 0 8px var(--accent);
+        }
+        .icon-btn {
+            font-size: 1.2rem;
+            padding: 0.4rem 0.9rem;
+        }
+
+        /* Two-column layout for interactive + extras */
+        .interactive-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        .canvas-area {
+            flex: 2;
+            min-width: 280px;
+        }
+        .controls-panel {
+            flex: 1;
+            min-width: 260px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 1.5rem;
+            padding: 1rem;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            background: var(--canvas-bg);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+        }
+        .slider-container {
+            margin: 1rem 0;
+        }
+        input[type="range"] {
+            width: 100%;
+            background: #1e2a3a;
+            height: 4px;
+            border-radius: 10px;
+            -webkit-appearance: none;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 6px var(--accent);
+            border: none;
+        }
+        .param-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            color: var(--accent);
+        }
+        .solution-badge {
+            background: rgba(0,0,0,0.2);
+            border-radius: 60px;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .count-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Number line canvas */
+        .number-line-container {
+            background: rgba(0,0,0,0.2);
+            border-radius: 1rem;
+            padding: 0.5rem;
+            margin-top: 1rem;
+        }
+        canvas.number-canvas {
+            width: 100%;
+            height: 70px;
+            background: var(--canvas-bg);
+            border-radius: 0.8rem;
+        }
+
+        /* Collapsible sections (accordion) */
+        .collapsible {
+            background: rgba(0,0,0,0.2);
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.1);
+        }
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 1rem;
+        }
+        .collapsible.open .collapsible-content {
+            max-height: 800px;
+            padding: 0.5rem 1rem 1rem 1rem;
+        }
+
+        /* Quiz */
+        .quiz-option {
+            background: var(--quiz-bg);
+            margin: 0.5rem 0;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .quiz-option.selected {
+            background: var(--accent);
+            color: #0a0f1c;
+        }
+        .correct {
+            background: #1a4d3e;
+            border-left: 5px solid var(--accent);
+        }
+        .wrong {
+            background: #5a2a36;
+            border-left: 5px solid var(--danger);
+        }
+
+        .mode-switch {
+            display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            .card { padding: 1rem; }
+        }
+        @media print {
+            body, body.light { background: white; color: black; }
+            .card { background: white; border: 1px solid #ccc; backdrop-filter: none; }
+            button, .toolbar, .collapsible-header, .controls-panel .mode-switch, .math-bg, .confetti-canvas { display: none; }
+            canvas { border: 1px solid #000; background: white; }
+        }
+    </style>
+</head>
+<body>
+<div class="math-bg" id="mathBg"></div>
+<div class="container">
+    <div class="toolbar">
+        <div class="mode-switch">
+            <span>🌙 Тёмная</span>
+            <button id="themeToggle" class="icon-btn">☀️</button>
+        </div>
+        <div>
+            <button id="copyGraphBtn">📸 Копировать график</button>
+            <button id="resetAllBtn">⟳ Сбросить всё</button>
+        </div>
+    </div>
+    <div class="progress-section">
+        <span class="progress-label">📈 Ваш прогресс</span>
+        <div class="progress-bar-container"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="progress-value" id="progressPercent">0%</span>
+    </div>
+
+    <div class="hero">
+        <h1>Графический метод<br>системы с параметром</h1>
+        <p>Вы исследуете систему уравнений с корнями и окружностью. Перемещайте ползунок, наблюдайте за рождением и исчезновением решений — и находите все <span class="accent-text">a</span>, при которых система имеет ровно два решения.</p>
+    </div>
+
+    <!-- main interactive block -->
+    <div class="card" data-tilt>
+        <div class="toolbar" style="margin-bottom: 1rem;">
+            <button id="animateParamBtn">▶ Анимация параметра</button>
+            <button id="stopAnimBtn">⏸ Стоп</button>
+            <button id="examModeBtn">📝 Режим экзамена</button>
+        </div>
+        <div class="interactive-panel">
+            <div class="canvas-area">
+                <canvas id="systemCanvas" width="700" height="500" style="width:100%; height:auto; max-width:700px; aspect-ratio:700/500"></canvas>
+            </div>
+            <div class="controls-panel">
+                <div class="slider-container">
+                    <label>Параметр a:</label>
+                    <input type="range" id="aSlider" min="-3" max="3" step="0.01" value="0.8">
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span>a = </span>
+                        <strong id="aValueDisplay" class="param-value">0.80</strong>
+                    </div>
+                </div>
+                <div class="solution-badge">
+                    <div>🔢 Количество решений: <span id="solutionCount" class="count-number">—</span></div>
+                    <div id="solutionDetail" style="font-size: 0.85rem;"></div>
+                </div>
+                <div class="number-line-container">
+                    <div>📊 Числовая прямая (кликните, чтобы выбрать a)</div>
+                    <canvas id="numberLineCanvas" width="500" height="70" class="number-canvas"></canvas>
+                </div>
+                <div id="stepExplanation" style="margin-top: 1rem; font-size: 0.9rem; background: rgba(0,0,0,0.2); border-radius: 1rem; padding: 0.6rem;">
+                    <strong>📖 Объяснение:</strong> <span id="explanationText">Выберите a</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Creative accordion blocks -->
+    <div class="collapsible" id="theoryCollapse">
+        <div class="collapsible-header">🧠 Как рождается решение? (разбор теории) ▼</div>
+        <div class="collapsible-content">
+            <p>Представьте, что вы — детектив, который ищет точки пересечения двух «миров». Первое уравнение с корнями задаёт <strong>две наклонные прямые</strong>, но только в пределах <strong>полосы |y| ≤ 4</strong> — словно свет софитов высвечивает лишь часть этих прямых. Второе уравнение — <strong>окружность с центром (4;2) и радиусом √20</strong>.</p>
+            <p>После преобразований выясняется: начало координат (0;0) — всегда решение (всегда «встреча»). Другие точки — это пересечения каждой из прямых с окружностью. Но они «видимы» только если лежат внутри полосы. Условие видимости для точки P<sub>a</sub> (на прямой y=ax) оказывается очень простым: <strong>a ≤ ½</strong>. А для симметричной прямой y=−ax — <strong>a ≥ −½</strong>.</p>
+            <p>Итог: два решения возникают, когда ровно одна из дополнительных точек попадает в полосу. Это происходит при a < −½ (кроме a=−2, где точка исчезает) и при a > ½ (кроме a=2). Особый случай a=0 — прямые сливаются, но система даёт вторую точку (8;0).</p>
+            <p style="margin-top: 0.5rem; background: rgba(44,197,192,0.2); padding: 0.4rem; border-radius: 1rem;">🔍 Ответ: <strong>a ∈ (−∞;−½)\{−2} ∪ {0} ∪ (½;∞)\{2}</strong>.</p>
+        </div>
+    </div>
+    <div class="collapsible" id="errorsCollapse">
+        <div class="collapsible-header">⚠️ Ловушки, в которые попадают даже сильные ученики ▼</div>
+        <div class="collapsible-content">
+            <ul style="margin-left: 1.5rem;">
+                <li><strong>Забывают про ОДЗ корней.</strong> Многие возводят в квадрат и рисуют прямые на всей плоскости, а потом «находят» лишние решения, которых на самом деле нет.</li>
+                <li><strong>Не проверяют особые значения параметра.</strong> a = −2 и a = 2 «убивают» одну из точек, превращая её в начало координат — остаётся только одно решение.</li>
+                <li><strong>Путают, какая прямая даёт дополнительную точку.</strong> При a > 0.5 работает только прямая y = −ax, а при a < −0.5 — только y = ax.</li>
+                <li><strong>Неправильно находят условие |y| ≤ 4.</strong> Важно не подставлять a наугад, а решить уравнение |y<sub>k</sub>| = 4 → k = ½.</li>
+                <li><strong>Игнорируют случай a = 0.</strong> Тогда система вырождается, и количество решений считается отдельно (их два).</li>
+            </ul>
+            <p>Помните: графический метод силён, но требует дисциплины — каждый кусочек графика должен быть проверен на соответствие ОДЗ.</p>
+        </div>
+    </div>
+    <div class="collapsible" id="customCollapse">
+        <div class="collapsible-header">🛠️ Экспериментальная лаборатория: измените условия ▼</div>
+        <div class="collapsible-content">
+            <p>А что, если сдвинуть окружность или изменить ширину полосы? Попробуйте сами! Это поможет почувствовать, как параметр влияет на картину.</p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <label>Центр X: <input type="number" id="customCx" value="4" step="0.5" style="width:70px"></label>
+                <label>Центр Y: <input type="number" id="customCy" value="2" step="0.5" style="width:70px"></label>
+                <label>R²: <input type="number" id="customR2" value="20" step="5" style="width:70px"></label>
+                <label>Полоса |y| ≤ <input type="number" id="customBound" value="4" step="1" style="width:70px"></label>
+                <button id="applyCustom">Применить</button>
+                <button id="resetCustom">Сброс</button>
+            </div>
+            <p id="customInfo" style="margin-top:0.5rem; font-size:0.8rem;"></p>
+            <p><em>Подсказка: изменив полосу, вы увидите, как смещаются границы, в которых живут прямые. Поэкспериментируйте — например, увеличьте полосу до 6 и посмотрите, как меняется количество решений для разных a.</em></p>
+        </div>
+    </div>
+    <div class="collapsible" id="historyCollapse">
+        <div class="collapsible-header">📜 Историческая справка: графический метод в задачах с параметром ▼</div>
+        <div class="collapsible-content">
+            <p>Идея решать уравнения с параметром с помощью графиков возникла в начале XX века, когда математики начали систематически изучать семейства кривых. Особенно эта идея расцвела в олимпиадном движении СССР: задачи типа «найти все a, при которых система имеет ровно два решения» стали классикой.</p>
+            <p>Графический подход позволяет превратить абстрактное условие в наглядную геометрическую картину. Сегодня он активно используется в подготовке к ЕГЭ, так как развивает пространственное воображение и умение анализировать зависимости.</p>
+            <p>Кстати, наша система — не просто упражнение: она моделирует реальные ситуации, где параметр может означать, например, угол наклона луча или коэффициент оптической системы.</p>
+        </div>
+    </div>
+
+    <!-- Quiz block (only one interactive block left) -->
+    <div class="card">
+        <h2>📋 Проверьте себя: мини-квиз</h2>
+        <div id="quizContainer">
+            <div class="quiz-question"><strong>1.</strong> Каков радиус окружности в исходной системе?<br>
+                <div class="quiz-option" data-correct="√20">√20 ≈ 4.47</div>
+                <div class="quiz-option" data-correct="false">20</div>
+                <div class="quiz-option" data-correct="false">2√5</div>
+                <div class="quiz-option" data-correct="false">4</div>
+            </div>
+            <div class="quiz-question"><strong>2.</strong> Какое условие гарантирует, что дополнительная точка P<sub>a</sub> лежит внутри полосы?<br>
+                <div class="quiz-option" data-correct="a ≤ 1/2">a ≤ 1/2</div>
+                <div class="quiz-option" data-correct="false">a ≥ 1/2</div>
+                <div class="quiz-option" data-correct="false">a ≤ 2</div>
+            </div>
+            <div class="quiz-question"><strong>3.</strong> Какое значение a даёт ровно два решения (среди перечисленных)?<br>
+                <div class="quiz-option" data-correct="a = 0.8">a = 0.8</div>
+                <div class="quiz-option" data-correct="false">a = 0.3</div>
+                <div class="quiz-option" data-correct="false">a = -0.3</div>
+            </div>
+            <div class="quiz-question"><strong>4.</strong> Какие значения параметра исключены из ответа из-за того, что дают одно решение?<br>
+                <div class="quiz-option" data-correct="a = -2 и a = 2">a = -2 и a = 2</div>
+                <div class="quiz-option" data-correct="false">a = 0 и a = ±0.5</div>
+            </div>
+            <button id="checkQuiz">Проверить</button>
+            <div id="quizResult"></div>
+        </div>
+    </div>
+
+    <div class="card" id="cheatSheet">
+        <h2>📎 Шпаргалка для быстрого повторения</h2>
+        <p><strong>Окружность:</strong> (x−4)² + (y−2)² = 20, центр (4;2), R = √20.<br>
+            <strong>Полоса:</strong> |y| ≤ 4 — это область, где «живут» прямые.<br>
+            <strong>Прямые:</strong> y = a·x и y = –a·x (только внутри полосы).<br>
+            ✅ <strong>Два решения:</strong> a ∈ (−∞;−½)\{−2} ∪ {0} ∪ (½;∞)\{2}.</p>
+    </div>
+    <footer>Интерактивное пособие — полная версия с анимацией, визуализацией ОДЗ, режимом экзамена и возможностью изменять условия задачи.</footer>
+</div>
+
+<script>
+    (function(){
+        // ---------- DOM elements ----------
+        const canvas = document.getElementById('systemCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = 700, height = 500;
+        canvas.width = width; canvas.height = height;
+
+        let xMin = -2, xMax = 10, yMin = -5, yMax = 5; // default
+        let customBound = 4, customCx = 4, customCy = 2, customR2 = 20;
+        let useCustom = false;
+
+        function toCanvasX(x) { return ((x - xMin) / (xMax - xMin)) * width; }
+        function toCanvasY(y) { return height - ((y - yMin) / (yMax - yMin)) * height; }
+
+        // Drawing helpers
+        function drawGrid() {
+            ctx.save();
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--grid');
+            ctx.lineWidth = 0.5;
+            for(let x = Math.ceil(xMin); x <= xMax; x+=1) {
+                if(Math.abs(x) < 0.01) continue;
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(x), 0);
+                ctx.lineTo(toCanvasX(x), height);
+                ctx.stroke();
+            }
+            for(let y = Math.ceil(yMin); y <= yMax; y+=1) {
+                if(Math.abs(y) < 0.01) continue;
+                ctx.beginPath();
+                ctx.moveTo(0, toCanvasY(y));
+                ctx.lineTo(width, toCanvasY(y));
+                ctx.stroke();
+            }
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text');
+            ctx.moveTo(0, toCanvasY(0));
+            ctx.lineTo(width, toCanvasY(0));
+            ctx.moveTo(toCanvasX(0), 0);
+            ctx.lineTo(toCanvasX(0), height);
+            ctx.stroke();
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-secondary');
+            ctx.font = "10px monospace";
+            for(let x = -2; x<=10; x+=2) {
+                if(x===0) continue;
+                ctx.fillText(x, toCanvasX(x)-4, toCanvasY(0)-4);
+            }
+            for(let y = -4; y<=4; y+=2) {
+                if(y===0) continue;
+                ctx.fillText(y, toCanvasX(0)+4, toCanvasY(y)+3);
+            }
+            ctx.fillText("x", toCanvasX(9.5), toCanvasY(0)-6);
+            ctx.fillText("y", toCanvasX(0)+8, toCanvasY(4.5));
+            ctx.restore();
+        }
+
+        function drawCircle() {
+            let R = Math.sqrt(useCustom ? customR2 : 20);
+            let cx = useCustom ? customCx : 4;
+            let cy = useCustom ? customCy : 2;
+            ctx.beginPath();
+            for(let t = 0; t <= 2*Math.PI; t+=0.02) {
+                let x = cx + R*Math.cos(t);
+                let y = cy + R*Math.sin(t);
+                if(t===0) ctx.moveTo(toCanvasX(x), toCanvasY(y));
+                else ctx.lineTo(toCanvasX(x), toCanvasY(y));
+            }
+            ctx.strokeStyle = "#ff8c5a";
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+
+        function drawODZ(a) {
+            let bound = useCustom ? customBound : 4;
+            ctx.save();
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = "#2cc5c0";
+            for(let y = -bound; y <= bound; y+=0.05) {
+                let xStart = -Math.abs(bound / (Math.abs(a)+0.001));
+                let xEnd = Math.abs(bound / (Math.abs(a)+0.001));
+                if(Math.abs(a) < 1e-8) { xStart = -100; xEnd = 100; }
+                let px1 = toCanvasX(Math.max(xMin, xStart));
+                let px2 = toCanvasX(Math.min(xMax, xEnd));
+                let py = toCanvasY(y);
+                ctx.fillRect(px1, py, px2-px1, 1);
+            }
+            ctx.globalAlpha = 1;
+            ctx.restore();
+        }
+
+        function drawLineLimited(k, color, lineWidth=2) {
+            if(Math.abs(k) > 100) return;
+            let bound = useCustom ? customBound : 4;
+            const points = [];
+            for(let x = xMin; x <= xMax; x+=0.05) {
+                let y = k*x;
+                if(y >= yMin && y <= yMax && Math.abs(y) <= bound && Math.abs(k*x) <= bound) {
+                    points.push({x,y});
+                }
+            }
+            if(points.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(points[0].x), toCanvasY(points[0].y));
+            for(let i=1;i<points.length;i++) ctx.lineTo(toCanvasX(points[i].x), toCanvasY(points[i].y));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+        }
+
+        function getExtraPoints(k, a) {
+            if(k === -2) return null;
+            let R2 = useCustom ? customR2 : 20;
+            let cx = useCustom ? customCx : 4;
+            let cy = useCustom ? customCy : 2;
+            let A = 1 + k*k;
+            let B = -2*cx - 2*k*cy;
+            let C = cx*cx + cy*cy - R2;
+            let D = B*B - 4*A*C;
+            if(D < 0) return null;
+            let x1 = (-B + Math.sqrt(D)) / (2*A);
+            let x2 = (-B - Math.sqrt(D)) / (2*A);
+            let bound = useCustom ? customBound : 4;
+            let res = [];
+            for(let x of [x1,x2]) {
+        let y = k*x;
+        if(Math.abs(y) <= bound+1e-8 && Math.abs(a*x) <= bound+1e-8) {
+            if(Math.abs(x) > 1e-6 || Math.abs(y) > 1e-6) res.push({x,y});
+        }
+    }
+    return res.length ? res[0] : null;
+    }
+
+    function getSolutionPoints(a) {
+    let pts = [{x:0,y:0}];
+    if(a !== -2) { let p = getExtraPoints(a, a); if(p) pts.push(p); }
+    if(a !== 2) { let p = getExtraPoints(-a, a); if(p) pts.push(p); }
+    if(Math.abs(a) < 1e-8) pts.push({x:8,y:0});
+    let unique = [];
+    for(let p of pts) {
+    if(!unique.some(q => Math.hypot(p.x-q.x, p.y-q.y) < 1e-6)) unique.push(p);
+    }
+    return unique;
+    }
+
+    function countSolutions(a) { return getSolutionPoints(a).length; }
+
+    function drawSolutions(a) {
+    let points = getSolutionPoints(a);
+    for(let p of points) {
+    ctx.beginPath();
+    ctx.arc(toCanvasX(p.x), toCanvasY(p.y), 5, 0, 2*Math.PI);
+    ctx.fillStyle = "#f5b042";
+    ctx.fill();
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text');
+    ctx.font = "bold 10px monospace";
+    ctx.fillText(`(${p.x.toFixed(2)},${p.y.toFixed(2)})`, toCanvasX(p.x)+6, toCanvasY(p.y)-4);
+    }
+    }
+
+    function updateVisuals() {
+    let a = parseFloat(document.getElementById('aSlider').value);
+    document.getElementById('aValueDisplay').innerText = a.toFixed(3);
+    ctx.clearRect(0,0,width,height);
+    drawGrid();
+    drawODZ(a);
+    drawCircle();
+    let bound = useCustom ? customBound : 4;
+    ctx.beginPath();
+    ctx.moveTo(toCanvasX(xMin), toCanvasY(bound));
+    ctx.lineTo(toCanvasX(xMax), toCanvasY(bound));
+    ctx.strokeStyle = "#4f9da6";
+    ctx.setLineDash([6,8]);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(toCanvasX(xMin), toCanvasY(-bound));
+    ctx.lineTo(toCanvasX(xMax), toCanvasY(-bound));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if(Math.abs(a) > 1e-8) {
+    drawLineLimited(a, "#3bc9db", 2.2);
+    drawLineLimited(-a, "#3bc9db", 2.2);
+    } else {
+    ctx.beginPath();
+    ctx.moveTo(toCanvasX(xMin), toCanvasY(0));
+    ctx.lineTo(toCanvasX(xMax), toCanvasY(0));
+    ctx.strokeStyle = "#3bc9db";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    }
+    drawSolutions(a);
+    let cnt = countSolutions(a);
+    document.getElementById('solutionCount').innerText = cnt;
+    let detail = "";
+    if(Math.abs(a+2)<0.01 || Math.abs(a-2)<0.01) detail = "Особая точка: одно решение";
+    else if(Math.abs(a) < 1e-6) detail = "a = 0: два решения (0,0) и (8,0)";
+    else if(a < -0.5) detail = "Два решения (начало + Pₐ)";
+    else if(a > 0.5) detail = "Два решения (начало + P₋ₐ)";
+    else if(a > -0.5 && a < 0.5 && Math.abs(a)>1e-6) detail = "Три решения: начало, Pₐ и P₋ₐ";
+    else detail = "";
+    document.getElementById('solutionDetail').innerHTML = detail;
+    document.getElementById('explanationText').innerHTML = detail ? detail : "Выберите a";
+    drawNumberLine(a);
+    }
+
+    function drawNumberLine(currentA) {
+    const numCanvas = document.getElementById('numberLineCanvas');
+    const w = numCanvas.clientWidth, h = 70;
+    numCanvas.width = w; numCanvas.height = h;
+    const nctx = numCanvas.getContext('2d');
+    nctx.clearRect(0,0,w,h);
+    nctx.strokeStyle = "#7f8c8d";
+    nctx.beginPath();
+    nctx.moveTo(40, h/2);
+    nctx.lineTo(w-40, h/2);
+    nctx.stroke();
+    const marks = [-2, -0.5, 0, 0.5, 2];
+    const xMap = (val) => 40 + ((val + 2) / 4) * (w-80);
+    marks.forEach(m => {
+    let x = xMap(m);
+    nctx.beginPath();
+    nctx.moveTo(x, h/2-4);
+    nctx.lineTo(x, h/2+4);
+    nctx.stroke();
+    nctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-secondary');
+    nctx.fillText(m, x-5, h/2-6);
+    });
+    nctx.beginPath();
+    nctx.strokeStyle = "#2cc5c0";
+    nctx.lineWidth = 3;
+    nctx.moveTo(40, h/2);
+    nctx.lineTo(xMap(-0.5), h/2);
+    nctx.stroke();
+    nctx.beginPath();
+    nctx.moveTo(xMap(0.5), h/2);
+    nctx.lineTo(w-40, h/2);
+    nctx.stroke();
+    let x0 = xMap(0);
+    nctx.fillStyle = "#2cc5c0";
+    nctx.beginPath();
+    nctx.arc(x0, h/2, 5, 0, 2*Math.PI);
+    nctx.fill();
+    let xm2 = xMap(-2), x2 = xMap(2);
+    nctx.beginPath();
+    nctx.arc(xm2, h/2, 5, 0, 2*Math.PI);
+    nctx.strokeStyle = "#ffaa66";
+    nctx.stroke();
+    nctx.beginPath();
+    nctx.arc(x2, h/2, 5, 0, 2*Math.PI);
+    nctx.stroke();
+    let xCurr = xMap(Math.min(2, Math.max(-2, currentA)));
+    nctx.beginPath();
+    nctx.moveTo(xCurr, h/2-12);
+    nctx.lineTo(xCurr, h/2+12);
+    nctx.strokeStyle = "#ffaa66";
+    nctx.stroke();
+    nctx.fillStyle = "#ffaa66";
+    nctx.fillText("▲", xCurr-3, h/2-8);
+    numCanvas.onclick = (e) => {
+    const rect = numCanvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const val = -2 + (clickX - 40) * 4 / (w-80);
+    let clamped = Math.min(3, Math.max(-3, val));
+    document.getElementById('aSlider').value = clamped;
+    updateVisuals();
+    if(window.animInterval) clearInterval(window.animInterval);
+    };
+    }
+
+    // progress and localStorage
+    let progress = 0;
+    function updateProgress(inc) {
+    progress = Math.min(100, progress + inc);
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressPercent').innerText = Math.floor(progress) + '%';
+    localStorage.setItem('mathProgress', progress);
+    }
+    function loadProgress() {
+    let saved = localStorage.getItem('mathProgress');
+    if(saved) progress = parseFloat(saved);
+    else progress = 0;
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressPercent').innerText = Math.floor(progress) + '%';
+    }
+
+    function startConfetti() {
+    const confCanvas = document.createElement('canvas');
+    confCanvas.className = 'confetti-canvas';
+    document.body.appendChild(confCanvas);
+    const w = window.innerWidth, h = window.innerHeight;
+    confCanvas.width = w; confCanvas.height = h;
+    const cctx = confCanvas.getContext('2d');
+    let particles = [];
+    for(let i=0;i<150;i++) {
+    particles.push({
+    x: Math.random() * w,
+    y: Math.random() * h - h,
+    size: Math.random() * 6 + 2,
+    color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+    speed: 2 + Math.random() * 8,
+    });
+    }
+    function drawConfetti() {
+    cctx.clearRect(0,0,w,h);
+    let allDead = true;
+    for(let p of particles) {
+    p.y += p.speed;
+    if(p.y < h + 100) allDead = false;
+    cctx.fillStyle = p.color;
+    cctx.fillRect(p.x, p.y, p.size, p.size/2);
+    }
+    if(allDead) {
+    cancelAnimationFrame(anim);
+    confCanvas.remove();
+    } else {
+    anim = requestAnimationFrame(drawConfetti);
+    }
+    }
+    let anim = requestAnimationFrame(drawConfetti);
+    setTimeout(() => { if(confCanvas.parentNode) confCanvas.remove(); cancelAnimationFrame(anim); }, 3000);
+    }
+
+    function createRipple(e, btn) {
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.style.position = 'absolute';
+    ripple.style.borderRadius = '50%';
+    ripple.style.backgroundColor = 'rgba(255,255,255,0.6)';
+    ripple.style.width = '10px';
+    ripple.style.height = '10px';
+    ripple.style.left = (e.clientX - rect.left) + 'px';
+    ripple.style.top = (e.clientY - rect.top) + 'px';
+    ripple.style.transform = 'scale(1)';
+    ripple.style.transition = 'transform 0.5s, opacity 0.5s';
+    ripple.style.pointerEvents = 'none';
+    btn.style.position = 'relative';
+    btn.appendChild(ripple);
+    setTimeout(() => { ripple.style.transform = 'scale(20)'; ripple.style.opacity = '0'; }, 10);
+    setTimeout(() => ripple.remove(), 500);
+    }
+
+    let animInterval = null;
+    function animateParam() {
+    if(animInterval) clearInterval(animInterval);
+    let a = parseFloat(document.getElementById('aSlider').value);
+    let dir = 1;
+    animInterval = setInterval(() => {
+    a += dir * 0.03;
+    if(a >= 3) { a = 3; dir = -1; }
+    if(a <= -3) { a = -3; dir = 1; }
+    document.getElementById('aSlider').value = a;
+    updateVisuals();
+    }, 40);
+    }
+    function stopAnim() { if(animInterval) clearInterval(animInterval); animInterval = null; }
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    updateVisuals();
+    drawNumberLine(parseFloat(document.getElementById('aSlider').value));
+    });
+
+    document.getElementById('copyGraphBtn').addEventListener('click', () => {
+    canvas.toBlob(blob => {
+    const item = new ClipboardItem({ 'image/png': blob });
+    navigator.clipboard.write([item]);
+    alert('График скопирован в буфер обмена!');
+    });
+    });
+
+    document.getElementById('resetAllBtn').addEventListener('click', () => {
+    localStorage.clear();
+    progress = 0;
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('progressPercent').innerText = '0%';
+    document.getElementById('aSlider').value = '0.8';
+    useCustom = false;
+    document.getElementById('customCx').value = 4;
+    document.getElementById('customCy').value = 2;
+    document.getElementById('customR2').value = 20;
+    document.getElementById('customBound').value = 4;
+    updateVisuals();
+    });
+
+    let examMode = false;
+    document.getElementById('examModeBtn').addEventListener('click', () => {
+    examMode = !examMode;
+    const expDiv = document.getElementById('stepExplanation');
+    if(examMode) {
+    expDiv.style.opacity = '0.3';
+    expDiv.style.pointerEvents = 'none';
+    document.getElementById('examModeBtn').innerHTML = '📖 Выйти из режима';
+    } else {
+    expDiv.style.opacity = '1';
+    expDiv.style.pointerEvents = 'auto';
+    document.getElementById('examModeBtn').innerHTML = '📝 Режим экзамена';
+    }
+    });
+
+    document.getElementById('applyCustom').addEventListener('click', () => {
+    useCustom = true;
+    customCx = parseFloat(document.getElementById('customCx').value);
+    customCy = parseFloat(document.getElementById('customCy').value);
+    customR2 = parseFloat(document.getElementById('customR2').value);
+    customBound = parseFloat(document.getElementById('customBound').value);
+    updateVisuals();
+    document.getElementById('customInfo').innerHTML = `Применены свои параметры. Окружность: (${customCx},${customCy}), R²=${customR2}, полоса |y| ≤ ${customBound}`;
+    });
+    document.getElementById('resetCustom').addEventListener('click', () => {
+    useCustom = false;
+    document.getElementById('customCx').value = 4;
+    document.getElementById('customCy').value = 2;
+    document.getElementById('customR2').value = 20;
+    document.getElementById('customBound').value = 4;
+    updateVisuals();
+    document.getElementById('customInfo').innerHTML = 'Сброшено к исходной системе.';
+    });
+
+    // Quiz
+    const quizOptions = document.querySelectorAll('.quiz-option');
+    function clearQuizHighlights() {
+    quizOptions.forEach(opt => opt.classList.remove('correct','wrong','selected'));
+    }
+    document.getElementById('checkQuiz').addEventListener('click', (e) => {
+    clearQuizHighlights();
+    let score = 0;
+    const correctValues = ['√20', 'a ≤ 1/2', 'a = 0.8', 'a = -2 и a = 2'];
+    const groups = [[0,1,2], [3,4,5], [6,7,8], [9,10,11]];
+    for(let g=0;g<4;g++) {
+    let selected = null;
+    for(let idx of groups[g]) {
+    if(quizOptions[idx].classList.contains('selected')) selected = quizOptions[idx];
+    }
+    let correctOption = Array.from(quizOptions).find(opt => opt.getAttribute('data-correct') === correctValues[g]);
+    if(selected && selected === correctOption) {
+    score++;
+    selected.classList.add('correct');
+    } else if(selected) {
+    selected.classList.add('wrong');
+    correctOption.classList.add('correct');
+    } else {
+    correctOption.classList.add('correct');
+    }
+    }
+    document.getElementById('quizResult').innerHTML = `🎯 Результат: ${score}/4. ${score===4 ? "Отлично!" : "Повторите теорию."}`;
+    if(score===4) startConfetti();
+    createRipple(e, e.target);
+    updateProgress(10);
+    });
+    quizOptions.forEach(opt => {
+    opt.addEventListener('click', function() {
+    let parent = this.parentElement.parentElement;
+    let siblings = parent.querySelectorAll('.quiz-option');
+    siblings.forEach(sib => sib.classList.remove('selected'));
+    this.classList.add('selected');
+    });
+    });
+
+    // Collapsibles
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+    header.addEventListener('click', () => {
+    header.parentElement.classList.toggle('open');
+    header.innerHTML = header.parentElement.classList.contains('open') ? header.innerText.replace('▼','▲') : header.innerText.replace('▲','▼');
+    });
+    });
+
+    document.getElementById('animateParamBtn').addEventListener('click', animateParam);
+    document.getElementById('stopAnimBtn').addEventListener('click', stopAnim);
+    document.getElementById('aSlider').addEventListener('input', () => { stopAnim(); updateVisuals(); updateProgress(0.5); });
+    document.querySelectorAll('button:not(#animateParamBtn):not(#stopAnimBtn)').forEach(btn => {
+    btn.addEventListener('click', (e) => createRipple(e, btn));
+    });
+
+    loadProgress();
+    updateVisuals();
+
+    // floating symbols
+    const symbols = ['∫','∑','√','π','∞','∠','≈','≠','±','α','β','γ','Δ','θ'];
+    const bg = document.getElementById('mathBg');
+    for(let i=0;i<40;i++) {
+    let span = document.createElement('div');
+    span.className = 'math-symbol';
+    span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+    span.style.left = Math.random() * 100 + '%';
+    span.style.fontSize = (Math.random() * 2 + 0.8) + 'rem';
+    span.style.animationDuration = (Math.random() * 20 + 10) + 's';
+    span.style.animationDelay = Math.random() * 20 + 's';
+    bg.appendChild(span);
+    }
+    })();
+</script>
+</body>
+</html>
