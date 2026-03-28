@@ -1,0 +1,1873 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Планиметрия ЕГЭ — интерактивная лаборатория</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0c1b31;
+            --panel:rgba(16,28,49,.72);
+            --panel-strong:rgba(19,34,58,.9);
+            --glass:rgba(255,255,255,.08);
+            --line:rgba(173,214,255,.18);
+            --text:#edf5ff;
+            --muted:#9fb2ca;
+            --soft:#cfe6ff;
+            --cyan:#66d9ff;
+            --blue:#7aa7ff;
+            --violet:#b792ff;
+            --mint:#76ffd8;
+            --gold:#ffd166;
+            --danger:#ff7b8a;
+            --ok:#73f0a8;
+            --shadow:0 20px 60px rgba(0,0,0,.35);
+            --radius:22px;
+            --radius-sm:14px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            --sans: Inter, Arial, Helvetica, system-ui, sans-serif;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+            radial-gradient(1200px 700px at 8% -10%, rgba(102,217,255,.16), transparent 55%),
+            radial-gradient(900px 700px at 100% 0%, rgba(183,146,255,.14), transparent 52%),
+            radial-gradient(700px 400px at 50% 120%, rgba(118,255,216,.1), transparent 55%),
+            linear-gradient(180deg, #07111f 0%, #081425 42%, #0a1730 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            background-image:
+            linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: radial-gradient(circle at center, black 55%, transparent 100%);
+            pointer-events:none;
+            z-index:-1;
+        }
+
+        a{color:inherit;text-decoration:none}
+        button,input,select{font:inherit}
+
+        .container{
+            width:min(1200px, calc(100% - 32px));
+            margin:0 auto;
+        }
+
+        .nav-wrap{
+            position:sticky;
+            top:0;
+            z-index:50;
+            backdrop-filter: blur(18px);
+            background:linear-gradient(180deg, rgba(7,17,31,.85), rgba(7,17,31,.45));
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+        .nav{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            min-height:72px;
+        }
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            font-weight:800;
+            letter-spacing:.02em;
+        }
+        .brand-badge{
+            width:38px;height:38px;border-radius:12px;
+            background:
+            radial-gradient(circle at 25% 25%, rgba(255,255,255,.3), transparent 35%),
+            linear-gradient(135deg, rgba(102,217,255,.95), rgba(122,167,255,.7) 52%, rgba(183,146,255,.95));
+            box-shadow:0 12px 28px rgba(102,217,255,.28), inset 0 1px 1px rgba(255,255,255,.25);
+            position:relative;
+        }
+        .brand-badge::after{
+            content:"∠";
+            position:absolute; inset:0;
+            display:grid; place-items:center;
+            font-size:20px; font-weight:900; color:#05111d;
+        }
+        .nav-links{
+            display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+        }
+        .nav-links a{
+            color:var(--muted);
+            padding:10px 14px;
+            border-radius:999px;
+            transition:.25s ease;
+            border:1px solid transparent;
+            font-size:14px;
+        }
+        .nav-links a:hover{
+            color:var(--text);
+            background:rgba(255,255,255,.05);
+            border-color:rgba(255,255,255,.08);
+        }
+
+        .hero{
+            padding:56px 0 28px;
+            position:relative;
+        }
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.15fr;
+            gap:24px;
+            align-items:stretch;
+        }
+        .hero-card, .panel{
+            background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+        .hero-card{
+            padding:34px;
+            position:relative;
+            overflow:hidden;
+            min-height:420px;
+        }
+        .hero-card::before{
+            content:"";
+            position:absolute;
+            width:460px;height:460px;
+            right:-130px;top:-180px;
+            border-radius:50%;
+            background: radial-gradient(circle, rgba(102,217,255,.18) 0%, transparent 68%);
+            pointer-events:none;
+        }
+        .eyebrow{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:8px 12px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.1);
+            background:rgba(255,255,255,.05);
+            color:var(--soft);
+            font-size:13px;
+            letter-spacing:.04em;
+            text-transform:uppercase;
+        }
+        .dot{
+            width:8px;height:8px;border-radius:50%;
+            background:var(--cyan);
+            box-shadow:0 0 18px var(--cyan);
+        }
+        .hero h1{
+            margin:18px 0 14px;
+            font-size:clamp(34px, 6vw, 66px);
+            line-height:.96;
+            letter-spacing:-.03em;
+            max-width:10ch;
+        }
+        .hero .lead{
+            color:var(--muted);
+            font-size:18px;
+            line-height:1.68;
+            max-width:62ch;
+            margin:0 0 26px;
+        }
+        .hero-actions{
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:24px;
+        }
+        .btn{
+            border:none;
+            border-radius:14px;
+            padding:13px 18px;
+            font-weight:700;
+            cursor:pointer;
+            transition:transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+        }
+        .btn:hover{transform:translateY(-1px)}
+        .btn-primary{
+            color:#04111e;
+            background:linear-gradient(135deg, var(--cyan), #9fd5ff);
+            box-shadow:0 14px 34px rgba(102,217,255,.3);
+        }
+        .btn-secondary{
+            color:var(--text);
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.1);
+        }
+
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0,1fr));
+            gap:12px;
+        }
+        .stat{
+            padding:16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .stat strong{
+            display:block;
+            font-size:28px;
+            margin-bottom:4px;
+            color:var(--soft);
+        }
+        .stat span{
+            color:var(--muted);
+            font-size:13px;
+            line-height:1.4;
+        }
+
+        .orbital{
+            padding:18px;
+            position:relative;
+            overflow:hidden;
+            min-height:420px;
+            isolation:isolate;
+        }
+        .orbital::before, .orbital::after{
+            content:"";
+            position:absolute;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,.09);
+            pointer-events:none;
+        }
+        .orbital::before{ width:320px;height:320px; top:48px; right:26px }
+        .orbital::after{ width:220px;height:220px; top:98px; right:76px }
+        .lab-tag{
+            position:absolute; top:18px; left:18px;
+            padding:8px 12px; border-radius:999px;
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--soft); font-size:13px;
+            z-index:2;
+        }
+
+        .diagram-shell{
+            height:100%;
+            display:grid;
+            place-items:center;
+            position:relative;
+        }
+        .pulse{
+            position:absolute;
+            width:14px;height:14px;border-radius:50%;
+            background:var(--mint);
+            box-shadow:0 0 18px var(--mint);
+            animation:pulse 2.7s ease-in-out infinite;
+        }
+        .pulse.p1{top:112px; right:158px}
+        .pulse.p2{top:212px; right:268px; animation-delay:.8s}
+        .pulse.p3{top:300px; right:118px; animation-delay:1.5s}
+        @keyframes pulse{
+            0%,100%{transform:scale(.8); opacity:.72}
+            50%{transform:scale(1.35); opacity:1}
+        }
+
+        .section{
+            padding:28px 0;
+        }
+        .section-head{
+            display:flex;
+            align-items:end;
+            justify-content:space-between;
+            gap:16px;
+            margin-bottom:18px;
+        }
+        .section-head h2{
+            margin:0;
+            font-size:clamp(24px, 4vw, 38px);
+            letter-spacing:-.03em;
+        }
+        .section-head p{
+            margin:0;
+            color:var(--muted);
+            max-width:60ch;
+            line-height:1.65;
+        }
+
+        .grid-2{
+            display:grid;
+            grid-template-columns:1.1fr .9fr;
+            gap:20px;
+        }
+        .grid-3{
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:18px;
+        }
+        .panel{
+            padding:22px;
+        }
+        .panel h3{
+            margin:0 0 12px;
+            font-size:20px;
+            letter-spacing:-.02em;
+        }
+        .panel p{margin:0;color:var(--muted);line-height:1.65}
+        .subtle{
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .controls{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+            margin-top:14px;
+        }
+        .control{
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:16px;
+            padding:14px;
+        }
+        .control label{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:8px;
+            font-size:14px;
+            color:var(--soft);
+        }
+        .control output{
+            font-family:var(--mono);
+            color:var(--cyan);
+            font-weight:700;
+        }
+        input[type="range"]{
+            width:100%;
+            accent-color:#8ad9ff;
+        }
+
+        .switches{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:14px;
+        }
+        .switch{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 12px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            font-size:14px;
+            color:var(--soft);
+        }
+        .switch input{accent-color:#8ad9ff}
+
+        .formula-list{
+            display:grid;
+            gap:10px;
+            margin-top:16px;
+        }
+        .formula{
+            padding:13px 14px;
+            border-radius:14px;
+            background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+            border:1px solid rgba(255,255,255,.08);
+            font-family:var(--mono);
+            overflow:auto;
+            color:#eaf6ff;
+        }
+        .formula strong{color:var(--gold);font-family:var(--sans);margin-right:8px}
+
+        .card-stack{
+            display:grid;
+            gap:14px;
+        }
+
+        .accordion{
+            border-radius:18px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+        }
+        .accordion + .accordion{margin-top:12px}
+        .acc-btn{
+            width:100%;
+            background:none;
+            border:none;
+            color:var(--text);
+            text-align:left;
+            padding:18px 18px;
+            cursor:pointer;
+            font-weight:800;
+            display:flex;
+            justify-content:space-between;
+            gap:14px;
+            align-items:center;
+        }
+        .acc-btn span:last-child{
+            color:var(--cyan);
+            transition:transform .22s ease;
+        }
+        .accordion.open .acc-btn span:last-child{transform:rotate(45deg)}
+        .acc-body{
+            max-height:0;
+            overflow:hidden;
+            transition:max-height .28s ease;
+        }
+        .accordion.open .acc-body{max-height:500px}
+        .acc-inner{
+            padding:0 18px 18px;
+            color:var(--muted);
+            line-height:1.7;
+        }
+        .acc-inner ul{padding-left:18px;margin:10px 0 0}
+        .acc-inner li{margin:6px 0}
+
+        .calculator-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:18px;
+            align-items:start;
+        }
+        .tabs{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-bottom:14px;
+        }
+        .tab{
+            padding:10px 14px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.1);
+            background:rgba(255,255,255,.04);
+            color:var(--soft);
+            cursor:pointer;
+            font-weight:700;
+        }
+        .tab.active{
+            color:#04111e;
+            background:linear-gradient(135deg, #a6e9ff, #73c4ff);
+            border-color:transparent;
+        }
+        .calc-fields{
+            display:grid;
+            gap:12px;
+            margin:14px 0 18px;
+        }
+        .field{
+            display:grid;
+            gap:8px;
+        }
+        .field label{
+            color:var(--soft);
+            font-size:14px;
+        }
+        .field input{
+            width:100%;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.1);
+            color:var(--text);
+            padding:14px 14px;
+            border-radius:14px;
+            outline:none;
+        }
+        .field input:focus{border-color:rgba(102,217,255,.42); box-shadow:0 0 0 3px rgba(102,217,255,.12)}
+        .result{
+            min-height:120px;
+            padding:16px;
+            border-radius:16px;
+            background:rgba(6,16,30,.55);
+            border:1px solid rgba(255,255,255,.08);
+            line-height:1.72;
+            color:var(--soft);
+        }
+        .result .big{
+            display:block;
+            font-size:28px;
+            color:var(--mint);
+            font-weight:800;
+            margin-top:8px;
+        }
+
+        .steps{
+            display:grid;
+            gap:14px;
+        }
+        .step{
+            padding:16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .step-num{
+            width:34px;height:34px;border-radius:12px;
+            display:grid;place-items:center;
+            background:linear-gradient(135deg, rgba(102,217,255,.2), rgba(183,146,255,.18));
+            color:var(--cyan);font-weight:800;margin-bottom:10px;
+        }
+        .math{
+            font-family:var(--mono);
+            color:#eef8ff;
+            display:block;
+            margin-top:6px;
+            overflow:auto;
+        }
+
+        .cards{
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:16px;
+        }
+        .tiny-card{
+            padding:18px;
+            border-radius:18px;
+            background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .tiny-card h4{margin:0 0 10px;font-size:16px}
+        .tiny-card .math{font-size:14px;color:var(--soft)}
+        .tiny-card p{margin:10px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+
+        .quiz-list{
+            display:grid;
+            gap:16px;
+        }
+        .quiz-card{
+            padding:18px;
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+        }
+        .quiz-card h4{margin:0 0 12px;font-size:18px}
+        .options{
+            display:grid;
+            gap:10px;
+        }
+        .option{
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:14px;
+            padding:12px 14px;
+            cursor:pointer;
+            transition:.2s ease;
+            background:rgba(255,255,255,.03);
+            color:var(--soft);
+        }
+        .option:hover{border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.05)}
+        .option.correct{
+            border-color:rgba(115,240,168,.55);
+            background:rgba(115,240,168,.12);
+            color:#eafff1;
+        }
+        .option.wrong{
+            border-color:rgba(255,123,138,.55);
+            background:rgba(255,123,138,.1);
+            color:#ffeef2;
+        }
+        .quiz-score{
+            padding:18px;
+            border-radius:18px;
+            background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+            border:1px solid rgba(255,255,255,.08);
+            display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+        }
+        .score-big{
+            font-size:34px;font-weight:900;color:var(--cyan);
+        }
+
+        .generator-output{
+            margin-top:14px;
+            padding:16px;
+            border-radius:16px;
+            background:rgba(6,16,30,.55);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--soft);
+            line-height:1.7;
+        }
+        .answer{
+            margin-top:12px;
+            padding:12px;
+            border-radius:12px;
+            background:rgba(255,255,255,.04);
+            display:none;
+        }
+        .answer.show{display:block}
+        .badge{
+            display:inline-flex;
+            padding:6px 10px;
+            border-radius:999px;
+            background:rgba(102,217,255,.12);
+            color:var(--cyan);
+            border:1px solid rgba(102,217,255,.2);
+            font-size:12px;
+            font-weight:700;
+            letter-spacing:.03em;
+            text-transform:uppercase;
+        }
+
+        .footer{
+            padding:30px 0 56px;
+            color:var(--muted);
+            text-align:center;
+        }
+
+        svg text{
+            font-family:var(--sans);
+            fill:#eef7ff;
+            font-size:14px;
+        }
+
+        .legend{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-top:14px;
+            color:var(--muted);
+            font-size:13px;
+        }
+        .legend-item{
+            display:flex;align-items:center;gap:8px;
+            padding:8px 10px;border-radius:999px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .line-swatch{
+            width:22px;height:0;border-top:3px solid currentColor;border-radius:4px;
+        }
+
+        .muted-box{
+            margin-top:12px;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--muted);
+            font-size:14px;
+            line-height:1.6;
+        }
+
+        @keyframes slowSpin{
+            from{transform:rotate(0deg)}
+            to{transform:rotate(360deg)}
+        }
+        @keyframes floatDrift{
+            0%,100%{transform:translateY(0) scale(1)}
+            50%{transform:translateY(-8px) scale(1.02)}
+        }
+        @keyframes shimmerFlow{
+            0%{stroke-dashoffset:0}
+            100%{stroke-dashoffset:-200}
+        }
+
+        @media (max-width: 980px){
+            .hero-grid,.grid-2,.calculator-grid,.cards{grid-template-columns:1fr}
+            .grid-3{grid-template-columns:1fr}
+            .hero-card,.orbital{min-height:auto}
+            .hero-stats{grid-template-columns:1fr}
+            .controls{grid-template-columns:1fr}
+            .nav{padding:8px 0}
+        }
+
+        @media (max-width: 640px){
+            .container{width:min(100% - 20px, 1200px)}
+            .hero{padding-top:34px}
+            .hero-card,.panel,.orbital{padding:18px}
+            .nav-links{display:none}
+            .btn{width:100%}
+            .hero-actions{flex-direction:column}
+            .tabs{flex-direction:column}
+            .tab{width:100%; text-align:center}
+        }
+
+        @media print{
+            body{
+                background:#fff !important;
+                color:#000 !important;
+            }
+            body::before,.nav-wrap,.hero-actions,.switches,.controls,.tabs,.btn,.pulse,.lab-tag{
+                display:none !important;
+            }
+            .hero,.section,.footer{padding:12px 0 !important}
+            .panel,.hero-card,.orbital,.tiny-card,.quiz-card,.quiz-score,.result,.generator-output,.accordion,.stat,.control,.switch,.step{
+                background:#fff !important;
+                color:#000 !important;
+                border:1px solid #ccc !important;
+                box-shadow:none !important;
+                backdrop-filter:none !important;
+            }
+            .muted,.subtle,.panel p,.section-head p,.acc-inner,.stat span,.legend,.muted-box,.option{color:#222 !important}
+            .hero h1,.section-head h2,.panel h3,.tiny-card h4,.quiz-card h4{color:#000 !important}
+            .formula,.math{color:#000 !important; background:#fff !important; border:1px solid #ddd !important}
+            a{color:#000 !important}
+            .acc-body{max-height:none !important}
+            .answer{display:block !important}
+            .option.correct,.option.wrong{background:#fff !important}
+        }
+    </style>
+</head>
+<body>
+<div class="nav-wrap">
+    <div class="container nav">
+        <div class="brand">
+            <div class="brand-badge"></div>
+            <div>Планиметрия ЕГЭ · цифровая лаборатория</div>
+        </div>
+        <div class="nav-links">
+            <a href="#about">Тема</a>
+            <a href="#visual">Визуализация</a>
+            <a href="#calculator">Калькулятор</a>
+            <a href="#theory">Теория</a>
+            <a href="#examples">Разбор</a>
+            <a href="#cheat">Шпаргалка</a>
+            <a href="#quiz">Квиз</a>
+            <a href="#generator">Генератор</a>
+        </div>
+    </div>
+</div>
+
+<header class="hero">
+    <div class="container hero-grid">
+        <div class="hero-card">
+            <div class="eyebrow"><span class="dot"></span> интерактивная математическая лаборатория</div>
+            <h1>Углы, треугольники, трапеции, центр вписанной окружности</h1>
+            <p class="lead">
+                Вся тема собрана в одном месте: аккуратная теория, живая геометрическая модель, автоматические вычисления,
+                разбор типовых задач и генератор новых упражнений.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="#visual">Открыть лабораторию</a>
+                <button class="btn btn-secondary" id="printBtn">Печать страницы</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <strong>6</strong>
+                    <span>ключевых идей: косинус, вписанный четырёхугольник, медиана, высота, биссектриса, средняя линия</span>
+                </div>
+                <div class="stat">
+                    <strong>4</strong>
+                    <span>интерактивных режима вычислений с мгновенным пересчётом формул и ответов</span>
+                </div>
+                <div class="stat">
+                    <strong>5+</strong>
+                    <span>типов тренировочных задач и самопроверка прямо на странице</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-card orbital">
+            <div class="lab-tag">Живая модель</div>
+            <div class="diagram-shell">
+                <svg viewBox="0 0 420 420" width="100%" height="100%" aria-label="Абстрактная живая модель">
+                    <defs>
+                        <radialGradient id="heroCore" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+                            <stop offset="18%" stop-color="#66d9ff" stop-opacity=".95"/>
+                            <stop offset="45%" stop-color="#7aa7ff" stop-opacity=".38"/>
+                            <stop offset="100%" stop-color="#7aa7ff" stop-opacity="0"/>
+                        </radialGradient>
+
+                        <linearGradient id="heroBeam" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#76ffd8"/>
+                            <stop offset="35%" stop-color="#66d9ff"/>
+                            <stop offset="70%" stop-color="#7aa7ff"/>
+                            <stop offset="100%" stop-color="#b792ff"/>
+                        </linearGradient>
+
+                        <linearGradient id="heroBeam2" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffd166"/>
+                            <stop offset="45%" stop-color="#66d9ff"/>
+                            <stop offset="100%" stop-color="#b792ff"/>
+                        </linearGradient>
+
+                        <filter id="heroGlow" x="-60%" y="-60%" width="220%" height="220%">
+                            <feGaussianBlur stdDeviation="6" result="g1"/>
+                            <feMerge>
+                                <feMergeNode in="g1"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+
+                        <filter id="heroGlowSoft" x="-60%" y="-60%" width="220%" height="220%">
+                            <feGaussianBlur stdDeviation="12" result="g2"/>
+                            <feMerge>
+                                <feMergeNode in="g2"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+
+                        <clipPath id="heroClip">
+                            <rect x="20" y="20" width="380" height="380" rx="24"/>
+                        </clipPath>
+                    </defs>
+
+                    <g clip-path="url(#heroClip)">
+                        <rect x="20" y="20" width="380" height="380" rx="24" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"/>
+
+                        <g opacity=".18">
+                            <line x1="60" y1="40" x2="60" y2="400" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="120" y1="40" x2="120" y2="400" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="180" y1="40" x2="180" y2="400" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="240" y1="40" x2="240" y2="400" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="300" y1="40" x2="300" y2="400" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="360" y1="40" x2="360" y2="400" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="40" y1="70" x2="400" y2="70" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="40" y1="130" x2="400" y2="130" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="40" y1="190" x2="400" y2="190" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="40" y1="250" x2="400" y2="250" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="40" y1="310" x2="400" y2="310" stroke="rgba(255,255,255,.08)"/>
+                            <line x1="40" y1="370" x2="400" y2="370" stroke="rgba(255,255,255,.08)"/>
+                        </g>
+
+                        <g style="transform-origin:210px 210px; animation:slowSpin 26s linear infinite;">
+                            <circle cx="210" cy="210" r="138" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1.2"/>
+                            <circle cx="210" cy="210" r="102" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+                            <circle cx="210" cy="210" r="66" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+                        </g>
+
+                        <g filter="url(#heroGlowSoft)" opacity=".8">
+                            <path d="M72 285 C105 212, 148 164, 211 210 S317 316, 364 149"
+                                  fill="none" stroke="url(#heroBeam)" stroke-width="6" stroke-linecap="round"/>
+                            <path d="M91 110 C149 170, 180 264, 211 210 S281 106, 344 287"
+                                  fill="none" stroke="url(#heroBeam2)" stroke-width="4.5" stroke-linecap="round" opacity=".92"/>
+                            <path d="M58 205 C120 202, 162 162, 211 210 S304 262, 382 228"
+                                  fill="none" stroke="url(#heroBeam)" stroke-width="3.5" stroke-linecap="round" opacity=".82"/>
+                        </g>
+
+                        <g>
+                            <path d="M72 285 C105 212, 148 164, 211 210 S317 316, 364 149"
+                                  fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.1" stroke-dasharray="8 10" style="animation:shimmerFlow 7s linear infinite;"/>
+                            <path d="M91 110 C149 170, 180 264, 211 210 S281 106, 344 287"
+                                  fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1" stroke-dasharray="7 11" style="animation:shimmerFlow 9s linear infinite;"/>
+                        </g>
+
+                        <g style="transform-origin:210px 210px; animation:floatDrift 5.8s ease-in-out infinite;">
+                            <circle cx="210" cy="210" r="56" fill="url(#heroCore)" filter="url(#heroGlowSoft)"/>
+                            <circle cx="210" cy="210" r="11" fill="#ffffff"/>
+                            <circle cx="210" cy="210" r="22" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.6"/>
+                        </g>
+
+                        <g filter="url(#heroGlow)">
+                            <circle cx="72" cy="285" r="5" fill="#76ffd8"/>
+                            <circle cx="91" cy="110" r="5" fill="#ffd166"/>
+                            <circle cx="364" cy="149" r="5" fill="#b792ff"/>
+                            <circle cx="344" cy="287" r="5" fill="#66d9ff"/>
+                            <circle cx="58" cy="205" r="4" fill="#66d9ff"/>
+                            <circle cx="382" cy="228" r="4" fill="#76ffd8"/>
+                            <circle cx="152" cy="165" r="3.6" fill="#ffffff" opacity=".95"/>
+                            <circle cx="281" cy="255" r="3.6" fill="#ffffff" opacity=".95"/>
+                        </g>
+
+                        <g opacity="5.88">
+                            <text x="48" y="300" fill="#76ffd8" style="font-size:12px; letter-spacing:.08em;">Ясно</text>
+                            <text x="298" y="138" fill="#b792ff" style="font-size:12px; letter-spacing:.08em;">Наглядно</text>
+                            <text x="124" y="100" fill="#ffd166" style="font-size:12px; letter-spacing:.08em;">Интерактивно</text>
+
+                        </g>
+                    </g>
+                </svg>
+                <div class="pulse p1"></div>
+                <div class="pulse p2"></div>
+                <div class="pulse p3"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="section" id="about">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Тема занятия</h2>
+                </div>
+                <p>
+                    Это компактный курс по типовым геометрическим идеям первой части ЕГЭ:
+                    как искать угол через подходящую фигуру, как видеть среднюю линию, как использовать центр вписанной окружности
+                    и как не теряться в задачах на прямоугольный треугольник.
+                </p>
+            </div>
+
+            <div class="grid-3">
+                <div class="panel">
+                    <h3>Главный принцип</h3>
+                    <p>
+                        Сначала выясни, в какую фигуру входит искомый элемент как полноценная часть.
+                        Если нужен косинус — ищи прямоугольный треугольник. Если нужен угол — найди треугольник,
+                        в котором он лежит. Если есть середины сторон — проверь среднюю линию.
+                    </p>
+                </div>
+                <div class="panel">
+                    <h3>Что особенно важно</h3>
+                    <p>
+                        В задачах часто не нужны отдельные углы по одному. Нужна их сумма или разность.
+                        Это резко сокращает решение и помогает не делать лишних вычислений.
+                    </p>
+                </div>
+                <div class="panel">
+                    <h3>Надёжный набор фактов</h3>
+                    <p>
+                        Противоположные углы вписанного четырёхугольника дают 180°.
+                        Биссектриса прямого угла даёт 45° и 45°.
+                        Медиана к гипотенузе равна половине гипотенузы.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="visual">
+        <div class="container">
+            <div class="section-head">
+                <div><h2>Интерактивный визуальный блок</h2></div>
+                <p>
+                    Двигай угол B в прямоугольном треугольнике и включай слои. Модель сразу показывает, как меняются
+                    угол между высотой и биссектрисой, а также угол между медианой и биссектрисой.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <h3>Живой чертёж прямоугольного треугольника</h3>
+                    <svg id="geoSVG" viewBox="0 0 700 470" width="100%" height="100%" aria-label="Интерактивный геометрический чертёж">
+                        <defs>
+                            <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feMerge>
+                                    <feMergeNode in="blur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <rect x="0" y="0" width="700" height="470" rx="22" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)"/>
+                        <g id="grid" opacity=".18"></g>
+
+                        <g id="triangleLayer">
+                            <line id="AB" x1="0" y1="0" x2="0" y2="0" stroke="#dff3ff" stroke-width="3"/>
+                            <line id="AC" x1="0" y1="0" x2="0" y2="0" stroke="#dff3ff" stroke-width="3"/>
+                            <line id="BC" x1="0" y1="0" x2="0" y2="0" stroke="#dff3ff" stroke-width="3"/>
+                        </g>
+
+                        <g id="auxLayer">
+                            <line id="CHline" x1="0" y1="0" x2="0" y2="0" stroke="#76ffd8" stroke-width="3" filter="url(#softGlow)"/>
+                            <line id="CDline" x1="0" y1="0" x2="0" y2="0" stroke="#ffd166" stroke-width="3" filter="url(#softGlow)"/>
+                            <line id="CMline" x1="0" y1="0" x2="0" y2="0" stroke="#66d9ff" stroke-width="3" filter="url(#softGlow)"/>
+                        </g>
+
+                        <g id="angleArcs"></g>
+                        <g id="labels"></g>
+                        <g id="points"></g>
+                    </svg>
+
+                    <div class="legend">
+                        <div class="legend-item" style="color:#dff3ff"><span class="line-swatch"></span>стороны треугольника</div>
+                        <div class="legend-item" style="color:#76ffd8"><span class="line-swatch"></span>высота CH</div>
+                        <div class="legend-item" style="color:#ffd166"><span class="line-swatch"></span>биссектриса CD</div>
+                        <div class="legend-item" style="color:#66d9ff"><span class="line-swatch"></span>медиана CM</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Управление моделью</h3>
+                    <p>Для прямоугольного треугольника ABC считаем, что ∠C = 90°. Меняем только острый угол B.</p>
+
+                    <div class="controls">
+                        <div class="control">
+                            <label>Угол B <output id="angleBOut">36°</output></label>
+                            <input id="angleB" type="range" min="20" max="70" step="1" value="36">
+                        </div>
+                        <div class="control">
+                            <label>Масштаб модели <output id="scaleOut">1.00×</output></label>
+                            <input id="scaleRange" type="range" min="0.8" max="1.25" step="0.01" value="1">
+                        </div>
+                    </div>
+
+                    <div class="switches">
+                        <label class="switch"><input type="checkbox" id="showCH" checked> Высота CH</label>
+                        <label class="switch"><input type="checkbox" id="showCD" checked> Биссектриса CD</label>
+                        <label class="switch"><input type="checkbox" id="showCM" checked> Медиана CM</label>
+                        <label class="switch"><input type="checkbox" id="showAngles" checked> Дуги углов</label>
+                        <label class="switch"><input type="checkbox" id="showNotes" checked> Подсказки</label>
+                    </div>
+
+                    <div class="formula-list">
+                        <div class="formula"><strong>∠A</strong><span id="angleAVal">54°</span></div>
+                        <div class="formula"><strong>∠DCB</strong> 45°</div>
+                        <div class="formula"><strong>∠HCB</strong> = 90° − ∠B = <span id="hcbVal">54°</span></div>
+                        <div class="formula"><strong>Угол между CH и CD</strong> = |45° − ∠HCB| = <span id="dchVal">9°</span></div>
+                        <div class="formula"><strong>Угол между CM и CB</strong> = ∠B = <span id="bcmVal">36°</span></div>
+                        <div class="formula"><strong>Угол между CM и CD</strong> = |45° − ∠B| = <span id="dcmVal">9°</span></div>
+                    </div>
+
+                    <div class="muted-box" id="modelComment">
+                        При ∠B = 36° получаем задачу из занятия: угол между медианой и биссектрисой равен 9°.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="calculator">
+        <div class="container">
+            <div class="section-head">
+                <div><h2>Калькулятор геометрических формул</h2></div>
+                <p>
+                    Четыре маленьких инструмента: центральный угол при центре вписанной окружности, углы в прямоугольном треугольнике,
+                    косинус через Пифагора и основания трапеции через среднюю линию.
+                </p>
+            </div>
+
+            <div class="calculator-grid">
+                <div class="panel">
+                    <div class="tabs">
+                        <button class="tab active" data-calc="incenter">Центр вписанной окружности</button>
+                        <button class="tab" data-calc="rightAngles">Высота / биссектриса / медиана</button>
+                        <button class="tab" data-calc="cosine">Косинус</button>
+                        <button class="tab" data-calc="trapezoid">Трапеция</button>
+                    </div>
+
+                    <div id="calc-incenter" class="calc-pane">
+                        <h3>Угол AOC по углу B</h3>
+                        <div class="calc-fields">
+                            <div class="field">
+                                <label for="incenterB">Введите угол B в треугольнике ABC</label>
+                                <input id="incenterB" type="number" value="68" min="1" max="178">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="calcIncenterBtn">Посчитать</button>
+                    </div>
+
+                    <div id="calc-rightAngles" class="calc-pane" hidden>
+                        <h3>Углы в прямоугольном треугольнике</h3>
+                        <div class="calc-fields">
+                            <div class="field">
+                                <label for="rightB">Введите острый угол B</label>
+                                <input id="rightB" type="number" value="67" min="1" max="89">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="calcRightBtn">Посчитать</button>
+                    </div>
+
+                    <div id="calc-cosine" class="calc-pane" hidden>
+                        <h3>Косинус через катет и гипотенузу</h3>
+                        <div class="calc-fields">
+                            <div class="field">
+                                <label for="cosHyp">Гипотенуза AC</label>
+                                <input id="cosHyp" type="number" value="25" min="1" step="0.01">
+                            </div>
+                            <div class="field">
+                                <label for="cosLeg">Катет AH</label>
+                                <input id="cosLeg" type="number" value="9.79795897" min="0" step="0.0001">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="calcCosBtn">Посчитать</button>
+                        <div class="subtle" style="margin-top:10px">Здесь 9.79795897 — это приближённое значение 4√6.</div>
+                    </div>
+
+                    <div id="calc-trapezoid" class="calc-pane" hidden>
+                        <h3>Основания трапеции через MJ : JK</h3>
+                        <div class="calc-fields">
+                            <div class="field">
+                                <label for="mkVal">Средняя линия MK</label>
+                                <input id="mkVal" type="number" value="24" min="0.01" step="0.01">
+                            </div>
+                            <div class="field">
+                                <label for="ratio1">MJ = a·x</label>
+                                <input id="ratio1" type="number" value="3" min="1" step="1">
+                            </div>
+                            <div class="field">
+                                <label for="ratio2">JK = b·x</label>
+                                <input id="ratio2" type="number" value="2" min="1" step="1">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="calcTrapBtn">Посчитать</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Результат</h3>
+                    <div class="result" id="calcResult">
+                        Выбери режим и нажми кнопку. Здесь появятся формулы, промежуточные шаги и готовый ответ.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="theory">
+        <div class="container">
+            <div class="section-head">
+                <div><h2>Теория в карточках</h2></div>
+                <p>
+                    Только те правила, которые реально использовались в задачах занятия.
+                    Открывай нужный блок и сразу связывай правило с типом задачи.
+                </p>
+            </div>
+
+            <div class="card-stack">
+                <div class="accordion open">
+                    <button class="acc-btn"><span>1. Косинус в прямоугольном треугольнике</span><span>+</span></button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            Косинус угла — это отношение прилежащего катета к гипотенузе.
+                            <div class="formula" style="margin-top:12px">cos α = прилежащий катет / гипотенуза</div>
+                            <ul>
+                                <li>Сначала найди правильный прямоугольный треугольник.</li>
+                                <li>Потом убедись, что рассматриваемый угол действительно лежит в нём.</li>
+                                <li>Если стороны не хватает, используй теорему Пифагора.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="acc-btn"><span>2. Вписанный четырёхугольник</span><span>+</span></button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            У вписанного четырёхугольника сумма противоположных углов равна 180°.
+                            <div class="formula" style="margin-top:12px">∠A + ∠C = 180°, ∠B + ∠D = 180°</div>
+                            <ul>
+                                <li>Если два данных угла не дают 180°, значит они соседние.</li>
+                                <li>Тогда оставшиеся углы находятся как 180° минус данный соседний угол.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="acc-btn"><span>3. Центр вписанной окружности</span><span>+</span></button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            Центр вписанной окружности — точка пересечения биссектрис.
+                            Поэтому если O — центр вписанной окружности треугольника ABC, то:
+                            <div class="formula" style="margin-top:12px">∠AOC = 90° + ∠B / 2</div>
+                            <ul>
+                                <li>Это очень удобно в задачах, где известен один угол треугольника.</li>
+                                <li>Не нужно искать ∠A и ∠C отдельно — достаточно их суммы.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="acc-btn"><span>4. Биссектриса, высота и медиана в прямоугольном треугольнике</span><span>+</span></button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            В прямоугольном треугольнике с прямым углом при C:
+                            <ul>
+                                <li>биссектриса делит 90° на 45° и 45°;</li>
+                                <li>высота к гипотенузе образует новый прямоугольный треугольник;</li>
+                                <li>медиана к гипотенузе равна половине гипотенузы;</li>
+                                <li>точка середины гипотенузы одинаково удалена от всех трёх вершин.</li>
+                            </ul>
+                            <div class="formula" style="margin-top:12px">Если CM — медиана к гипотенузе AB, то MA = MB = MC</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="acc-btn"><span>5. Средняя линия треугольника и трапеции</span><span>+</span></button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            Если отрезок соединяет середины двух сторон треугольника, то он параллелен третьей стороне и равен её половине.
+                            В трапеции средняя линия равна полусумме оснований.
+                            <div class="formula" style="margin-top:12px">m = (a + b) / 2</div>
+                            <ul>
+                                <li>Если диагональ трапеции режет среднюю линию, часто появляются две средние линии треугольников.</li>
+                                <li>Это позволяет быстро найти оба основания.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="acc-btn"><span>6. Типичные ошибки</span><span>+</span></button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            <ul>
+                                <li>Считать косинус угла, который не лежит в выбранном прямоугольном треугольнике.</li>
+                                <li>Путать прилежащий и противолежащий катеты.</li>
+                                <li>Забывать, что 48° и 74° не могут быть противоположными углами вписанного четырёхугольника.</li>
+                                <li>Искать два угла по отдельности, когда нужна только их сумма.</li>
+                                <li>Не замечать средние линии в треугольниках внутри трапеции.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="examples">
+        <div class="container">
+            <div class="section-head">
+                <div><h2>Разбор двух типовых задач</h2></div>
+                <p>
+                    Разборы построены по той же логике, что и на занятии: не просто формула, а выбор правильной фигуры,
+                    в которой лежит нужный угол или нужный отрезок.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <span class="badge">разбор 1</span>
+                    <h3 style="margin-top:10px">Центр вписанной окружности</h3>
+                    <p>
+                        В треугольнике ABC точка O — центр вписанной окружности. Известно, что ∠B = 68°.
+                        Найти ∠AOC.
+                    </p>
+                    <div class="steps" style="margin-top:16px">
+                        <div class="step">
+                            <div class="step-num">1</div>
+                            <div>Точка O — это пересечение биссектрис, значит угол AOC выражается через угол B.</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">2</div>
+                            <div class="math">∠AOC = 90° + ∠B / 2</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">3</div>
+                            <div class="math">∠AOC = 90° + 68° / 2 = 90° + 34° = 124°</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">4</div>
+                            <div>Ответ: <span class="math">124°</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <span class="badge">разбор 2</span>
+                    <h3 style="margin-top:10px">Средняя линия трапеции и диагональ</h3>
+                    <p>
+                        В трапеции средняя линия MK равна 24. Диагональ делит её в отношении MJ : JK = 3 : 2.
+                        Найти большее основание.
+                    </p>
+                    <div class="steps" style="margin-top:16px">
+                        <div class="step">
+                            <div class="step-num">1</div>
+                            <div>Положим <span class="math">MJ = 3x</span>, <span class="math">JK = 2x</span>.</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">2</div>
+                            <div class="math">MK = MJ + JK = 5x = 24</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">3</div>
+                            <div class="math">x = 24 / 5 = 4.8</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">4</div>
+                            <div>Отрезок MJ — средняя линия треугольника с большим основанием, поэтому</div>
+                            <div class="math">большее основание = 2 · MJ = 2 · 3x = 6x = 28.8</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">5</div>
+                            <div>Ответ: <span class="math">28.8</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="cheat">
+        <div class="container">
+            <div class="section-head">
+                <div><h2>Cheat sheet</h2></div>
+                <p>
+                    Короткая сводка для повторения перед тренировкой или перед вариантом.
+                </p>
+            </div>
+
+            <div class="cards">
+                <div class="tiny-card">
+                    <h4>Косинус</h4>
+                    <div class="math">cos α = прилежащий катет / гипотенуза</div>
+                    <p>Сначала найди прямоугольный треугольник, в котором лежит угол.</p>
+                </div>
+                <div class="tiny-card">
+                    <h4>Вписанный четырёхугольник</h4>
+                    <div class="math">противоположные углы дают 180°</div>
+                    <p>Если сумма не 180°, значит данные углы соседние.</p>
+                </div>
+                <div class="tiny-card">
+                    <h4>Центр вписанной окружности</h4>
+                    <div class="math">∠AOC = 90° + ∠B / 2</div>
+                    <p>О — точка пересечения биссектрис треугольника.</p>
+                </div>
+                <div class="tiny-card">
+                    <h4>Биссектриса 90°</h4>
+                    <div class="math">45° и 45°</div>
+                    <p>Часто это сразу даёт угол между биссектрисой и другим лучом.</p>
+                </div>
+                <div class="tiny-card">
+                    <h4>Высота к гипотенузе</h4>
+                    <div class="math">∠HCB = 90° − ∠B</div>
+                    <p>Появляется маленький прямоугольный треугольник внутри большого.</p>
+                </div>
+                <div class="tiny-card">
+                    <h4>Медиана к гипотенузе</h4>
+                    <div class="math">MA = MB = MC</div>
+                    <p>Получаются равнобедренные треугольники с удобными углами.</p>
+                </div>
+                <div class="tiny-card">
+                    <h4>Средняя линия треугольника</h4>
+                    <div class="math">равна половине третьей стороны</div>
+                    <p>Сразу связывает кусок внутри рисунка с большой стороной.</p>
+                </div>
+                <div class="tiny-card">
+                    <h4>Средняя линия трапеции</h4>
+                    <div class="math">m = (a + b) / 2</div>
+                    <p>Если диагональ режет среднюю линию, смотри на внутренние треугольники.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="quiz">
+        <div class="container">
+            <div class="section-head">
+                <div><h2>Мини-квиз</h2></div>
+                <p>
+                    Пять быстрых вопросов по теме. После проверки ответы подсвечиваются, а внизу появляется итоговый счёт.
+                </p>
+            </div>
+
+            <div class="quiz-list" id="quizList"></div>
+
+            <div class="quiz-score">
+                <div>
+                    <div class="subtle">Результат</div>
+                    <div class="score-big" id="scoreBig">0 / 5</div>
+                </div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap">
+                    <button class="btn btn-primary" id="checkQuiz">Проверить</button>
+                    <button class="btn btn-secondary" id="resetQuiz">Сбросить</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="generator">
+        <div class="container">
+            <div class="section-head">
+                <div><h2>Генератор тренировочных задач</h2></div>
+                <p>
+                    Генератор использует только безопасные шаблоны с проверяемыми ответами: без сомнительных условий и без двусмысленностей.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <h3>Выбери тип задачи</h3>
+                    <div class="tabs" id="genTabs">
+                        <button class="tab active" data-type="cyclic">Вписанный четырёхугольник</button>
+                        <button class="tab" data-type="incenter">Центр вписанной окружности</button>
+                        <button class="tab" data-type="medianBisector">Медиана и биссектриса</button>
+                        <button class="tab" data-type="altBisector">Высота и биссектриса</button>
+                        <button class="tab" data-type="trapezoid">Трапеция</button>
+                    </div>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px">
+                        <button class="btn btn-primary" id="generateTask">Сгенерировать</button>
+                        <button class="btn btn-secondary" id="showAnswerBtn">Показать ответ</button>
+                    </div>
+                    <div class="generator-output" id="generatorOutput">
+                        Нажми «Сгенерировать», чтобы получить новую задачу.
+                        <div class="answer" id="generatorAnswer"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Как устроен генератор</h3>
+                    <p>
+                        Все шаблоны соответствуют теме страницы:
+                    </p>
+                    <ul class="subtle" style="margin:12px 0 0 18px; line-height:1.8">
+                        <li>соседние углы вписанного четырёхугольника;</li>
+                        <li>формула ∠AOC = 90° + ∠B / 2;</li>
+                        <li>угол между медианой и биссектрисой: |45° − ∠B|;</li>
+                        <li>угол между высотой и биссектрисой: |∠B − 45°|;</li>
+                        <li>основания трапеции через среднюю линию и отношение частей.</li>
+                    </ul>
+                    <div class="muted-box">
+                        Во всех случаях ответ проверяется заранее формулой, поэтому условия остаются корректными.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    Интерактивный учебный модуль по планиметрии · всё содержимое посвящено только теме занятия
+</footer>
+
+<script>
+    (function(){
+        const $ = (sel, root=document) => root.querySelector(sel);
+        const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+        $('#printBtn').addEventListener('click', () => window.print());
+
+        $$('.accordion').forEach(acc => {
+            $('.acc-btn', acc).addEventListener('click', () => acc.classList.toggle('open'));
+        });
+
+        const gridLayer = $('#grid');
+        const labelsLayer = $('#labels');
+        const pointsLayer = $('#points');
+        const angleArcs = $('#angleArcs');
+
+        function drawGrid(){
+            let html = '';
+            for(let x=30; x<=670; x+=40){
+                html += `<line x1="${x}" y1="20" x2="${x}" y2="450" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+            }
+            for(let y=20; y<=450; y+=40){
+                html += `<line x1="30" y1="${y}" x2="670" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+            }
+            gridLayer.innerHTML = html;
+        }
+        drawGrid();
+
+        const angleBInput = $('#angleB');
+        const scaleInput = $('#scaleRange');
+        const angleBOut = $('#angleBOut');
+        const scaleOut = $('#scaleOut');
+
+        const showCH = $('#showCH');
+        const showCD = $('#showCD');
+        const showCM = $('#showCM');
+        const showAngles = $('#showAngles');
+        const showNotes = $('#showNotes');
+
+        function fmt(n, d=0){
+            return Number(n).toFixed(d).replace(/\.0+$/,'');
+        }
+
+        function projectPointToLine(px, py, ax, ay, bx, by){
+            const ABx = bx - ax, ABy = by - ay;
+            const APx = px - ax, APy = py - ay;
+            const t = (APx*ABx + APy*ABy) / (ABx*ABx + ABy*ABy);
+            return {x: ax + t*ABx, y: ay + t*ABy};
+        }
+
+        function lineIntersection(ax, ay, bx, by, cx, cy, dx, dy){
+            const den = (ax-bx)*(cy-dy) - (ay-by)*(cx-dx);
+            if(Math.abs(den) < 1e-9) return null;
+            const px = ((ax*by - ay*bx)*(cx-dx) - (ax-bx)*(cx*dy - cy*dx)) / den;
+            const py = ((ax*by - ay*bx)*(cy-dy) - (ay-by)*(cx*dy - cy*dx)) / den;
+            return {x:px, y:py};
+        }
+
+        function polar(cx, cy, r, deg){
+            const a = deg * Math.PI/180;
+            return {x: cx + r*Math.cos(a), y: cy - r*Math.sin(a)};
+        }
+
+        function arcPath(cx, cy, r, startDeg, endDeg){
+            const s = polar(cx, cy, r, startDeg);
+            const e = polar(cx, cy, r, endDeg);
+            const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+            const sweep = endDeg > startDeg ? 0 : 1;
+            return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} ${sweep} ${e.x} ${e.y}`;
+        }
+
+        function renderTriangle(){
+            const Bdeg = parseFloat(angleBInput.value);
+            const scale = parseFloat(scaleInput.value);
+            angleBOut.textContent = `${Bdeg}°`;
+            scaleOut.textContent = `${scale.toFixed(2)}×`;
+
+            const C = {x:100, y:390};
+            const B = {x:560, y:390};
+            const AC = 240 * scale;
+            const BC = AC / Math.tan(Bdeg*Math.PI/180);
+            const A = {x:C.x, y:C.y - AC};
+            B.x = Math.min(620, C.x + BC);
+
+            const M = {x:(A.x+B.x)/2, y:(A.y+B.y)/2};
+            const H = projectPointToLine(C.x, C.y, A.x, A.y, B.x, B.y);
+
+            const bisectorDirection = {x:1, y:-1};
+            const D = lineIntersection(C.x, C.y, C.x + bisectorDirection.x, C.y + bisectorDirection.y, A.x, A.y, B.x, B.y);
+
+            $('#AB').setAttribute('x1', A.x); $('#AB').setAttribute('y1', A.y);
+            $('#AB').setAttribute('x2', B.x); $('#AB').setAttribute('y2', B.y);
+
+            $('#AC').setAttribute('x1', A.x); $('#AC').setAttribute('y1', A.y);
+            $('#AC').setAttribute('x2', C.x); $('#AC').setAttribute('y2', C.y);
+
+            $('#BC').setAttribute('x1', C.x); $('#BC').setAttribute('y1', C.y);
+            $('#BC').setAttribute('x2', B.x); $('#BC').setAttribute('y2', B.y);
+
+            $('#CHline').setAttribute('x1', C.x); $('#CHline').setAttribute('y1', C.y);
+            $('#CHline').setAttribute('x2', H.x); $('#CHline').setAttribute('y2', H.y);
+            $('#CHline').style.display = showCH.checked ? 'block' : 'none';
+
+            $('#CDline').setAttribute('x1', C.x); $('#CDline').setAttribute('y1', C.y);
+            $('#CDline').setAttribute('x2', D.x); $('#CDline').setAttribute('y2', D.y);
+            $('#CDline').style.display = showCD.checked ? 'block' : 'none';
+
+            $('#CMline').setAttribute('x1', C.x); $('#CMline').setAttribute('y1', C.y);
+            $('#CMline').setAttribute('x2', M.x); $('#CMline').setAttribute('y2', M.y);
+            $('#CMline').style.display = showCM.checked ? 'block' : 'none';
+
+            labelsLayer.innerHTML = '';
+            pointsLayer.innerHTML = '';
+            angleArcs.innerHTML = '';
+
+            const pointEntries = [
+                ['A', A.x, A.y, -18, -10, '#e8f5ff'],
+                ['B', B.x, B.y, 12, 18, '#e8f5ff'],
+                ['C', C.x, C.y, -20, 20, '#e8f5ff'],
+                ['H', H.x, H.y, 12, -10, '#76ffd8'],
+                ['D', D.x, D.y, 12, -10, '#ffd166'],
+                ['M', M.x, M.y, 12, -10, '#66d9ff']
+            ];
+
+            pointEntries.forEach(([name,x,y,dx,dy,color])=>{
+                if((name==='H' && !showCH.checked) || (name==='D' && !showCD.checked) || (name==='M' && !showCM.checked)) return;
+                pointsLayer.insertAdjacentHTML('beforeend',
+                    `<circle cx="${x}" cy="${y}" r="4.8" fill="${color}" />`);
+                labelsLayer.insertAdjacentHTML('beforeend',
+                    `<text x="${x+dx}" y="${y+dy}" fill="${color}">${name}</text>`);
+            });
+
+            if(showAngles.checked){
+                const rightSize = 22;
+                angleArcs.insertAdjacentHTML('beforeend',
+                    `<path d="M ${C.x+rightSize} ${C.y} L ${C.x+rightSize} ${C.y-rightSize} L ${C.x} ${C.y-rightSize}" stroke="#dff3ff" stroke-width="2" fill="none" opacity=".9"/>`);
+            }
+
+            if(showAngles.checked){
+                angleArcs.insertAdjacentHTML('beforeend',
+                    `<path d="${arcPath(B.x, B.y, 38, 180-Bdeg, 180)}" stroke="#76ffd8" stroke-width="3" fill="none"/>`);
+                angleArcs.insertAdjacentHTML('beforeend',
+                    `<text x="${B.x-56}" y="${B.y-16}" fill="#76ffd8">${Bdeg}°</text>`);
+
+                angleArcs.insertAdjacentHTML('beforeend',
+                    `<path d="${arcPath(C.x, C.y, 50, 0, 45)}" stroke="#ffd166" stroke-width="3" fill="none" style="display:${showCD.checked?'block':'none'}"/>`);
+                angleArcs.insertAdjacentHTML('beforeend',
+                    `<text x="${C.x+48}" y="${C.y-20}" fill="#ffd166" style="display:${showCD.checked?'block':'none'}">45°</text>`);
+
+                const hcb = 90 - Bdeg;
+                angleArcs.insertAdjacentHTML('beforeend',
+                    `<path d="${arcPath(C.x, C.y, 72, 0, hcb)}" stroke="#76ffd8" stroke-width="2.4" fill="none" opacity=".85" style="display:${showCH.checked?'block':'none'}"/>`);
+            }
+
+            if(showNotes.checked){
+                labelsLayer.insertAdjacentHTML('beforeend',
+                    `<text x="${(A.x+B.x)/2 - 50}" y="${(A.y+B.y)/2 - 18}" fill="#9fb2ca">гипотенуза AB</text>`);
+                labelsLayer.insertAdjacentHTML('beforeend',
+                    `<text x="${C.x+20}" y="${C.y-110}" fill="#9fb2ca">AC</text>`);
+                labelsLayer.insertAdjacentHTML('beforeend',
+                    `<text x="${(C.x+B.x)/2 - 8}" y="${C.y+24}" fill="#9fb2ca">BC</text>`);
+            }
+
+            const angleA = 90 - Bdeg;
+            const hcb = 90 - Bdeg;
+            const dch = Math.abs(45 - hcb);
+            const dcm = Math.abs(45 - Bdeg);
+
+            $('#angleAVal').textContent = `${angleA}°`;
+            $('#hcbVal').textContent = `${hcb}°`;
+            $('#dchVal').textContent = `${dch}°`;
+            $('#bcmVal').textContent = `${Bdeg}°`;
+            $('#dcmVal').textContent = `${dcm}°`;
+
+            const comment = $('#modelComment');
+            if(Bdeg === 36){
+                comment.textContent = 'При ∠B = 36° получаем задачу из занятия: угол между медианой и биссектрисой равен 9°.';
+            } else if(Bdeg === 67){
+                comment.textContent = 'При ∠B = 67° получаем задачу из занятия: угол между высотой и биссектрисой равен 22°.';
+            } else if(Bdeg === 45){
+                comment.textContent = 'При ∠B = 45° биссектриса совпадает по направлению с медианой и высотой только в равнобедренном прямоугольном треугольнике.';
+            } else {
+                comment.textContent = `Сейчас ∠B = ${Bdeg}°. Тогда угол между высотой и биссектрисой равен ${dch}°, а угол между медианой и биссектрисой равен ${dcm}°.`;
+            }
+        }
+
+        [angleBInput, scaleInput, showCH, showCD, showCM, showAngles, showNotes].forEach(el => {
+            el.addEventListener('input', renderTriangle);
+            el.addEventListener('change', renderTriangle);
+        });
+        renderTriangle();
+
+        $$('.tab[data-calc]').forEach(tab=>{
+            tab.addEventListener('click', ()=>{
+                $$('.tab[data-calc]').forEach(t=>t.classList.remove('active'));
+                tab.classList.add('active');
+                $$('.calc-pane').forEach(p=>p.hidden = true);
+                $('#calc-'+tab.dataset.calc).hidden = false;
+            });
+        });
+
+        const calcResult = $('#calcResult');
+
+        $('#calcIncenterBtn').addEventListener('click', ()=>{
+            const B = parseFloat($('#incenterB').value);
+            if(!(B>0 && B<179)){
+                calcResult.innerHTML = 'Угол B должен быть между 1° и 178°.';
+                return;
+            }
+            const ans = 90 + B/2;
+            calcResult.innerHTML = `
+          Используем формулу для центра вписанной окружности:
+          <div class="math">∠AOC = 90° + ∠B / 2</div>
+          <div class="math">∠AOC = 90° + ${fmt(B,0)}° / 2 = 90° + ${fmt(B/2,1)}°</div>
+          <span class="big">∠AOC = ${fmt(ans,1)}°</span>
+        `;
+        });
+
+        $('#calcRightBtn').addEventListener('click', ()=>{
+            const B = parseFloat($('#rightB').value);
+            if(!(B>0 && B<90)){
+                calcResult.innerHTML = 'Острый угол B должен быть между 1° и 89°.';
+                return;
+            }
+            const hcb = 90 - B;
+            const dch = Math.abs(45 - hcb);
+            const dcm = Math.abs(45 - B);
+            calcResult.innerHTML = `
+          Для прямоугольного треугольника:
+          <div class="math">∠HCB = 90° − ∠B = 90° − ${fmt(B,0)}° = ${fmt(hcb,0)}°</div>
+          <div class="math">∠DCB = 45°</div>
+          <div class="math">Угол между CH и CD = |45° − ${fmt(hcb,0)}°| = ${fmt(dch,0)}°</div>
+          <div class="math">Угол между CM и CD = |45° − ${fmt(B,0)}°| = ${fmt(dcm,0)}°</div>
+          <span class="big">CH и CD: ${fmt(dch,0)}° · CM и CD: ${fmt(dcm,0)}°</span>
+        `;
+        });
+
+        $('#calcCosBtn').addEventListener('click', ()=>{
+            const hyp = parseFloat($('#cosHyp').value);
+            const leg = parseFloat($('#cosLeg').value);
+            if(!(hyp>0) || !(leg>=0) || leg>hyp){
+                calcResult.innerHTML = 'Нужно, чтобы гипотенуза была положительной, а катет не превышал гипотенузу.';
+                return;
+            }
+            const otherSq = hyp*hyp - leg*leg;
+            const other = Math.sqrt(Math.max(0, otherSq));
+            const cos = other / hyp;
+            calcResult.innerHTML = `
+          Предположим, что известны гипотенуза AC и катет AH.
+          Тогда второй катет:
+          <div class="math">CH = √(AC² − AH²)</div>
+          <div class="math">CH = √(${fmt(hyp,4)}² − ${fmt(leg,4)}²) = √(${fmt(otherSq,4)}) = ${fmt(other,6)}</div>
+          <div class="math">cos ∠ACH = CH / AC = ${fmt(other,6)} / ${fmt(hyp,4)}</div>
+          <span class="big">cos ∠ACH ≈ ${fmt(cos,6)}</span>
+        `;
+        });
+
+        $('#calcTrapBtn').addEventListener('click', ()=>{
+            const mk = parseFloat($('#mkVal').value);
+            const a = parseFloat($('#ratio1').value);
+            const b = parseFloat($('#ratio2').value);
+            if(!(mk>0) || !(a>0) || !(b>0)){
+                calcResult.innerHTML = 'Все значения должны быть положительными.';
+                return;
+            }
+            const x = mk / (a+b);
+            const larger = 2 * Math.max(a,b) * x;
+            const smaller = 2 * Math.min(a,b) * x;
+            calcResult.innerHTML = `
+          Пусть MJ = ${fmt(a,0)}x, JK = ${fmt(b,0)}x.
+          <div class="math">MK = MJ + JK = (${fmt(a,0)} + ${fmt(b,0)})x = ${fmt(mk,2)}</div>
+          <div class="math">x = ${fmt(mk,2)} / ${fmt(a+b,0)} = ${fmt(x,4)}</div>
+          <div class="math">Одно основание = 2 · MJ = ${fmt(2*a,0)}x = ${fmt(2*a*x,4)}</div>
+          <div class="math">Другое основание = 2 · JK = ${fmt(2*b,0)}x = ${fmt(2*b*x,4)}</div>
+          <span class="big">Основания: ${fmt(smaller,4)} и ${fmt(larger,4)}</span>
+        `;
+        });
+
+        const quizData = [
+            {
+                q:'Если два угла вписанного четырёхугольника равны 48° и 74°, что можно сказать сразу?',
+                options:[
+                    'Это противоположные углы',
+                    'Это соседние углы',
+                    'Оба угла прямые',
+                    'Четырёхугольник не может быть вписанным'
+                ],
+                correct:1
+            },
+            {
+                q:'В треугольнике ABC точка O — центр вписанной окружности. Если ∠B = 68°, то ∠AOC равен:',
+                options:['112°','124°','136°','146°'],
+                correct:1
+            },
+            {
+                q:'Биссектриса прямого угла делит его на:',
+                options:['30° и 60°','40° и 50°','45° и 45°','20° и 70°'],
+                correct:2
+            },
+            {
+                q:'В прямоугольном треугольнике медиана к гипотенузе:',
+                options:[
+                    'равна сумме катетов',
+                    'равна половине гипотенузы',
+                    'всегда равна высоте',
+                    'всегда делит гипотенузу в отношении 2 : 1'
+                ],
+                correct:1
+            },
+            {
+                q:'Если в трапеции диагональ делит среднюю линию на части MJ и JK, то основание, соответствующее MJ, равно:',
+                options:['MJ','MJ / 2','2 · MJ','MJ + JK'],
+                correct:2
+            }
+        ];
+
+        const quizList = $('#quizList');
+
+        function renderQuiz(){
+            quizList.innerHTML = quizData.map((item, i)=>`
+          <div class="quiz-card" data-q="${i}">
+            <h4>${i+1}. ${item.q}</h4>
+            <div class="options">
+              ${item.options.map((opt, j)=>`
+                <div class="option" data-choice="${j}">${opt}</div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+        }
+        renderQuiz();
+
+        const userAnswers = Array(quizData.length).fill(null);
+
+        quizList.addEventListener('click', (e)=>{
+            const opt = e.target.closest('.option');
+            if(!opt) return;
+            const card = e.target.closest('.quiz-card');
+            const qIdx = +card.dataset.q;
+            userAnswers[qIdx] = +opt.dataset.choice;
+            $$('.option', card).forEach(o=>{
+                o.style.outline = '';
+                o.style.borderColor = 'rgba(255,255,255,.1)';
+                o.style.background = 'rgba(255,255,255,.03)';
+            });
+            opt.style.outline = '2px solid rgba(102,217,255,.35)';
+            opt.style.borderColor = 'rgba(102,217,255,.4)';
+            opt.style.background = 'rgba(102,217,255,.08)';
+        });
+
+        $('#checkQuiz').addEventListener('click', ()=>{
+            let score = 0;
+            $$('.quiz-card').forEach((card, i)=>{
+                const correct = quizData[i].correct;
+                $$('.option', card).forEach((opt, j)=>{
+                    opt.classList.remove('correct','wrong');
+                    if(j === correct) opt.classList.add('correct');
+                    if(userAnswers[i] === j && j !== correct) opt.classList.add('wrong');
+                });
+                if(userAnswers[i] === correct) score++;
+            });
+            $('#scoreBig').textContent = `${score} / ${quizData.length}`;
+        });
+
+        $('#resetQuiz').addEventListener('click', ()=>{
+            for(let i=0;i<userAnswers.length;i++) userAnswers[i] = null;
+            renderQuiz();
+            $('#scoreBig').textContent = `0 / ${quizData.length}`;
+        });
+
+        let currentGenType = 'cyclic';
+
+        $$('#genTabs .tab').forEach(tab=>{
+            tab.addEventListener('click', ()=>{
+                $$('#genTabs .tab').forEach(t=>t.classList.remove('active'));
+                tab.classList.add('active');
+                currentGenType = tab.dataset.type;
+                $('#generatorOutput').innerHTML = 'Нажми «Сгенерировать», чтобы получить новую задачу.<div class="answer" id="generatorAnswer"></div>';
+            });
+        });
+
+        function randFrom(arr){ return arr[Math.floor(Math.random()*arr.length)] }
+
+        function generateTask(type){
+            if(type === 'cyclic'){
+                const a = randFrom([32, 38, 42, 48, 54, 58, 64, 72]);
+                const b = randFrom([46, 52, 58, 64, 68, 74]);
+                const ans1 = 180 - a;
+                const ans2 = 180 - b;
+                return {
+                    q:`Во вписанном четырёхугольнике два соседних угла равны ${a}° и ${b}°. Найдите два оставшихся угла.`,
+                    a:`Оставшиеся углы: ${ans1}° и ${ans2}°.`
+                };
+            }
+
+            if(type === 'incenter'){
+                const B = randFrom([24, 36, 48, 52, 64, 68, 76, 84]);
+                return {
+                    q:`В треугольнике ABC точка O — центр вписанной окружности. Известно, что ∠B = ${B}°. Найдите ∠AOC.`,
+                    a:`∠AOC = 90° + ${B}° / 2 = ${90 + B/2}°.`
+                };
+            }
+
+            if(type === 'medianBisector'){
+                const B = randFrom([18, 24, 28, 32, 36, 39, 41, 52]);
+                const ans = Math.abs(45 - B);
+                return {
+                    q:`В прямоугольном треугольнике ABC угол C прямой. Проведены биссектриса CD и медиана CM к гипотенузе. Если ∠B = ${B}°, найдите угол между CM и CD.`,
+                    a:`Угол между медианой и биссектрисой равен |45° − ${B}°| = ${ans}°.`
+                };
+            }
+
+            if(type === 'altBisector'){
+                const B = randFrom([52, 57, 61, 67, 72, 78]);
+                const ans = Math.abs(B - 45);
+                return {
+                    q:`В прямоугольном треугольнике ABC угол C прямой. Проведены высота CH к гипотенузе и биссектриса CD. Если ∠B = ${B}°, найдите угол между CH и CD.`,
+                    a:`∠HCB = 90° − ${B}° = ${90-B}°. Тогда угол между CH и CD равен |45° − ${90-B}°| = ${ans}°.`
+                };
+            }
+
+            if(type === 'trapezoid'){
+                const ratioPairs = [[3,2],[4,3],[5,2],[5,3]];
+                const pair = randFrom(ratioPairs);
+                const a = pair[0], b = pair[1];
+                const sum = a+b;
+                const x = randFrom([2,3,4,5,6]);
+                const mk = sum * x;
+                const larger = 2*Math.max(a,b)*x;
+                return {
+                    q:`В трапеции диагональ делит среднюю линию MK в отношении MJ : JK = ${a} : ${b}. Если MK = ${mk}, найдите большее основание трапеции.`,
+                    a:`Пусть MJ = ${a}x, JK = ${b}x. Тогда (${a}+${b})x = ${mk}, значит x = ${x}. Большее основание равно 2 · ${Math.max(a,b)}x = ${larger}.`
+                };
+            }
+
+            return {q:'Ошибка генерации.', a:''};
+        }
+
+        $('#generateTask').addEventListener('click', ()=>{
+            const currentTask = generateTask(currentGenType);
+            $('#generatorOutput').innerHTML = `
+          <div class="badge">${currentGenType}</div>
+          <div style="margin-top:12px">${currentTask.q}</div>
+          <div class="answer" id="generatorAnswer">${currentTask.a}</div>
+        `;
+        });
+
+        $('#showAnswerBtn').addEventListener('click', ()=>{
+            const answer = $('#generatorAnswer');
+            if(answer) answer.classList.toggle('show');
+        });
+
+    })();
+</script>
+</body>
+</html>

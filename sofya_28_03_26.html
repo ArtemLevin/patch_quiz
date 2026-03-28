@@ -1,0 +1,2349 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Интерактивная лаборатория: растворы, смеси, сплавы</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0d1830;
+            --panel:rgba(15,24,48,0.72);
+            --panel-strong:rgba(12,18,38,0.88);
+            --line:rgba(150,190,255,0.18);
+            --text:#eef5ff;
+            --muted:#a9bdd8;
+            --accent:#72d7ff;
+            --accent2:#8c7dff;
+            --accent3:#7fffd4;
+            --good:#7effb7;
+            --bad:#ff8a9c;
+            --warn:#ffd47a;
+            --shadow:0 20px 60px rgba(0,0,0,0.35);
+            --radius:22px;
+            --radius-sm:16px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+            radial-gradient(circle at 15% 20%, rgba(114,215,255,0.18), transparent 28%),
+            radial-gradient(circle at 85% 10%, rgba(140,125,255,0.14), transparent 30%),
+            radial-gradient(circle at 50% 80%, rgba(127,255,212,0.10), transparent 32%),
+            linear-gradient(180deg, #07101e 0%, #091528 45%, #07111f 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before,
+        body::after{
+            content:"";
+            position:fixed;
+            inset:auto;
+            width:42vw;
+            height:42vw;
+            border-radius:50%;
+            filter:blur(60px);
+            opacity:.18;
+            pointer-events:none;
+            z-index:-1;
+        }
+        body::before{
+            left:-10vw; top:-10vw;
+            background:radial-gradient(circle, rgba(114,215,255,.9), rgba(114,215,255,0));
+        }
+        body::after{
+            right:-10vw; top:10vh;
+            background:radial-gradient(circle, rgba(140,125,255,.9), rgba(140,125,255,0));
+        }
+
+        .topbar{
+            position:sticky;
+            top:0;
+            z-index:40;
+            backdrop-filter: blur(16px);
+            background:rgba(7,17,31,.58);
+            border-bottom:1px solid var(--line);
+        }
+        .topbar-inner{
+            max-width:1280px;
+            margin:0 auto;
+            padding:12px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+        }
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-width:0;
+        }
+        .brand-mark{
+            width:42px;height:42px;border-radius:14px;
+            background:
+            linear-gradient(135deg, rgba(114,215,255,.28), rgba(140,125,255,.24));
+            border:1px solid rgba(255,255,255,.14);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 10px 30px rgba(0,0,0,.25);
+            display:grid;place-items:center;
+            position:relative;
+            overflow:hidden;
+        }
+        .brand-mark::before{
+            content:"";
+            position:absolute; inset:6px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.18);
+        }
+        .brand-mark svg{width:24px;height:24px}
+        .brand-title{
+            min-width:0;
+        }
+        .brand-title strong{
+            display:block;
+            font-size:14px;
+            letter-spacing:.12em;
+            text-transform:uppercase;
+            color:#dff5ff;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .brand-title span{
+            display:block;
+            font-size:12px;
+            color:var(--muted);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+        .nav{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+        }
+        .nav a, .ghost-btn, .solid-btn{
+            text-decoration:none;
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.04);
+            padding:10px 14px;
+            border-radius:999px;
+            font-size:13px;
+            transition:.22s ease;
+            cursor:pointer;
+            backdrop-filter: blur(10px);
+        }
+        .nav a:hover, .ghost-btn:hover, .solid-btn:hover{
+            transform:translateY(-1px);
+            border-color:rgba(114,215,255,.36);
+            box-shadow:0 10px 25px rgba(0,0,0,.18);
+            color:#fff;
+        }
+        .solid-btn{
+            background:linear-gradient(135deg, rgba(114,215,255,.18), rgba(140,125,255,.18));
+            border-color:rgba(114,215,255,.28);
+        }
+
+        .page{
+            max-width:1280px;
+            margin:0 auto;
+            padding:28px 18px 70px;
+        }
+
+        .hero{
+            position:relative;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.10);
+            background:
+            linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)),
+            linear-gradient(135deg, rgba(114,215,255,.08), rgba(140,125,255,.08) 45%, rgba(127,255,212,.05));
+            box-shadow:var(--shadow);
+            border-radius:34px;
+            padding:38px;
+            min-height:560px;
+            display:grid;
+            grid-template-columns:1.15fr .95fr;
+            gap:24px;
+            align-items:stretch;
+        }
+
+        .hero::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:
+            linear-gradient(transparent 0 94%, rgba(255,255,255,.04) 94% 95%, transparent 95%),
+            linear-gradient(90deg, transparent 0 94%, rgba(255,255,255,.04) 94% 95%, transparent 95%);
+            background-size:44px 44px;
+            mask-image:linear-gradient(180deg, rgba(0,0,0,.66), rgba(0,0,0,.15));
+            pointer-events:none;
+        }
+
+        .hero-copy{
+            position:relative;
+            z-index:1;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+            gap:22px;
+        }
+
+        .eyebrow{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:8px 14px;
+            border-radius:999px;
+            border:1px solid rgba(114,215,255,.25);
+            background:rgba(114,215,255,.08);
+            width:max-content;
+            color:#d9f7ff;
+            font-size:13px;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+        }
+        .eyebrow .dot{
+            width:8px;height:8px;border-radius:50%;
+            background:var(--accent3);
+            box-shadow:0 0 14px rgba(127,255,212,.75);
+        }
+
+        h1{
+            margin:0;
+            font-size:clamp(34px, 5.8vw, 72px);
+            line-height:.94;
+            letter-spacing:-0.04em;
+            max-width:11ch;
+            text-wrap:balance;
+        }
+        .hero p.lead{
+            margin:0;
+            max-width:62ch;
+            color:var(--muted);
+            font-size:17px;
+            line-height:1.7;
+        }
+
+        .hero-pills{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        .pill{
+            padding:11px 14px;
+            border-radius:999px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.09);
+            color:#dbe9ff;
+            font-size:14px;
+        }
+
+        .hero-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            padding-top:4px;
+        }
+
+        .hero-visual{
+            position:relative;
+            min-height:480px;
+            z-index:1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .orbital{
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+        }
+
+        .float-card{
+            position:absolute;
+            border-radius:20px;
+            background:rgba(11,20,38,.62);
+            border:1px solid rgba(255,255,255,.10);
+            box-shadow:var(--shadow);
+            backdrop-filter: blur(16px);
+            padding:14px 16px;
+            max-width:220px;
+            animation: drift 7s ease-in-out infinite;
+        }
+        .float-card:nth-child(1){top:22px; right:12px}
+        .float-card:nth-child(2){bottom:28px; left:4px; animation-delay:-2.8s}
+        .float-card:nth-child(3){bottom:20px; right:34px; animation-delay:-4.1s}
+        .float-card strong{display:block; font-size:13px; color:#eaf7ff; margin-bottom:6px}
+        .float-card span{display:block; color:var(--muted); font-size:13px; line-height:1.45}
+        .formula-chip{
+            margin-top:8px;
+            display:inline-block;
+            padding:6px 10px;
+            border-radius:999px;
+            font-family:var(--mono);
+            font-size:12px;
+            color:#ddf9ff;
+            background:rgba(114,215,255,.08);
+            border:1px solid rgba(114,215,255,.18);
+        }
+
+        @keyframes drift{
+            0%,100%{transform:translateY(0px)}
+            50%{transform:translateY(-10px)}
+        }
+
+        .hero-core{
+            width:min(100%, 520px);
+            aspect-ratio:1/1;
+            border-radius:50%;
+            position:relative;
+            display:grid;
+            place-items:center;
+            background:
+            radial-gradient(circle at 50% 50%, rgba(114,215,255,.16), rgba(114,215,255,0) 45%),
+            radial-gradient(circle at 50% 50%, rgba(140,125,255,.10), rgba(140,125,255,0) 62%);
+        }
+        .hero-core::before,
+        .hero-core::after{
+            content:"";
+            position:absolute;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,.10);
+            inset:12%;
+            animation: spin 16s linear infinite;
+        }
+        .hero-core::after{
+            inset:4%;
+            border-style:dashed;
+            animation-duration:26s;
+            animation-direction:reverse;
+            opacity:.7;
+        }
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        .hero-svg-wrap{
+            width:84%;
+            max-width:420px;
+            filter:drop-shadow(0 18px 42px rgba(0,0,0,.28));
+        }
+        .hero-label{
+            position:absolute;
+            left:50%;
+            bottom:28px;
+            transform:translateX(-50%);
+            padding:10px 16px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(7,17,31,.62);
+            color:#d8e8ff;
+            font-size:13px;
+            letter-spacing:.04em;
+            backdrop-filter:blur(12px);
+        }
+
+        section{
+            margin-top:24px;
+        }
+
+        .grid-2{
+            display:grid;
+            grid-template-columns:1.1fr .9fr;
+            gap:24px;
+        }
+        .grid-3{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:18px;
+        }
+
+        .panel{
+            position:relative;
+            border-radius:var(--radius);
+            background:var(--panel);
+            border:1px solid rgba(255,255,255,.10);
+            box-shadow:var(--shadow);
+            backdrop-filter: blur(12px);
+            overflow:hidden;
+        }
+        .panel::before{
+            content:"";
+            position:absolute;
+            inset:0 0 auto 0;
+            height:1px;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+            pointer-events:none;
+        }
+        .panel-body{padding:24px}
+        .panel-head{
+            padding:22px 24px 0;
+        }
+
+        .section-title{
+            margin:0 0 10px;
+            font-size:clamp(24px, 3vw, 36px);
+            line-height:1.05;
+            letter-spacing:-.03em;
+        }
+        .section-desc{
+            margin:0;
+            color:var(--muted);
+            line-height:1.7;
+            font-size:15px;
+            max-width:70ch;
+        }
+
+        .kpi-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:14px;
+            margin-top:18px;
+        }
+        .kpi{
+            padding:18px;
+            border-radius:20px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .kpi strong{
+            display:block;
+            font-size:13px;
+            color:var(--muted);
+            margin-bottom:10px;
+            letter-spacing:.04em;
+            text-transform:uppercase;
+        }
+        .kpi span{
+            display:block;
+            font-size:30px;
+            font-weight:700;
+            letter-spacing:-.03em;
+        }
+        .kpi small{
+            display:block;
+            margin-top:8px;
+            color:#cfe7ff;
+            line-height:1.4;
+        }
+
+        .visual-layout{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:18px;
+            align-items:stretch;
+        }
+
+        .svg-stage{
+            position:relative;
+            min-height:500px;
+            border-radius:24px;
+            background:
+            radial-gradient(circle at 50% 0%, rgba(114,215,255,.10), transparent 40%),
+            linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+            border:1px solid rgba(255,255,255,.08);
+            overflow:hidden;
+            padding:16px;
+        }
+        .svg-stage svg{
+            width:100%;
+            height:100%;
+            display:block;
+        }
+
+        .control-stack{
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+        }
+        .control-card{
+            border-radius:22px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            padding:18px;
+        }
+        .control-card h3{
+            margin:0 0 8px;
+            font-size:18px;
+            letter-spacing:-.02em;
+        }
+        .control-card p{
+            margin:0 0 14px;
+            color:var(--muted);
+            line-height:1.6;
+            font-size:14px;
+        }
+
+        .switch-row, .toggle-grid{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        .toggle{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:10px 12px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            user-select:none;
+            cursor:pointer;
+            font-size:14px;
+            color:#e9f3ff;
+        }
+        .toggle input{display:none}
+        .toggle .mark{
+            width:18px;height:18px;border-radius:5px;
+            border:1px solid rgba(255,255,255,.18);
+            background:rgba(255,255,255,.05);
+            display:grid;place-items:center;
+            transition:.2s ease;
+            flex:none;
+        }
+        .toggle .mark::after{
+            content:"";
+            width:10px;height:10px;border-radius:3px;
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
+            opacity:0; transform:scale(.55);
+            transition:.2s ease;
+        }
+        .toggle input:checked + .mark{
+            border-color:rgba(114,215,255,.35);
+            box-shadow:0 0 0 4px rgba(114,215,255,.08);
+        }
+        .toggle input:checked + .mark::after{
+            opacity:1; transform:scale(1);
+        }
+
+        .range-row{
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:12px;
+            align-items:center;
+            margin-top:8px;
+        }
+        input[type="range"]{
+            width:100%;
+            accent-color:#7fdcff;
+            cursor:pointer;
+        }
+        .range-value{
+            min-width:120px;
+            text-align:right;
+            font-family:var(--mono);
+            font-size:13px;
+            color:#dff7ff;
+        }
+
+        .math-box{
+            border-radius:18px;
+            padding:14px 16px;
+            background:rgba(114,215,255,.06);
+            border:1px solid rgba(114,215,255,.14);
+            font-family:var(--mono);
+            font-size:14px;
+            color:#ddfbff;
+            line-height:1.7;
+            overflow:auto hidden;
+        }
+
+        .calc-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:18px;
+        }
+        .field-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:12px;
+        }
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+        .field label{
+            font-size:13px;
+            color:#d7eaff;
+            letter-spacing:.03em;
+        }
+        .field input, .field select{
+            width:100%;
+            min-width:0;
+            padding:13px 14px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.09);
+            outline:none;
+            font-size:15px;
+            font-family:var(--sans);
+        }
+        .field input:focus, .field select:focus{
+            border-color:rgba(114,215,255,.36);
+            box-shadow:0 0 0 4px rgba(114,215,255,.08);
+        }
+
+        .calc-result{
+            display:grid;
+            gap:12px;
+        }
+        .result-row{
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .result-row strong{
+            display:block;
+            font-size:12px;
+            color:var(--muted);
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            margin-bottom:8px;
+        }
+        .result-row span{
+            display:block;
+            font-size:28px;
+            font-weight:700;
+            letter-spacing:-.02em;
+        }
+        .result-row small{
+            display:block;
+            color:#cfe7ff;
+            margin-top:8px;
+            line-height:1.45;
+        }
+
+        .accordion{
+            display:grid;
+            gap:12px;
+        }
+        .acc-item{
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            overflow:hidden;
+        }
+        .acc-btn{
+            width:100%;
+            text-align:left;
+            background:none;
+            color:var(--text);
+            border:none;
+            padding:18px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            cursor:pointer;
+            font-size:17px;
+            font-weight:700;
+        }
+        .acc-btn span:last-child{
+            font-size:24px;
+            color:var(--accent);
+            flex:none;
+            transition:.2s ease;
+        }
+        .acc-item.open .acc-btn span:last-child{transform:rotate(45deg)}
+        .acc-panel{
+            max-height:0;
+            overflow:hidden;
+            transition:max-height .28s ease;
+        }
+        .acc-inner{
+            padding:0 18px 18px;
+            color:var(--muted);
+            line-height:1.75;
+            font-size:15px;
+        }
+        .acc-inner ul{
+            margin:10px 0 0;
+            padding-left:18px;
+        }
+        .acc-inner li{margin:6px 0}
+        .formula-line{
+            display:block;
+            margin:12px 0;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(114,215,255,.06);
+            border:1px solid rgba(114,215,255,.14);
+            color:#e4fbff;
+            font-family:var(--mono);
+            overflow:auto hidden;
+        }
+
+        .example-stack{
+            display:grid;
+            gap:18px;
+        }
+        .example{
+            border-radius:22px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            overflow:hidden;
+        }
+        .example-head{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            align-items:center;
+            justify-content:space-between;
+            padding:18px 18px 12px;
+        }
+        .example-head h3{
+            margin:0;
+            font-size:20px;
+            letter-spacing:-.02em;
+        }
+        .example-tag{
+            padding:8px 12px;
+            border-radius:999px;
+            font-size:12px;
+            border:1px solid rgba(255,255,255,.1);
+            color:#d7ebff;
+            background:rgba(255,255,255,.04);
+        }
+        .example-body{
+            padding:0 18px 18px;
+            color:var(--muted);
+            line-height:1.7;
+            font-size:15px;
+        }
+        .steps{
+            display:grid;
+            gap:10px;
+            margin-top:14px;
+        }
+        .step{
+            padding:12px 14px;
+            border-radius:16px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .step strong{
+            display:block;
+            color:#eaf7ff;
+            margin-bottom:6px;
+            font-size:14px;
+        }
+
+        .cheat-grid{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:14px;
+        }
+        .cheat{
+            padding:18px;
+            border-radius:20px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .cheat h4{
+            margin:0 0 10px;
+            font-size:16px;
+        }
+        .cheat p{
+            margin:0;
+            color:var(--muted);
+            line-height:1.6;
+            font-size:14px;
+        }
+        .cheat .formula-line{margin-top:10px}
+
+        .quiz-wrap{
+            display:grid;
+            gap:14px;
+        }
+        .quiz-card{
+            padding:18px;
+            border-radius:20px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .quiz-card h4{
+            margin:0 0 12px;
+            font-size:18px;
+            line-height:1.4;
+        }
+        .options{
+            display:grid;
+            gap:10px;
+        }
+        .option{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            cursor:pointer;
+            transition:.2s ease;
+        }
+        .option:hover{border-color:rgba(114,215,255,.24)}
+        .option input{margin-top:3px}
+        .option.correct{
+            border-color:rgba(126,255,183,.42);
+            background:rgba(126,255,183,.08);
+        }
+        .option.wrong{
+            border-color:rgba(255,138,156,.42);
+            background:rgba(255,138,156,.08);
+        }
+
+        .quiz-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-top:10px;
+            align-items:center;
+        }
+        .score-pill{
+            padding:11px 14px;
+            border-radius:999px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            color:#e8f7ff;
+            font-weight:600;
+        }
+
+        .gen-layout{
+            display:grid;
+            grid-template-columns:1fr .95fr;
+            gap:18px;
+        }
+        .task-box, .answer-box{
+            border-radius:20px;
+            padding:20px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+            min-height:240px;
+        }
+        .task-box h3, .answer-box h3{
+            margin:0 0 10px;
+            font-size:20px;
+        }
+        .task-text{
+            color:#eaf6ff;
+            line-height:1.78;
+            font-size:17px;
+        }
+        .answer-text{
+            color:var(--muted);
+            line-height:1.75;
+            font-size:15px;
+            white-space:pre-line;
+        }
+        .hidden-answer{
+            filter:blur(10px);
+            user-select:none;
+            transition:.25s ease;
+        }
+        .hidden-answer.show{
+            filter:none;
+            user-select:text;
+        }
+
+        .footer-note{
+            text-align:center;
+            color:var(--muted);
+            padding:34px 10px 0;
+            font-size:14px;
+        }
+
+        .badge-row{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:16px;
+        }
+        .mini-badge{
+            border-radius:999px;
+            padding:9px 12px;
+            font-size:12px;
+            color:#d9ecff;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+        }
+
+        .subtle{
+            color:var(--muted);
+        }
+
+        .legend{
+            display:grid;
+            gap:10px;
+            margin-top:12px;
+        }
+        .legend-item{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            color:#dbeeff;
+            font-size:14px;
+        }
+        .legend-swatch{
+            width:16px;height:16px;border-radius:5px;flex:none;
+            border:1px solid rgba(255,255,255,.22);
+        }
+
+        .hr{
+            height:1px;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+            margin:16px 0;
+        }
+
+        .table-wrap{
+            overflow:auto hidden;
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+        }
+        table{
+            width:100%;
+            border-collapse:collapse;
+            min-width:580px;
+        }
+        th, td{
+            padding:14px 16px;
+            text-align:left;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+        th{
+            color:#dff4ff;
+            font-size:13px;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            background:rgba(255,255,255,.04);
+        }
+        td{
+            color:var(--muted);
+        }
+        tr:last-child td{border-bottom:none}
+
+        @media (max-width: 1100px){
+            .hero, .grid-2, .visual-layout, .calc-grid, .gen-layout{
+                grid-template-columns:1fr;
+            }
+            .hero{
+                min-height:auto;
+                padding:24px;
+            }
+            .hero-visual{
+                min-height:420px;
+            }
+            .kpi-grid{
+                grid-template-columns:repeat(2,1fr);
+            }
+            .grid-3, .cheat-grid{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media (max-width: 760px){
+            .topbar-inner{
+                flex-direction:column;
+                align-items:stretch;
+            }
+            .nav{
+                justify-content:flex-start;
+            }
+            .page{
+                padding:18px 12px 54px;
+            }
+            .panel-body, .panel-head{
+                padding-left:18px;
+                padding-right:18px;
+            }
+            .hero{
+                border-radius:26px;
+            }
+            .hero-core{
+                width:min(100%, 360px);
+            }
+            .field-grid{
+                grid-template-columns:1fr;
+            }
+            .kpi-grid{
+                grid-template-columns:1fr;
+            }
+            .float-card{
+                position:relative;
+                inset:auto !important;
+                max-width:none;
+                margin-top:10px;
+            }
+            .hero-visual{
+                display:block;
+            }
+            .orbital{
+                position:relative;
+            }
+            .hero-core{
+                margin:0 auto;
+            }
+        }
+
+        @media print{
+            :root{
+                --bg:#fff;
+                --bg2:#fff;
+                --panel:#fff;
+                --panel-strong:#fff;
+                --text:#111;
+                --muted:#333;
+                --line:rgba(0,0,0,.14);
+            }
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+            body::before, body::after, .orbital, .hero::before, .hero-core::before, .hero-core::after{
+                display:none !important;
+            }
+            .topbar, .hero-actions, .quiz-actions, .control-stack .solid-btn, .control-stack .ghost-btn, .nav{
+                display:none !important;
+            }
+            .panel, .hero, .control-card, .kpi, .example, .cheat, .quiz-card, .task-box, .answer-box, .svg-stage{
+                background:#fff !important;
+                box-shadow:none !important;
+                border:1px solid #ddd !important;
+            }
+            .hero{
+                min-height:auto;
+                padding:20px;
+            }
+            .hero-label{
+                background:#fff;
+                color:#111;
+                border:1px solid #ddd;
+            }
+            .float-card{
+                display:none !important;
+            }
+            .hidden-answer{
+                filter:none !important;
+                user-select:text !important;
+            }
+            .page{
+                max-width:none;
+                padding:0;
+            }
+            .section-title, h1, .brand-title strong, .brand-title span, p, li, td, th, label, span, strong, small, h3, h4{
+                color:#111 !important;
+            }
+            .formula-line, .math-box{
+                background:#f7f7f7 !important;
+                color:#111 !important;
+                border:1px solid #ddd !important;
+            }
+            a{
+                color:#111 !important;
+                text-decoration:none;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none">
+                    <path d="M18 20h28M18 32h28M18 44h20" stroke="url(#g1)" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="48" cy="44" r="6" fill="url(#g1)"/>
+                    <defs>
+                        <linearGradient id="g1" x1="18" y1="20" x2="54" y2="50" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#72d7ff"/>
+                            <stop offset="1" stop-color="#8c7dff"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="brand-title">
+                <strong>Интерактивная лаборатория</strong>
+                <span>Растворы · смеси · сплавы · сушка · массовая доля</span>
+            </div>
+        </div>
+        <nav class="nav" aria-label="Навигация по разделам">
+            <a href="#visual">Визуализация</a>
+            <a href="#calc">Калькулятор</a>
+            <a href="#theory">Теория</a>
+            <a href="#examples">Разборы</a>
+            <a href="#quiz">Квиз</a>
+            <a href="#generator">Тренажёр</a>
+            <button class="solid-btn" id="printBtn" type="button">Печать</button>
+        </nav>
+    </div>
+</header>
+
+<main class="page">
+    <section class="hero panel">
+        <div class="hero-copy">
+            <div>
+                <div class="eyebrow"><span class="dot"></span> цифровая учебная экспозиция</div>
+                <h1>Растворы, смеси и сплавы</h1>
+                <p class="lead">
+                    Здесь всё построено вокруг одной идеи: отслеживать массу нужного вещества и не путать её с общей массой системы.
+                    Смешивание, разбавление водой, равные массы, сплавы и сушка ягод — это одна большая тема с единым методом.
+                </p>
+                <div class="hero-pills">
+                    <div class="pill">k = m вещества / m раствора</div>
+                    <div class="pill">вода → k = 0</div>
+                    <div class="pill">при сушке сохраняется сухое вещество</div>
+                    <div class="pill">концентрации не складывают</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="hero-actions">
+                    <a class="solid-btn" href="#visual">Открыть живую модель</a>
+                    <a class="ghost-btn" href="#examples">Сразу к разбору задач</a>
+                    <a class="ghost-btn" href="#generator">Сгенерировать новую задачу</a>
+                </div>
+                <div class="badge-row">
+                    <div class="mini-badge">Школьная программа</div>
+                    <div class="mini-badge">Без сырого LaTeX</div>
+                    <div class="mini-badge">Все вычисления пересчитываются автоматически</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="orbital">
+                <div class="float-card">
+                    <strong>Главный объект учёта</strong>
+                    <span>Не просто масса раствора, а масса конкретного вещества: соли, никеля, сухого остатка.</span>
+                    <div class="formula-chip">m вещества = m раствора · k</div>
+                </div>
+                <div class="float-card">
+                    <strong>При добавлении воды</strong>
+                    <span>Меняется общая масса, но масса растворённого вещества остаётся прежней.</span>
+                    <div class="formula-chip">m вещества = const</div>
+                </div>
+                <div class="float-card">
+                    <strong>При сушке</strong>
+                    <span>Уходит вода, а сухое вещество не исчезает. Именно его надо приравнивать.</span>
+                    <div class="formula-chip">m сухого = const</div>
+                </div>
+            </div>
+
+            <div class="hero-core">
+                <div class="hero-svg-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 420 420">
+                        <defs>
+                            <linearGradient id="glassStroke" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#bfeeff" stop-opacity=".85"/>
+                                <stop offset="100%" stop-color="#7d84ff" stop-opacity=".65"/>
+                            </linearGradient>
+                            <linearGradient id="liquidFill" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#84efff" stop-opacity=".88"/>
+                                <stop offset="100%" stop-color="#5b7cff" stop-opacity=".78"/>
+                            </linearGradient>
+                            <radialGradient id="glow" cx="50%" cy="30%" r="70%">
+                                <stop offset="0%" stop-color="#dfffff" stop-opacity=".9"/>
+                                <stop offset="100%" stop-color="#dfffff" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+
+                        <circle cx="210" cy="210" r="180" fill="url(#glow)" opacity=".32"/>
+                        <g transform="translate(88 54)">
+                            <path d="M46 20h152c10 0 18 8 18 18v32c0 14 10 27 24 31 14 5 24 18 24 33v132c0 34-27 61-61 61H59c-34 0-61-27-61-61V134c0-15 10-28 24-33 14-4 24-17 24-31V38c0-10 8-18 18-18z"
+                                  fill="rgba(255,255,255,.05)"
+                                  stroke="url(#glassStroke)"
+                                  stroke-width="4"/>
+                            <path d="M18 208c0-24 18-43 42-43h142c24 0 42 19 42 43v58c0 23-18 41-41 41H59c-23 0-41-18-41-41z"
+                                  fill="url(#liquidFill)"
+                                  opacity=".95"/>
+                            <ellipse cx="131" cy="164" rx="92" ry="16" fill="#c4fbff" opacity=".28"/>
+                            <ellipse cx="131" cy="78" rx="85" ry="8" fill="#ffffff" opacity=".12"/>
+                            <path d="M72 52h118" stroke="#fff" stroke-opacity=".18" stroke-width="5" stroke-linecap="round"/>
+                            <circle cx="87" cy="205" r="4" fill="#fff" opacity=".5"/>
+                            <circle cx="110" cy="230" r="5" fill="#fff" opacity=".35"/>
+                            <circle cx="140" cy="195" r="3" fill="#fff" opacity=".45"/>
+                            <circle cx="179" cy="244" r="6" fill="#fff" opacity=".22"/>
+                            <circle cx="197" cy="216" r="4" fill="#fff" opacity=".32"/>
+
+                            <g transform="translate(265 118)">
+                                <rect x="0" y="0" width="60" height="90" rx="16" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.18)"/>
+                                <path d="M15 64c0-9 7-16 16-16h14v26c0 6-5 11-11 11h-8c-6 0-11-5-11-11z" fill="#fdf4c8"/>
+                                <path d="M24 22l8-8 8 8v22H24z" fill="#fff3b1"/>
+                                <path d="M32 14v-8" stroke="#fff3b1" stroke-width="4" stroke-linecap="round"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                <div class="hero-label">Одна таблица решает десятки задач</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <h2 class="section-title">Быстрая сводка темы</h2>
+            <p class="section-desc">
+                Ниже — четыре базовых идеи, на которых держится весь раздел. Если они понятны, то почти любую задачу можно свести к простой таблице и одному уравнению.
+            </p>
+        </div>
+        <div class="panel-body">
+            <div class="kpi-grid">
+                <div class="kpi">
+                    <strong>Массовая доля</strong>
+                    <span>k = mвещ / mсист</span>
+                    <small>Если концентрация в процентах, сначала переводим её в дробь: 15% → 0,15.</small>
+                </div>
+                <div class="kpi">
+                    <strong>Масса вещества</strong>
+                    <span>m = M · k</span>
+                    <small>Это основная рабочая формула для всех таблиц: раствор, смесь, сплав, ягоды.</small>
+                </div>
+                <div class="kpi">
+                    <strong>Чистая вода</strong>
+                    <span>k = 0</span>
+                    <small>Вода не добавляет растворённого вещества, а только увеличивает общую массу раствора.</small>
+                </div>
+                <div class="kpi">
+                    <strong>Сушка</strong>
+                    <span>m сухого = const</span>
+                    <small>При удалении воды надо приравнивать сухое вещество, а не общую массу продукта.</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="visual" class="panel">
+        <div class="panel-head">
+            <h2 class="section-title">Интерактивная визуализация</h2>
+            <p class="section-desc">
+                Меняйте массы и концентрации двух растворов, включайте слои чертежа и наблюдайте, как автоматически меняется итоговая смесь.
+                Это наглядная модель формулы k = (m₁k₁ + m₂k₂) / (m₁ + m₂).
+            </p>
+        </div>
+        <div class="panel-body">
+            <div class="visual-layout">
+                <div class="svg-stage">
+                    <svg id="mixSvg" viewBox="0 0 880 540" aria-label="Схема смешивания двух растворов">
+                        <defs>
+                            <linearGradient id="beakerStroke" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#d9fbff" stop-opacity=".9"/>
+                                <stop offset="100%" stop-color="#93a4ff" stop-opacity=".8"/>
+                            </linearGradient>
+                            <linearGradient id="liquid1" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#72d7ff" />
+                                <stop offset="100%" stop-color="#5188ff" />
+                            </linearGradient>
+                            <linearGradient id="liquid2" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#9c8fff" />
+                                <stop offset="100%" stop-color="#7565ff" />
+                            </linearGradient>
+                            <linearGradient id="liquidMix" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#7af4ff" />
+                                <stop offset="100%" stop-color="#637cff" />
+                            </linearGradient>
+                            <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+                                <feGaussianBlur stdDeviation="12" result="b"/>
+                                <feMerge>
+                                    <feMergeNode in="b"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        <g opacity=".16">
+                            <path d="M70 450H810" stroke="#fff" stroke-width="1"/>
+                            <path d="M100 70V470M260 70V470M440 70V470M620 70V470M780 70V470" stroke="#fff" stroke-width="1"/>
+                        </g>
+
+                        <g id="flowLayer">
+                            <path d="M260 180c80 0 96 70 150 70s64-65 126-65" fill="none" stroke="rgba(126,240,255,.28)" stroke-width="16" stroke-linecap="round" filter="url(#softGlow)"/>
+                            <path d="M260 190c72 0 82 52 143 52s74-58 132-58" fill="none" stroke="rgba(156,143,255,.24)" stroke-width="10" stroke-linecap="round"/>
+                        </g>
+
+                        <g id="beakerA" transform="translate(80,120)">
+                            <path d="M25 20h120c8 0 15 7 15 15v24c0 10 7 18 17 21 13 4 22 16 22 29v152c0 25-20 45-45 45H36c-25 0-45-20-45-45V109c0-13 9-25 22-29 10-3 17-11 17-21V35c0-8 7-15 15-15z"
+                                  fill="rgba(255,255,255,.04)" stroke="url(#beakerStroke)" stroke-width="3"/>
+                            <path id="liquidA" d="" fill="url(#liquid1)" opacity=".95"/>
+                            <ellipse id="surfaceA" cx="93" cy="0" rx="67" ry="11" fill="#c9fbff" opacity=".22"/>
+                            <text x="93" y="-18" text-anchor="middle" fill="#dff8ff" font-size="18" font-weight="700">Раствор 1</text>
+                            <text id="labelA1" x="93" y="330" text-anchor="middle" fill="#cfe8ff" font-size="15">m = 4 кг</text>
+                            <text id="labelA2" x="93" y="352" text-anchor="middle" fill="#cfe8ff" font-size="15">k = 15%</text>
+                        </g>
+
+                        <g id="beakerB" transform="translate(330,120)">
+                            <path d="M25 20h120c8 0 15 7 15 15v24c0 10 7 18 17 21 13 4 22 16 22 29v152c0 25-20 45-45 45H36c-25 0-45-20-45-45V109c0-13 9-25 22-29 10-3 17-11 17-21V35c0-8 7-15 15-15z"
+                                  fill="rgba(255,255,255,.04)" stroke="url(#beakerStroke)" stroke-width="3"/>
+                            <path id="liquidB" d="" fill="url(#liquid2)" opacity=".95"/>
+                            <ellipse id="surfaceB" cx="93" cy="0" rx="67" ry="11" fill="#ddd3ff" opacity=".20"/>
+                            <text x="93" y="-18" text-anchor="middle" fill="#ebebff" font-size="18" font-weight="700">Раствор 2</text>
+                            <text id="labelB1" x="93" y="330" text-anchor="middle" fill="#d9deff" font-size="15">m = 6 кг</text>
+                            <text id="labelB2" x="93" y="352" text-anchor="middle" fill="#d9deff" font-size="15">k = 25%</text>
+                        </g>
+
+                        <g id="beakerMix" transform="translate(600,90)">
+                            <path d="M35 18h150c10 0 18 8 18 18v32c0 12 9 23 21 27 16 5 28 20 28 36v198c0 31-25 56-56 56H54c-31 0-56-25-56-56V131c0-16 12-31 28-36 12-4 21-15 21-27V36c0-10 8-18 18-18z"
+                                  fill="rgba(255,255,255,.05)" stroke="url(#beakerStroke)" stroke-width="3.4"/>
+                            <path id="liquidMix" d="" fill="url(#liquidMix)" opacity=".95"/>
+                            <ellipse id="surfaceMix" cx="110" cy="0" rx="86" ry="12" fill="#d8fbff" opacity=".22"/>
+                            <text x="110" y="-18" text-anchor="middle" fill="#eefcff" font-size="19" font-weight="700">Итоговая смесь</text>
+                            <text id="labelMix1" x="110" y="414" text-anchor="middle" fill="#e2f1ff" font-size="16">m = 10 кг</text>
+                            <text id="labelMix2" x="110" y="438" text-anchor="middle" fill="#e2f1ff" font-size="16">k = 21%</text>
+                            <text id="labelMix3" x="110" y="462" text-anchor="middle" fill="#e2f1ff" font-size="15">m вещества = 2,1 кг</text>
+                        </g>
+
+                        <g id="formulaLayer">
+                            <rect x="534" y="32" width="276" height="88" rx="22" fill="rgba(7,17,31,.56)" stroke="rgba(255,255,255,.12)"/>
+                            <text x="554" y="64" fill="#dff6ff" font-size="15" font-family="ui-monospace, monospace">k = (m₁k₁ + m₂k₂) / (m₁ + m₂)</text>
+                            <text id="formulaLine1" x="554" y="92" fill="#c3d7f8" font-size="14" font-family="ui-monospace, monospace">k = (4·0,15 + 6·0,25) / 10</text>
+                            <text id="formulaLine2" x="554" y="114" fill="#7fffd4" font-size="14" font-family="ui-monospace, monospace">k = 0,21 = 21%</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="control-stack">
+                    <div class="control-card">
+                        <h3>Параметры растворов</h3>
+                        <p>Изменяйте исходные данные. Высота жидкости и вычисления пересчитываются мгновенно.</p>
+                        <div class="field-grid">
+                            <div class="field">
+                                <label for="m1Range">Масса 1-го раствора</label>
+                                <input type="range" id="m1Range" min="1" max="20" step="1" value="4">
+                            </div>
+                            <div class="field">
+                                <label for="k1Range">Концентрация 1-го раствора</label>
+                                <input type="range" id="k1Range" min="0" max="100" step="1" value="15">
+                            </div>
+                            <div class="field">
+                                <label for="m2Range">Масса 2-го раствора</label>
+                                <input type="range" id="m2Range" min="1" max="20" step="1" value="6">
+                            </div>
+                            <div class="field">
+                                <label for="k2Range">Концентрация 2-го раствора</label>
+                                <input type="range" id="k2Range" min="0" max="100" step="1" value="25">
+                            </div>
+                        </div>
+                        <div class="range-row">
+                            <div class="subtle">Текущие значения</div>
+                            <div class="range-value" id="mixNowText">m₁ = 4 кг · k₁ = 15% · m₂ = 6 кг · k₂ = 25%</div>
+                        </div>
+                    </div>
+
+                    <div class="control-card">
+                        <h3>Слои визуализации</h3>
+                        <p>Оставьте только то, что помогает понять формулу.</p>
+                        <div class="toggle-grid">
+                            <label class="toggle">
+                                <input type="checkbox" data-target="flowLayer" checked>
+                                <span class="mark"></span>
+                                Потоки смешивания
+                            </label>
+                            <label class="toggle">
+                                <input type="checkbox" data-target="formulaLayer" checked>
+                                <span class="mark"></span>
+                                Формула справа
+                            </label>
+                            <label class="toggle">
+                                <input type="checkbox" data-target="labelA1" checked>
+                                <span class="mark"></span>
+                                Подписи масс
+                            </label>
+                            <label class="toggle">
+                                <input type="checkbox" data-target="labelMix3" checked>
+                                <span class="mark"></span>
+                                Масса вещества
+                            </label>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item"><span class="legend-swatch" style="background:linear-gradient(180deg,#72d7ff,#5188ff)"></span>1-й раствор</div>
+                            <div class="legend-item"><span class="legend-swatch" style="background:linear-gradient(180deg,#9c8fff,#7565ff)"></span>2-й раствор</div>
+                            <div class="legend-item"><span class="legend-swatch" style="background:linear-gradient(180deg,#7af4ff,#637cff)"></span>итоговая смесь</div>
+                        </div>
+                    </div>
+
+                    <div class="control-card">
+                        <h3>Вывод модели</h3>
+                        <div class="math-box" id="mixSummary">
+                            Если смешать 4 кг 15%-ного раствора и 6 кг 25%-ного раствора, получится 10 кг смеси с концентрацией 21%.
+                        </div>
+                        <div class="hr"></div>
+                        <button class="solid-btn" id="visualResetBtn" type="button">Вернуть пример 4 кг и 6 кг</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="calc" class="grid-2">
+        <div class="panel">
+            <div class="panel-head">
+                <h2 class="section-title">Калькулятор массовой доли</h2>
+                <p class="section-desc">
+                    Универсальный блок для трёх типовых режимов: смешивание двух растворов, разбавление водой и сушка.
+                </p>
+            </div>
+            <div class="panel-body">
+                <div class="field" style="margin-bottom:14px">
+                    <label for="calcMode">Режим расчёта</label>
+                    <select id="calcMode">
+                        <option value="mix">Смешивание двух растворов</option>
+                        <option value="water">Добавление воды</option>
+                        <option value="dry">Сушка ягод / изюм</option>
+                    </select>
+                </div>
+
+                <div class="calc-grid">
+                    <div>
+                        <div id="modeMix" class="mode-pane">
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label for="mixMass1">Масса 1-го раствора</label>
+                                    <input id="mixMass1" type="number" min="0" step="0.1" value="4">
+                                </div>
+                                <div class="field">
+                                    <label for="mixConc1">Концентрация 1-го раствора, %</label>
+                                    <input id="mixConc1" type="number" min="0" max="100" step="0.1" value="15">
+                                </div>
+                                <div class="field">
+                                    <label for="mixMass2">Масса 2-го раствора</label>
+                                    <input id="mixMass2" type="number" min="0" step="0.1" value="6">
+                                </div>
+                                <div class="field">
+                                    <label for="mixConc2">Концентрация 2-го раствора, %</label>
+                                    <input id="mixConc2" type="number" min="0" max="100" step="0.1" value="25">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modeWater" class="mode-pane" hidden>
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label for="waterMass">Масса исходного раствора</label>
+                                    <input id="waterMass" type="number" min="0" step="0.1" value="8">
+                                </div>
+                                <div class="field">
+                                    <label for="waterConc">Исходная концентрация, %</label>
+                                    <input id="waterConc" type="number" min="0" max="100" step="0.1" value="15">
+                                </div>
+                                <div class="field">
+                                    <label for="waterAdded">Добавили воды</label>
+                                    <input id="waterAdded" type="number" min="0" step="0.1" value="4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modeDry" class="mode-pane" hidden>
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label for="dryMass">Масса исходного продукта</label>
+                                    <input id="dryMass" type="number" min="0" step="0.1" value="50">
+                                </div>
+                                <div class="field">
+                                    <label for="dryWater1">Влажность исходного продукта, %</label>
+                                    <input id="dryWater1" type="number" min="0" max="100" step="0.1" value="80">
+                                </div>
+                                <div class="field">
+                                    <label for="dryWater2">Влажность после сушки, %</label>
+                                    <input id="dryWater2" type="number" min="0" max="100" step="0.1" value="20">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calc-result">
+                        <div class="result-row">
+                            <strong>Главный результат</strong>
+                            <span id="calcMain">21%</span>
+                            <small id="calcSub">Итоговая концентрация после смешивания.</small>
+                        </div>
+                        <div class="result-row">
+                            <strong>Промежуточные данные</strong>
+                            <span id="calcAux">2,1 кг</span>
+                            <small id="calcAuxSub">Масса растворённого вещества в итоговой смеси.</small>
+                        </div>
+                        <div class="result-row">
+                            <strong>Формула</strong>
+                            <div class="math-box" id="calcFormula">k = (4·0,15 + 6·0,25) / 10 = 0,21 = 21%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-actions" style="margin-top:18px">
+                    <button class="solid-btn" type="button" id="calcReset">Сбросить к базовому примеру</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <h2 class="section-title">Эталонная таблица</h2>
+                <p class="section-desc">
+                    Практически каждую задачу по этой теме удобно привести к одной и той же структуре.
+                </p>
+            </div>
+            <div class="panel-body">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Объект</th>
+                            <th>Масса</th>
+                            <th>Концентрация</th>
+                            <th>Масса вещества</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>1-й раствор</td>
+                            <td>m₁</td>
+                            <td>k₁</td>
+                            <td>m₁ · k₁</td>
+                        </tr>
+                        <tr>
+                            <td>2-й раствор</td>
+                            <td>m₂</td>
+                            <td>k₂</td>
+                            <td>m₂ · k₂</td>
+                        </tr>
+                        <tr>
+                            <td>Итоговая смесь</td>
+                            <td>m₁ + m₂</td>
+                            <td>k</td>
+                            <td>(m₁ + m₂) · k</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="math-box" style="margin-top:14px">
+                    Складывать можно массы и массы вещества. Концентрации напрямую складывать нельзя.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="theory" class="grid-2">
+        <div class="panel">
+            <div class="panel-head">
+                <h2 class="section-title">Теория в аккордеонах</h2>
+                <p class="section-desc">
+                    Коротко, но по сути: определения, формулы, свойства и типичные ловушки.
+                </p>
+            </div>
+            <div class="panel-body">
+                <div class="accordion" id="accordion">
+                    <div class="acc-item open">
+                        <button class="acc-btn" type="button">
+                            <span>1. Массовая доля и базовая формула</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-panel" style="max-height:400px">
+                            <div class="acc-inner">
+                                Массовая доля показывает, какую часть всей массы составляет нужное вещество.
+                                <span class="formula-line">k = m вещества / m системы</span>
+                                Если концентрация дана в процентах, переводим её в дробь:
+                                <span class="formula-line">15% = 0,15 &nbsp;&nbsp; 25% = 0,25</span>
+                                Рабочая формула:
+                                <span class="formula-line">m вещества = m системы · k</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn" type="button">
+                            <span>2. Смешивание двух растворов</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-panel">
+                            <div class="acc-inner">
+                                При смешивании складываются массы растворов и массы растворённого вещества.
+                                <span class="formula-line">m итог = m₁ + m₂</span>
+                                <span class="formula-line">m вещества итог = m₁k₁ + m₂k₂</span>
+                                Отсюда:
+                                <span class="formula-line">k = (m₁k₁ + m₂k₂) / (m₁ + m₂)</span>
+                                Итоговая концентрация всегда лежит между исходными, если не добавляют постороннее вещество.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn" type="button">
+                            <span>3. Что происходит при добавлении воды</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-panel">
+                            <div class="acc-inner">
+                                У воды концентрация растворённого вещества равна нулю.
+                                <span class="formula-line">k воды = 0</span>
+                                Значит, вода не меняет массу растворённого вещества, а только увеличивает массу раствора.
+                                <span class="formula-line">m вещества до = m вещества после</span>
+                                Поэтому концентрация после разбавления становится меньше.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn" type="button">
+                            <span>4. Равные массы и задачи на сплавы</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-panel">
+                            <div class="acc-inner">
+                                Если в условии сказано, что массы двух растворов одинаковы, удобно обозначить обе через одну букву m.
+                                Тогда общая масса равна 2m.
+                                В сплавах всё то же самое: вместо соли можно отслеживать, например, массу никеля.
+                                <ul>
+                                    <li>нужное вещество — конкретный металл;</li>
+                                    <li>концентрация — доля этого металла;</li>
+                                    <li>обычно составляют систему из двух уравнений: по общей массе и по массе металла.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn" type="button">
+                            <span>5. Сушка ягод и изюм</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-panel">
+                            <div class="acc-inner">
+                                При сушке уходит вода, но сухое вещество сохраняется.
+                                Если влажность 85%, то сухого вещества 15%.
+                                <span class="formula-line">сухое вещество = 100% − влажность</span>
+                                Для задач на виноград и изюм главный закон такой:
+                                <span class="formula-line">m сухого вещества до = m сухого вещества после</span>
+                                Именно поэтому задачи на сушку концептуально относятся к тем же задачам на смеси и растворы.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn" type="button">
+                            <span>6. Типичные ошибки</span>
+                            <span>+</span>
+                        </button>
+                        <div class="acc-panel">
+                            <div class="acc-inner">
+                                <ul>
+                                    <li>Складывают концентрации вместо масс вещества.</li>
+                                    <li>Забывают перевести проценты в дробь.</li>
+                                    <li>В задачах на сушку работают с водой, хотя удобнее и надёжнее работать с сухим веществом.</li>
+                                    <li>Не проверяют здравый смысл ответа: концентрация должна быть от 0% до 100%.</li>
+                                    <li>Не замечают, что при добавлении воды масса вещества не меняется.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <h2 class="section-title">Алгоритм решения</h2>
+                <p class="section-desc">
+                    Пользуйтесь этим мини-протоколом каждый раз, когда видите проценты, массы и смесь компонентов.
+                </p>
+            </div>
+            <div class="panel-body">
+                <div class="example-stack">
+                    <div class="example">
+                        <div class="example-head">
+                            <h3>Шаг 1. Найди “главное вещество”</h3>
+                            <div class="example-tag">соль / никель / сухой остаток</div>
+                        </div>
+                        <div class="example-body">
+                            Сначала решите, что именно нужно отслеживать. В растворе это может быть соль, в сплаве — металл, в ягодах — сухое вещество.
+                        </div>
+                    </div>
+
+                    <div class="example">
+                        <div class="example-head">
+                            <h3>Шаг 2. Переведи проценты в дроби</h3>
+                            <div class="example-tag">15% → 0,15</div>
+                        </div>
+                        <div class="example-body">
+                            Если оставить проценты как есть, легко допустить ошибку. Проще сразу работать в десятичных дробях.
+                        </div>
+                    </div>
+
+                    <div class="example">
+                        <div class="example-head">
+                            <h3>Шаг 3. Заполни таблицу</h3>
+                            <div class="example-tag">масса · концентрация · масса вещества</div>
+                        </div>
+                        <div class="example-body">
+                            Для каждого объекта запишите массу, концентрацию и массу нужного вещества. Это снимает почти все смысловые ошибки.
+                        </div>
+                    </div>
+
+                    <div class="example">
+                        <div class="example-head">
+                            <h3>Шаг 4. Используй закон сохранения</h3>
+                            <div class="example-tag">что именно сохраняется?</div>
+                        </div>
+                        <div class="example-body">
+                            <ul>
+                                <li>При смешивании — суммируются массы и массы вещества.</li>
+                                <li>При добавлении воды — сохраняется масса вещества.</li>
+                                <li>При сушке — сохраняется масса сухого вещества.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="example">
+                        <div class="example-head">
+                            <h3>Шаг 5. Проверь ответ</h3>
+                            <div class="example-tag">здравый смысл</div>
+                        </div>
+                        <div class="example-body">
+                            Итоговая концентрация не может быть отрицательной или больше 100%. При разбавлении водой она должна уменьшаться. При сушке итоговая масса должна становиться меньше исходной.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="examples" class="panel">
+        <div class="panel-head">
+            <h2 class="section-title">Разбор задач</h2>
+            <p class="section-desc">
+                Два эталонных решения по текущей теме: смешивание растворов и сушка винограда. Оба разбора согласованы с формулами выше.
+            </p>
+        </div>
+        <div class="panel-body">
+            <div class="example-stack">
+                <article class="example">
+                    <div class="example-head">
+                        <h3>Задача 1. Смешивание 4 кг 15%-ного и 6 кг 25%-ного раствора</h3>
+                        <div class="example-tag">итоговая концентрация</div>
+                    </div>
+                    <div class="example-body">
+                        <div class="steps">
+                            <div class="step">
+                                <strong>Шаг 1. Считаем массу вещества в каждом растворе</strong>
+                                В первом растворе: 4 · 0,15 = 0,6 кг вещества. <br>
+                                Во втором растворе: 6 · 0,25 = 1,5 кг вещества.
+                            </div>
+                            <div class="step">
+                                <strong>Шаг 2. Складываем массы</strong>
+                                Общая масса смеси: 4 + 6 = 10 кг. <br>
+                                Общая масса вещества: 0,6 + 1,5 = 2,1 кг.
+                            </div>
+                            <div class="step">
+                                <strong>Шаг 3. Находим итоговую концентрацию</strong>
+                                <span class="formula-line">k = 2,1 / 10 = 0,21 = 21%</span>
+                            </div>
+                            <div class="step">
+                                <strong>Ответ</strong>
+                                Концентрация итогового раствора равна 21%.
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="example">
+                    <div class="example-head">
+                        <h3>Задача 2. Из винограда влажностью 85% получили 30 кг изюма влажностью 36%</h3>
+                        <div class="example-tag">ищем массу винограда</div>
+                    </div>
+                    <div class="example-body">
+                        <div class="steps">
+                            <div class="step">
+                                <strong>Шаг 1. Находим долю сухого вещества</strong>
+                                В винограде сухого вещества 100% − 85% = 15%. <br>
+                                В изюме сухого вещества 100% − 36% = 64%.
+                            </div>
+                            <div class="step">
+                                <strong>Шаг 2. Используем сохранение сухого вещества</strong>
+                                Если масса винограда равна x кг, то сухого вещества в нём 0,15x. <br>
+                                В 30 кг изюма сухого вещества 30 · 0,64 = 19,2 кг.
+                            </div>
+                            <div class="step">
+                                <strong>Шаг 3. Составляем уравнение</strong>
+                                <span class="formula-line">0,15x = 19,2</span>
+                                <span class="formula-line">x = 19,2 / 0,15 = 128</span>
+                            </div>
+                            <div class="step">
+                                <strong>Ответ</strong>
+                                Нужно было 128 кг винограда.
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <h2 class="section-title">Cheat sheet — всё, что нужно помнить</h2>
+            <p class="section-desc">
+                Быстрая памятка для решения задач на уроке, контрольной и пробнике.
+            </p>
+        </div>
+        <div class="panel-body">
+            <div class="cheat-grid">
+                <div class="cheat">
+                    <h4>1. Формулы</h4>
+                    <span class="formula-line">k = m вещества / m системы</span>
+                    <span class="formula-line">m вещества = m системы · k</span>
+                    <p>Работайте с долями в виде дробей, а не процентов.</p>
+                </div>
+                <div class="cheat">
+                    <h4>2. Смешивание</h4>
+                    <span class="formula-line">m итог = m₁ + m₂</span>
+                    <span class="formula-line">m вещества итог = m₁k₁ + m₂k₂</span>
+                    <p>Концентрации напрямую не складывают.</p>
+                </div>
+                <div class="cheat">
+                    <h4>3. Вода</h4>
+                    <span class="formula-line">k воды = 0</span>
+                    <span class="formula-line">m вещества = const</span>
+                    <p>После добавления воды концентрация обязательно уменьшается.</p>
+                </div>
+                <div class="cheat">
+                    <h4>4. Равные массы</h4>
+                    <span class="formula-line">m и m → общая масса 2m</span>
+                    <p>Если массы одинаковые, можно обозначить их одной буквой. Часто она сокращается.</p>
+                </div>
+                <div class="cheat">
+                    <h4>5. Сплавы</h4>
+                    <span class="formula-line">логика та же, что и у растворов</span>
+                    <p>Отслеживаем массу нужного металла и строим уравнение или систему.</p>
+                </div>
+                <div class="cheat">
+                    <h4>6. Сушка</h4>
+                    <span class="formula-line">сухое вещество = 100% − влажность</span>
+                    <span class="formula-line">m сухого = const</span>
+                    <p>Нельзя приравнивать общую массу ягод до и после сушки.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz" class="panel">
+        <div class="panel-head">
+            <h2 class="section-title">Самопроверка: мини-квиз</h2>
+            <p class="section-desc">
+                Пять коротких вопросов на понимание логики темы. После проверки система покажет верные и неверные ответы.
+            </p>
+        </div>
+        <div class="panel-body">
+            <div class="quiz-wrap" id="quizWrap">
+                <div class="quiz-card" data-answer="1">
+                    <h4>1. В 100 г раствора содержится 12 г соли. Какова концентрация раствора?</h4>
+                    <div class="options">
+                        <label class="option"><input type="radio" name="q1" value="0"><span>0,12%</span></label>
+                        <label class="option"><input type="radio" name="q1" value="1"><span>12%</span></label>
+                        <label class="option"><input type="radio" name="q1" value="2"><span>88%</span></label>
+                    </div>
+                </div>
+
+                <div class="quiz-card" data-answer="2">
+                    <h4>2. Что не меняется при добавлении чистой воды к раствору?</h4>
+                    <div class="options">
+                        <label class="option"><input type="radio" name="q2" value="0"><span>Концентрация</span></label>
+                        <label class="option"><input type="radio" name="q2" value="1"><span>Общая масса раствора</span></label>
+                        <label class="option"><input type="radio" name="q2" value="2"><span>Масса растворённого вещества</span></label>
+                    </div>
+                </div>
+
+                <div class="quiz-card" data-answer="0">
+                    <h4>3. Смешали 2 кг 10%-ного и 2 кг 30%-ного раствора. Какова концентрация смеси?</h4>
+                    <div class="options">
+                        <label class="option"><input type="radio" name="q3" value="0"><span>20%</span></label>
+                        <label class="option"><input type="radio" name="q3" value="1"><span>40%</span></label>
+                        <label class="option"><input type="radio" name="q3" value="2"><span>10%</span></label>
+                    </div>
+                </div>
+
+                <div class="quiz-card" data-answer="1">
+                    <h4>4. Если влажность винограда 80%, то доля сухого вещества равна…</h4>
+                    <div class="options">
+                        <label class="option"><input type="radio" name="q4" value="0"><span>80%</span></label>
+                        <label class="option"><input type="radio" name="q4" value="1"><span>20%</span></label>
+                        <label class="option"><input type="radio" name="q4" value="2"><span>100%</span></label>
+                    </div>
+                </div>
+
+                <div class="quiz-card" data-answer="2">
+                    <h4>5. Какое действие является методической ошибкой?</h4>
+                    <div class="options">
+                        <label class="option"><input type="radio" name="q5" value="0"><span>Перевести 25% в 0,25</span></label>
+                        <label class="option"><input type="radio" name="q5" value="1"><span>При сушке приравнять массу сухого вещества</span></label>
+                        <label class="option"><input type="radio" name="q5" value="2"><span>Сложить 15% и 25%, чтобы получить итоговую концентрацию</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-actions">
+                <button class="solid-btn" type="button" id="checkQuizBtn">Проверить ответы</button>
+                <button class="ghost-btn" type="button" id="resetQuizBtn">Сбросить квиз</button>
+                <div class="score-pill" id="quizScore">Счёт: —</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator" class="panel">
+        <div class="panel-head">
+            <h2 class="section-title">Генератор тренировочных задач</h2>
+            <p class="section-desc">
+                Генератор использует только безопасные шаблоны с гарантированно корректными ответами. Можно тренировать смешивание, воду, равные массы, сплавы и сушку.
+            </p>
+        </div>
+        <div class="panel-body">
+            <div class="gen-layout">
+                <div class="task-box">
+                    <h3>Новая задача</h3>
+                    <div class="task-text" id="taskText">
+                        Нажмите кнопку, чтобы получить новую корректную задачу по теме.
+                    </div>
+                    <div class="hero-actions" style="margin-top:18px">
+                        <button class="solid-btn" type="button" id="newTaskBtn">Сгенерировать задачу</button>
+                        <button class="ghost-btn" type="button" id="showAnswerBtn">Показать ответ</button>
+                        <button class="ghost-btn" type="button" id="resetTaskBtn">Очистить</button>
+                    </div>
+                </div>
+
+                <div class="answer-box">
+                    <h3>Ответ и краткий ход</h3>
+                    <div class="answer-text hidden-answer" id="taskAnswer">
+                        Здесь появится ответ к сгенерированной задаче.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="footer-note">
+        Учебная страница посвящена только теме массовой доли, растворов, смесей, сплавов и сушки. Все формулы отображаются обычным текстом браузера и не требуют внешних библиотек.
+    </div>
+</main>
+
+<script>
+    (function(){
+        const $ = (sel, root=document) => root.querySelector(sel);
+        const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+        function clamp(n, min, max){ return Math.min(max, Math.max(min, n)); }
+        function round(n, digits=2){
+            const p = Math.pow(10, digits);
+            return Math.round((n + Number.EPSILON) * p) / p;
+        }
+        function formatRu(n, digits=2){
+            if (!isFinite(n)) return "—";
+            const fixed = round(n, digits).toFixed(digits);
+            const trimmed = fixed.replace(/\.?0+$/,"");
+            return trimmed.replace(".", ",");
+        }
+        function percentRu(n, digits=1){
+            return formatRu(n, digits) + "%";
+        }
+
+        const printBtn = $("#printBtn");
+        printBtn.addEventListener("click", () => window.print());
+
+        // Accordion
+        $$("#accordion .acc-item").forEach(item=>{
+            const btn = $(".acc-btn", item);
+            const panel = $(".acc-panel", item);
+            btn.addEventListener("click", ()=>{
+                const open = item.classList.contains("open");
+                if(open){
+                    item.classList.remove("open");
+                    panel.style.maxHeight = "0px";
+                }else{
+                    item.classList.add("open");
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                }
+            });
+        });
+
+        // Visual mix model
+        const m1Range = $("#m1Range");
+        const k1Range = $("#k1Range");
+        const m2Range = $("#m2Range");
+        const k2Range = $("#k2Range");
+        const mixNowText = $("#mixNowText");
+        const mixSummary = $("#mixSummary");
+        const visualResetBtn = $("#visualResetBtn");
+
+        const liquidA = $("#liquidA");
+        const liquidB = $("#liquidB");
+        const liquidMix = $("#liquidMix");
+        const surfaceA = $("#surfaceA");
+        const surfaceB = $("#surfaceB");
+        const surfaceMix = $("#surfaceMix");
+
+        const labelA1 = $("#labelA1");
+        const labelA2 = $("#labelA2");
+        const labelB1 = $("#labelB1");
+        const labelB2 = $("#labelB2");
+        const labelMix1 = $("#labelMix1");
+        const labelMix2 = $("#labelMix2");
+        const labelMix3 = $("#labelMix3");
+        const formulaLine1 = $("#formulaLine1");
+        const formulaLine2 = $("#formulaLine2");
+
+        function liquidPath(x, topY, width, bottomY, rx){
+            const left = x, right = x + width;
+            return `M ${left} ${topY}
+                Q ${x + width/2} ${topY - rx} ${right} ${topY}
+                L ${right} ${bottomY}
+                Q ${x + width/2} ${bottomY + 16} ${left} ${bottomY}
+                Z`;
+        }
+
+        function updateVisual(){
+            const m1 = +m1Range.value;
+            const k1p = +k1Range.value;
+            const m2 = +m2Range.value;
+            const k2p = +k2Range.value;
+            const k1 = k1p/100;
+            const k2 = k2p/100;
+
+            const totalM = m1 + m2;
+            const totalSub = m1*k1 + m2*k2;
+            const k = totalM === 0 ? 0 : totalSub / totalM;
+
+            const h1 = 76 + (m1 / 20) * 142;
+            const h2 = 76 + (m2 / 20) * 142;
+            const hm = 110 + (totalM / 40) * 180;
+
+            const topA = 286 - h1;
+            const topB = 286 - h2;
+            const topM = 382 - hm;
+
+            liquidA.setAttribute("d", liquidPath(18, topA, 150, 286, 12));
+            liquidB.setAttribute("d", liquidPath(18, topB, 150, 286, 12));
+            liquidMix.setAttribute("d", liquidPath(18, topM, 184, 382, 13));
+
+            surfaceA.setAttribute("cy", topA);
+            surfaceB.setAttribute("cy", topB);
+            surfaceMix.setAttribute("cy", topM);
+
+            labelA1.textContent = `m = ${formatRu(m1,0)} кг`;
+            labelA2.textContent = `k = ${percentRu(k1p,0)}`;
+            labelB1.textContent = `m = ${formatRu(m2,0)} кг`;
+            labelB2.textContent = `k = ${percentRu(k2p,0)}`;
+            labelMix1.textContent = `m = ${formatRu(totalM,0)} кг`;
+            labelMix2.textContent = `k = ${percentRu(k*100,1)}`;
+            labelMix3.textContent = `m вещества = ${formatRu(totalSub,2)} кг`;
+
+            formulaLine1.textContent = `k = (${formatRu(m1,0)}·${formatRu(k1,2)} + ${formatRu(m2,0)}·${formatRu(k2,2)}) / ${formatRu(totalM,0)}`;
+            formulaLine2.textContent = `k = ${formatRu(k,3)} = ${percentRu(k*100,1)}`;
+
+            mixNowText.textContent = `m₁ = ${formatRu(m1,0)} кг · k₁ = ${percentRu(k1p,0)} · m₂ = ${formatRu(m2,0)} кг · k₂ = ${percentRu(k2p,0)}`;
+            mixSummary.textContent =
+            `Если смешать ${formatRu(m1,0)} кг ${percentRu(k1p,0)}-ного раствора и ${formatRu(m2,0)} кг ${percentRu(k2p,0)}-ного раствора, получится ${formatRu(totalM,0)} кг смеси с концентрацией ${percentRu(k*100,1)}. Масса растворённого вещества составит ${formatRu(totalSub,2)} кг.`;
+        }
+
+        [m1Range, k1Range, m2Range, k2Range].forEach(el=>el.addEventListener("input", updateVisual));
+        visualResetBtn.addEventListener("click", ()=>{
+            m1Range.value = 4;
+            k1Range.value = 15;
+            m2Range.value = 6;
+            k2Range.value = 25;
+            updateVisual();
+        });
+
+        $$('input[data-target]').forEach(ch=>{
+            ch.addEventListener("change", ()=>{
+                const targetId = ch.dataset.target;
+                const target = $("#" + targetId);
+                if(target) target.style.display = ch.checked ? "" : "none";
+                if(targetId === "labelA1"){
+                    labelA1.style.display = ch.checked ? "" : "none";
+                    labelB1.style.display = ch.checked ? "" : "none";
+                    labelMix1.style.display = ch.checked ? "" : "none";
+                }
+                if(targetId === "labelMix3"){
+                    labelMix3.style.display = ch.checked ? "" : "none";
+                }
+            });
+        });
+
+        updateVisual();
+
+        // Calculator
+        const calcMode = $("#calcMode");
+        const modeMix = $("#modeMix");
+        const modeWater = $("#modeWater");
+        const modeDry = $("#modeDry");
+
+        const mixMass1 = $("#mixMass1");
+        const mixConc1 = $("#mixConc1");
+        const mixMass2 = $("#mixMass2");
+        const mixConc2 = $("#mixConc2");
+
+        const waterMass = $("#waterMass");
+        const waterConc = $("#waterConc");
+        const waterAdded = $("#waterAdded");
+
+        const dryMass = $("#dryMass");
+        const dryWater1 = $("#dryWater1");
+        const dryWater2 = $("#dryWater2");
+
+        const calcMain = $("#calcMain");
+        const calcSub = $("#calcSub");
+        const calcAux = $("#calcAux");
+        const calcAuxSub = $("#calcAuxSub");
+        const calcFormula = $("#calcFormula");
+        const calcReset = $("#calcReset");
+
+        function setMode(mode){
+            modeMix.hidden = mode !== "mix";
+            modeWater.hidden = mode !== "water";
+            modeDry.hidden = mode !== "dry";
+            calc();
+        }
+
+        function calc(){
+            const mode = calcMode.value;
+
+            if(mode === "mix"){
+                const m1 = Math.max(0, parseFloat(mixMass1.value) || 0);
+                const m2 = Math.max(0, parseFloat(mixMass2.value) || 0);
+                const c1 = clamp(parseFloat(mixConc1.value) || 0, 0, 100);
+                const c2 = clamp(parseFloat(mixConc2.value) || 0, 0, 100);
+                const k1 = c1 / 100;
+                const k2 = c2 / 100;
+                const totalM = m1 + m2;
+                const substance = m1*k1 + m2*k2;
+                const k = totalM === 0 ? 0 : substance / totalM;
+                calcMain.textContent = percentRu(k*100, 2);
+                calcSub.textContent = "Итоговая концентрация после смешивания.";
+                calcAux.textContent = formatRu(substance, 3) + " кг";
+                calcAuxSub.textContent = "Масса растворённого вещества в итоговой смеси.";
+                calcFormula.textContent = `k = (${formatRu(m1,2)}·${formatRu(k1,4)} + ${formatRu(m2,2)}·${formatRu(k2,4)}) / ${formatRu(totalM,2)} = ${formatRu(k,4)} = ${percentRu(k*100,2)}`;
+            }
+
+            if(mode === "water"){
+                const m = Math.max(0, parseFloat(waterMass.value) || 0);
+                const c = clamp(parseFloat(waterConc.value) || 0, 0, 100);
+                const add = Math.max(0, parseFloat(waterAdded.value) || 0);
+                const substance = m * (c/100);
+                const totalM = m + add;
+                const k = totalM === 0 ? 0 : substance / totalM;
+                calcMain.textContent = percentRu(k*100, 2);
+                calcSub.textContent = "Новая концентрация после добавления воды.";
+                calcAux.textContent = formatRu(substance, 3) + " кг";
+                calcAuxSub.textContent = "Масса растворённого вещества не изменилась.";
+                calcFormula.textContent = `m вещества = ${formatRu(m,2)}·${formatRu(c/100,4)} = ${formatRu(substance,3)}; k = ${formatRu(substance,3)} / ${formatRu(totalM,2)} = ${formatRu(k,4)} = ${percentRu(k*100,2)}`;
+            }
+
+            if(mode === "dry"){
+                const m = Math.max(0, parseFloat(dryMass.value) || 0);
+                const w1 = clamp(parseFloat(dryWater1.value) || 0, 0, 100);
+                const w2 = clamp(parseFloat(dryWater2.value) || 0, 0, 100);
+                const dryShare1 = (100 - w1) / 100;
+                const dryShare2 = (100 - w2) / 100;
+                const drySub = m * dryShare1;
+                const finalM = dryShare2 <= 0 ? 0 : drySub / dryShare2;
+                calcMain.textContent = formatRu(finalM, 3) + " кг";
+                calcSub.textContent = "Масса продукта после сушки.";
+                calcAux.textContent = formatRu(drySub, 3) + " кг";
+                calcAuxSub.textContent = "Масса сухого вещества, которая сохраняется.";
+                calcFormula.textContent = `m сухого = ${formatRu(m,2)}·${formatRu(dryShare1,4)} = ${formatRu(drySub,3)}; масса после сушки = ${formatRu(drySub,3)} / ${formatRu(dryShare2,4)} = ${formatRu(finalM,3)}`;
+            }
+        }
+
+        calcMode.addEventListener("change", ()=>setMode(calcMode.value));
+        [mixMass1,mixConc1,mixMass2,mixConc2,waterMass,waterConc,waterAdded,dryMass,dryWater1,dryWater2]
+            .forEach(el=>el.addEventListener("input", calc));
+
+        calcReset.addEventListener("click", ()=>{
+            calcMode.value = "mix";
+            mixMass1.value = 4;
+            mixConc1.value = 15;
+            mixMass2.value = 6;
+            mixConc2.value = 25;
+            waterMass.value = 8;
+            waterConc.value = 15;
+            waterAdded.value = 4;
+            dryMass.value = 50;
+            dryWater1.value = 80;
+            dryWater2.value = 20;
+            setMode("mix");
+        });
+        setMode("mix");
+
+        // Quiz
+        const checkQuizBtn = $("#checkQuizBtn");
+        const resetQuizBtn = $("#resetQuizBtn");
+        const quizScore = $("#quizScore");
+        const quizCards = $$("#quizWrap .quiz-card");
+
+        checkQuizBtn.addEventListener("click", ()=>{
+            let score = 0;
+            quizCards.forEach((card, idx)=>{
+                const answer = card.dataset.answer;
+                const options = $$(".option", card);
+                options.forEach(opt => opt.classList.remove("correct","wrong"));
+                const checked = $(`input[name="q${idx+1}"]:checked`, card);
+                options.forEach((opt, i)=>{
+                    if(String(i) === answer) opt.classList.add("correct");
+                });
+                if(checked){
+                    if(checked.value === answer){
+                        score++;
+                    }else{
+                        checked.closest(".option").classList.add("wrong");
+                    }
+                }
+            });
+            quizScore.textContent = `Счёт: ${score} / ${quizCards.length}`;
+        });
+
+        resetQuizBtn.addEventListener("click", ()=>{
+            quizCards.forEach((card, idx)=>{
+                $$(`input[name="q${idx+1}"]`, card).forEach(inp=>inp.checked=false);
+                $$(".option", card).forEach(opt=>opt.classList.remove("correct","wrong"));
+            });
+            quizScore.textContent = "Счёт: —";
+        });
+
+        // Generator
+        const taskText = $("#taskText");
+        const taskAnswer = $("#taskAnswer");
+        const newTaskBtn = $("#newTaskBtn");
+        const showAnswerBtn = $("#showAnswerBtn");
+        const resetTaskBtn = $("#resetTaskBtn");
+
+        let currentTask = null;
+
+        function choice(arr){
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateMixTask(){
+            const m1 = choice([2,3,4,5,6,8]);
+            const m2 = choice([2,3,4,5,6,8,10]);
+            const c1 = choice([5,10,12,15,20,25]);
+            const c2 = choice([20,25,30,35,40]);
+            const substance = m1*(c1/100) + m2*(c2/100);
+            const total = m1 + m2;
+            const k = substance/total*100;
+            return {
+                text: `Смешали ${m1} кг ${c1}%-ного раствора и ${m2} кг ${c2}%-ного раствора того же вещества. Найдите концентрацию получившейся смеси.`,
+                answer:
+                `Масса вещества:\n${m1}·${formatRu(c1/100,2)} + ${m2}·${formatRu(c2/100,2)} = ${formatRu(substance,2)} кг.\n` +
+                `Общая масса: ${m1} + ${m2} = ${total} кг.\n` +
+                `Концентрация: ${formatRu(substance,2)} / ${total} = ${formatRu(k/100,4)} = ${percentRu(k,2)}.\n\n` +
+                `Ответ: ${percentRu(k,2)}.`
+            };
+        }
+
+        function generateWaterTask(){
+            const m = choice([4,6,8,10,12]);
+            const c = choice([10,12,15,20,24,30]);
+            const add = choice([2,3,4,5,6]);
+            const substance = m*(c/100);
+            const total = m + add;
+            const k = substance/total*100;
+            return {
+                text: `К ${m} кг ${c}%-ного раствора добавили ${add} кг воды. Найдите новую концентрацию раствора.`,
+                answer:
+                `Масса вещества до разбавления: ${m}·${formatRu(c/100,2)} = ${formatRu(substance,2)} кг.\n` +
+                `После добавления воды масса вещества не меняется.\n` +
+                `Новая масса раствора: ${m} + ${add} = ${total} кг.\n` +
+                `Концентрация: ${formatRu(substance,2)} / ${total} = ${formatRu(k/100,4)} = ${percentRu(k,2)}.\n\n` +
+                `Ответ: ${percentRu(k,2)}.`
+            };
+        }
+
+        function generateEqualTask(){
+            const c1 = choice([8,10,12,14,16,18]);
+            const c2 = choice([20,22,24,26,28,30]);
+            const k = (c1 + c2) / 2;
+            return {
+                text: `Смешали равные массы ${c1}%-ного и ${c2}%-ного растворов одного и того же вещества. Найдите концентрацию получившейся смеси.`,
+                answer:
+                `Пусть каждая масса равна m.\n` +
+                `Тогда общая масса: 2m.\n` +
+                `Масса вещества: ${formatRu(c1/100,2)}m + ${formatRu(c2/100,2)}m = ${formatRu((c1+c2)/100,2)}m.\n` +
+                `Концентрация: ${formatRu((c1+c2)/100,2)}m / 2m = ${formatRu(k/100,4)} = ${percentRu(k,2)}.\n\n` +
+                `Ответ: ${percentRu(k,2)}.`
+            };
+        }
+
+        function generateAlloyTask(){
+            const x = choice([10,12,15,18,20]);
+            const y = choice([10,12,15,18,20]);
+            const c1 = choice([20,25,30]);
+            const c2 = choice([5,8,10,12]);
+            const target = (x*c1/100 + y*c2/100) / (x+y) * 100;
+            return {
+                text: `Смешали ${x} кг сплава с содержанием металла ${c1}% и ${y} кг сплава с содержанием того же металла ${c2}%. Найдите содержание металла в новом сплаве.`,
+                answer:
+                `Масса металла в первом сплаве: ${x}·${formatRu(c1/100,2)} = ${formatRu(x*c1/100,2)} кг.\n` +
+                `Масса металла во втором сплаве: ${y}·${formatRu(c2/100,2)} = ${formatRu(y*c2/100,2)} кг.\n` +
+                `Итого металла: ${formatRu(x*c1/100 + y*c2/100,2)} кг.\n` +
+                `Масса сплава: ${x+y} кг.\n` +
+                `Концентрация: ${formatRu((target/100),4)} = ${percentRu(target,2)}.\n\n` +
+                `Ответ: ${percentRu(target,2)}.`
+            };
+        }
+
+        function generateDryTask(){
+            const mass = choice([40,50,60,80,100]);
+            const water1 = choice([70,75,80,85]);
+            const water2 = choice([20,25,30,35,40]);
+            const dry1 = (100-water1)/100;
+            const dry2 = (100-water2)/100;
+            const dryMass = mass*dry1;
+            const finalMass = dryMass/dry2;
+            return {
+                text: `Виноград содержит ${water1}% воды. После сушки получили изюм, содержащий ${water2}% воды. Сколько килограммов изюма получится из ${mass} кг винограда?`,
+                answer:
+                `Доля сухого вещества в винограде: 100% − ${water1}% = ${100-water1}%.\n` +
+                `Масса сухого вещества: ${mass}·${formatRu(dry1,2)} = ${formatRu(dryMass,2)} кг.\n` +
+                `В изюме сухого вещества ${100-water2}% = ${formatRu(dry2,2)} всей массы.\n` +
+                `Значит, масса изюма: ${formatRu(dryMass,2)} / ${formatRu(dry2,2)} = ${formatRu(finalMass,2)} кг.\n\n` +
+                `Ответ: ${formatRu(finalMass,2)} кг.`
+            };
+        }
+
+        function generateTask(){
+            const generators = [
+                generateMixTask,
+                generateWaterTask,
+                generateEqualTask,
+                generateAlloyTask,
+                generateDryTask
+            ];
+            currentTask = choice(generators)();
+            taskText.textContent = currentTask.text;
+            taskAnswer.textContent = currentTask.answer;
+            taskAnswer.classList.remove("show");
+        }
+
+        newTaskBtn.addEventListener("click", generateTask);
+        showAnswerBtn.addEventListener("click", ()=>{
+            if(!currentTask) generateTask();
+            taskAnswer.classList.add("show");
+        });
+        resetTaskBtn.addEventListener("click", ()=>{
+            currentTask = null;
+            taskText.textContent = "Нажмите кнопку, чтобы получить новую корректную задачу по теме.";
+            taskAnswer.textContent = "Здесь появится ответ к сгенерированной задаче.";
+            taskAnswer.classList.remove("show");
+        });
+    })();
+</script>
+</body>
+</html>
