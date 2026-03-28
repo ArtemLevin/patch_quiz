@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ОДЗ и отбор корней — интерактивная математическая лаборатория</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0b172a;
+            --panel:rgba(15,24,40,.68);
+            --panel-strong:rgba(13,19,31,.88);
+            --line:rgba(146,180,255,.16);
+            --text:#e9f2ff;
+            --muted:#9fb1cd;
+            --soft:#c7d7ef;
+            --a:#75d7ff;
+            --b:#9b8cff;
+            --c:#7ff5c6;
+            --danger:#ff8c9c;
+            --warn:#ffd87a;
+            --ok:#8df7b4;
+            --shadow:0 20px 60px rgba(0,0,0,.34);
+            --radius:24px;
+            --radius-sm:16px;
+            --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+            --sans:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+            radial-gradient(900px 500px at 15% -10%, rgba(117,215,255,.12), transparent 60%),
+            radial-gradient(850px 480px at 90% 0%, rgba(155,140,255,.12), transparent 60%),
+            radial-gradient(700px 420px at 50% 100%, rgba(127,245,198,.08), transparent 60%),
+            linear-gradient(180deg,var(--bg),#091424 40%, #07111f 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+        .grid-bg{
+            position:fixed; inset:0; pointer-events:none; opacity:.18;
+            background-image:
+            linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size:32px 32px;
+            mask-image:linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.25));
+        }
+        .orb{
+            position:fixed; border-radius:50%; filter:blur(70px); pointer-events:none; opacity:.35;
+        }
+        .orb.a{width:300px;height:300px;left:-100px;top:80px;background:rgba(117,215,255,.14)}
+        .orb.b{width:340px;height:340px;right:-120px;top:240px;background:rgba(155,140,255,.12)}
+        .orb.c{width:280px;height:280px;left:35%;bottom:-80px;background:rgba(127,245,198,.1)}
+        .container{width:min(1180px, calc(100% - 32px)); margin:0 auto}
+        .topbar{
+            position:sticky; top:0; z-index:30;
+            backdrop-filter:blur(16px);
+            background:linear-gradient(180deg, rgba(7,17,31,.88), rgba(7,17,31,.55));
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .topbar .inner{
+            display:flex; align-items:center; gap:16px; justify-content:space-between;
+            min-height:70px;
+        }
+        .brand{
+            display:flex; align-items:center; gap:12px; min-width:0;
+            font-weight:700; letter-spacing:.02em;
+        }
+        .brand-badge{
+            width:42px; height:42px; border-radius:14px; position:relative;
+            background:linear-gradient(135deg, rgba(117,215,255,.24), rgba(155,140,255,.22));
+            border:1px solid rgba(255,255,255,.12);
+            box-shadow: inset 0 0 22px rgba(255,255,255,.04), 0 10px 30px rgba(0,0,0,.28);
+        }
+        .brand-badge::before,.brand-badge::after{
+            content:""; position:absolute; inset:8px; border:1.5px solid rgba(255,255,255,.26); border-radius:10px;
+            transform:rotate(45deg);
+        }
+        .brand-badge::after{inset:14px; opacity:.7}
+        .brand span{
+            display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .nav{
+            display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+        }
+        .nav a,.ghost-btn,.solid-btn,.seg button,.mini-btn,.quiz-btn,.print-btn{
+            text-decoration:none; color:var(--text); border:none; cursor:pointer;
+            border-radius:999px; padding:10px 14px; font:600 14px/1 var(--sans);
+            transition:.25s ease; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+        }
+        .nav a:hover,.ghost-btn:hover,.seg button:hover,.mini-btn:hover,.quiz-btn:hover,.print-btn:hover{
+            transform:translateY(-1px);
+            background:rgba(255,255,255,.08);
+            border-color:rgba(255,255,255,.14);
+        }
+        .solid-btn{
+            background:linear-gradient(135deg, rgba(117,215,255,.16), rgba(155,140,255,.18));
+            border-color:rgba(117,215,255,.32);
+            box-shadow:0 12px 32px rgba(72,134,255,.18);
+        }
+        .hero{
+            padding:54px 0 28px;
+        }
+        .hero-grid{
+            display:grid; grid-template-columns:1.15fr .85fr; gap:24px; align-items:stretch;
+        }
+        .panel{
+            background:linear-gradient(180deg, rgba(15,24,40,.75), rgba(9,16,30,.78));
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            backdrop-filter:blur(16px);
+        }
+        .hero-card{
+            padding:30px;
+            position:relative; overflow:hidden;
+        }
+        .hero-card::before{
+            content:""; position:absolute; inset:auto -10% -35% auto; width:360px; height:360px; border-radius:50%;
+            background:radial-gradient(circle, rgba(117,215,255,.18), transparent 62%);
+            pointer-events:none;
+        }
+        .eyebrow{
+            display:inline-flex; align-items:center; gap:10px; padding:8px 12px;
+            border-radius:999px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+            color:var(--soft); font-size:13px; letter-spacing:.04em;
+        }
+        .eyebrow::before{
+            content:""; width:8px; height:8px; border-radius:50%;
+            background:linear-gradient(135deg,var(--a),var(--b)); box-shadow:0 0 16px rgba(117,215,255,.7);
+        }
+        h1{
+            margin:16px 0 14px; font-size:clamp(34px, 5vw, 64px); line-height:.98; letter-spacing:-.04em;
+        }
+        .lead{
+            font-size:clamp(16px, 2vw, 19px); line-height:1.7; color:var(--soft); max-width:64ch;
+        }
+        .hero-actions{
+            display:flex; gap:12px; flex-wrap:wrap; margin-top:22px;
+        }
+        .stats{
+            display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:22px;
+        }
+        .stat{
+            padding:16px;
+            border-radius:20px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .stat strong{display:block; font-size:24px; margin-bottom:6px}
+        .stat span{color:var(--muted); font-size:14px; line-height:1.4}
+        .visual-card{
+            padding:22px;
+            display:flex; flex-direction:column; gap:14px; overflow:hidden;
+        }
+        .section{
+            padding:18px 0 8px;
+        }
+        .section h2{
+            margin:0 0 14px; font-size:clamp(28px, 3vw, 40px); letter-spacing:-.03em;
+        }
+        .section-head{
+            display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap;
+            margin-bottom:18px;
+        }
+        .section-head p{margin:0; color:var(--muted); max-width:70ch; line-height:1.7}
+        .cards{
+            display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
+        }
+        .card{
+            padding:20px;
+            border-radius:22px;
+            background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .card h3{margin:0 0 10px; font-size:20px}
+        .card p,.card li{color:var(--soft); line-height:1.7}
+        .formula{
+            display:block; margin:10px 0 0; padding:12px 14px; border-radius:14px;
+            background:rgba(8,12,22,.5); border:1px solid rgba(255,255,255,.08);
+            font-family:var(--mono); color:#dff6ff; overflow-wrap:anywhere;
+        }
+        .chips{display:flex; flex-wrap:wrap; gap:10px}
+        .chip{
+            padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08); color:var(--soft); font-size:14px;
+        }
+        .lab-grid{
+            display:grid; grid-template-columns:1.05fr .95fr; gap:18px;
+        }
+        .lab-svg-wrap{
+            padding:16px; min-height:420px; display:flex; align-items:center; justify-content:center;
+        }
+        .lab-controls{
+            padding:18px; display:grid; gap:16px;
+        }
+        .seg{
+            display:flex; gap:8px; flex-wrap:wrap;
+        }
+        .seg button.active{
+            background:linear-gradient(135deg, rgba(117,215,255,.18), rgba(155,140,255,.2));
+            border-color:rgba(117,215,255,.35);
+        }
+        .control-group{
+            display:grid; gap:10px;
+            padding:14px; border-radius:18px; background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .control-group label{
+            display:flex; align-items:center; justify-content:space-between; gap:16px;
+            color:var(--soft); font-size:14px;
+        }
+        input[type="range"]{
+            width:100%;
+            accent-color:#8ae3ff;
+        }
+        .readout{
+            padding:14px; border-radius:16px; background:rgba(7,12,22,.58);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .readout strong{display:block; font-size:15px; margin-bottom:8px}
+        .readout .line{color:var(--soft); margin:6px 0; line-height:1.6}
+        .math-strong{color:#fff; font-weight:700}
+        .subtle{color:var(--muted)}
+        .accordion{display:grid; gap:12px}
+        details{
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;
+            background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+            overflow:hidden;
+        }
+        summary{
+            cursor:pointer; list-style:none; padding:18px 20px; font-weight:700; font-size:17px;
+            display:flex; justify-content:space-between; align-items:center; gap:12px;
+        }
+        summary::-webkit-details-marker{display:none}
+        summary::after{
+            content:"＋"; font-size:22px; color:var(--a); line-height:1; transition:.25s;
+        }
+        details[open] summary::after{content:"−"}
+        .details-body{
+            padding:0 20px 18px;
+            color:var(--soft);
+        }
+        .details-body p,.details-body li{line-height:1.75}
+        .work-table{
+            width:100%; border-collapse:collapse; overflow:hidden; border-radius:16px;
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .work-table th,.work-table td{
+            padding:12px 10px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left; color:var(--soft);
+        }
+        .work-table th{color:#fff; background:rgba(255,255,255,.05)}
+        .solutions{
+            display:grid; grid-template-columns:1fr 1fr; gap:18px;
+        }
+        .solution-card{
+            padding:22px;
+            border-radius:24px;
+            border:1px solid rgba(255,255,255,.08);
+            background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+        }
+        .solution-card h3{margin-top:0; font-size:22px}
+        .step{
+            display:grid; grid-template-columns:34px 1fr; gap:12px; align-items:start; margin:14px 0;
+        }
+        .step b{
+            width:34px; height:34px; border-radius:12px; display:grid; place-items:center;
+            background:linear-gradient(135deg, rgba(117,215,255,.14), rgba(155,140,255,.16));
+            border:1px solid rgba(255,255,255,.1);
+        }
+        .answer{
+            margin-top:16px; padding:14px 16px; border-radius:16px; color:#fff;
+            background:linear-gradient(135deg, rgba(127,245,198,.14), rgba(117,215,255,.12));
+            border:1px solid rgba(127,245,198,.25);
+            font-weight:700;
+        }
+        .cheat-grid{
+            display:grid; grid-template-columns:repeat(2,1fr); gap:14px;
+        }
+        .cheat{
+            padding:18px; border-radius:20px;
+            border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.035);
+        }
+        .cheat h4{margin:0 0 10px; font-size:18px}
+        .cheat ul{margin:0; padding-left:18px}
+        .cheat li{color:var(--soft); line-height:1.7}
+        .calc-grid{
+            display:grid; grid-template-columns:1fr 1fr; gap:18px;
+        }
+        .calc-panel{
+            padding:20px; border-radius:24px; border:1px solid rgba(255,255,255,.08);
+            background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+        }
+        .input-row{
+            display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;
+        }
+        .field{display:grid; gap:8px}
+        .field label{font-size:14px; color:var(--muted)}
+        .field input, .field select{
+            width:100%; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.08);
+            background:rgba(7,12,22,.7); color:var(--text); outline:none;
+        }
+        .calc-output{
+            margin-top:16px; padding:16px; border-radius:16px;
+            background:rgba(7,12,22,.58); border:1px solid rgba(255,255,255,.08);
+        }
+        .calc-output .row{margin:6px 0; line-height:1.65; color:var(--soft)}
+        .generator{
+            display:grid; grid-template-columns:.95fr 1.05fr; gap:18px;
+        }
+        .task-box,.quiz-box{
+            padding:20px; border-radius:24px; border:1px solid rgba(255,255,255,.08);
+            background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+        }
+        .task-statement{
+            margin:12px 0 0; padding:16px; border-radius:16px;
+            background:rgba(7,12,22,.58); border:1px solid rgba(255,255,255,.08);
+            min-height:126px; line-height:1.75; color:var(--soft);
+        }
+        .hidden-answer{
+            margin-top:12px; display:none; padding:14px; border-radius:16px;
+            background:linear-gradient(135deg, rgba(127,245,198,.14), rgba(117,215,255,.12));
+            border:1px solid rgba(127,245,198,.25);
+            color:#fff; line-height:1.65;
+        }
+        .quiz-q{
+            margin:14px 0; padding:14px; border-radius:16px;
+            background:rgba(7,12,22,.5); border:1px solid rgba(255,255,255,.08);
+        }
+        .quiz-q h4{margin:0 0 10px; font-size:16px}
+        .options{display:grid; gap:8px}
+        .option{
+            width:100%; text-align:left; padding:12px 14px; border-radius:14px;
+            background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:var(--soft);
+            cursor:pointer; transition:.2s ease;
+        }
+        .option:hover{background:rgba(255,255,255,.07)}
+        .option.correct{border-color:rgba(127,245,198,.45); background:rgba(127,245,198,.13); color:#fff}
+        .option.wrong{border-color:rgba(255,140,156,.45); background:rgba(255,140,156,.12); color:#fff}
+        .quiz-result{
+            margin-top:12px; padding:14px; border-radius:16px;
+            background:rgba(7,12,22,.58); border:1px solid rgba(255,255,255,.08);
+            color:var(--soft);
+        }
+        .footer-space{height:40px}
+        .legend{
+            display:flex; gap:10px; flex-wrap:wrap; color:var(--muted); font-size:13px;
+        }
+        .legend span{
+            display:inline-flex; gap:8px; align-items:center; padding:8px 10px;
+            background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:999px;
+        }
+        .dot{width:10px; height:10px; border-radius:50%}
+        .dot.a{background:var(--a)} .dot.b{background:var(--b)} .dot.c{background:var(--c)} .dot.d{background:var(--danger)}
+        .muted{color:var(--muted)}
+        .tiny{font-size:13px}
+        .print-row{display:flex; gap:10px; flex-wrap:wrap}
+        @media (max-width:1080px){
+            .hero-grid,.lab-grid,.solutions,.calc-grid,.generator,.cards{grid-template-columns:1fr}
+            .cheat-grid{grid-template-columns:1fr}
+        }
+        @media (max-width:760px){
+            .topbar .inner{padding:10px 0}
+            .nav{display:none}
+            .hero-card,.visual-card,.card,.solution-card,.calc-panel,.task-box,.quiz-box{padding:18px}
+            .stats{grid-template-columns:1fr}
+            .input-row{grid-template-columns:1fr}
+            .container{width:min(100% - 20px, 1180px)}
+        }
+        @media print{
+            :root{
+                --bg:#fff; --text:#111; --soft:#222; --muted:#444; --line:#ccc;
+                --panel:#fff; --panel-strong:#fff; --shadow:none;
+            }
+            body{
+                background:#fff !important; color:#111;
+            }
+            .grid-bg,.orb,.topbar,.hero-actions,.print-row,.seg,.ghost-btn,.solid-btn,.mini-btn,.quiz-btn,
+            .option,.task-box .hero-actions, .visual-card .legend{
+                display:none !important;
+            }
+            .panel,.card,.solution-card,.calc-panel,.task-box,.quiz-box,details,.cheat{
+                box-shadow:none !important; backdrop-filter:none !important;
+                background:#fff !important; border:1px solid #d8d8d8 !important;
+                break-inside:avoid;
+            }
+            .hidden-answer{display:block !important; color:#111; background:#fff !important}
+            .task-statement,.calc-output,.readout,.quiz-result,.formula{
+                background:#fff !important; color:#111 !important; border:1px solid #ddd !important;
+            }
+            .lead,.card p,.card li,.details-body p,.details-body li,.option,.quiz-result,.muted,.subtle,.work-table td{color:#222 !important}
+            .work-table th{background:#f4f4f4 !important; color:#111 !important}
+            a{color:#111 !important; text-decoration:none}
+            .section{padding:8px 0}
+            .footer-space{display:none}
+        }
+    </style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="orb a"></div>
+<div class="orb b"></div>
+<div class="orb c"></div>
+
+<header class="topbar">
+    <div class="container inner">
+        <div class="brand">
+            <div class="brand-badge" aria-hidden="true"></div>
+            <span>ОДЗ и отбор корней — интерактивная лаборатория</span>
+        </div>
+        <nav class="nav" aria-label="Навигация по странице">
+            <a href="#theme">Тема</a>
+            <a href="#lab">Визуальная лаборатория</a>
+            <a href="#theory">Теория</a>
+            <a href="#solutions">Разборы</a>
+            <a href="#calc">Калькуляторы</a>
+            <a href="#cheat">Cheat sheet</a>
+            <a href="#practice">Тренировка</a>
+            <a href="#quiz">Квиз</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero" id="theme">
+        <div class="container hero-grid">
+            <div class="panel hero-card">
+                <div class="eyebrow">10 класс · ЕГЭ · алгебра</div>
+                <h1>ОДЗ, фильтрующие условия и отбор корней</h1>
+                <p class="lead">
+                    Здесь собраны самые коварные места школьной алгебры: уравнения с корнем, логарифм с тригонометрией,
+                    точки пересечения графиков и задачи на совместную работу. Главная идея одна: <b>не просто решить</b>,
+                    а сначала понять, где вообще решение имеет право существовать.
+                </p>
+                <div class="hero-actions">
+                    <a class="solid-btn" href="#lab">Открыть лабораторию</a>
+                    <a class="ghost-btn" href="#solutions">Перейти к разборам</a>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <strong>4</strong>
+                        <span>ключевых сюжета ЕГЭ, где чаще всего теряют баллы из-за невнимательной записи</span>
+                    </div>
+                    <div class="stat">
+                        <strong>∞</strong>
+                        <span>пользы от привычки проверять диапазоны: √, log, sin, cos и производительность</span>
+                    </div>
+                    <div class="stat">
+                        <strong>1</strong>
+                        <span>главное правило: сначала ограничения, потом преобразования</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel visual-card">
+                <div class="section-head" style="margin-bottom:0">
+                    <div>
+                        <h2 style="margin:0;font-size:28px">Карта темы</h2>
+                        <p style="margin-top:8px">Все блоки страницы связаны одной логикой: от области допустимых значений к правильному ответу.</p>
+                    </div>
+                </div>
+                <div class="chips">
+                    <div class="chip">√(F(x)) = G(x) ⇒ нужно G(x) ≥ 0</div>
+                    <div class="chip">logₐ b ⇒ a &gt; 0, a ≠ 1, b &gt; 0</div>
+                    <div class="chip">−1 ≤ sin x, cos x ≤ 1</div>
+                    <div class="chip">совместная производительность = сумма отдельных</div>
+                </div>
+                <svg viewBox="0 0 520 320" width="100%" height="100%" aria-label="Схема темы">
+                    <defs>
+                        <linearGradient id="g1" x1="0" x2="1">
+                            <stop offset="0%" stop-color="#75d7ff" stop-opacity="0.9"></stop>
+                            <stop offset="100%" stop-color="#9b8cff" stop-opacity="0.9"></stop>
+                        </linearGradient>
+                        <linearGradient id="g2" x1="0" x2="1">
+                            <stop offset="0%" stop-color="#7ff5c6" stop-opacity="0.9"></stop>
+                            <stop offset="100%" stop-color="#75d7ff" stop-opacity="0.9"></stop>
+                        </linearGradient>
+                    </defs>
+                    <rect x="18" y="18" width="484" height="284" rx="28" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"></rect>
+                    <g font-family="system-ui, Arial, sans-serif" fill="#e9f2ff" font-size="14">
+                        <rect x="44" y="50" width="140" height="56" rx="18" fill="rgba(117,215,255,.11)" stroke="rgba(117,215,255,.34)"></rect>
+                        <text x="114" y="73" text-anchor="middle" font-weight="700">корень</text>
+                        <text x="114" y="92" text-anchor="middle" fill="#bdd7f2">√(F(x)) = G(x)</text>
+
+                        <rect x="338" y="50" width="140" height="56" rx="18" fill="rgba(155,140,255,.12)" stroke="rgba(155,140,255,.34)"></rect>
+                        <text x="408" y="73" text-anchor="middle" font-weight="700">логарифм</text>
+                        <text x="408" y="92" text-anchor="middle" fill="#d9d1ff">log₂(cos x)</text>
+
+                        <rect x="44" y="214" width="140" height="56" rx="18" fill="rgba(127,245,198,.12)" stroke="rgba(127,245,198,.34)"></rect>
+                        <text x="114" y="237" text-anchor="middle" font-weight="700">графики</text>
+                        <text x="114" y="256" text-anchor="middle" fill="#caf7e9">y = kx + b</text>
+
+                        <rect x="338" y="214" width="140" height="56" rx="18" fill="rgba(255,216,122,.1)" stroke="rgba(255,216,122,.3)"></rect>
+                        <text x="408" y="237" text-anchor="middle" font-weight="700">работа</text>
+                        <text x="408" y="256" text-anchor="middle" fill="#fff0b7">1/t + 1/x</text>
+
+                        <circle cx="261" cy="160" r="54" fill="url(#g1)" fill-opacity=".12" stroke="url(#g1)"></circle>
+                        <text x="261" y="151" text-anchor="middle" font-size="17" font-weight="800">ОДЗ</text>
+                        <text x="261" y="173" text-anchor="middle" fill="#cfe7ff">и проверка</text>
+
+                        <path d="M184 78 C220 78, 220 126, 244 136" stroke="url(#g1)" fill="none" stroke-width="2"></path>
+                        <path d="M338 78 C302 78, 302 126, 278 136" stroke="url(#g1)" fill="none" stroke-width="2"></path>
+                        <path d="M184 242 C220 242, 220 194, 244 184" stroke="url(#g2)" fill="none" stroke-width="2"></path>
+                        <path d="M338 242 C302 242, 302 194, 278 184" stroke="url(#g2)" fill="none" stroke-width="2"></path>
+                    </g>
+                </svg>
+                <div class="print-row">
+                    <button class="print-btn" onclick="window.print()">Печать страницы</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="lab">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Визуальная лаборатория</h2>
+                    <p>Выбери режим. Здесь можно увидеть, как ограничения сужают множество допустимых значений и почему часть корней исчезает после проверки.</p>
+                </div>
+            </div>
+            <div class="panel" style="padding:18px">
+                <div class="lab-grid">
+                    <div class="panel lab-svg-wrap" style="min-height:460px">
+                        <svg id="labSvg" viewBox="0 0 760 460" width="100%" height="100%" aria-label="Интерактивная математическая визуализация"></svg>
+                    </div>
+                    <div class="panel lab-controls">
+                        <div class="seg" role="tablist" aria-label="Режим лаборатории">
+                            <button class="active" data-mode="root">Корень</button>
+                            <button data-mode="trig">Логарифм и cos</button>
+                            <button data-mode="work">Производительность</button>
+                        </div>
+
+                        <div class="control-group" id="rootControls">
+                            <label>
+                                <span>Показывать ОДЗ: 1 − x ≥ 0</span>
+                                <input type="checkbox" id="showOdz" checked>
+                            </label>
+                            <label>
+                                <span>Показывать фильтр: x + 2 ≥ 0</span>
+                                <input type="checkbox" id="showFilter" checked>
+                            </label>
+                            <label>
+                                <span>Показывать найденные корни</span>
+                                <input type="checkbox" id="showRoots" checked>
+                            </label>
+                            <div class="readout" id="rootReadout"></div>
+                        </div>
+
+                        <div class="control-group" id="trigControls" hidden>
+                            <label>
+                                <span>Значение справа: 2<sup>k</sup></span>
+                                <span id="kLabel" class="math-strong">k = 0.5</span>
+                            </label>
+                            <input type="range" id="kSlider" min="-2" max="2" step="0.1" value="0.5">
+                            <label>
+                                <span>Показывать диапазон cos x</span>
+                                <input type="checkbox" id="showTrigRange" checked>
+                            </label>
+                            <div class="readout" id="trigReadout"></div>
+                        </div>
+
+                        <div class="control-group" id="workControls" hidden>
+                            <label>
+                                <span>Время первой трубы, ч</span>
+                                <span id="t1Label" class="math-strong">13</span>
+                            </label>
+                            <input type="range" id="t1Slider" min="4" max="20" step="1" value="13">
+                            <label>
+                                <span>Совместное время, ч</span>
+                                <span id="tTogetherLabel" class="math-strong">7.4</span>
+                            </label>
+                            <input type="range" id="tTogetherSlider" min="2" max="12" step="0.1" value="7.4">
+                            <div class="readout" id="workReadout"></div>
+                        </div>
+
+                        <div class="legend">
+                            <span><i class="dot a"></i> ограничения</span>
+                            <span><i class="dot b"></i> значения/функции</span>
+                            <span><i class="dot c"></i> корректная область</span>
+                            <span><i class="dot d"></i> посторонний корень</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="theory">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Теория в карточках</h2>
+                    <p>Открой нужный блок. Каждая карточка отвечает за один тип ошибки, который на экзамене особенно опасен.</p>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <details open>
+                    <summary>1. Уравнения с корнем: что такое фильтрующее условие</summary>
+                    <div class="details-body">
+                        <p>Для уравнения вида <span class="formula">√(F(x)) = G(x)</span> мало проверить только подкоренное выражение.</p>
+                        <p>Нужно записать два условия:</p>
+                        <div class="formula">F(x) ≥ 0 и G(x) ≥ 0</div>
+                        <p>Второе условие называется <b>фильтрующим</b>, потому что после возведения в квадрат оно отсекает посторонние корни.</p>
+                        <p>Алгоритм:</p>
+                        <ol>
+                            <li>записать ОДЗ для корня;</li>
+                            <li>записать неотрицательность правой части;</li>
+                            <li>возвести в квадрат;</li>
+                            <li>решить полученное уравнение;</li>
+                            <li>отобрать корни по ограничениям.</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>2. Логарифм и тригонометрия: где решения не могут существовать</summary>
+                    <div class="details-body">
+                        <p>Для логарифма <span class="formula">logₐ b</span> обязательно нужно:</p>
+                        <div class="formula">a &gt; 0, a ≠ 1, b &gt; 0</div>
+                        <p>Если основание — обычное число, например 2, то проверяем прежде всего аргумент логарифма.</p>
+                        <p>Для уравнения <span class="formula">log₂(cos x) = c</span> требуется:</p>
+                        <div class="formula">cos x &gt; 0</div>
+                        <p>После перехода к <span class="formula">cos x = 2<sup>c</sup></span> обязательно сравниваем правую часть с диапазоном косинуса:</p>
+                        <div class="formula">−1 ≤ cos x ≤ 1</div>
+                        <p>Если справа получилось число больше 1, решений нет сразу.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>3. Графики прямых: как быстро восстановить формулу</summary>
+                    <div class="details-body">
+                        <p>Если прямая проходит через две точки, удобно использовать вид:</p>
+                        <div class="formula">y = kx + b</div>
+                        <p>Подставляем координаты двух точек, получаем систему на k и b.</p>
+                        <p>Дальше для точки пересечения двух прямых приравниваем их правые части.</p>
+                        <p>Важно не путать:</p>
+                        <ul>
+                            <li><b>абсцисса</b> — это x;</li>
+                            <li><b>ордината</b> — это y.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>4. Задачи на производительность: только через таблицу</summary>
+                    <div class="details-body">
+                        <p>Весь объём работы принимаем за 1. Тогда:</p>
+                        <div class="formula">производительность = результат / время</div>
+                        <p>Если два объекта работают вместе, то:</p>
+                        <div class="formula">совместная производительность = сумма отдельных производительностей</div>
+                        <p>Для бассейна, трубы, заказа, принтера или насоса схема одна и та же. Наиболее частая ошибка — неверно перевести минуты в часы.</p>
+                        <div class="formula">7 ч 22 мин = 7 + 22/60 = 7 + 11/30 = 221/30 ч</div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>5. Самые важные диапазоны и быстрые проверки</summary>
+                    <div class="details-body">
+                        <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:6px">
+                            <div class="card">
+                                <h3>Синус и косинус</h3>
+                                <span class="formula">−1 ≤ sin x ≤ 1</span>
+                                <span class="formula">−1 ≤ cos x ≤ 1</span>
+                            </div>
+                            <div class="card">
+                                <h3>Квадраты</h3>
+                                <span class="formula">0 ≤ sin²x ≤ 1</span>
+                                <span class="formula">0 ≤ cos²x ≤ 1</span>
+                            </div>
+                            <div class="card">
+                                <h3>Тангенс</h3>
+                                <span class="formula">tan x — любое действительное число там, где определён</span>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="solutions">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Разборы задач</h2>
+                    <p>Два полных примера из пособия: один про корень и отбор корней, второй — про логарифм с тригонометрией.</p>
+                </div>
+            </div>
+
+            <div class="solutions">
+                <article class="solution-card panel">
+                    <h3>Задача 1. Решить уравнение √(1 − x) = x + 2</h3>
+                    <div class="step">
+                        <b>1</b>
+                        <div>
+                            Запишем ограничения:
+                            <div class="formula">1 − x ≥ 0 ⇒ x ≤ 1</div>
+                            <div class="formula">x + 2 ≥ 0 ⇒ x ≥ −2</div>
+                            Значит, искать решения имеет смысл только на отрезке
+                            <span class="formula">−2 ≤ x ≤ 1</span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <b>2</b>
+                        <div>
+                            Возводим обе части в квадрат:
+                            <div class="formula">1 − x = (x + 2)²</div>
+                            <div class="formula">1 − x = x² + 4x + 4</div>
+                            <div class="formula">x² + 5x + 3 = 0</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <b>3</b>
+                        <div>
+                            Решаем квадратное уравнение:
+                            <div class="formula">D = 25 − 12 = 13</div>
+                            <div class="formula">x = (−5 ± √13) / 2</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <b>4</b>
+                        <div>
+                            Проверяем ограничения:
+                            <div class="formula">(−5 − √13) / 2 &lt; −2 — не подходит</div>
+                            <div class="formula">(−5 + √13) / 2 ∈ [−2; 1] — подходит</div>
+                        </div>
+                    </div>
+                    <div class="answer">Ответ: x = (−5 + √13) / 2</div>
+                </article>
+
+                <article class="solution-card panel">
+                    <h3>Задача 2. Решить уравнение log₂(cos x) = −½</h3>
+                    <div class="step">
+                        <b>1</b>
+                        <div>
+                            Сначала записываем ОДЗ логарифма:
+                            <div class="formula">cos x &gt; 0</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <b>2</b>
+                        <div>
+                            Переходим к показательному виду:
+                            <div class="formula">cos x = 2<sup>−1/2</sup> = 1 / √2 = √2 / 2</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <b>3</b>
+                        <div>
+                            Это табличное значение косинуса. На единичной окружности получаем:
+                            <div class="formula">x = π/4 + 2πn или x = −π/4 + 2πn, n ∈ ℤ</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <b>4</b>
+                        <div>
+                            ОДЗ выполнено автоматически, потому что
+                            <span class="formula">√2 / 2 &gt; 0</span>
+                        </div>
+                    </div>
+                    <div class="answer">Ответ: x = π/4 + 2πn или x = −π/4 + 2πn, n ∈ ℤ</div>
+                </article>
+            </div>
+
+            <div class="panel" style="padding:18px; margin-top:18px">
+                <h3 style="margin-top:0">Короткий разбор текстовой задачи</h3>
+                <p class="muted" style="margin-top:0">Две трубы вместе наполняют бассейн за 7 ч 22 мин, первая — за 13 ч. Найти время второй трубы.</p>
+                <table class="work-table">
+                    <thead>
+                    <tr>
+                        <th>Объект</th>
+                        <th>Время</th>
+                        <th>Производительность</th>
+                        <th>Результат</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Первая труба</td>
+                        <td>13 ч</td>
+                        <td>1/13</td>
+                        <td>1 бассейн</td>
+                    </tr>
+                    <tr>
+                        <td>Вторая труба</td>
+                        <td>x ч</td>
+                        <td>1/x</td>
+                        <td>1 бассейн</td>
+                    </tr>
+                    <tr>
+                        <td>Обе вместе</td>
+                        <td>221/30 ч</td>
+                        <td>30/221</td>
+                        <td>1 бассейн</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="formula" style="margin-top:14px">1/13 + 1/x = 30/221 ⇒ 1/x = 13/221 ⇒ x = 17</div>
+                <div class="answer" style="max-width:360px">Ответ: 17 часов</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="calc">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Вычислительные блоки</h2>
+                    <p>Здесь можно не просто смотреть, а считать: проверять пересечение интервалов и автоматически находить время работы второй трубы.</p>
+                </div>
+            </div>
+            <div class="calc-grid">
+                <div class="calc-panel panel">
+                    <h3 style="margin-top:0">Пересечение ограничений для √(1 − x) = x + 2</h3>
+                    <p class="muted">Подставь значение x и посмотри, проходит ли оно оба фильтра.</p>
+                    <div class="input-row">
+                        <div class="field">
+                            <label for="xCheck">Проверяемое значение x</label>
+                            <input id="xCheck" type="number" step="0.01" value="-1">
+                        </div>
+                        <div class="field">
+                            <label>&nbsp;</label>
+                            <button class="solid-btn" id="checkXBtn">Проверить x</button>
+                        </div>
+                    </div>
+                    <div class="calc-output" id="xCheckOutput">
+                        <div class="row">Введите значение и нажмите «Проверить x».</div>
+                    </div>
+                </div>
+
+                <div class="calc-panel panel">
+                    <h3 style="margin-top:0">Калькулятор производительности</h3>
+                    <p class="muted">Если известны время первой трубы и совместное время, калькулятор найдёт время второй.</p>
+                    <div class="input-row">
+                        <div class="field">
+                            <label for="pipe1">Время первой трубы, ч</label>
+                            <input id="pipe1" type="number" step="0.01" value="13">
+                        </div>
+                        <div class="field">
+                            <label for="pipeTogether">Совместное время, ч</label>
+                            <input id="pipeTogether" type="number" step="0.01" value="7.3666667">
+                        </div>
+                    </div>
+                    <div class="hero-actions" style="margin-top:14px">
+                        <button class="solid-btn" id="calcPipeBtn">Вычислить</button>
+                        <button class="ghost-btn" id="resetPipeBtn">Сбросить к примеру</button>
+                    </div>
+                    <div class="calc-output" id="pipeOutput">
+                        <div class="row">Готово к вычислению.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="cheat">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Cheat sheet</h2>
+                    <p>Компактная сводка формул, диапазонов и типичных ловушек — в одном месте.</p>
+                </div>
+            </div>
+            <div class="cheat-grid">
+                <div class="cheat panel">
+                    <h4>Корни и отбор решений</h4>
+                    <ul>
+                        <li>Для √(F(x)) нужно F(x) ≥ 0.</li>
+                        <li>Для уравнения √(F(x)) = G(x) добавляй G(x) ≥ 0.</li>
+                        <li>После возведения в квадрат всегда делай отбор корней.</li>
+                    </ul>
+                    <span class="formula">√(1 − x) = x + 2 ⇒ x ≤ 1 и x ≥ −2</span>
+                </div>
+                <div class="cheat panel">
+                    <h4>Логарифмы</h4>
+                    <ul>
+                        <li>logₐ b существует только при a &gt; 0, a ≠ 1, b &gt; 0.</li>
+                        <li>Если есть log₂(cos x), то обязательно cos x &gt; 0.</li>
+                        <li>Дальше сравни результат с диапазоном cos x.</li>
+                    </ul>
+                    <span class="formula">−1 ≤ cos x ≤ 1</span>
+                </div>
+                <div class="cheat panel">
+                    <h4>Графики прямых</h4>
+                    <ul>
+                        <li>Используй форму y = kx + b.</li>
+                        <li>Две точки дают систему на k и b.</li>
+                        <li>Точка пересечения — это равенство правых частей.</li>
+                    </ul>
+                    <span class="formula">3x − 4 = −2x + 3 ⇒ x = 7/5, y = 1/5</span>
+                </div>
+                <div class="cheat panel">
+                    <h4>Производительность</h4>
+                    <ul>
+                        <li>Весь объём работы принимается за 1.</li>
+                        <li>Производительность = 1 / время.</li>
+                        <li>Вместе: 1/t₁ + 1/t₂ = 1/tсовм.</li>
+                    </ul>
+                    <span class="formula">1/13 + 1/x = 30/221 ⇒ x = 17</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="practice">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Генератор тренировочных задач</h2>
+                    <p>Здесь используются только безопасные шаблоны: все задачи заранее математически корректны, а ответы проверены.</p>
+                </div>
+            </div>
+            <div class="generator">
+                <div class="task-box panel">
+                    <h3 style="margin-top:0">Новая задача</h3>
+                    <div class="hero-actions" style="margin-top:8px">
+                        <button class="solid-btn" id="newTaskBtn">Сгенерировать</button>
+                        <button class="ghost-btn" id="showTaskAnswerBtn">Показать ответ</button>
+                    </div>
+                    <div class="task-statement" id="taskStatement">Нажмите «Сгенерировать», чтобы получить новую задачу.</div>
+                    <div class="hidden-answer" id="taskAnswer"></div>
+                    <p class="tiny muted" style="margin-top:12px">Типы: корни, пересечение прямых, логарифм с тригонометрией, производительность.</p>
+                </div>
+
+                <div class="quiz-box panel" id="quiz">
+                    <h3 style="margin-top:0">Мини-квиз</h3>
+                    <p class="muted">Проверь, насколько уверенно ты отличаешь настоящие решения от «появившихся после квадратов».</p>
+                    <div id="quizContainer"></div>
+                    <div class="hero-actions" style="margin-top:14px">
+                        <button class="solid-btn quiz-btn" id="checkQuizBtn">Проверить квиз</button>
+                        <button class="ghost-btn quiz-btn" id="resetQuizBtn">Сбросить</button>
+                    </div>
+                    <div class="quiz-result" id="quizResult">Пока ответов нет.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="footer-space"></div>
+</main>
+
+<script>
+    (function(){
+        const svg = document.getElementById('labSvg');
+        const modeButtons = document.querySelectorAll('.seg button');
+        const controls = {
+            root: document.getElementById('rootControls'),
+            trig: document.getElementById('trigControls'),
+            work: document.getElementById('workControls')
+        };
+        let mode = 'root';
+
+        function setMode(next){
+            mode = next;
+            modeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.mode === next));
+            Object.entries(controls).forEach(([key, el]) => el.hidden = key !== next);
+            renderLab();
+        }
+        modeButtons.forEach(btn => btn.addEventListener('click', ()=>setMode(btn.dataset.mode)));
+
+        function fmt(n, digits=3){
+            if (!isFinite(n)) return '—';
+            const v = Math.round(n * Math.pow(10,digits)) / Math.pow(10,digits);
+            return String(v).replace('.', ',');
+        }
+        function fracApprox(x){
+            const vals = [
+                {v:Math.SQRT1_2, label:'√2 / 2'},
+                {v:0.5, label:'1/2'},
+                {v:1, label:'1'},
+                {v:2, label:'2'},
+                {v:0.25, label:'1/4'}
+            ];
+            for(const item of vals){
+                if(Math.abs(x - item.v) < 0.03) return item.label;
+            }
+            return fmt(x,3);
+        }
+
+        const rootReadout = document.getElementById('rootReadout');
+        const trigReadout = document.getElementById('trigReadout');
+        const workReadout = document.getElementById('workReadout');
+
+        function renderRoot(){
+            const showOdz = document.getElementById('showOdz').checked;
+            const showFilter = document.getElementById('showFilter').checked;
+            const showRoots = document.getElementById('showRoots').checked;
+            const x1 = (-5 - Math.sqrt(13))/2;
+            const x2 = (-5 + Math.sqrt(13))/2;
+
+            const width = 760, height = 460;
+            const left = 60, right = 700, y1 = 170, y2 = 270;
+            const minX = -4, maxX = 3;
+            const tx = x => left + (x - minX) / (maxX - minX) * (right - left);
+
+            svg.innerHTML = `
+      <defs>
+        <linearGradient id="lineG" x1="0" x2="1">
+          <stop offset="0%" stop-color="#75d7ff"></stop>
+          <stop offset="100%" stop-color="#9b8cff"></stop>
+        </linearGradient>
+      </defs>
+      <rect x="20" y="20" width="720" height="420" rx="28" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"></rect>
+      <text x="50" y="58" fill="#e9f2ff" font-size="22" font-weight="800">Корень и фильтр: √(1 − x) = x + 2</text>
+      <text x="50" y="86" fill="#9fb1cd" font-size="14">Сверху — ОДЗ x ≤ 1, снизу — фильтр x ≥ −2. Их пересечение даёт допустимую область.</text>
+      <line x1="${left}" y1="${y1}" x2="${right}" y2="${y1}" stroke="rgba(255,255,255,.22)" stroke-width="2"></line>
+      <line x1="${left}" y1="${y2}" x2="${right}" y2="${y2}" stroke="rgba(255,255,255,.22)" stroke-width="2"></line>
+      ${Array.from({length:8}, (_,i)=>{
+        const x = minX + i;
+        const px = tx(x);
+        return `<g>
+            <line x1="${px}" y1="${y1-7}" x2="${px}" y2="${y1+7}" stroke="rgba(255,255,255,.4)"></line>
+            <line x1="${px}" y1="${y2-7}" x2="${px}" y2="${y2+7}" stroke="rgba(255,255,255,.4)"></line>
+            <text x="${px}" y="${y1+26}" text-anchor="middle" fill="#c7d7ef" font-size="13">${x}</text>
+    </g>`;
+      }).join('')}
+      <text x="${left}" y="${y1-18}" fill="#75d7ff" font-size="15" font-weight="700">ОДЗ: 1 − x ≥ 0</text>
+      <text x="${left}" y="${y2-18}" fill="#9b8cff" font-size="15" font-weight="700">Фильтр: x + 2 ≥ 0</text>
+      ${showOdz ? `
+        <line x1="${tx(minX)}" y1="${y1}" x2="${tx(1)}" y2="${y1}" stroke="#75d7ff" stroke-width="6" stroke-linecap="round"></line>
+        <circle cx="${tx(1)}" cy="${y1}" r="7" fill="#75d7ff"></circle>
+      ` : ``}
+      ${showFilter ? `
+        <line x1="${tx(-2)}" y1="${y2}" x2="${tx(maxX)}" y2="${y2}" stroke="#9b8cff" stroke-width="6" stroke-linecap="round"></line>
+        <circle cx="${tx(-2)}" cy="${y2}" r="7" fill="#9b8cff"></circle>
+      ` : ``}
+      ${(showOdz && showFilter) ? `
+        <rect x="${tx(-2)}" y="${y1-18}" width="${tx(1)-tx(-2)}" height="${(y2-y1)+36}" rx="18" fill="rgba(127,245,198,.10)" stroke="rgba(127,245,198,.4)" stroke-dasharray="6 6"></rect>
+        <text x="${(tx(-2)+tx(1))/2}" y="${(y1+y2)/2 + 6}" text-anchor="middle" fill="#7ff5c6" font-size="18" font-weight="800">допустимая область</text>
+      ` : ``}
+      ${showRoots ? `
+        <circle cx="${tx(x1)}" cy="${y1}" r="7" fill="#ff8c9c"></circle>
+        <circle cx="${tx(x2)}" cy="${y1}" r="7" fill="#7ff5c6"></circle>
+        <text x="${tx(x1)}" y="${y1-16}" text-anchor="middle" fill="#ffb7c0" font-size="12">x₁</text>
+        <text x="${tx(x2)}" y="${y1-16}" text-anchor="middle" fill="#bafad8" font-size="12">x₂</text>
+      ` : ``}
+      <text x="50" y="355" fill="#e9f2ff" font-size="16" font-weight="700">Итог</text>
+      <text x="50" y="381" fill="#c7d7ef" font-size="15">После квадратов получаются два числа, но только одно лежит в пересечении ограничений.</text>
+      <text x="50" y="410" fill="#ffffff" font-size="18" font-weight="800">Ответ: x = (−5 + √13) / 2</text>
+    `;
+    rootReadout.innerHTML = `
+      <strong>Что происходит</strong>
+      <div class="line">ОДЗ даёт: <span class="math-strong">x ≤ 1</span></div>
+      <div class="line">Фильтр даёт: <span class="math-strong">x ≥ −2</span></div>
+      <div class="line">Пересечение: <span class="math-strong">−2 ≤ x ≤ 1</span></div>
+      <div class="line">Посторонний корень: <span class="math-strong">x₁ = ${fmt(x1)}</span></div>
+      <div class="line">Подходящий корень: <span class="math-strong">x₂ = ${fmt(x2)}</span></div>
+    `;
+    }
+
+    function renderTrig(){
+    const k = parseFloat(document.getElementById('kSlider').value);
+    document.getElementById('kLabel').textContent = `k = ${fmt(k,1).replace(',', '.')}`;
+    const value = Math.pow(2,k);
+    const showRange = document.getElementById('showTrigRange').checked;
+
+    const width = 760, height = 460;
+    const left = 70, right = 690, baseY = 235;
+    const min = -1.5, max = 2.3;
+    const tx = x => left + (x - min) / (max - min) * (right - left);
+
+    const solvable = value <= 1 && value > 0;
+    let solutionText = 'решений нет';
+    if (Math.abs(value - Math.SQRT1_2) < 0.03) solutionText = 'x = ±π/4 + 2πn';
+    else if (Math.abs(value - 0.5) < 0.03) solutionText = 'x = ±π/3 + 2πn';
+    else if (Math.abs(value - 1) < 0.03) solutionText = 'x = 2πn';
+    else if (Math.abs(value - 0.25) < 0.03) solutionText = 'cos x = 1/4, решение не табличное';
+    else if (solvable) solutionText = 'значение допустимо, но угол не табличный';
+
+    svg.innerHTML = `
+      <rect x="20" y="20" width="720" height="420" rx="28" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"></rect>
+      <text x="50" y="58" fill="#e9f2ff" font-size="22" font-weight="800">Логарифм и диапазон cos x</text>
+      <text x="50" y="86" fill="#9fb1cd" font-size="14">Исследуем уравнение log₂(cos x) = k и сравниваем cos x = 2ᵏ с диапазоном косинуса.</text>
+      <line x1="${left}" y1="${baseY}" x2="${right}" y2="${baseY}" stroke="rgba(255,255,255,.22)" stroke-width="2"></line>
+      ${[-1,0,1,2].map(v=>`
+        <g>
+          <line x1="${tx(v)}" y1="${baseY-8}" x2="${tx(v)}" y2="${baseY+8}" stroke="rgba(255,255,255,.45)"></line>
+          <text x="${tx(v)}" y="${baseY+28}" text-anchor="middle" fill="#c7d7ef" font-size="13">${v}</text>
+        </g>
+      `).join('')}
+      ${showRange ? `
+        <line x1="${tx(-1)}" y1="${baseY}" x2="${tx(1)}" y2="${baseY}" stroke="#75d7ff" stroke-width="8" stroke-linecap="round"></line>
+        <circle cx="${tx(-1)}" cy="${baseY}" r="7" fill="#75d7ff"></circle>
+        <circle cx="${tx(1)}" cy="${baseY}" r="7" fill="#75d7ff"></circle>
+        <text x="${(tx(-1)+tx(1))/2}" y="${baseY-20}" text-anchor="middle" fill="#75d7ff" font-size="16" font-weight="700">−1 ≤ cos x ≤ 1</text>
+      ` : ``}
+      <circle cx="${tx(value)}" cy="${baseY}" r="8" fill="${solvable ? '#7ff5c6' : '#ff8c9c'}"></circle>
+      <text x="${tx(value)}" y="${baseY-18}" text-anchor="middle" fill="${solvable ? '#c6ffe4' : '#ffc3cb'}" font-size="13">2ᵏ</text>
+      <text x="50" y="330" fill="#e9f2ff" font-size="16" font-weight="700">Текущее вычисление</text>
+      <text x="50" y="358" fill="#c7d7ef" font-size="15">log₂(cos x) = ${fmt(k,1).replace(',', '.')} ⇒ cos x = 2ᵏ = ${fracApprox(value)}</text>
+      <text x="50" y="386" fill="${solvable ? '#7ff5c6' : '#ff8c9c'}" font-size="17" font-weight="800">${solvable ? 'Значение допустимо для cos x' : 'Значение вне диапазона cos x'}</text>
+      <text x="50" y="414" fill="#ffffff" font-size="16">${solutionText}</text>
+    `;
+    trigReadout.innerHTML = `
+      <strong>Анализ</strong>
+      <div class="line">ОДЗ логарифма: <span class="math-strong">cos x &gt; 0</span></div>
+      <div class="line">Получаем: <span class="math-strong">cos x = 2<sup>${fmt(k,1).replace(',', '.')}</sup> ≈ ${fmt(value,3)}</span></div>
+      <div class="line">Сравнение с диапазоном <span class="math-strong">−1 ≤ cos x ≤ 1</span></div>
+      <div class="line">${solvable ? 'Это значение может быть косинусом.' : 'Это значение не может быть косинусом.'}</div>
+      <div class="line">Вывод: <span class="math-strong">${solutionText}</span></div>
+    `;
+    }
+
+    function renderWork(){
+    const t1 = parseFloat(document.getElementById('t1Slider').value);
+    const tt = parseFloat(document.getElementById('tTogetherSlider').value);
+    document.getElementById('t1Label').textContent = fmt(t1,1);
+    document.getElementById('tTogetherLabel').textContent = fmt(tt,1);
+    const p1 = 1/t1, pt = 1/tt;
+    const p2 = pt - p1;
+    const t2 = p2 > 0 ? 1/p2 : Infinity;
+
+    const bars = [
+    {label:'первая', t:t1, color:'#75d7ff', x:110},
+    {label:'вместе', t:tt, color:'#9b8cff', x:320},
+    {label:'вторая', t:isFinite(t2)?t2:0, color:'#7ff5c6', x:530}
+    ];
+    const maxT = Math.max(...bars.map(b=>isFinite(b.t)?b.t:0), 20);
+    const baseY = 380;
+    const scale = 250 / maxT;
+
+    svg.innerHTML = `
+      <rect x="20" y="20" width="720" height="420" rx="28" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"></rect>
+      <text x="50" y="58" fill="#e9f2ff" font-size="22" font-weight="800">Производительность и совместная работа</text>
+      <text x="50" y="86" fill="#9fb1cd" font-size="14">Чем меньше время, тем выше производительность. По двум временам можно восстановить третье.</text>
+      ${bars.map(b=>`
+        <g>
+          <rect x="${b.x}" y="${baseY - (isFinite(b.t)?b.t*scale:0)}" width="120" height="${isFinite(b.t)?b.t*scale:0}" rx="18"
+            fill="${b.color}" fill-opacity=".20" stroke="${b.color}" stroke-width="2"></rect>
+          <text x="${b.x+60}" y="${baseY+24}" text-anchor="middle" fill="#e9f2ff" font-size="16" font-weight="700">${b.label}</text>
+          <text x="${b.x+60}" y="${baseY+46}" text-anchor="middle" fill="#c7d7ef" font-size="13">${isFinite(b.t)?fmt(b.t,2)+' ч':'—'}</text>
+        </g>
+      `).join('')}
+      <line x1="70" y1="${baseY}" x2="690" y2="${baseY}" stroke="rgba(255,255,255,.22)" stroke-width="2"></line>
+      <text x="50" y="130" fill="#ffffff" font-size="16" font-weight="700">Формула</text>
+      <text x="50" y="156" fill="#c7d7ef" font-size="15">1/t₁ + 1/t₂ = 1/tсовм</text>
+      <text x="50" y="186" fill="#c7d7ef" font-size="15">1/${fmt(t1,1)} + 1/t₂ = 1/${fmt(tt,1)}</text>
+      <text x="50" y="216" fill="${p2>0 ? '#7ff5c6' : '#ff8c9c'}" font-size="16" font-weight="800">${p2>0 ? 't₂ существует и положительно' : 'при таких данных вторая производительность получилась неположительной'}</text>
+    `;
+    workReadout.innerHTML = `
+      <strong>Вычисление</strong>
+      <div class="line">Производительность первой: <span class="math-strong">1 / ${fmt(t1,1)} ≈ ${fmt(p1,4)}</span></div>
+      <div class="line">Совместная производительность: <span class="math-strong">1 / ${fmt(tt,1)} ≈ ${fmt(pt,4)}</span></div>
+      <div class="line">Производительность второй: <span class="math-strong">${p2>0 ? fmt(p2,4) : '≤ 0'}</span></div>
+      <div class="line">Время второй: <span class="math-strong">${isFinite(t2) ? fmt(t2,3)+' ч' : 'невозможно по данным'}</span></div>
+    `;
+    }
+
+    function renderLab(){
+    if(mode === 'root') renderRoot();
+    if(mode === 'trig') renderTrig();
+    if(mode === 'work') renderWork();
+    }
+
+    ['showOdz','showFilter','showRoots','showTrigRange'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', renderLab);
+    });
+    ['kSlider','t1Slider','tTogetherSlider'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', renderLab);
+    });
+    renderLab();
+
+    const xCheckBtn = document.getElementById('checkXBtn');
+    const xCheckOutput = document.getElementById('xCheckOutput');
+    xCheckBtn.addEventListener('click', ()=>{
+    const x = parseFloat(document.getElementById('xCheck').value);
+    if(!isFinite(x)){
+    xCheckOutput.innerHTML = `<div class="row">Введите корректное число.</div>`;
+    return;
+    }
+    const odz = 1 - x >= 0;
+    const filter = x + 2 >= 0;
+    const inBoth = odz && filter;
+    let valueInfo = '';
+    if(inBoth){
+    const left = Math.sqrt(1 - x);
+    const right = x + 2;
+    valueInfo = `<div class="row">Левая часть: <b>${fmt(left,5)}</b>; правая часть: <b>${fmt(right,5)}</b>.</div>`;
+    }
+    xCheckOutput.innerHTML = `
+      <div class="row">Проверяем x = <b>${fmt(x,4)}</b></div>
+      <div class="row">ОДЗ: 1 − x ≥ 0 → <b>${odz ? 'выполнено' : 'не выполнено'}</b></div>
+      <div class="row">Фильтр: x + 2 ≥ 0 → <b>${filter ? 'выполнено' : 'не выполнено'}</b></div>
+      <div class="row">Итог: <b>${inBoth ? 'значение допустимо для дальнейшей проверки' : 'значение сразу отбрасывается'}</b></div>
+      ${valueInfo}
+    `;
+    });
+
+    const pipeOutput = document.getElementById('pipeOutput');
+    function calcPipe(){
+    const t1 = parseFloat(document.getElementById('pipe1').value);
+    const tt = parseFloat(document.getElementById('pipeTogether').value);
+    if(!(t1 > 0) || !(tt > 0)){
+    pipeOutput.innerHTML = `<div class="row">Оба времени должны быть положительными.</div>`;
+    return;
+    }
+    const p2 = 1/tt - 1/t1;
+    if(!(p2 > 0)){
+    pipeOutput.innerHTML = `
+        <div class="row">1/t₂ = 1/${fmt(tt,3)} − 1/${fmt(t1,3)} = ${fmt(p2,5)}</div>
+        <div class="row">Получилась неположительная производительность второй трубы. Значит, такие данные физически некорректны.</div>
+      `;
+    return;
+    }
+    const t2 = 1/p2;
+    pipeOutput.innerHTML = `
+      <div class="row">Совместная производительность: <b>1/${fmt(tt,4)} ≈ ${fmt(1/tt,5)}</b></div>
+      <div class="row">Производительность первой трубы: <b>1/${fmt(t1,4)} ≈ ${fmt(1/t1,5)}</b></div>
+      <div class="row">Производительность второй трубы: <b>${fmt(p2,5)}</b></div>
+      <div class="row">Следовательно, время второй трубы: <b>${fmt(t2,4)} ч</b></div>
+    `;
+    }
+    document.getElementById('calcPipeBtn').addEventListener('click', calcPipe);
+    document.getElementById('resetPipeBtn').addEventListener('click', ()=>{
+    document.getElementById('pipe1').value = 13;
+    document.getElementById('pipeTogether').value = 7.3666667;
+    pipeOutput.innerHTML = `<div class="row">Готово к вычислению.</div>`;
+    });
+
+    const taskPool = [
+    {
+    type:'Корень',
+    statement:`Решить уравнение √(2x + 3) = x + 1.`,
+    answer:`ОДЗ: 2x + 3 ≥ 0 и x + 1 ≥ 0. После возведения в квадрат получаем x² = 2, то есть x = ±√2. По фильтру подходит только x = √2.`
+    },
+    {
+    type:'Корень',
+    statement:`Решить уравнение √(9 − 2x) = x − 3.`,
+    answer:`Нужно 9 − 2x ≥ 0 и x − 3 ≥ 0. После квадратов получаем x² − 4x = 0, то есть x = 0 или x = 4. По фильтру подходит только x = 4.`
+    },
+    {
+    type:'Графики',
+    statement:`Прямая 1 проходит через точки A(0; 2) и B(3; −1), а прямая 2 — через точки C(0; −2) и D(2; 2). Найти точку пересечения.`,
+    answer:`Первая прямая: y = −x + 2. Вторая прямая: y = 2x − 2. Приравниваем: −x + 2 = 2x − 2 ⇒ x = 4/3. Тогда y = 2/3. Ответ: (4/3; 2/3).`
+    },
+    {
+    type:'Графики',
+    statement:`Прямая 1 проходит через точки A(−1; 1) и B(1; 5), а прямая 2 — через точки C(0; 4) и D(2; 0). Найти точку пересечения.`,
+    answer:`Первая прямая: y = 2x + 3. Вторая прямая: y = −2x + 4. Приравниваем: 2x + 3 = −2x + 4 ⇒ x = 1/4. Тогда y = 7/2. Стоп: проверим. Для x = 1/4 первая даёт 3,5, вторая тоже 3,5. Значит, точка пересечения: (1/4; 7/2).`
+    },
+    {
+    type:'Логарифм и trig',
+    statement:`Решить уравнение log₄(cos x) = −1/2.`,
+    answer:`Переходим к показательному виду: cos x = 4^(−1/2) = 1/2. Тогда x = ±π/3 + 2πn, n ∈ ℤ. ОДЗ cos x > 0 выполнено автоматически.`
+    },
+    {
+    type:'Логарифм и trig',
+    statement:`Решить уравнение log₅(cos²x) = 0.`,
+    answer:`Получаем cos²x = 1. Тогда cos x = ±1, то есть x = πn, n ∈ ℤ. Аргумент логарифма положителен, так как cos²x = 1.`
+    },
+    {
+    type:'Производительность',
+    statement:`Два рабочих вместе выполняют заказ за 6 часов. Первый один выполняет его за 10 часов. За сколько часов выполнит заказ второй?`,
+    answer:`1/10 + 1/x = 1/6 ⇒ 1/x = 1/6 − 1/10 = 1/15. Ответ: 15 часов.`
+    },
+    {
+    type:'Производительность',
+    statement:`Первый принтер печатает весь тираж за 18 минут, второй — за 30 минут. За сколько минут они напечатают весь тираж вместе?`,
+    answer:`1/18 + 1/30 = 4/45, значит время вместе равно 45/4 мин = 11,25 мин = 11 мин 15 с.`
+    }
+    ];
+    let currentTaskIndex = -1;
+    const taskStatement = document.getElementById('taskStatement');
+    const taskAnswer = document.getElementById('taskAnswer');
+
+    document.getElementById('newTaskBtn').addEventListener('click', ()=>{
+    let next = Math.floor(Math.random()*taskPool.length);
+    if(taskPool.length > 1){
+    while(next === currentTaskIndex) next = Math.floor(Math.random()*taskPool.length);
+    }
+    currentTaskIndex = next;
+    const t = taskPool[next];
+    taskStatement.innerHTML = `<b>${t.type}.</b> ${t.statement}`;
+    taskAnswer.style.display = 'none';
+    taskAnswer.innerHTML = `<b>Ответ и краткий ход:</b><br>${t.answer}`;
+    });
+    document.getElementById('showTaskAnswerBtn').addEventListener('click', ()=>{
+    if(currentTaskIndex < 0) return;
+    taskAnswer.style.display = 'block';
+    });
+
+    const quizData = [
+    {
+    q:'Для уравнения √(F(x)) = G(x) перед возведением в квадрат обязательно нужно записать…',
+    options:['Только F(x) ≥ 0','Только G(x) ≥ 0','F(x) ≥ 0 и G(x) ≥ 0','Ничего не нужно'],
+    correct:2
+    },
+    {
+    q:'Какое из чисел не может быть значением cos x?',
+    options:['√2 / 2','1/2','−1','√2'],
+    correct:3
+    },
+    {
+    q:'Если прямая задана двумя точками, удобнее всего использовать форму…',
+    options:['y = kx + b','y = x² + bx + c','y = a/x','x² + y² = r²'],
+    correct:0
+    },
+    {
+    q:'В задачах на совместную работу производительность обычно равна…',
+    options:['время / результат','результат / время','время + результат','1 / результат'],
+    correct:1
+    },
+    {
+    q:'Если log₂(cos x) = 1/2, то после перехода получаем cos x = √2. Какой вывод верный?',
+    options:['Решений бесконечно много','Решение x = π/4','Решений нет','Нужно возвести в квадрат'],
+    correct:2
+    }
+    ];
+
+    const quizContainer = document.getElementById('quizContainer');
+    const quizResult = document.getElementById('quizResult');
+    let quizAnswers = new Array(quizData.length).fill(null);
+
+    function renderQuiz(){
+    quizContainer.innerHTML = quizData.map((item, qi)=>`
+      <div class="quiz-q">
+        <h4>${qi+1}. ${item.q}</h4>
+        <div class="options">
+          ${item.options.map((opt, oi)=>`
+            <button class="option" data-q="${qi}" data-o="${oi}">${opt}</button>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+    quizContainer.querySelectorAll('.option').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q, o = +btn.dataset.o;
+    quizAnswers[q] = o;
+    [...quizContainer.querySelectorAll(`.option[data-q="${q}"]`)].forEach(el=>{
+    el.classList.remove('correct','wrong');
+    el.style.outline = '';
+    });
+    btn.style.outline = '2px solid rgba(117,215,255,.45)';
+    });
+    });
+    quizResult.textContent = 'Пока ответов нет.';
+    }
+
+    function checkQuiz(){
+    let score = 0;
+    quizData.forEach((item, qi)=>{
+    const opts = [...quizContainer.querySelectorAll(`.option[data-q="${qi}"]`)];
+    opts.forEach(el=>{
+    el.classList.remove('correct','wrong');
+    el.style.outline = '';
+    const oi = +el.dataset.o;
+    if(oi === item.correct) el.classList.add('correct');
+    if(quizAnswers[qi] !== null && oi === quizAnswers[qi] && oi !== item.correct) el.classList.add('wrong');
+    });
+    if(quizAnswers[qi] === item.correct) score++;
+    });
+    const total = quizData.length;
+    let comment = 'Хорошее начало.';
+    if(score === total) comment = 'Идеально. Все ключевые идеи усвоены.';
+    else if(score >= total - 1) comment = 'Очень сильно. Осталась одна мелочь.';
+    else if(score >= 3) comment = 'Неплохо. Стоит ещё раз пройти ограничения и диапазоны.';
+    else comment = 'Нужно вернуться к карточкам теории и разборам.';
+    quizResult.innerHTML = `Результат: <b>${score} из ${total}</b>. ${comment}`;
+    }
+
+    document.getElementById('checkQuizBtn').addEventListener('click', checkQuiz);
+    document.getElementById('resetQuizBtn').addEventListener('click', ()=>{
+    quizAnswers = new Array(quizData.length).fill(null);
+    renderQuiz();
+    });
+
+    renderQuiz();
+    })();
+</script>
+</body>
+</html>
