@@ -1,0 +1,2332 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Стереометрия: Пирамиды — интерактивная лаборатория</title>
+    <style>
+        :root{
+            --bg:#071018;
+            --bg2:#0b1622;
+            --panel:rgba(14,27,40,.72);
+            --panel-strong:rgba(10,20,30,.9);
+            --line:rgba(136,203,255,.16);
+            --text:#eaf7ff;
+            --muted:#9eb7c9;
+            --accent:#6ee7d8;
+            --accent-2:#7aa7ff;
+            --accent-3:#b08cff;
+            --danger:#ff8a8a;
+            --ok:#8cf0b5;
+            --warn:#ffd68a;
+            --shadow:0 20px 60px rgba(0,0,0,.36);
+            --radius:22px;
+            --radius-sm:14px;
+            --max:1320px;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            color:var(--text);
+            background:
+            radial-gradient(circle at 15% 10%, rgba(110,231,216,.12), transparent 20%),
+            radial-gradient(circle at 80% 0%, rgba(122,167,255,.14), transparent 26%),
+            radial-gradient(circle at 50% 100%, rgba(176,140,255,.10), transparent 22%),
+            linear-gradient(180deg, #061019 0%, #07131f 35%, #08131b 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before,
+        body::after{
+            content:"";
+            position:fixed;
+            width:42vw;
+            height:42vw;
+            border-radius:50%;
+            pointer-events:none;
+            filter:blur(70px);
+            opacity:.18;
+            z-index:0;
+        }
+        body::before{
+            left:-12vw;
+            top:20vh;
+            background:linear-gradient(135deg, var(--accent), transparent 70%);
+        }
+        body::after{
+            right:-12vw;
+            top:10vh;
+            background:linear-gradient(135deg, var(--accent-2), transparent 70%);
+        }
+
+        .grain{
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            opacity:.05;
+            z-index:0;
+            background-image:
+            linear-gradient(transparent 0, rgba(255,255,255,.7) 1px, transparent 1px),
+            linear-gradient(90deg, transparent 0, rgba(255,255,255,.7) 1px, transparent 1px);
+            background-size:4px 4px, 4px 4px;
+            mix-blend-mode:soft-light;
+        }
+
+        .shell{position:relative; z-index:1}
+        .container{width:min(var(--max), calc(100% - 32px)); margin:0 auto}
+
+        .topbar{
+            position:sticky;
+            top:0;
+            z-index:20;
+            backdrop-filter:blur(18px);
+            background:rgba(6,16,25,.55);
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .topbar-inner{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:20px;
+            padding:14px 0;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            font-weight:800;
+            letter-spacing:.03em;
+            text-transform:uppercase;
+            font-size:13px;
+            color:#dff9ff;
+        }
+        .brand-badge{
+            width:38px;height:38px;border-radius:12px;
+            background:
+            linear-gradient(135deg, rgba(110,231,216,.24), rgba(122,167,255,.2)),
+            rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.12);
+            display:grid;place-items:center;
+            box-shadow:0 10px 30px rgba(110,231,216,.14);
+            font-size:18px;
+        }
+
+        .nav{
+            display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end;
+        }
+
+        .nav a, .ghost-btn, .primary-btn, .mini-btn, .viewer-chip, .viewer-btn{
+            text-decoration:none;
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.04);
+            padding:10px 14px;
+            border-radius:999px;
+            font-size:14px;
+            transition:.25s ease;
+            cursor:pointer;
+            box-shadow:none;
+            font:inherit;
+        }
+
+        .nav a:hover, .ghost-btn:hover, .mini-btn:hover, .viewer-chip:hover, .viewer-btn:hover{
+            transform:translateY(-1px);
+            border-color:rgba(110,231,216,.34);
+            background:rgba(110,231,216,.08);
+        }
+
+        .primary-btn, .viewer-btn{
+            background:linear-gradient(135deg, rgba(110,231,216,.22), rgba(122,167,255,.22));
+            border-color:rgba(110,231,216,.34);
+            box-shadow:0 16px 35px rgba(110,231,216,.12);
+            font-weight:700;
+        }
+        .primary-btn:hover, .viewer-btn:hover{
+            background:linear-gradient(135deg, rgba(110,231,216,.28), rgba(122,167,255,.28));
+        }
+
+        .hero{padding:56px 0 36px}
+        .hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:24px; align-items:stretch}
+
+        .card{
+            background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            backdrop-filter:blur(18px);
+        }
+
+        .hero-copy{
+            padding:34px;
+            position:relative;
+            overflow:hidden;
+        }
+        .hero-copy::before{
+            content:"";
+            position:absolute;
+            width:320px;height:320px;
+            right:-80px;top:-90px;
+            background:radial-gradient(circle, rgba(110,231,216,.22), transparent 70%);
+            filter:blur(15px);
+        }
+
+        .eyebrow{
+            display:inline-flex;align-items:center;gap:10px;
+            padding:8px 12px;border-radius:999px;
+            background:rgba(110,231,216,.09);
+            color:#cffff7;font-size:13px;
+            border:1px solid rgba(110,231,216,.18);
+            margin-bottom:18px;
+        }
+
+        .hero h1{
+            margin:0 0 14px;
+            font-size:clamp(36px, 5vw, 70px);
+            line-height:.98;
+            letter-spacing:-.04em;
+            font-weight:900;
+            max-width:10ch;
+        }
+        .gradient-text{
+            background:linear-gradient(135deg, #eafffe 0%, #93fff1 45%, #9cbcff 100%);
+            -webkit-background-clip:text;background-clip:text;color:transparent;
+        }
+
+        .hero p{
+            margin:0;
+            color:var(--muted);
+            font-size:17px;
+            line-height:1.7;
+            max-width:64ch;
+        }
+
+        .hero-actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:24px}
+        .hero-stats{margin-top:28px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+        .stat{
+            padding:16px 16px 14px;
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .stat strong{display:block; font-size:24px; margin-bottom:4px; color:#f2fdff}
+        .stat span{color:var(--muted); font-size:13px; line-height:1.45}
+
+        .hero-art{
+            position:relative;
+            padding:0;
+            overflow:hidden;
+            min-height:460px;
+            background:
+            radial-gradient(circle at 65% 20%, rgba(176,140,255,.22), transparent 24%),
+            radial-gradient(circle at 30% 80%, rgba(110,231,216,.18), transparent 24%),
+            linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+        }
+        .hero-art canvas{width:100%; height:100%; display:block}
+
+        .section{padding:18px 0 10px}
+        .section-head{
+            display:flex; align-items:end; justify-content:space-between;
+            gap:18px; margin-bottom:18px;
+        }
+        .section-head h2{
+            margin:0;
+            font-size:clamp(28px, 3.2vw, 44px);
+            letter-spacing:-.035em;
+            line-height:1.05;
+        }
+        .section-head p{
+            margin:8px 0 0;
+            color:var(--muted);
+            max-width:70ch;
+            line-height:1.65;
+        }
+
+        .pill-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+        .pill{
+            padding:8px 12px;
+            border-radius:999px;
+            font-size:13px;
+            color:#d7eeff;
+            background:rgba(122,167,255,.08);
+            border:1px solid rgba(122,167,255,.17);
+        }
+
+        .grid-2{display:grid; grid-template-columns:1.1fr .9fr; gap:22px}
+        .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
+
+        .panel{padding:24px}
+        .panel h3{margin:0 0 14px; font-size:22px; letter-spacing:-.02em}
+        .panel h4{margin:0 0 8px; font-size:17px}
+        .muted{color:var(--muted)}
+
+        .formula{
+            font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+            font-size:14px;
+            line-height:1.7;
+            color:#dff9ff;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:16px;
+            padding:14px 16px;
+            overflow:auto;
+        }
+        .formula strong{color:#ffffff}
+
+        .theory-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:16px;
+        }
+
+        .accordion{
+            overflow:hidden;
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.07);
+            background:rgba(255,255,255,.035);
+        }
+        .accordion button{
+            appearance:none;width:100%;background:none;border:0;color:var(--text);
+            display:flex;justify-content:space-between;align-items:center;gap:14px;
+            padding:18px 18px;cursor:pointer;font:inherit;text-align:left;
+        }
+        .accordion button:hover{background:rgba(255,255,255,.03)}
+        .accordion .acc-content{
+            max-height:0; overflow:hidden; transition:max-height .35s ease;
+            border-top:1px solid rgba(255,255,255,.05);
+        }
+        .accordion.open .acc-content{max-height:800px}
+        .accordion .acc-inner{
+            padding:16px 18px 18px;
+            color:var(--muted);
+            line-height:1.72;
+        }
+        .accordion .icon{
+            width:30px;height:30px;display:grid;place-items:center;
+            border-radius:999px;background:rgba(110,231,216,.08);
+            color:#d1fff8;flex:0 0 auto;transition:transform .25s ease;
+        }
+        .accordion.open .icon{transform:rotate(45deg)}
+
+        .visual-wrap{
+            display:grid; grid-template-columns:1.1fr .9fr;
+            gap:22px; align-items:start;
+        }
+
+        .visual-viewport{
+            position:relative;
+            min-height:540px;
+            overflow:hidden;
+            border-radius:18px;
+            background:
+            radial-gradient(circle at 50% 20%, rgba(122,167,255,.08), transparent 35%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+            border:1px solid rgba(255,255,255,.06);
+        }
+        .viewer-canvas{
+            width:100%;
+            height:100%;
+            display:block;
+            background:transparent;
+            touch-action:none;
+            cursor:grab;
+        }
+        .viewer-canvas.dragging{cursor:grabbing}
+
+        .viewer-overlay{
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            background:
+            linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+            background-size:32px 32px;
+            mask-image:linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.25));
+            opacity:.22;
+        }
+
+        .viewer-caption{
+            margin-top:12px;
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            flex-wrap:wrap;
+            align-items:flex-start;
+        }
+
+        .viewer-panel{
+            background:rgba(6,16,25,.62);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:16px;
+            padding:12px 12px;
+            backdrop-filter:blur(14px);
+            box-shadow:0 16px 40px rgba(0,0,0,.25);
+        }
+
+        .viewer-hint{
+            color:#dff6ff;
+            font-size:13px;
+            line-height:1.55;
+            max-width:480px;
+        }
+        .viewer-hint strong{display:block; margin-bottom:4px}
+
+        .viewer-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            justify-content:flex-end;
+        }
+
+        .visual-controls{display:grid; gap:14px; padding:22px}
+        .control-group{
+            padding:18px;
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .control-group label{display:block; font-size:14px; color:#dff6ff; margin-bottom:10px}
+        .range-row{display:flex; align-items:center; gap:12px}
+        .range-row input[type="range"]{width:100%; accent-color:#7ff7e7}
+        .value-tag{
+            min-width:82px; text-align:center;
+            font-family:ui-monospace, monospace;
+            font-size:13px; color:#eaffff;
+            padding:9px 10px; border-radius:12px;
+            background:rgba(110,231,216,.08);
+            border:1px solid rgba(110,231,216,.14);
+        }
+
+        .switches{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+        .switch{
+            display:flex; align-items:center; gap:10px;
+            padding:10px 12px; border-radius:14px;
+            border:1px solid rgba(255,255,255,.07);
+            background:rgba(255,255,255,.03);
+            cursor:pointer; user-select:none; font-size:14px; color:#dff3ff;
+        }
+        .switch input{accent-color:#7ff7e7}
+
+        .readout{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:6px}
+        .readout-item{
+            padding:12px 14px; border-radius:15px;
+            background:rgba(7,17,26,.55);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .readout-item .k{
+            display:block; color:var(--muted);
+            font-size:12px; margin-bottom:5px;
+        }
+        .readout-item .v{
+            font-family:ui-monospace, monospace;
+            font-size:16px; color:#f5ffff;
+            line-height:1.35; word-break:break-word;
+        }
+
+        .calc-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px}
+        .calc-box{
+            padding:22px; border-radius:20px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .mode-tabs{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px}
+        .tab{
+            padding:10px 14px; border-radius:999px;
+            border:1px solid rgba(255,255,255,.09);
+            background:rgba(255,255,255,.03);
+            cursor:pointer; transition:.2s ease; font-size:14px;
+        }
+        .tab.active{
+            background:linear-gradient(135deg, rgba(110,231,216,.22), rgba(122,167,255,.22));
+            border-color:rgba(110,231,216,.24); color:#fff;
+        }
+
+        .input-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:12px}
+        .field{display:flex; flex-direction:column; gap:8px}
+        .field label{color:#dff3ff; font-size:14px}
+        .field input, .field select{
+            width:100%; padding:13px 14px; border-radius:14px;
+            border:1px solid rgba(255,255,255,.11);
+            background:rgba(5,12,18,.82); color:var(--text);
+            font:inherit; outline:none;
+        }
+        .field input:focus, .field select:focus{
+            border-color:rgba(110,231,216,.36);
+            box-shadow:0 0 0 3px rgba(110,231,216,.08);
+        }
+
+        .steps{display:grid; gap:10px; margin-top:14px}
+        .step{
+            padding:12px 14px; border-radius:14px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.07);
+            color:#def4ff; line-height:1.7;
+        }
+
+        .task{
+            padding:24px;
+            border-radius:22px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+            display:grid;
+            gap:16px;
+            align-content:start;
+            overflow:visible;
+        }
+        .task-header{
+            display:flex; justify-content:space-between;
+            gap:14px; align-items:start; flex-wrap:wrap;
+        }
+        .tag{
+            display:inline-block;
+            padding:7px 10px;
+            border-radius:999px;
+            background:rgba(176,140,255,.12);
+            border:1px solid rgba(176,140,255,.2);
+            color:#ece2ff;
+            font-size:12px;
+            letter-spacing:.02em;
+            text-transform:uppercase;
+        }
+        .task h3{margin:0; font-size:24px; line-height:1.2}
+        .task p, .task li{color:var(--muted); line-height:1.72}
+        .task .solution{
+            display:none; padding:16px; border-radius:16px;
+            background:rgba(110,231,216,.06);
+            border:1px solid rgba(110,231,216,.14);
+        }
+        .task.open .solution{display:block}
+
+        .viewer-shell{
+            display:grid;
+            gap:12px;
+            position:relative;
+            z-index:0;
+        }
+
+        .task-viewer{
+            position:relative;
+            min-height:380px;
+            border-radius:18px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.07);
+            background:
+            radial-gradient(circle at 50% 18%, rgba(176,140,255,.10), transparent 35%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+            isolation:isolate;
+            z-index:0;
+        }
+
+        .viewer-toolbar{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            align-items:center;
+            justify-content:space-between;
+            position:relative;
+            z-index:1;
+        }
+        .viewer-toolbar-left, .viewer-toolbar-right{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            align-items:center;
+        }
+
+        .viewer-chip.active{
+            background:rgba(110,231,216,.12);
+            border-color:rgba(110,231,216,.26);
+        }
+
+        .viewer-help{
+            font-size:13px;
+            color:var(--muted);
+            line-height:1.6;
+            position:relative;
+            z-index:1;
+        }
+
+        .cheat{display:grid; gap:12px}
+        .cheat-row{
+            display:grid; grid-template-columns:minmax(180px, 260px) 1fr; gap:12px;
+            padding:14px 16px; border-radius:16px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .cheat-row strong{color:#f5ffff}
+        .cheat-row span{color:var(--muted); line-height:1.65}
+
+        .quiz-grid{display:grid; gap:16px}
+        .q-card{
+            padding:20px; border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+        }
+        .q-card h4{margin:0 0 12px; font-size:18px; line-height:1.5}
+        .options{display:grid; gap:10px}
+        .option{
+            border:1px solid rgba(255,255,255,.09);
+            background:rgba(255,255,255,.025);
+            color:#e7f4ff;
+            padding:12px 14px;
+            border-radius:14px;
+            cursor:pointer;
+            text-align:left;
+            font:inherit;
+            transition:.2s ease;
+        }
+        .option:hover{background:rgba(255,255,255,.05); transform:translateY(-1px)}
+        .option.correct{
+            border-color:rgba(140,240,181,.45);
+            background:rgba(140,240,181,.10);
+            color:#effff4;
+        }
+        .option.wrong{
+            border-color:rgba(255,138,138,.45);
+            background:rgba(255,138,138,.10);
+            color:#fff3f3;
+        }
+
+        .score-box{
+            padding:22px; border-radius:20px;
+            background:linear-gradient(135deg, rgba(110,231,216,.12), rgba(122,167,255,.10));
+            border:1px solid rgba(110,231,216,.16);
+            display:flex; align-items:center; justify-content:space-between;
+            gap:14px; flex-wrap:wrap;
+        }
+
+        .generator-layout{display:grid; grid-template-columns:.9fr 1.1fr; gap:22px}
+        .gen-output{
+            min-height:320px; padding:22px; border-radius:20px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            display:grid; gap:16px; align-content:start;
+        }
+        .answer{
+            padding:16px; border-radius:16px;
+            background:rgba(122,167,255,.08);
+            border:1px solid rgba(122,167,255,.14);
+            display:none;
+        }
+        .answer.show{display:block}
+
+        .footer{padding:38px 0 70px; color:var(--muted); font-size:14px}
+        .dot-list{display:grid; gap:10px; margin:0; padding:0; list-style:none}
+        .dot-list li{
+            position:relative; padding-left:18px;
+            line-height:1.7; color:var(--muted);
+        }
+        .dot-list li::before{
+            content:""; position:absolute; left:0; top:.72em;
+            width:7px; height:7px; border-radius:50%;
+            background:linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow:0 0 14px rgba(110,231,216,.5);
+        }
+
+        .print-only{display:none}
+        .small{font-size:13px}
+        .center{text-align:center}
+        .divider{
+            height:1px;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,.09), transparent);
+            margin:20px 0;
+        }
+        .hint{
+            padding:12px 14px; border-radius:14px;
+            border:1px solid rgba(255,214,138,.22);
+            background:rgba(255,214,138,.07);
+            color:#fff2d6; line-height:1.65;
+        }
+
+        .fade-in{
+            opacity:0; transform:translateY(18px);
+            transition:opacity .7s ease, transform .7s ease;
+        }
+        .fade-in.in{opacity:1; transform:none}
+
+        @media (max-width: 1150px){
+            .hero-grid,.grid-2,.visual-wrap,.calc-grid,.generator-layout{grid-template-columns:1fr}
+            .theory-grid{grid-template-columns:1fr}
+            .grid-3{grid-template-columns:1fr}
+            .hero h1{max-width:none}
+        }
+
+        @media (max-width: 760px){
+            .container{width:min(var(--max), calc(100% - 18px))}
+            .topbar-inner{align-items:flex-start; flex-direction:column}
+            .nav{justify-content:flex-start}
+            .hero-copy, .panel, .task, .visual-controls, .calc-box, .gen-output{padding:18px}
+            .hero-stats{grid-template-columns:1fr}
+            .readout, .input-grid, .switches{grid-template-columns:1fr}
+            .cheat-row{grid-template-columns:1fr}
+            .hero{padding-top:28px}
+            .hero-art{min-height:360px}
+            .visual-viewport{min-height:420px}
+            .task-viewer{min-height:320px}
+            .section-head{flex-direction:column; align-items:flex-start}
+            .viewer-caption{flex-direction:column}
+            .viewer-actions{justify-content:flex-start}
+            .viewer-toolbar{flex-direction:column; align-items:flex-start}
+        }
+
+        @media print{
+            :root{--bg:#fff; --text:#111; --muted:#333}
+            body{background:#fff !important; color:#111 !important}
+            body::before, body::after, .grain, .topbar, .primary-btn, .ghost-btn, .mini-btn,
+            .nav, .switches, .mode-tabs, .hint, .viewer-toolbar, .viewer-overlay,
+            .print-hide, .score-box button{
+                display:none !important;
+            }
+            .shell, .container{width:100% !important; max-width:none !important}
+            .card, .task, .q-card, .calc-box, .panel, .accordion, .cheat-row, .readout-item, .control-group, .task-viewer, .visual-viewport, .viewer-panel{
+                background:#fff !important; border:1px solid #bbb !important; color:#111 !important; box-shadow:none !important; break-inside:avoid;
+            }
+            .muted, .task p, .task li, .accordion .acc-inner, .cheat-row span, .viewer-help, .viewer-hint{color:#222 !important}
+            .print-only{display:block}
+            a{color:#111 !important; text-decoration:none !important}
+            .hero{padding-top:0}
+            .section{padding:10px 0}
+            .viewer-canvas{filter:grayscale(100%) contrast(110%)}
+        }
+    </style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="shell">
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand">
+                <div class="brand-badge">△</div>
+                <div>Стереометрия · Пирамиды</div>
+            </div>
+            <nav class="nav print-hide">
+                <a href="#visual">Визуализация</a>
+                <a href="#calculator">Калькулятор</a>
+                <a href="#theory">Теория</a>
+                <a href="#problems">Задачи</a>
+                <a href="#quiz">Квиз</a>
+                <a href="#generator">Генератор</a>
+                <button class="primary-btn" onclick="window.print()">Печать</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="card hero-copy fade-in">
+                    <div class="eyebrow">Интерактивная геометрическая лаборатория</div>
+                    <h1><span class="gradient-text">Пирамиды</span><br>в стереометрии</h1>
+                    <p>
+                        Свойства, формулы, углы, апофема, высота, боковые рёбра и разбор типовых задач.
+                        Для каждой фигуры добавлены вращение, масштабирование, сдвиг и корректная динамическая штриховка скрытых рёбер.
+                    </p>
+                    <div class="hero-actions print-hide">
+                        <a class="primary-btn" href="#visual">Открыть лабораторию</a>
+                        <a class="ghost-btn" href="#problems">Перейти к задачам</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <strong>3D</strong>
+                            <span>вращение, масштабирование и сдвиг фигур без внешних библиотек</span>
+                        </div>
+                        <div class="stat">
+                            <strong>2</strong>
+                            <span>отдельных интерактивных чертежа прямо внутри разбора задач</span>
+                        </div>
+                        <div class="stat">
+                            <strong>∞</strong>
+                            <span>видов фигуры: скрытые рёбра автоматически меняют стиль при повороте</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card hero-art fade-in">
+                    <canvas id="heroViewer" class="viewer-canvas" aria-label="Интерактивная модель пирамиды"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="overview">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Краткая карта темы</h2>
+                        <p>
+                            Пирамида — многогранник с многоугольником в основании и треугольными боковыми гранями, сходящимися в одной вершине.
+                            Для школьных задач особенно важны правильные пирамиды, углы наклона рёбер и граней, а также умение находить внутри фигуры
+                            прямоугольные треугольники.
+                        </p>
+                        <div class="pill-row">
+                            <span class="pill">Высота H</span>
+                            <span class="pill">Апофема h<sub>a</sub></span>
+                            <span class="pill">Боковое ребро</span>
+                            <span class="pill">Линейный угол двугранного угла</span>
+                            <span class="pill">Площадь боковой поверхности</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="visual">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Главный интерактивный блок</h2>
+                        <p>
+                            Ниже — модель правильной четырёхугольной пирамиды. Меняйте сторону основания и высоту,
+                            включайте смысловые слои и вращайте фигуру мышью или пальцем.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="visual-wrap">
+                    <div class="card panel fade-in" style="padding:18px;">
+                        <div class="visual-viewport">
+                            <canvas id="mainViewer" class="viewer-canvas" aria-label="Модель правильной четырёхугольной пирамиды"></canvas>
+                            <div class="viewer-overlay"></div>
+                        </div>
+                        <div class="viewer-caption print-hide">
+                            <div class="viewer-panel viewer-hint">
+                                <strong>Управление</strong>
+                                ЛКМ / палец — вращение · колесо — масштаб · Shift + перетаскивание — сдвиг · кнопка справа — сброс вида
+                            </div>
+                            <div class="viewer-actions">
+                                <button class="viewer-btn" data-reset-viewer="mainViewer">Сбросить вид</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card visual-controls fade-in">
+                        <div class="control-group">
+                            <label for="baseRange">Высота Н</label>
+                            <div class="range-row">
+                                <input id="baseRange" type="range" min="4" max="14" step="0.5" value="8">
+                                <div class="value-tag" id="baseValue">8.0 см</div>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="heightRange">Сторона основания a</label>
+                            <div class="range-row">
+                                <input id="heightRange" type="range" min="3" max="14" step="0.5" value="6">
+                                <div class="value-tag" id="heightValue">6.0 см</div>
+                            </div>
+                        </div>
+
+                        <div class="control-group print-hide">
+                            <label>Показывать элементы</label>
+                            <div class="switches">
+                                <label class="switch"><input type="checkbox" id="toggleHeight" checked> высота SO</label>
+                                <label class="switch"><input type="checkbox" id="toggleApothem" checked> апофема SM</label>
+                                <label class="switch"><input type="checkbox" id="toggleDiag" checked> диагонали основания</label>
+                                <label class="switch"><input type="checkbox" id="toggleProj" checked> проекцию AO</label>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <h3 style="margin-bottom:12px">Мгновенный пересчёт</h3>
+                            <div class="readout">
+                                <div class="readout-item">
+                                    <span class="k">Радиус OA</span>
+                                    <span class="v" id="outOA"></span>
+                                </div>
+                                <div class="readout-item">
+                                    <span class="k">Боковое ребро SA</span>
+                                    <span class="v" id="outSA"></span>
+                                </div>
+                                <div class="readout-item">
+                                    <span class="k">Апофема SM</span>
+                                    <span class="v" id="outSM"></span>
+                                </div>
+                                <div class="readout-item">
+                                    <span class="k">Угол ребра к основанию</span>
+                                    <span class="v" id="outAlpha"></span>
+                                </div>
+                                <div class="readout-item">
+                                    <span class="k">Площадь боковой поверхности</span>
+                                    <span class="v" id="outSideArea"></span>
+                                </div>
+                                <div class="readout-item">
+                                    <span class="k">Объём</span>
+                                    <span class="v" id="outVolume"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula">
+                            <strong>Для правильной четырёхугольной пирамиды:</strong><br>
+                            OA = a / √2<br>
+                            SA = √(H² + a² / 2)<br>
+                            SM = √(H² + a² / 4)<br>
+                            S<sub>бок</sub> = 2a · SM<br>
+                            V = a²H / 3
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="calculator">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Калькулятор типовых вычислений</h2>
+                        <p>
+                            Два режима: правильная четырёхугольная пирамида и пирамида с правильным треугольником в основании,
+                            где две боковые грани перпендикулярны основанию.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card panel fade-in">
+                    <div class="mode-tabs print-hide">
+                        <button class="tab active" data-mode="square">Правильная четырёхугольная</button>
+                        <button class="tab" data-mode="tri">Треугольное основание + две грани ⟂ основанию</button>
+                    </div>
+
+                    <div class="calc-grid">
+                        <div class="calc-box" id="calcInputs">
+                            <h3>Исходные данные</h3>
+                            <div id="squareInputs">
+                                <div class="input-grid">
+                                    <div class="field">
+                                        <label for="sqA">Сторона основания a</label>
+                                        <input id="sqA" type="number" min="0.1" step="0.1" value="4">
+                                    </div>
+                                    <div class="field">
+                                        <label for="sqS">Боковое ребро SA</label>
+                                        <input id="sqS" type="number" min="0.1" step="0.1" value="4">
+                                    </div>
+                                    <div class="field">
+                                        <label for="sqAngle">Угол ребра с плоскостью основания α</label>
+                                        <select id="sqAngle">
+                                            <option value="30">30°</option>
+                                            <option value="45" selected>45°</option>
+                                            <option value="60">60°</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label>Подсказка</label>
+                                        <div class="hint">Если дано боковое ребро и угол с основанием, то H = SA · sin α, а AO = SA · cos α.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="triInputs" style="display:none">
+                                <div class="input-grid">
+                                    <div class="field">
+                                        <label for="triA">Сторона основания a</label>
+                                        <input id="triA" type="number" min="0.1" step="0.1" value="6">
+                                    </div>
+                                    <div class="field">
+                                        <label for="triAngle">Угол третьей боковой грани с основанием β</label>
+                                        <select id="triAngle">
+                                            <option value="30" selected>30°</option>
+                                            <option value="45">45°</option>
+                                            <option value="60">60°</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label>Модель</label>
+                                        <div class="hint">Основание — правильный треугольник. Две боковые грани перпендикулярны основанию. Их общее ребро — высота пирамиды.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="divider"></div>
+                            <button class="primary-btn print-hide" onclick="runCalculator()">Вычислить</button>
+                            <button class="ghost-btn print-hide" onclick="resetCalculator()">Сбросить</button>
+                        </div>
+
+                        <div class="calc-box">
+                            <h3>Результат и ход решения</h3>
+                            <div class="steps" id="calcSteps">
+                                <div class="step">Выберите режим и нажмите «Вычислить».</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="theory">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Теория в карточках</h2>
+                        <p>
+                            Короткие опорные блоки, чтобы быстро восстановить понятия и не перепутать угол ребра, угол грани,
+                            высоту, апофему и типовые ловушки.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="theory-grid fade-in">
+                    <div class="accordion open">
+                        <button type="button">
+                            <span><strong>Основные определения</strong><br><span class="muted small">пирамида, правильная пирамида, высота, апофема</span></span>
+                            <span class="icon">+</span>
+                        </button>
+                        <div class="acc-content">
+                            <div class="acc-inner">
+                                <ul class="dot-list">
+                                    <li><strong>Пирамида</strong> — многогранник, у которого основание является многоугольником, а боковые грани — треугольники с общей вершиной.</li>
+                                    <li><strong>Правильная пирамида</strong> — пирамида с правильным многоугольником в основании, причём вершина проектируется в центр основания.</li>
+                                    <li><strong>Высота H</strong> — перпендикуляр из вершины к плоскости основания.</li>
+                                    <li><strong>Апофема h<sub>a</sub></strong> — высота боковой грани правильной пирамиды, проведённая к стороне основания.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion">
+                        <button type="button">
+                            <span><strong>Ключевые свойства правильной пирамиды</strong><br><span class="muted small">что в ней одинаково</span></span>
+                            <span class="icon">+</span>
+                        </button>
+                        <div class="acc-content">
+                            <div class="acc-inner">
+                                <ul class="dot-list">
+                                    <li>Все боковые рёбра равны.</li>
+                                    <li>Все боковые грани — равные равнобедренные треугольники.</li>
+                                    <li>Все апофемы равны.</li>
+                                    <li>Основание высоты совпадает с центром описанной и вписанной окружностей основания.</li>
+                                    <li>Все боковые рёбра одинаково наклонены к плоскости основания.</li>
+                                    <li>Все боковые грани одинаково наклонены к плоскости основания.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion">
+                        <button type="button">
+                            <span><strong>Формулы площади и объёма</strong><br><span class="muted small">минимум, который нужно помнить</span></span>
+                            <span class="icon">+</span>
+                        </button>
+                        <div class="acc-content">
+                            <div class="acc-inner">
+                                <div class="formula">
+                                    S<sub>полн</sub> = S<sub>осн</sub> + S<sub>бок</sub><br>
+                                    S<sub>бок</sub> = ½P<sub>осн</sub> · h<sub>a</sub> &nbsp; (для правильной пирамиды)<br>
+                                    V = (1 / 3)S<sub>осн</sub> · H<br>
+                                    S<sub>прав. треугольника</sub> = a²√3 / 4<br>
+                                    h<sub>прав. треугольника</sub> = a√3 / 2
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion">
+                        <button type="button">
+                            <span><strong>Три главных прямоугольных треугольника</strong><br><span class="muted small">что чаще всего выделяют в задачах</span></span>
+                            <span class="icon">+</span>
+                        </button>
+                        <div class="acc-content">
+                            <div class="acc-inner">
+                                <ul class="dot-list">
+                                    <li><strong>△SOA</strong>: SO — высота, SA — боковое ребро, OA — радиус описанной окружности основания.</li>
+                                    <li><strong>△SOH</strong>: SO — высота, SH — апофема, OH — радиус вписанной окружности основания.</li>
+                                    <li><strong>△SHA</strong>: SH — апофема, SA — боковое ребро, AH = a / 2 для правильной четырёхугольной пирамиды.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion">
+                        <button type="button">
+                            <span><strong>Углы в пирамиде</strong><br><span class="muted small">как не перепутать угол ребра и угол грани</span></span>
+                            <span class="icon">+</span>
+                        </button>
+                        <div class="acc-content">
+                            <div class="acc-inner">
+                                <ul class="dot-list">
+                                    <li><strong>Угол ребра с плоскостью основания</strong> — угол между ребром и его проекцией на основание. Например, для ребра SA это угол между SA и AO.</li>
+                                    <li><strong>Угол боковой грани с плоскостью основания</strong> — линейный угол соответствующего двугранного угла. В правильной пирамиде это угол между апофемой и её проекцией на основание.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion">
+                        <button type="button">
+                            <span><strong>Ловушки</strong><br><span class="muted small">частые ошибки на задачах</span></span>
+                            <span class="icon">+</span>
+                        </button>
+                        <div class="acc-content">
+                            <div class="acc-inner">
+                                <ul class="dot-list">
+                                    <li>Если две боковые грани перпендикулярны плоскости основания, их линия пересечения — высота пирамиды.</li>
+                                    <li>Не путайте диагональ квадрата и сторону: d = a√2.</li>
+                                    <li>Не путайте высоту грани и высоту пирамиды: апофема обычно длиннее высоты.</li>
+                                    <li>Угол 45° в задачах может относиться либо к ребру, либо к грани — это разные величины.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="problems">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Разбор задач с интерактивными фигурами</h2>
+                        <p>
+                            Для каждой задачи ниже есть собственная модель. Её можно вращать, приближать и переключать слои,
+                            чтобы видеть именно те элементы, которые используются в решении.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <article class="task card fade-in" id="task1">
+                        <div class="task-header">
+                            <div>
+                                <span class="tag">Задача 1</span>
+                                <h3>Правильная четырёхугольная пирамида</h3>
+                            </div>
+                            <button class="primary-btn print-hide" onclick="toggleSolution('task1')">Показать решение</button>
+                        </div>
+
+                        <p>
+                            Боковое ребро правильной четырёхугольной пирамиды равно 4 см и образует с плоскостью основания угол 45°.
+                            Найти высоту пирамиды и площадь боковой поверхности.
+                        </p>
+
+                        <div class="viewer-shell">
+                            <div class="task-viewer">
+                                <canvas id="task1Viewer" class="viewer-canvas" aria-label="Фигура к задаче 1"></canvas>
+                                <div class="viewer-overlay"></div>
+                            </div>
+
+                            <div class="viewer-caption print-hide">
+                                <div class="viewer-panel viewer-hint">
+                                    <strong>Фигура к задаче 1</strong>
+                                    Показаны квадрат основания, вершина S, высота SO, проекция AO и апофема SM. Скрытые рёбра автоматически становятся пунктирными.
+                                </div>
+                                <div class="viewer-actions">
+                                    <button class="viewer-btn" data-reset-viewer="task1Viewer">Сбросить вид</button>
+                                </div>
+                            </div>
+
+                            <div class="viewer-toolbar print-hide">
+                                <div class="viewer-toolbar-left">
+                                    <button class="viewer-chip active" data-layer-toggle="task1Viewer" data-layer="height">Высота</button>
+                                    <button class="viewer-chip active" data-layer-toggle="task1Viewer" data-layer="projection">Проекция AO</button>
+                                    <button class="viewer-chip active" data-layer-toggle="task1Viewer" data-layer="apothem">Апофема</button>
+                                    <button class="viewer-chip active" data-layer-toggle="task1Viewer" data-layer="diagonals">Диагонали</button>
+                                </div>
+                                <div class="viewer-toolbar-right">
+                                    <button class="mini-btn" data-viewer-preset="task1Viewer" data-preset="front">Спереди</button>
+                                    <button class="mini-btn" data-viewer-preset="task1Viewer" data-preset="top">Сверху</button>
+                                    <button class="mini-btn" data-viewer-preset="task1Viewer" data-preset="iso">Изометрия</button>
+                                </div>
+                            </div>
+
+                            <div class="viewer-help">
+                                Мышь или палец — вращение · колёсико — масштаб · Shift + перетаскивание — сдвиг камеры.
+                            </div>
+                        </div>
+
+                        <div class="formula">
+                            Дано: SA = 4, α = 45°<br>
+                            Требуется: H, S<sub>бок</sub>
+                        </div>
+
+                        <div class="solution">
+                            <ol class="dot-list" style="list-style:none; padding:0; margin:0;">
+                                <li>1) Рассматриваем прямоугольный треугольник SOA, где SO — высота, SA — боковое ребро, AO — проекция ребра на основание.</li>
+                                <li>2) Высота: H = SO = SA · sin 45° = 4 · √2 / 2 = 2√2 см.</li>
+                                <li>3) Проекция ребра: AO = SA · cos 45° = 4 · √2 / 2 = 2√2 см.</li>
+                                <li>4) Для квадрата AO = a / √2, значит a = AO√2 = 2√2 · √2 = 4 см.</li>
+                                <li>5) Апофема SM = √(H² + (a / 2)²) = √(8 + 4) = √12 = 2√3 см.</li>
+                                <li>6) Площадь боковой поверхности правильной четырёхугольной пирамиды:
+                                    S<sub>бок</sub> = ½ · P<sub>осн</sub> · SM = ½ · 16 · 2√3 = 16√3 см².</li>
+                            </ol>
+                            <div class="divider"></div>
+                            <div class="formula"><strong>Ответ:</strong> H = 2√2 см, &nbsp; S<sub>бок</sub> = 16√3 см².</div>
+                        </div>
+                    </article>
+
+                    <article class="task card fade-in" id="task2">
+                        <div class="task-header">
+                            <div>
+                                <span class="tag">Задача 2</span>
+                                <h3>Основание — правильный треугольник</h3>
+                            </div>
+                            <button class="primary-btn print-hide" onclick="toggleSolution('task2')">Показать решение</button>
+                        </div>
+
+                        <p>
+                            Основание пирамиды — правильный треугольник с площадью 9√3 см². Две боковые грани перпендикулярны основанию,
+                            а третья наклонена к нему под углом 30°. Найти длины боковых рёбер и площадь боковой поверхности.
+                        </p>
+
+                        <div class="viewer-shell">
+                            <div class="task-viewer">
+                                <canvas id="task2Viewer" class="viewer-canvas" aria-label="Фигура к задаче 2"></canvas>
+                                <div class="viewer-overlay"></div>
+                            </div>
+
+                            <div class="viewer-caption print-hide">
+                                <div class="viewer-panel viewer-hint">
+                                    <strong>Фигура к задаче 2</strong>
+                                    Показаны ребро-высота SB, высота основания BH и отрезок SH, отвечающий за угол грани с основанием. Невидимые рёбра автоматически штрихуются.
+                                </div>
+                                <div class="viewer-actions">
+                                    <button class="viewer-btn" data-reset-viewer="task2Viewer">Сбросить вид</button>
+                                </div>
+                            </div>
+
+                            <div class="viewer-toolbar print-hide">
+                                <div class="viewer-toolbar-left">
+                                    <button class="viewer-chip active" data-layer-toggle="task2Viewer" data-layer="height">Высота SB</button>
+                                    <button class="viewer-chip active" data-layer-toggle="task2Viewer" data-layer="bh">BH</button>
+                                    <button class="viewer-chip active" data-layer-toggle="task2Viewer" data-layer="sh">SH</button>
+                                    <button class="viewer-chip active" data-layer-toggle="task2Viewer" data-layer="right">Прямые углы</button>
+                                </div>
+                                <div class="viewer-toolbar-right">
+                                    <button class="mini-btn" data-viewer-preset="task2Viewer" data-preset="front">Спереди</button>
+                                    <button class="mini-btn" data-viewer-preset="task2Viewer" data-preset="top">Сверху</button>
+                                    <button class="mini-btn" data-viewer-preset="task2Viewer" data-preset="iso">Изометрия</button>
+                                </div>
+                            </div>
+
+                            <div class="viewer-help">
+                                В этой модели удобно видеть, почему SB — высота пирамиды, а угол между гранью SAC и основанием читается через ∠SHB.
+                            </div>
+                        </div>
+
+                        <div class="formula">
+                            S<sub>осн</sub> = 9√3 см², &nbsp; β = 30°
+                        </div>
+
+                        <div class="solution">
+                            <ol class="dot-list" style="list-style:none; padding:0; margin:0;">
+                                <li>1) Для правильного треугольника S = a²√3 / 4. Отсюда a²√3 / 4 = 9√3, значит a² = 36 и a = 6 см.</li>
+                                <li>2) Если две боковые грани перпендикулярны основанию, их общее ребро является высотой. Значит SB — высота пирамиды.</li>
+                                <li>3) Пусть H — середина AC. Тогда в основании BH — высота правильного треугольника:
+                                    BH = a√3 / 2 = 6√3 / 2 = 3√3 см.</li>
+                                <li>4) Угол между третьей гранью и основанием равен 30°, поэтому в прямоугольном треугольнике SHB:
+                                    tan 30° = SB / BH. Отсюда SB = BH · tan 30° = 3√3 · (1 / √3) = 3 см.</li>
+                                <li>5) Боковые рёбра:
+                                    SA = √(AB² + SB²) = √(36 + 9) = 3√5 см,
+                                    SC = √(BC² + SB²) = 3√5 см.</li>
+                                <li>6) Площади граней:
+                                    S<sub>SAB</sub> = ½ · 6 · 3 = 9 см²,
+                                    S<sub>SBC</sub> = 9 см².</li>
+                                <li>7) В треугольнике SHB:
+                                    cos 30° = BH / SH, значит SH = BH / cos 30° = 3√3 / (√3 / 2) = 6 см.</li>
+                                <li>8) Тогда S<sub>SAC</sub> = ½ · AC · SH = ½ · 6 · 6 = 18 см².</li>
+                                <li>9) Общая площадь боковой поверхности:
+                                    S<sub>бок</sub> = 9 + 9 + 18 = 36 см².</li>
+                            </ol>
+                            <div class="divider"></div>
+                            <div class="formula"><strong>Ответ:</strong> SA = SC = 3√5 см, &nbsp; SB = 3 см, &nbsp; S<sub>бок</sub> = 36 см².</div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="cheatsheet">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Сводка формул</h2>
+                        <p>Опорный лист, который удобно быстро просмотреть перед решением задач или перед печатью страницы.</p>
+                    </div>
+                </div>
+
+                <div class="card panel cheat fade-in">
+                    <div class="cheat-row">
+                        <strong>Полная поверхность</strong>
+                        <span>S<sub>полн</sub> = S<sub>осн</sub> + S<sub>бок</sub></span>
+                    </div>
+                    <div class="cheat-row">
+                        <strong>Боковая поверхность правильной пирамиды</strong>
+                        <span>S<sub>бок</sub> = ½P<sub>осн</sub> · h<sub>a</sub></span>
+                    </div>
+                    <div class="cheat-row">
+                        <strong>Объём</strong>
+                        <span>V = (1 / 3)S<sub>осн</sub> · H</span>
+                    </div>
+                    <div class="cheat-row">
+                        <strong>Площадь правильного треугольника</strong>
+                        <span>S = a²√3 / 4</span>
+                    </div>
+                    <div class="cheat-row">
+                        <strong>Высота правильного треугольника</strong>
+                        <span>h = a√3 / 2</span>
+                    </div>
+                    <div class="cheat-row">
+                        <strong>Диагональ квадрата</strong>
+                        <span>d = a√2</span>
+                    </div>
+                    <div class="cheat-row">
+                        <strong>Правильная четырёхугольная пирамида</strong>
+                        <span>OA = a / √2, &nbsp; SA = √(H² + a² / 2), &nbsp; SM = √(H² + a² / 4)</span>
+                    </div>
+                    <div class="cheat-row">
+                        <strong>Ключевая ловушка</strong>
+                        <span>Угол ребра с основанием — между ребром и его проекцией; угол грани с основанием — между апофемой и её проекцией.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="quiz">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Самопроверка: мини-квиз</h2>
+                        <p>Пять вопросов по определениям, формулам и ключевым идеям. После проверки появится итоговый счёт.</p>
+                    </div>
+                </div>
+
+                <div class="card panel fade-in">
+                    <div class="quiz-grid" id="quizWrap"></div>
+                    <div class="divider"></div>
+                    <div class="score-box">
+                        <div>
+                            <strong style="display:block; font-size:20px; margin-bottom:4px;">Результат</strong>
+                            <span class="muted" id="quizScoreText">Пока не проверено.</span>
+                        </div>
+                        <div class="print-hide" style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="primary-btn" onclick="checkQuiz()">Проверить</button>
+                            <button class="ghost-btn" onclick="resetQuiz()">Сбросить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="generator">
+            <div class="container">
+                <div class="section-head fade-in">
+                    <div>
+                        <h2>Генератор тренировочных задач</h2>
+                        <p>
+                            Генерация идёт только по безопасным шаблонам с заранее контролируемой математикой:
+                            все условия корректны, ответы вычисляются автоматически и скрываются до нажатия.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="generator-layout">
+                    <div class="card panel fade-in">
+                        <h3>Выбрать тип задачи</h3>
+                        <ul class="dot-list">
+                            <li>Правильная четырёхугольная пирамида: боковое ребро и угол к основанию.</li>
+                            <li>Правильная четырёхугольная пирамида: сторона основания и апофема.</li>
+                            <li>Основание — правильный треугольник, две грани перпендикулярны основанию.</li>
+                            <li>Правильная четырёхугольная пирамида: высота и угол ребра к основанию.</li>
+                        </ul>
+                        <div class="divider"></div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;" class="print-hide">
+                            <button class="primary-btn" onclick="generateTask()">Сгенерировать задачу</button>
+                            <button class="ghost-btn" onclick="toggleGeneratedAnswer()">Показать / скрыть ответ</button>
+                        </div>
+                    </div>
+
+                    <div class="card gen-output fade-in">
+                        <div id="generatedTaskText" class="muted" style="line-height:1.8;">
+                            Нажмите кнопку, чтобы получить новую задачу.
+                        </div>
+                        <div id="generatedTaskMeta" class="formula" style="display:none;"></div>
+                        <div id="generatedAnswer" class="answer"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section print-only">
+            <div class="container">
+                <div class="card panel">
+                    <h2>Краткая печатная памятка</h2>
+                    <p>Основные формулы: S<sub>бок</sub> = ½P<sub>осн</sub> · h<sub>a</sub>, V = (1 / 3)S<sub>осн</sub> · H, для квадрата d = a√2, для правильного треугольника S = a²√3 / 4.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container center">
+            Учебная интерактивная страница по теме «Пирамиды» · без внешних библиотек · автономный HTML
+        </div>
+    </footer>
+</div>
+
+<script>
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => [...document.querySelectorAll(sel)];
+
+    function fmt(n, digits = 2){
+        if (!isFinite(n)) return "—";
+        const rounded = Math.round(n * Math.pow(10, digits)) / Math.pow(10, digits);
+        return rounded.toLocaleString('ru-RU', {
+            maximumFractionDigits: digits,
+            minimumFractionDigits: rounded % 1 === 0 ? 0 : Math.min(digits, 2)
+        });
+    }
+
+    function deg(rad){ return rad * 180 / Math.PI; }
+
+    function initAccordions(){
+        $$('.accordion button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.parentElement.classList.toggle('open');
+            });
+        });
+    }
+
+    function toggleSolution(id){
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    // ---------------- 3D CANVAS ENGINE ----------------
+    const VIEWERS = {};
+
+    function vec(x=0,y=0,z=0){ return {x,y,z}; }
+    function add(a,b){ return {x:a.x+b.x, y:a.y+b.y, z:a.z+b.z}; }
+    function sub(a,b){ return {x:a.x-b.x, y:a.y-b.y, z:a.z-b.z}; }
+    function mul(a,s){ return {x:a.x*s, y:a.y*s, z:a.z*s}; }
+    function mid(a,b){ return {x:(a.x+b.x)/2, y:(a.y+b.y)/2, z:(a.z+b.z)/2}; }
+    function norm(a){ const l=Math.hypot(a.x,a.y,a.z)||1; return {x:a.x/l,y:a.y/l,z:a.z/l}; }
+    function dot(a,b){ return a.x*b.x+a.y*b.y+a.z*b.z; }
+    function cross(a,b){ return {x:a.y*b.z-a.z*b.y, y:a.z*b.x-a.x*b.z, z:a.x*b.y-a.y*b.x}; }
+
+    function rotatePoint(p, rx, ry){
+        let x = p.x, y = p.y, z = p.z;
+        const cosy = Math.cos(ry), siny = Math.sin(ry);
+        const x1 = x * cosy + z * siny;
+        const z1 = -x * siny + z * cosy;
+        const cosx = Math.cos(rx), sinx = Math.sin(rx);
+        const y2 = y * cosx - z1 * sinx;
+        const z2 = y * sinx + z1 * cosx;
+        return {x:x1, y:y2, z:z2};
+    }
+
+    function makeSquarePyramid(a=8,h=6){
+        const A = vec(-a/2, 0, -a/2);
+        const B = vec(a/2, 0, -a/2);
+        const C = vec(a/2, 0, a/2);
+        const D = vec(-a/2, 0, a/2);
+        const O = vec(0,0,0);
+        const M = mid(A,B);
+        const S = vec(0,h,0);
+
+        return {
+            points:{A,B,C,D,O,M,S},
+            faces:[
+                {pts:['A','B','S'], fill:'rgba(110,231,216,.12)', stroke:'rgba(110,231,216,.55)'},
+                {pts:['B','C','S'], fill:'rgba(122,167,255,.12)', stroke:'rgba(122,167,255,.55)'},
+                {pts:['C','D','S'], fill:'rgba(176,140,255,.10)', stroke:'rgba(176,140,255,.50)'},
+                {pts:['D','A','S'], fill:'rgba(122,167,255,.08)', stroke:'rgba(122,167,255,.45)'},
+                {pts:['A','B','C','D'], fill:'rgba(255,255,255,.025)', stroke:'rgba(255,255,255,.12)'}
+            ],
+            edges:[
+                {a:'A',b:'B', color:'rgba(255,255,255,.65)', width:1.8},
+                {a:'B',b:'C', color:'rgba(255,255,255,.65)', width:1.8},
+                {a:'C',b:'D', color:'rgba(255,255,255,.55)', width:1.8},
+                {a:'D',b:'A', color:'rgba(255,255,255,.55)', width:1.8},
+                {a:'S',b:'A', color:'#79f1e0', width:2.5},
+                {a:'S',b:'B', color:'#7aa7ff', width:2.5},
+                {a:'S',b:'C', color:'#7aa7ff', width:2.5},
+                {a:'S',b:'D', color:'#79f1e0', width:2.5}
+            ],
+            layers:{
+                height:[{a:'S',b:'O', color:'#6ee7d8', width:2.5}],
+                apothem:[{a:'S',b:'M', color:'#7aa7ff', width:2.5}],
+                diagonals:[
+                    {a:'A',b:'C', color:'#b08cff', width:1.6},
+                    {a:'B',b:'D', color:'#b08cff', width:1.6}
+                ],
+                projection:[{a:'A',b:'O', color:'#ffffff', width:1.7}]
+            },
+            labels:{
+                A:{dx:-14,dy:16}, B:{dx:8,dy:16}, C:{dx:8,dy:16}, D:{dx:-14,dy:16},
+                O:{dx:10,dy:14}, M:{dx:10,dy:14}, S:{dx:10,dy:-10}
+            }
+        };
+    }
+
+    function makeTask1Figure(){
+        return makeSquarePyramid(4, 2*Math.sqrt(2));
+    }
+
+    function makeTriCaseFigure(){
+        const A = vec(-3,0,-1.7320508076);
+        const B = vec(3,0,-1.7320508076);
+        const C = vec(0,0,3.4641016152);
+        const H = mid(A,C);
+        const S = vec(3,3,-1.7320508076);
+
+        return {
+            points:{A,B,C,H,S},
+            faces:[
+                {pts:['A','B','S'], fill:'rgba(110,231,216,.12)', stroke:'rgba(110,231,216,.52)'},
+                {pts:['B','C','S'], fill:'rgba(122,167,255,.12)', stroke:'rgba(122,167,255,.52)'},
+                {pts:['A','C','S'], fill:'rgba(176,140,255,.10)', stroke:'rgba(176,140,255,.46)'},
+                {pts:['A','B','C'], fill:'rgba(255,255,255,.03)', stroke:'rgba(255,255,255,.14)'}
+            ],
+            edges:[
+                {a:'A',b:'B', color:'rgba(255,255,255,.7)', width:1.8},
+                {a:'B',b:'C', color:'rgba(255,255,255,.7)', width:1.8},
+                {a:'C',b:'A', color:'rgba(255,255,255,.7)', width:1.8},
+                {a:'S',b:'A', color:'#79f1e0', width:2.5},
+                {a:'S',b:'B', color:'#6ee7d8', width:2.7},
+                {a:'S',b:'C', color:'#7aa7ff', width:2.5}
+            ],
+            layers:{
+                height:[{a:'S',b:'B', color:'#6ee7d8', width:2.7}],
+                bh:[{a:'B',b:'H', color:'#ffffff', width:1.8}],
+                sh:[{a:'S',b:'H', color:'#b08cff', width:2.3}],
+                right:[]
+            },
+            rightAngles:[
+                {center:'B', along1:vec(-0.45,0,0), along2:vec(0,0,0.45), size:.24, color:'rgba(255,255,255,.75)'},
+                {center:'H', along1:sub(A,H), along2:sub(S,H), size:.22, color:'rgba(255,255,255,.75)'}
+            ],
+            labels:{
+                A:{dx:-14,dy:16}, B:{dx:10,dy:16}, C:{dx:8,dy:16}, H:{dx:10,dy:14}, S:{dx:10,dy:-10}
+            }
+        };
+    }
+
+    function attachViewer(canvasId, getScene, options = {}){
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        const state = {
+            rotX: options.rotX ?? -0.55,
+            rotY: options.rotY ?? 0.75,
+            zoom: options.zoom ?? 1,
+            panX: 0,
+            panY: 0,
+            dragging:false,
+            panning:false,
+            lastX:0,
+            lastY:0,
+            sceneFactory:getScene,
+            layers: Object.assign({}, options.layers || {}),
+            dpr: Math.max(1, window.devicePixelRatio || 1)
+        };
+
+        function resize(){
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = Math.max(1, Math.floor(rect.width * state.dpr));
+            canvas.height = Math.max(1, Math.floor(rect.height * state.dpr));
+            ctx.setTransform(state.dpr,0,0,state.dpr,0,0);
+            draw();
+        }
+
+        function setPreset(name){
+            if (name === 'front'){
+                state.rotX = -0.05;
+                state.rotY = 0.0;
+            } else if (name === 'top'){
+                state.rotX = -1.45;
+                state.rotY = 0.0;
+            } else {
+                state.rotX = options.rotX ?? -0.55;
+                state.rotY = options.rotY ?? 0.75;
+            }
+            state.panX = 0;
+            state.panY = 0;
+            state.zoom = options.zoom ?? 1;
+            draw();
+        }
+
+        function resetView(){ setPreset('iso'); }
+
+        function currentScene(){
+            return typeof state.sceneFactory === 'function' ? state.sceneFactory() : state.sceneFactory;
+        }
+
+        function projectPoint(p, scaleBase){
+            const rp = rotatePoint(p, state.rotX, state.rotY);
+            const depth = 7;
+            const persp = depth / (depth - rp.z * 0.08);
+            return {
+                x: canvas.clientWidth / 2 + state.panX + rp.x * scaleBase * state.zoom * persp,
+                y: canvas.clientHeight / 2 + state.panY - rp.y * scaleBase * state.zoom * persp,
+                z: rp.z,
+                world: rp
+            };
+        }
+
+        function faceNormal(face, rotatedPoints){
+            const p0 = rotatedPoints[face.pts[0]];
+            const p1 = rotatedPoints[face.pts[1]];
+            const p2 = rotatedPoints[face.pts[2]];
+            const u = sub(p1, p0);
+            const v = sub(p2, p0);
+            return cross(u, v);
+        }
+
+        function isFaceFront(face, rotatedPoints){
+            const n = faceNormal(face, rotatedPoints);
+            return n.z > 0;
+        }
+
+        function buildVisibleFrontFaces(scene, rotatedPoints){
+            return (scene.faces || [])
+                .filter(f => f.pts.length >= 3 && isFaceFront(f, rotatedPoints));
+        }
+
+        function edgeVisibility(edge, scene, frontFaces){
+            const withEdge = frontFaces.filter(face => {
+                let count = 0;
+                if (face.pts.includes(edge.a)) count++;
+                if (face.pts.includes(edge.b)) count++;
+                return count === 2;
+            });
+            return withEdge.length > 0;
+        }
+
+        function drawRightAngleMark(center, v1, v2, size, color, scaleBase){
+            const a1 = norm(v1);
+            const a2 = norm(v2);
+            const p1 = add(center, mul(a1, size));
+            const p2 = add(add(center, mul(a1, size)), mul(a2, size));
+            const p3 = add(center, mul(a2, size));
+
+            const P1 = projectPoint(p1, scaleBase);
+            const P2 = projectPoint(p2, scaleBase);
+            const P3 = projectPoint(p3, scaleBase);
+
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(P1.x, P1.y);
+            ctx.lineTo(P2.x, P2.y);
+            ctx.lineTo(P3.x, P3.y);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function strokeSegment(seg, projected, hidden=false){
+            const p1 = projected[seg.a], p2 = projected[seg.b];
+            ctx.save();
+            let color = seg.color || '#fff';
+            let width = seg.width || 2;
+            if (hidden){
+                color = color.startsWith('rgba(') ? color.replace(/rgba\(([^)]+),\s*([^)]+)\)/, 'rgba($1, .28)') : color;
+                width = Math.max(1, width - 0.2);
+                ctx.setLineDash(seg.hiddenDash || [7,7]);
+            } else if (seg.dash){
+                ctx.setLineDash(seg.dash);
+            }
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(p1.x,p1.y);
+            ctx.lineTo(p2.x,p2.y);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function draw(){
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            ctx.clearRect(0,0,w,h);
+
+            const g1 = ctx.createRadialGradient(w*0.25,h*0.2,10,w*0.25,h*0.2,w*0.5);
+            g1.addColorStop(0,'rgba(110,231,216,.12)');
+            g1.addColorStop(1,'rgba(110,231,216,0)');
+            ctx.fillStyle = g1;
+            ctx.fillRect(0,0,w,h);
+
+            const g2 = ctx.createRadialGradient(w*0.78,h*0.18,10,w*0.78,h*0.18,w*0.45);
+            g2.addColorStop(0,'rgba(122,167,255,.12)');
+            g2.addColorStop(1,'rgba(122,167,255,0)');
+            ctx.fillStyle = g2;
+            ctx.fillRect(0,0,w,h);
+
+            const scene = currentScene();
+            const pts = scene.points;
+            const keys = Object.keys(pts);
+            const all = keys.map(k => pts[k]);
+            let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,minZ=Infinity,maxZ=-Infinity;
+            all.forEach(p => {
+                minX=Math.min(minX,p.x); maxX=Math.max(maxX,p.x);
+                minY=Math.min(minY,p.y); maxY=Math.max(maxY,p.y);
+                minZ=Math.min(minZ,p.z); maxZ=Math.max(maxZ,p.z);
+            });
+            const span = Math.max(maxX-minX, maxY-minY, maxZ-minZ, 1);
+            const scaleBase = Math.min(w,h) * 0.12 / (span/6);
+
+            const projected = {};
+            const rotatedPoints = {};
+            keys.forEach(k => {
+                const rp = rotatePoint(pts[k], state.rotX, state.rotY);
+                rotatedPoints[k] = rp;
+                const pp = projectPoint(pts[k], scaleBase);
+                projected[k] = pp;
+            });
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,.08)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, h*0.82 + state.panY);
+            ctx.lineTo(w, h*0.82 + state.panY);
+            ctx.stroke();
+            ctx.restore();
+
+            const frontFaces = buildVisibleFrontFaces(scene, rotatedPoints);
+            const faces = (scene.faces || []).map(face => {
+                const avgZ = face.pts.reduce((s,k)=>s+projected[k].z,0)/face.pts.length;
+                const front = face.pts.length >= 3 ? isFaceFront(face, rotatedPoints) : true;
+                return {...face, avgZ, front};
+            }).sort((a,b)=>a.avgZ-b.avgZ);
+
+            faces.forEach(face => {
+                ctx.save();
+                ctx.beginPath();
+                face.pts.forEach((k,i) => {
+                    const p = projected[k];
+                    if (i===0) ctx.moveTo(p.x,p.y);
+                    else ctx.lineTo(p.x,p.y);
+                });
+                ctx.closePath();
+                ctx.fillStyle = face.front ? face.fill : 'rgba(255,255,255,.012)';
+                ctx.fill();
+                ctx.strokeStyle = face.front ? face.stroke : 'rgba(255,255,255,.05)';
+                ctx.lineWidth = 1.1;
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            keys.forEach(k => {
+                const p = projected[k];
+                const rg = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,12);
+                rg.addColorStop(0,'rgba(255,255,255,.22)');
+                rg.addColorStop(1,'rgba(255,255,255,0)');
+                ctx.fillStyle = rg;
+                ctx.beginPath();
+                ctx.arc(p.x,p.y,12,0,Math.PI*2);
+                ctx.fill();
+            });
+
+            (scene.edges || []).forEach(seg => {
+                const visible = edgeVisibility(seg, scene, frontFaces);
+                strokeSegment(seg, projected, !visible);
+            });
+
+            Object.entries(scene.layers || {}).forEach(([name,list]) => {
+                if (state.layers[name] !== false){
+                    list.forEach(seg => {
+                        const visible = edgeVisibility(seg, scene, frontFaces);
+                        strokeSegment(seg, projected, !visible);
+                    });
+                }
+            });
+
+            if (scene.rightAngles && state.layers.right !== false){
+                scene.rightAngles.forEach(mark => {
+                    const center = scene.points[mark.center];
+                    drawRightAngleMark(center, mark.along1, mark.along2, mark.size || 0.3, mark.color || '#fff', scaleBase);
+                });
+            }
+
+            if (canvas.id === 'task2Viewer' && state.layers.sh !== false && state.layers.bh !== false){
+                const H = projected.H, B = projected.B, S = projected.S;
+                const r = 24;
+                const a1 = Math.atan2(H.y-B.y, H.x-B.x);
+                const a2 = Math.atan2(S.y-B.y, S.x-B.x);
+                ctx.save();
+                ctx.strokeStyle = '#ffd68a';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(B.x, B.y, r, a1, a2, false);
+                ctx.stroke();
+                ctx.fillStyle = '#fff0c2';
+                ctx.font = '700 13px Inter, Arial, sans-serif';
+                ctx.fillText('30°', B.x + 14, B.y - 10);
+                ctx.restore();
+            }
+
+            ctx.save();
+            ctx.font = '700 14px Inter, Arial, sans-serif';
+            ctx.textBaseline = 'middle';
+            Object.entries(scene.labels || {}).forEach(([key,off]) => {
+                const p = projected[key];
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#071018';
+                ctx.strokeText(key, p.x + (off.dx||0), p.y + (off.dy||0));
+                ctx.fillStyle = '#eefaff';
+                ctx.fillText(key, p.x + (off.dx||0), p.y + (off.dy||0));
+            });
+            ctx.restore();
+
+            keys.forEach(k => {
+                const p = projected[k];
+                ctx.save();
+                ctx.fillStyle = k === 'S' ? '#6ee7d8' : '#eefaff';
+                ctx.beginPath();
+                ctx.arc(p.x,p.y, k==='S'?4.5:3.8, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        function pointerPos(e){
+            const r = canvas.getBoundingClientRect();
+            if (e.touches && e.touches[0]){
+                return {x:e.touches[0].clientX-r.left, y:e.touches[0].clientY-r.top};
+            }
+            return {x:e.clientX-r.left, y:e.clientY-r.top};
+        }
+
+        function startDrag(e){
+            const p = pointerPos(e);
+            state.dragging = true;
+            state.panning = !!e.shiftKey;
+            state.lastX = p.x;
+            state.lastY = p.y;
+            canvas.classList.add('dragging');
+        }
+
+        function moveDrag(e){
+            if (!state.dragging) return;
+            const p = pointerPos(e);
+            const dx = p.x - state.lastX;
+            const dy = p.y - state.lastY;
+            state.lastX = p.x;
+            state.lastY = p.y;
+
+            if ((e.touches && e.touches.length === 2)) return;
+
+            if (state.panning){
+                state.panX += dx;
+                state.panY += dy;
+            } else {
+                state.rotY += dx * 0.01;
+                state.rotX += dy * 0.01;
+                state.rotX = Math.max(-Math.PI/2 + 0.05, Math.min(Math.PI/2 - 0.05, state.rotX));
+            }
+            draw();
+        }
+
+        function endDrag(){
+            state.dragging = false;
+            canvas.classList.remove('dragging');
+        }
+
+        let pinchDist = null;
+        canvas.addEventListener('touchstart', e => {
+            if (e.touches.length === 2){
+                pinchDist = Math.hypot(
+                    e.touches[1].clientX - e.touches[0].clientX,
+                    e.touches[1].clientY - e.touches[0].clientY
+                );
+            } else {
+                startDrag(e);
+            }
+        }, {passive:true});
+
+        canvas.addEventListener('touchmove', e => {
+            if (e.touches.length === 2 && pinchDist){
+                const d = Math.hypot(
+                    e.touches[1].clientX - e.touches[0].clientX,
+                    e.touches[1].clientY - e.touches[0].clientY
+                );
+                const ratio = d / pinchDist;
+                state.zoom = Math.max(0.45, Math.min(2.8, state.zoom * ratio));
+                pinchDist = d;
+                draw();
+                return;
+            }
+            moveDrag(e);
+        }, {passive:true});
+
+        canvas.addEventListener('touchend', () => {
+            pinchDist = null;
+            endDrag();
+        });
+
+        canvas.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', moveDrag);
+        window.addEventListener('mouseup', endDrag);
+        canvas.addEventListener('mouseleave', endDrag);
+
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            const factor = e.deltaY > 0 ? 0.92 : 1.08;
+            state.zoom = Math.max(0.45, Math.min(2.8, state.zoom * factor));
+            draw();
+        }, {passive:false});
+
+        const viewerApi = {
+            canvas,
+            state,
+            draw,
+            resize,
+            resetView,
+            setPreset,
+            toggleLayer(name){
+                state.layers[name] = state.layers[name] === false ? true : false;
+                draw();
+            },
+            setSceneFactory(fn){
+                state.sceneFactory = fn;
+                draw();
+            }
+        };
+
+        VIEWERS[canvasId] = viewerApi;
+        resize();
+
+        const ro = new ResizeObserver(resize);
+        ro.observe(canvas);
+
+        return viewerApi;
+    }
+
+    // ---------------- MAIN VISUAL ----------------
+    const baseRange = $('#baseRange');
+    const heightRange = $('#heightRange');
+    const baseValue = $('#baseValue');
+    const heightValue = $('#heightValue');
+
+    function currentMainSquareScene(){
+        const a = parseFloat(baseRange.value);
+        const h = parseFloat(heightRange.value);
+        return makeSquarePyramid(a,h);
+    }
+
+    function updateMainReadout(){
+        const a = parseFloat(baseRange.value);
+        const h = parseFloat(heightRange.value);
+
+        baseValue.textContent = `${fmt(a,1)} см`;
+        heightValue.textContent = `${fmt(h,1)} см`;
+
+        const OA = a / Math.sqrt(2);
+        const SA = Math.sqrt(h*h + a*a/2);
+        const SM = Math.sqrt(h*h + a*a/4);
+        const alpha = deg(Math.atan(h / OA));
+        const sideArea = 2 * a * SM;
+        const volume = a*a*h/3;
+
+        $('#outOA').textContent = `${fmt(OA)} см`;
+        $('#outSA').textContent = `${fmt(SA)} см`;
+        $('#outSM').textContent = `${fmt(SM)} см`;
+        $('#outAlpha').textContent = `${fmt(alpha)}°`;
+        $('#outSideArea').textContent = `${fmt(sideArea)} см²`;
+        $('#outVolume').textContent = `${fmt(volume)} см³`;
+
+        const mainViewer = VIEWERS.mainViewer;
+        if (mainViewer){
+            mainViewer.setSceneFactory(currentMainSquareScene);
+        }
+    }
+
+    function syncMainLayerButtons(){
+        const v = VIEWERS.mainViewer;
+        if (!v) return;
+        v.state.layers.height = $('#toggleHeight').checked;
+        v.state.layers.apothem = $('#toggleApothem').checked;
+        v.state.layers.diagonals = $('#toggleDiag').checked;
+        v.state.layers.projection = $('#toggleProj').checked;
+        v.draw();
+    }
+
+    // ---------------- CALCULATOR ----------------
+    let calcMode = 'square';
+
+    function setMode(mode){
+        calcMode = mode;
+        $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+        $('#squareInputs').style.display = mode === 'square' ? '' : 'none';
+        $('#triInputs').style.display = mode === 'tri' ? '' : 'none';
+        $('#calcSteps').innerHTML = '<div class="step">Нажмите «Вычислить».</div>';
+    }
+
+    $$('.tab').forEach(tab => {
+        tab.addEventListener('click', () => setMode(tab.dataset.mode));
+    });
+
+    function runCalculator(){
+        const steps = $('#calcSteps');
+        steps.innerHTML = '';
+
+        if (calcMode === 'square'){
+            const a = parseFloat($('#sqA').value);
+            const s = parseFloat($('#sqS').value);
+            const angle = parseFloat($('#sqAngle').value);
+            if (!(a > 0 && s > 0)){
+                steps.innerHTML = '<div class="step">Введите положительные значения.</div>';
+                return;
+            }
+            const rad = angle * Math.PI / 180;
+            const H = s * Math.sin(rad);
+            const AO = s * Math.cos(rad);
+            const aFromProjection = AO * Math.sqrt(2);
+            const SM = Math.sqrt(H*H + a*a/4);
+            const sideArea = 2 * a * SM;
+            const totalArea = a*a + sideArea;
+            const volume = a*a * H / 3;
+
+            steps.innerHTML = `
+          <div class="step"><strong>Шаг 1.</strong> В прямоугольном треугольнике SOA:
+          H = SO = SA · sin ${angle}° = ${fmt(s)} · sin ${angle}° = <strong>${fmt(H)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 2.</strong> Проекция ребра на основание:
+          AO = SA · cos ${angle}° = ${fmt(s)} · cos ${angle}° = <strong>${fmt(AO)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 3.</strong> Если опираться только на угол и ребро, то для квадрата получилось бы
+          a = AO√2 = <strong>${fmt(aFromProjection)}</strong> см. Сравните это со введённой стороной основания a = <strong>${fmt(a)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 4.</strong> Апофема:
+          SM = √(H² + a² / 4) = <strong>${fmt(SM)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 5.</strong> Площади и объём:
+          S<sub>бок</sub> = 2a · SM = <strong>${fmt(sideArea)}</strong> см²,
+          S<sub>полн</sub> = a² + S<sub>бок</sub> = <strong>${fmt(totalArea)}</strong> см²,
+          V = a²H / 3 = <strong>${fmt(volume)}</strong> см³.</div>
+        `;
+        } else {
+            const a = parseFloat($('#triA').value);
+            const angle = parseFloat($('#triAngle').value);
+            if (!(a > 0)){
+                steps.innerHTML = '<div class="step">Введите положительное значение стороны основания.</div>';
+                return;
+            }
+            const rad = angle * Math.PI / 180;
+            const BH = a * Math.sqrt(3) / 2;
+            const SB = BH * Math.tan(rad);
+            const SA = Math.sqrt(a*a + SB*SB);
+            const SH = BH / Math.cos(rad);
+            const areaAB = 0.5 * a * SB;
+            const areaBC = areaAB;
+            const areaAC = 0.5 * a * SH;
+            const sideArea = areaAB + areaBC + areaAC;
+            const baseArea = a*a*Math.sqrt(3)/4;
+            const volume = baseArea * SB / 3;
+
+            steps.innerHTML = `
+          <div class="step"><strong>Шаг 1.</strong> Высота правильного треугольника основания:
+          BH = a√3 / 2 = ${fmt(a)}√3 / 2 = <strong>${fmt(BH)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 2.</strong> Так как две боковые грани перпендикулярны основанию, их общее ребро SB — высота пирамиды.</div>
+
+          <div class="step"><strong>Шаг 3.</strong> В прямоугольном треугольнике SHB:
+          tan ${angle}° = SB / BH, поэтому SB = BH · tan ${angle}° = <strong>${fmt(SB)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 4.</strong> Боковые рёбра:
+          SA = SC = √(a² + SB²) = <strong>${fmt(SA)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 5.</strong> Высота третьей боковой грани:
+          SH = BH / cos ${angle}° = <strong>${fmt(SH)}</strong> см.</div>
+
+          <div class="step"><strong>Шаг 6.</strong> Площадь боковой поверхности:
+          S<sub>SAB</sub> = ½a·SB = <strong>${fmt(areaAB)}</strong> см²,
+          S<sub>SBC</sub> = <strong>${fmt(areaBC)}</strong> см²,
+          S<sub>SAC</sub> = ½a·SH = <strong>${fmt(areaAC)}</strong> см²,
+          всего <strong>${fmt(sideArea)}</strong> см².</div>
+
+          <div class="step"><strong>Шаг 7.</strong> Объём:
+          S<sub>осн</sub> = a²√3 / 4 = <strong>${fmt(baseArea)}</strong> см²,
+          V = (1 / 3)S<sub>осн</sub>·SB = <strong>${fmt(volume)}</strong> см³.</div>
+        `;
+        }
+    }
+
+    function resetCalculator(){
+        $('#sqA').value = 4;
+        $('#sqS').value = 4;
+        $('#sqAngle').value = 45;
+        $('#triA').value = 6;
+        $('#triAngle').value = 30;
+        $('#calcSteps').innerHTML = '<div class="step">Выберите режим и нажмите «Вычислить».</div>';
+    }
+
+    // ---------------- QUIZ ----------------
+    const quizData = [
+        {
+            q: '1. Что называется апофемой правильной пирамиды?',
+            answers: [
+                'Высота всей пирамиды',
+                'Высота боковой грани, проведённая к стороне основания',
+                'Диагональ основания',
+                'Отрезок от центра основания до вершины основания'
+            ],
+            correct: 1
+        },
+        {
+            q: '2. Как вычисляется объём пирамиды?',
+            answers: [
+                'V = Sосн · H',
+                'V = ½Sосн · H',
+                'V = (1 / 3)Sосн · H',
+                'V = Pосн · H'
+            ],
+            correct: 2
+        },
+        {
+            q: '3. В правильной четырёхугольной пирамиде OA равно…',
+            answers: [
+                'a / 2',
+                'a',
+                'a / √2',
+                'a√2'
+            ],
+            correct: 2
+        },
+        {
+            q: '4. Угол бокового ребра с плоскостью основания — это угол между…',
+            answers: [
+                'ребром и высотой пирамиды',
+                'ребром и его проекцией на основание',
+                'двумя боковыми рёбрами',
+                'ребром и стороной основания'
+            ],
+            correct: 1
+        },
+        {
+            q: '5. Если две боковые грани пирамиды перпендикулярны основанию, то их линия пересечения…',
+            answers: [
+                'параллельна основанию',
+                'является апофемой',
+                'является высотой пирамиды',
+                'является диагональю основания'
+            ],
+            correct: 2
+        }
+    ];
+
+    function renderQuiz(){
+        const wrap = $('#quizWrap');
+        wrap.innerHTML = '';
+        quizData.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'q-card';
+            card.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="options">
+            ${item.answers.map((ans, aIdx) => `
+              <button class="option" data-q="${idx}" data-a="${aIdx}">${ans}</button>
+            `).join('')}
+          </div>
+        `;
+            wrap.appendChild(card);
+        });
+
+        $$('.option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const q = btn.dataset.q;
+                $$(`.option[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                btn.parentElement.dataset.selected = btn.dataset.a;
+            });
+        });
+    }
+
+    function checkQuiz(){
+        let score = 0;
+        quizData.forEach((item, idx) => {
+            const selectedWrap = $$('.options')[idx];
+            const selected = parseInt(selectedWrap.dataset.selected, 10);
+            const btns = $$(`.option[data-q="${idx}"]`);
+            btns.forEach((b, aIdx) => {
+                b.classList.remove('correct','wrong');
+                if (aIdx === item.correct) b.classList.add('correct');
+                if (!Number.isNaN(selected) && aIdx === selected && aIdx !== item.correct) b.classList.add('wrong');
+            });
+            if (selected === item.correct) score++;
+        });
+        $('#quizScoreText').textContent =
+        `Верно: ${score} из ${quizData.length}. ${
+          score === quizData.length ? 'Отлично.' :
+          score >= 3 ? 'Хороший уровень, но есть что закрепить.' :
+          'Нужно ещё потренироваться.'
+        }`;
+    }
+
+    function resetQuiz(){
+        renderQuiz();
+        $('#quizScoreText').textContent = 'Пока не проверено.';
+    }
+
+    // ---------------- TASK GENERATOR ----------------
+    let currentGenerated = null;
+
+    function choice(arr){
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generateTask(){
+        const type = choice([1,2,3,4]);
+        let task = '', answer = '', meta = '';
+
+        if (type === 1){
+            const s = choice([4, 6, 8]);
+            const angle = choice([30,45,60]);
+            const rad = angle * Math.PI / 180;
+            const H = s * Math.sin(rad);
+            const AO = s * Math.cos(rad);
+            const a = AO * Math.sqrt(2);
+            const SM = Math.sqrt(H*H + a*a/4);
+            const area = 2 * a * SM;
+
+            task = `Боковое ребро правильной четырёхугольной пирамиды равно ${s} см и образует с плоскостью основания угол ${angle}°. Найдите высоту пирамиды и площадь её боковой поверхности.`;
+            answer = `Высота: H = ${fmt(H)} см.<br>Сторона основания: a = ${fmt(a)} см.<br>Апофема: SM = ${fmt(SM)} см.<br>Площадь боковой поверхности: S<sub>бок</sub> = ${fmt(area)} см².`;
+            meta = `Использовано: H = SA · sin α, AO = SA · cos α, a = AO√2, S<sub>бок</sub> = 2a · SM.`;
+        }
+
+        if (type === 2){
+            const a = choice([6, 8, 10, 12]);
+            const ap = choice([5, 7, 9]);
+            const area = 2 * a * ap;
+            const H2 = ap*ap - (a*a/4);
+            if (!(H2 > 0)) return generateTask();
+            const H = Math.sqrt(H2);
+
+            task = `Сторона основания правильной четырёхугольной пирамиды равна ${a} см, а апофема равна ${ap} см. Найдите высоту пирамиды и площадь боковой поверхности.`;
+            answer = `Высота: H = √(${ap}² − (${a}/2)²) = ${fmt(H)} см.<br>Площадь боковой поверхности: S<sub>бок</sub> = 2a · h<sub>a</sub> = ${fmt(area)} см².`;
+            meta = `Использовано: h<sub>a</sub>² = H² + (a / 2)², S<sub>бок</sub> = ½ · 4a · h<sub>a</sub> = 2a · h<sub>a</sub>.`;
+        }
+
+        if (type === 3){
+            const a = choice([4, 6, 8]);
+            const angle = choice([30,45,60]);
+            const rad = angle * Math.PI / 180;
+            const BH = a * Math.sqrt(3) / 2;
+            const SB = BH * Math.tan(rad);
+            const SA = Math.sqrt(a*a + SB*SB);
+            const SH = BH / Math.cos(rad);
+            const sideArea = a*SB + 0.5*a*SH;
+
+            task = `Основание пирамиды — правильный треугольник со стороной ${a} см. Две боковые грани перпендикулярны основанию, а третья наклонена к нему под углом ${angle}°. Найдите высоту пирамиды, боковые рёбра, равные друг другу, и площадь боковой поверхности.`;
+            answer = `Высота пирамиды: SB = ${fmt(SB)} см.<br>Равные боковые рёбра: SA = SC = ${fmt(SA)} см.<br>Высота третьей грани: SH = ${fmt(SH)} см.<br>Площадь боковой поверхности: S<sub>бок</sub> = ${fmt(sideArea)} см².`;
+            meta = `Использовано: BH = a√3 / 2, SB = BH · tan β, SA = √(a² + SB²), SH = BH / cos β.`;
+        }
+
+        if (type === 4){
+            const H = choice([3, 4, 6, 8]);
+            const angle = choice([30,45,60]);
+            const rad = angle * Math.PI / 180;
+            const AO = H / Math.tan(rad);
+            const a = AO * Math.sqrt(2);
+            const SA = H / Math.sin(rad);
+            const SM = Math.sqrt(H*H + a*a/4);
+
+            task = `В правильной четырёхугольной пирамиде высота равна ${H} см, а боковое ребро наклонено к плоскости основания под углом ${angle}°. Найдите сторону основания и боковое ребро.`;
+            answer = `Проекция ребра: AO = H / tan ${angle}° = ${fmt(AO)} см.<br>Сторона основания: a = AO√2 = ${fmt(a)} см.<br>Боковое ребро: SA = H / sin ${angle}° = ${fmt(SA)} см.<br>Апофема: SM = ${fmt(SM)} см.`;
+            meta = `Использовано: tan α = H / AO, a = AO√2, sin α = H / SA.`;
+        }
+
+        currentGenerated = {task, answer, meta};
+        $('#generatedTaskText').innerHTML = `<strong style="display:block; margin-bottom:8px; font-size:19px; color:#f8ffff;">Новая задача</strong>${task}`;
+        $('#generatedTaskMeta').style.display = 'block';
+        $('#generatedTaskMeta').innerHTML = meta;
+        $('#generatedAnswer').classList.remove('show');
+        $('#generatedAnswer').innerHTML = `<strong style="display:block; margin-bottom:8px;">Ответ</strong>${answer}`;
+    }
+
+    function toggleGeneratedAnswer(){
+        if (!currentGenerated) return;
+        $('#generatedAnswer').classList.toggle('show');
+    }
+
+    // ---------------- REVEAL ----------------
+    function initReveal(){
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting){
+                    entry.target.classList.add('in');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, {threshold:.12});
+        $$('.fade-in').forEach(el => obs.observe(el));
+    }
+
+    // ---------------- VIEWER UI ----------------
+    function initViewerUI(){
+        $$('[data-reset-viewer]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.resetViewer;
+                VIEWERS[id]?.resetView();
+            });
+        });
+
+        $$('[data-viewer-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.viewerPreset;
+                const preset = btn.dataset.preset;
+                VIEWERS[id]?.setPreset(preset);
+            });
+        });
+
+        $$('[data-layer-toggle]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.layerToggle;
+                const layer = btn.dataset.layer;
+                btn.classList.toggle('active');
+                VIEWERS[id]?.toggleLayer(layer);
+            });
+        });
+    }
+
+    // ---------------- INIT ----------------
+    document.addEventListener('DOMContentLoaded', () => {
+        initAccordions();
+        renderQuiz();
+        initReveal();
+        setMode('square');
+
+        attachViewer('heroViewer', () => makeSquarePyramid(8,6), {
+            rotX:-0.58,
+            rotY:0.95,
+            zoom:1.05,
+            layers:{height:true, apothem:false, diagonals:false, projection:false}
+        });
+
+        attachViewer('mainViewer', currentMainSquareScene, {
+            rotX:-0.58,
+            rotY:0.86,
+            zoom:1,
+            layers:{height:true, apothem:true, diagonals:true, projection:true}
+        });
+
+        attachViewer('task1Viewer', makeTask1Figure, {
+            rotX:-0.55,
+            rotY:0.88,
+            zoom:1.12,
+            layers:{height:true, apothem:true, diagonals:true, projection:true}
+        });
+
+        attachViewer('task2Viewer', makeTriCaseFigure, {
+            rotX:-0.55,
+            rotY:0.78,
+            zoom:1.18,
+            layers:{height:true, bh:true, sh:true, right:true}
+        });
+
+        initViewerUI();
+        updateMainReadout();
+
+        ['input','change'].forEach(ev => {
+            baseRange.addEventListener(ev, updateMainReadout);
+            heightRange.addEventListener(ev, updateMainReadout);
+            $('#toggleHeight').addEventListener(ev, syncMainLayerButtons);
+            $('#toggleApothem').addEventListener(ev, syncMainLayerButtons);
+            $('#toggleDiag').addEventListener(ev, syncMainLayerButtons);
+            $('#toggleProj').addEventListener(ev, syncMainLayerButtons);
+        });
+    });
+</script>
+</body>
+</html>
