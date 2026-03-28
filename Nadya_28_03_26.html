@@ -1,0 +1,1882 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Округление десятичных дробей — интерактивная лаборатория</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg-2:#0c1830;
+            --panel:rgba(17, 28, 54, 0.72);
+            --panel-strong:rgba(15, 24, 46, 0.9);
+            --line:rgba(158, 205, 255, 0.18);
+            --text:#eef5ff;
+            --muted:#9db2d1;
+            --accent:#79d7ff;
+            --accent-2:#8e8bff;
+            --accent-3:#6cf1c8;
+            --danger:#ff7d93;
+            --warning:#ffc26f;
+            --ok:#8df0ae;
+            --shadow:0 16px 50px rgba(0,0,0,.35);
+            --radius:24px;
+            --radius-sm:16px;
+            --max:1240px;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            color:var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            background:
+            radial-gradient(1200px 600px at 10% -10%, rgba(121,215,255,.16), transparent 55%),
+            radial-gradient(900px 520px at 95% 0%, rgba(142,139,255,.14), transparent 52%),
+            radial-gradient(1000px 700px at 50% 110%, rgba(108,241,200,.08), transparent 55%),
+            linear-gradient(180deg, #05101c 0%, #07111f 32%, #081426 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            background-image:
+            linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size:42px 42px;
+            mask-image:radial-gradient(circle at center, black 35%, transparent 85%);
+            opacity:.35;
+        }
+
+        a{color:inherit;text-decoration:none}
+        button,input,select{font:inherit}
+        .wrap{width:min(var(--max), calc(100% - 32px)); margin:0 auto}
+        .section{padding:72px 0}
+        .panel{
+            background:var(--panel);
+            border:1px solid var(--line);
+            box-shadow:var(--shadow);
+            border-radius:var(--radius);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        .panel.strong{background:var(--panel-strong)}
+        .muted{color:var(--muted)}
+        .eyebrow{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            padding:8px 14px;
+            border-radius:999px;
+            border:1px solid rgba(121,215,255,.18);
+            background:rgba(121,215,255,.07);
+            color:#d6f3ff;
+            font-size:13px;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+        }
+        .eyebrow::before{
+            content:"";
+            width:8px;height:8px;border-radius:50%;
+            background:linear-gradient(135deg,var(--accent),var(--accent-3));
+            box-shadow:0 0 18px rgba(121,215,255,.8);
+        }
+
+        .nav{
+            position:sticky;
+            top:0;
+            z-index:20;
+            background:rgba(5,12,24,.7);
+            backdrop-filter: blur(16px);
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .nav-inner{
+            min-height:68px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+        }
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            font-weight:700;
+            letter-spacing:.02em;
+        }
+        .logo{
+            width:42px;height:42px;border-radius:14px;
+            display:grid;place-items:center;
+            color:#081321;
+            background:
+            radial-gradient(circle at 30% 30%, #d9f6ff, transparent 35%),
+            linear-gradient(135deg,var(--accent),var(--accent-2) 58%, var(--accent-3));
+            box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.45),
+            0 10px 25px rgba(121,215,255,.2);
+            font-weight:900;
+        }
+        .nav-links{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            align-items:center;
+            justify-content:flex-end;
+        }
+        .nav-links a, .ghost-btn{
+            padding:10px 14px;
+            border-radius:999px;
+            font-size:14px;
+            color:#d7e7ff;
+            border:1px solid transparent;
+            transition:.24s ease;
+        }
+        .nav-links a:hover, .ghost-btn:hover{
+            border-color:rgba(121,215,255,.16);
+            background:rgba(121,215,255,.08);
+            transform:translateY(-1px);
+        }
+
+        .hero{
+            padding:44px 0 28px;
+            position:relative;
+            overflow:hidden;
+        }
+        .hero-grid{
+            display:grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap:28px;
+            align-items:stretch;
+        }
+        .hero-copy{
+            padding:34px;
+            position:relative;
+            overflow:hidden;
+        }
+        .hero-copy::after{
+            content:"";
+            position:absolute;
+            inset:auto -12% -28% auto;
+            width:340px;height:340px;
+            border-radius:50%;
+            background:radial-gradient(circle, rgba(121,215,255,.22), transparent 62%);
+            filter:blur(8px);
+            pointer-events:none;
+        }
+        h1{
+            font-size:clamp(34px, 6vw, 72px);
+            line-height:.95;
+            margin:18px 0 18px;
+            letter-spacing:-.04em;
+            max-width:12ch;
+        }
+        .lead{
+            font-size:clamp(16px, 2vw, 20px);
+            line-height:1.65;
+            color:#d8e7fa;
+            max-width:62ch;
+            margin:0 0 22px;
+        }
+        .hero-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-top:18px;
+        }
+        .btn{
+            border:0;
+            border-radius:16px;
+            padding:14px 18px;
+            color:#0a1527;
+            font-weight:800;
+            cursor:pointer;
+            transition:transform .2s ease, box-shadow .25s ease, background .25s ease;
+            background:linear-gradient(135deg, #c7f2ff, var(--accent), var(--accent-3));
+            box-shadow:0 14px 30px rgba(121,215,255,.24);
+        }
+        .btn:hover{transform:translateY(-2px)}
+        .btn.secondary{
+            color:var(--text);
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.08);
+            box-shadow:none;
+        }
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:12px;
+            margin-top:22px;
+        }
+        .stat{
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.06);
+        }
+        .stat strong{
+            display:block;
+            font-size:24px;
+            margin-bottom:4px;
+            letter-spacing:-.03em;
+        }
+        .hero-visual{
+            padding:20px;
+            position:relative;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+            min-height:540px;
+            overflow:hidden;
+        }
+        .hero-visual::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:
+            radial-gradient(circle at 28% 18%, rgba(121,215,255,.16), transparent 38%),
+            radial-gradient(circle at 76% 36%, rgba(142,139,255,.15), transparent 34%),
+            radial-gradient(circle at 50% 92%, rgba(108,241,200,.12), transparent 28%);
+            pointer-events:none;
+        }
+        .orbits{
+            position:relative;
+            height:290px;
+            display:grid;
+            place-items:center;
+        }
+        .orbit{
+            position:absolute;
+            border-radius:999px;
+            border:1px solid rgba(121,215,255,.18);
+            box-shadow: inset 0 0 30px rgba(121,215,255,.04);
+            animation:spin linear infinite;
+        }
+        .orbit.one{width:280px;height:280px;animation-duration:28s}
+        .orbit.two{width:210px;height:210px;animation-duration:18s;animation-direction:reverse}
+        .orbit.three{width:140px;height:140px;animation-duration:12s}
+        .atom-core{
+            width:86px;height:86px;border-radius:50%;
+            background:
+            radial-gradient(circle at 35% 35%, #f4feff, rgba(244,254,255,.85) 22%, rgba(121,215,255,.92) 48%, rgba(9,23,43,.95) 78%);
+            box-shadow:0 0 40px rgba(121,215,255,.34), inset 0 0 24px rgba(255,255,255,.16);
+            position:relative;
+            z-index:2;
+            display:grid;place-items:center;
+            font-weight:900;
+            color:#07111f;
+            font-size:18px;
+        }
+        .dot{
+            position:absolute;
+            width:12px;height:12px;border-radius:50%;
+            background:var(--accent-3);
+            box-shadow:0 0 18px rgba(108,241,200,.8);
+            top:12px;left:50%;
+            transform:translateX(-50%);
+        }
+        .orbit.two .dot{background:var(--accent); box-shadow:0 0 18px rgba(121,215,255,.7)}
+        .orbit.three .dot{background:var(--accent-2); box-shadow:0 0 18px rgba(142,139,255,.72)}
+        @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+        .formula-stack{
+            display:grid;
+            gap:10px;
+            position:relative;
+            z-index:1;
+        }
+        .formula{
+            padding:14px 16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            flex-wrap:wrap;
+        }
+        .formula code{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            color:#eaf8ff;
+            font-size:15px;
+            white-space:normal;
+            word-break:break-word;
+        }
+        .pill{
+            padding:8px 12px;
+            border-radius:999px;
+            font-size:12px;
+            color:#0e182b;
+            font-weight:800;
+            background:linear-gradient(135deg,#d2f6ff, #95e1ff);
+        }
+
+        .section-head{
+            display:flex;
+            align-items:end;
+            justify-content:space-between;
+            gap:16px;
+            margin-bottom:24px;
+            flex-wrap:wrap;
+        }
+        .section-head h2{
+            margin:0;
+            font-size:clamp(28px, 4vw, 44px);
+            letter-spacing:-.035em;
+        }
+        .section-head p{
+            margin:8px 0 0;
+            max-width:62ch;
+            color:var(--muted);
+            line-height:1.7;
+        }
+
+        .topic-intro{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:22px;
+        }
+        .topic-card{
+            padding:26px;
+        }
+        .topic-card h3{
+            margin:0 0 12px;
+            font-size:22px;
+            letter-spacing:-.02em;
+        }
+        .topic-card ul{
+            margin:0;
+            padding-left:18px;
+            color:#d7e6f9;
+            line-height:1.8;
+        }
+
+        .visual-lab{
+            display:grid;
+            grid-template-columns:1.1fr .9fr;
+            gap:22px;
+            align-items:start;
+        }
+        .visual-canvas{
+            padding:26px;
+        }
+        .visual-controls{
+            display:grid;
+            gap:16px;
+            padding:22px;
+        }
+        .control-group{
+            display:grid;
+            gap:10px;
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .control-row{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
+        .range-wrap{display:grid;gap:8px}
+        input[type="range"]{
+            width:100%;
+            accent-color:var(--accent);
+            cursor:pointer;
+        }
+        .mini{
+            font-size:13px;
+            color:var(--muted);
+            line-height:1.5;
+        }
+        .toggles{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        .toggle{
+            border:1px solid rgba(255,255,255,.1);
+            background:rgba(255,255,255,.04);
+            color:#dfeeff;
+            border-radius:999px;
+            padding:10px 12px;
+            cursor:pointer;
+            transition:.2s ease;
+            font-size:14px;
+        }
+        .toggle.active{
+            color:#0b182a;
+            background:linear-gradient(135deg,#d3f6ff,var(--accent));
+            border-color:transparent;
+            font-weight:800;
+        }
+        .visual-result{
+            display:grid;
+            gap:10px;
+            padding:16px;
+            border-radius:18px;
+            background:rgba(121,215,255,.06);
+            border:1px solid rgba(121,215,255,.12);
+        }
+        .big-value{
+            font-size:34px;
+            font-weight:900;
+            letter-spacing:-.04em;
+        }
+
+        svg text{
+            fill:#edf5ff;
+            font-family: Inter, ui-sans-serif, Arial, sans-serif;
+            user-select:none;
+        }
+
+        .calc-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:22px;
+        }
+        .calc-card{
+            padding:24px;
+        }
+        .calc-card h3{
+            margin:0 0 14px;
+            font-size:22px;
+            letter-spacing:-.02em;
+        }
+        .field{
+            display:grid;
+            gap:8px;
+            margin-bottom:14px;
+        }
+        .field label{
+            font-size:14px;
+            color:#cde1ff;
+        }
+        .field input, .field select, .answer-box, textarea{
+            width:100%;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.09);
+            color:var(--text);
+            border-radius:16px;
+            padding:14px 15px;
+            outline:none;
+            transition:border-color .2s ease, box-shadow .2s ease;
+        }
+        .field input:focus, .field select:focus, textarea:focus{
+            border-color:rgba(121,215,255,.45);
+            box-shadow:0 0 0 4px rgba(121,215,255,.09);
+        }
+        .answer-box{
+            min-height:62px;
+            display:grid;
+            align-items:center;
+            line-height:1.6;
+        }
+        .answer-box strong{font-size:24px; letter-spacing:-.03em}
+        .hint{
+            font-size:13px;
+            color:var(--muted);
+            line-height:1.55;
+        }
+        .calc-actions{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-top:10px;
+        }
+
+        .accordion{
+            display:grid;
+            gap:14px;
+        }
+        .acc-item{
+            overflow:hidden;
+        }
+        .acc-head{
+            width:100%;
+            background:none;
+            border:0;
+            color:var(--text);
+            padding:22px 24px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:14px;
+            cursor:pointer;
+            text-align:left;
+        }
+        .acc-head span:first-child{
+            font-size:20px;
+            font-weight:800;
+            letter-spacing:-.02em;
+        }
+        .acc-head .chev{
+            width:34px;height:34px;border-radius:50%;
+            display:grid;place-items:center;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.05);
+            transition:transform .25s ease, background .25s ease;
+            flex:0 0 auto;
+        }
+        .acc-item.open .acc-head .chev{transform:rotate(180deg); background:rgba(121,215,255,.12)}
+        .acc-body{
+            display:grid;
+            grid-template-rows:0fr;
+            transition:grid-template-rows .3s ease;
+        }
+        .acc-item.open .acc-body{grid-template-rows:1fr}
+        .acc-inner{
+            overflow:hidden;
+            padding:0 24px 22px;
+            color:#d9e7fa;
+            line-height:1.8;
+        }
+        .acc-inner ul{
+            margin:0;
+            padding-left:18px;
+        }
+        .math-line{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            padding:12px 14px;
+            border-radius:14px;
+            margin:8px 0;
+            overflow:auto;
+        }
+
+        .examples-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:22px;
+        }
+        .example{
+            padding:24px;
+        }
+        .example h3{margin:0 0 12px; font-size:22px}
+        .steps{
+            display:grid;
+            gap:10px;
+            counter-reset:step;
+        }
+        .step{
+            display:grid;
+            grid-template-columns:40px 1fr;
+            gap:12px;
+            align-items:start;
+            padding:12px 0;
+            border-bottom:1px dashed rgba(255,255,255,.08);
+        }
+        .step:last-child{border-bottom:0}
+        .step::before{
+            counter-increment:step;
+            content:counter(step);
+            width:34px;height:34px;border-radius:50%;
+            display:grid;place-items:center;
+            background:linear-gradient(135deg,rgba(121,215,255,.18),rgba(142,139,255,.18));
+            border:1px solid rgba(255,255,255,.08);
+            font-weight:800;
+        }
+
+        .cheat-grid{
+            display:grid;
+            grid-template-columns: repeat(4,1fr);
+            gap:16px;
+        }
+        .cheat{
+            padding:20px;
+            border-radius:22px;
+            background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+            border:1px solid rgba(255,255,255,.08);
+            box-shadow:var(--shadow);
+        }
+        .cheat h3{
+            margin:0 0 10px;
+            font-size:18px;
+        }
+        .cheat p{
+            margin:0;
+            color:#d7e7fb;
+            line-height:1.7;
+        }
+        .cheat code{
+            font-family: ui-monospace, monospace;
+            color:#eff9ff;
+            font-size:14px;
+        }
+
+        .quiz-card, .generator-card{
+            padding:24px;
+        }
+        .quiz-list{
+            display:grid;
+            gap:18px;
+            margin-top:14px;
+        }
+        .q-item{
+            padding:18px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .q-item h4{
+            margin:0 0 12px;
+            font-size:17px;
+            line-height:1.5;
+        }
+        .options{
+            display:grid;
+            gap:10px;
+        }
+        .option{
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            padding:10px 12px;
+            border-radius:14px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            cursor:pointer;
+            transition:.2s ease;
+        }
+        .option:hover{background:rgba(255,255,255,.05)}
+        .option input{margin-top:3px}
+        .q-item.correct{border-color:rgba(141,240,174,.35); background:rgba(141,240,174,.07)}
+        .q-item.wrong{border-color:rgba(255,125,147,.3); background:rgba(255,125,147,.06)}
+        .quiz-result{
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            background:rgba(121,215,255,.07);
+            border:1px solid rgba(121,215,255,.14);
+            line-height:1.7;
+        }
+
+        .generator-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:18px;
+            margin-top:10px;
+        }
+        .task-box{
+            padding:18px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            min-height:142px;
+            display:grid;
+            align-content:start;
+            gap:10px;
+        }
+        .task-box h4{margin:0;font-size:17px}
+        .task-answer{
+            display:none;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(121,215,255,.08);
+            border:1px solid rgba(121,215,255,.14);
+            color:#edfbff;
+        }
+        .task-answer.show{display:block}
+
+        .footer{
+            padding:36px 0 70px;
+            color:var(--muted);
+        }
+
+        .print-note{
+            font-size:14px;
+            color:var(--muted);
+        }
+
+        .spacer-8{height:8px}
+        .spacer-12{height:12px}
+        .spacer-18{height:18px}
+
+        @media (max-width: 1100px){
+            .hero-grid,
+            .visual-lab,
+            .calc-grid,
+            .examples-grid,
+            .topic-intro,
+            .generator-grid{
+                grid-template-columns:1fr;
+            }
+            .cheat-grid{grid-template-columns:repeat(2,1fr)}
+            .hero-visual{min-height:420px}
+            h1{max-width:none}
+        }
+
+        @media (max-width: 720px){
+            .wrap{width:min(var(--max), calc(100% - 18px))}
+            .section{padding:54px 0}
+            .hero-copy, .hero-visual, .calc-card, .example, .quiz-card, .generator-card, .topic-card, .visual-canvas, .visual-controls{padding:18px}
+            .hero-stats{grid-template-columns:1fr}
+            .cheat-grid{grid-template-columns:1fr}
+            .nav-inner{padding:10px 0}
+            .nav-links{display:none}
+            .formula{align-items:flex-start}
+            .section-head{margin-bottom:18px}
+            .big-value{font-size:28px}
+            .acc-head{padding:18px}
+            .acc-inner{padding:0 18px 18px}
+        }
+
+        @media print{
+            :root{
+                --bg:#fff;
+                --panel:#fff;
+                --panel-strong:#fff;
+                --text:#111;
+                --muted:#444;
+                --line:rgba(0,0,0,.12);
+            }
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+            body::before,
+            .nav,
+            .hero-actions,
+            .visual-controls,
+            .calc-actions,
+            .btn,
+            .ghost-btn,
+            .toggle,
+            .print-hide{
+                display:none !important;
+            }
+            .panel,
+            .cheat,
+            .task-box,
+            .q-item,
+            .answer-box{
+                background:#fff !important;
+                color:#111 !important;
+                border:1px solid #ddd !important;
+                box-shadow:none !important;
+                backdrop-filter:none !important;
+            }
+            .section{padding:24px 0}
+            .hero{padding-top:12px}
+            .hero-grid, .visual-lab, .calc-grid, .examples-grid, .topic-intro, .generator-grid, .cheat-grid{
+                display:block !important;
+            }
+            .hero-grid > *, .visual-lab > *, .calc-grid > *, .examples-grid > *, .topic-intro > *, .generator-grid > *, .cheat-grid > *{
+                margin-bottom:16px;
+            }
+            .task-answer{display:block !important}
+            .acc-body{grid-template-rows:1fr !important}
+            .acc-inner{padding-bottom:10px}
+            svg text{fill:#111 !important}
+            .eyebrow, .pill{
+                color:#111 !important;
+                background:#f5f5f5 !important;
+                border-color:#ddd !important;
+            }
+            .formula code, .math-line code, .math-line{
+                color:#111 !important;
+            }
+            a{color:#111 !important}
+        }
+    </style>
+</head>
+<body>
+<nav class="nav print-hide">
+    <div class="wrap nav-inner">
+        <div class="brand">
+            <div class="logo">≈</div>
+            <div>
+                <div style="font-size:15px;">Интерактивная математическая лаборатория</div>
+                <div class="muted" style="font-size:12px;">Округление и десятичные дроби</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="#intro">Тема</a>
+            <a href="#visual">Визуализация</a>
+            <a href="#calc">Калькуляторы</a>
+            <a href="#theory">Теория</a>
+            <a href="#examples">Разбор</a>
+            <a href="#cheat">Шпаргалка</a>
+            <a href="#quiz">Квиз</a>
+            <a href="#generator">Тренажёр</a>
+            <a href="#print" class="ghost-btn" id="printBtn">Печать</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="wrap hero-grid">
+        <section class="panel strong hero-copy">
+            <span class="eyebrow">5 класс · десятичные дроби</span>
+            <h1>Прибавлять или не прибавлять?</h1>
+            <p class="lead">
+                Интерактивная страница по теме округления десятичных дробей, базовых вычислений,
+                дроби от числа и простых текстовых задач. Всё построено так, чтобы правило не просто запомнить,
+                а увидеть в действии.
+            </p>
+
+            <div class="hero-actions">
+                <a class="btn" href="#visual">Открыть лабораторию</a>
+                <a class="btn secondary" href="#quiz">Проверить себя</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <strong>1</strong>
+                    <span class="muted">главный вопрос при округлении: что делает цифра справа?</span>
+                </div>
+                <div class="stat">
+                    <strong>4</strong>
+                    <span class="muted">учебных модуля: визуализация, калькуляторы, теория, практика</span>
+                </div>
+                <div class="stat">
+                    <strong>∞</strong>
+                    <span class="muted">повторов: генератор создаёт новые безопасные тренировочные задачи</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel hero-visual">
+            <div class="orbits" aria-hidden="true">
+                <div class="orbit one"><div class="dot"></div></div>
+                <div class="orbit two"><div class="dot"></div></div>
+                <div class="orbit three"><div class="dot"></div></div>
+                <div class="atom-core">0,5</div>
+            </div>
+
+            <div class="formula-stack">
+                <div class="formula">
+                    <code>50,57457 → до десятых → 50,6</code>
+                    <span class="pill">7 заставляет прибавить</span>
+                </div>
+                <div class="formula">
+                    <code>3,8563 → до сотых → 3,86</code>
+                    <span class="pill">6 значит +1</span>
+                </div>
+                <div class="formula">
+                    <code>57,2 : 8 = 7,15 → до десятых → 7,2</code>
+                    <span class="pill">работает то же правило</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</header>
+
+<main>
+    <section id="intro" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Что внутри</span>
+                    <h2>Тема занятия</h2>
+                    <p>
+                        В этом материале собраны ключевые идеи урока: округление до десятых и сотых, сложение и вычитание
+                        десятичных дробей, деление, перевод в обыкновенную дробь, нахождение дроби от числа и простые задачи
+                        на части и движение.
+                    </p>
+                </div>
+            </div>
+
+            <div class="topic-intro">
+                <article class="panel topic-card">
+                    <h3>Главная мысль</h3>
+                    <ul>
+                        <li>Сначала находим нужный разряд.</li>
+                        <li>Потом смотрим только на цифру справа.</li>
+                        <li>Если справа 0, 1, 2, 3 или 4 — не прибавляем.</li>
+                        <li>Если справа 5, 6, 7, 8 или 9 — прибавляем 1.</li>
+                        <li>Все цифры правее удаляем.</li>
+                    </ul>
+                </article>
+
+                <article class="panel topic-card">
+                    <h3>Что особенно важно не перепутать</h3>
+                    <ul>
+                        <li>Округление — это не простое отбрасывание цифр.</li>
+                        <li>Число 5 уже требует округления с прибавлением.</li>
+                        <li>Если округляем до сотых, запись вроде 5,30 лучше не сокращать до 5,3.</li>
+                        <li>В задачах на дробь от числа нужно умножать на дробь.</li>
+                        <li>В делении удобно сначала сделать делитель натуральным числом.</li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="visual" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Интерактивный визуальный блок</span>
+                    <h2>Лаборатория округления</h2>
+                    <p>
+                        Меняйте число, выбирайте разряд и включайте подсказки. На рисунке видно, какой разряд сохраняется,
+                        какая цифра на него влияет и почему ответ получается именно таким.
+                    </p>
+                </div>
+            </div>
+
+            <div class="visual-lab">
+                <div class="panel visual-canvas">
+                    <svg id="roundingSvg" viewBox="0 0 980 430" width="100%" role="img" aria-label="Визуализация округления">
+                        <defs>
+                            <linearGradient id="lineGlow" x1="0%" x2="100%">
+                                <stop offset="0%" stop-color="#79d7ff" stop-opacity=".5"></stop>
+                                <stop offset="100%" stop-color="#8e8bff" stop-opacity=".7"></stop>
+                            </linearGradient>
+                            <linearGradient id="activeGrad" x1="0%" x2="100%">
+                                <stop offset="0%" stop-color="#79d7ff"></stop>
+                                <stop offset="100%" stop-color="#6cf1c8"></stop>
+                            </linearGradient>
+                            <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="6" result="blur"></feGaussianBlur>
+                                <feMerge>
+                                    <feMergeNode in="blur"></feMergeNode>
+                                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        <rect x="20" y="24" width="940" height="382" rx="28" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"></rect>
+                        <text x="50" y="70" font-size="26" font-weight="800">Число и его разряды</text>
+                        <text x="50" y="98" font-size="15" fill="#9db2d1">Цифра справа решает, нужно ли прибавить 1 к выбранному разряду.</text>
+
+                        <g id="digitLayer"></g>
+
+                        <g id="helperLayer">
+                            <line id="arrowLine" x1="0" y1="0" x2="0" y2="0" stroke="url(#lineGlow)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="6 8"></line>
+                            <circle id="watchCircle" cx="0" cy="0" r="0" fill="rgba(121,215,255,.13)" stroke="#79d7ff" stroke-width="2"></circle>
+                            <circle id="keepCircle" cx="0" cy="0" r="0" fill="rgba(108,241,200,.14)" stroke="#6cf1c8" stroke-width="2"></circle>
+                        </g>
+
+                        <g id="bottomText">
+                            <text x="50" y="310" font-size="20" font-weight="700">Решение</text>
+                            <text id="visualRule" x="50" y="345" font-size="18"></text>
+                            <text id="visualAnswer" x="50" y="385" font-size="28" font-weight="900" filter="url(#softGlow)"></text>
+                        </g>
+                    </svg>
+                </div>
+
+                <aside class="panel visual-controls">
+                    <div class="control-group">
+                        <div class="control-row">
+                            <strong>Число</strong>
+                            <span class="muted" id="numberMirror">50,57457</span>
+                        </div>
+                        <div class="field" style="margin:0">
+                            <input id="visualNumber" type="text" value="50,57457" inputmode="decimal" />
+                        </div>
+                        <div class="mini">
+                            Введите десятичное число через запятую или точку. Пример: 3,8563 или 57.2
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-row">
+                            <strong>Разряд округления</strong>
+                            <span class="muted" id="placeMirror">десятых</span>
+                        </div>
+                        <div class="toggles" id="placeToggles">
+                            <button class="toggle active" data-place="tenths">До десятых</button>
+                            <button class="toggle" data-place="hundredths">До сотых</button>
+                            <button class="toggle" data-place="thousandths">До тысячных</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-row">
+                            <strong>Подсветки</strong>
+                            <span class="muted">слои схемы</span>
+                        </div>
+                        <div class="toggles">
+                            <button class="toggle active" data-layer="keep">Нужный разряд</button>
+                            <button class="toggle active" data-layer="watch">Цифра справа</button>
+                        </div>
+                    </div>
+
+                    <div class="visual-result">
+                        <div class="muted">Итог</div>
+                        <div class="big-value" id="visualMainAnswer">50,6</div>
+                        <div class="mini" id="visualMiniExplain">
+                            Сохраняем цифру в разряде десятых и смотрим на цифру справа.
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <section id="calc" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Калькуляторы</span>
+                    <h2>Считать и сразу понимать, почему</h2>
+                    <p>
+                        Два блока: первый — чистое округление, второй — дробь от числа. В обоих ответ строится пошагово,
+                        чтобы не терять смысл вычислений.
+                    </p>
+                </div>
+            </div>
+
+            <div class="calc-grid">
+                <div class="panel calc-card">
+                    <h3>Калькулятор округления</h3>
+                    <div class="field">
+                        <label for="roundInput">Введите число</label>
+                        <input id="roundInput" type="text" value="3,8563" inputmode="decimal" />
+                    </div>
+
+                    <div class="field">
+                        <label for="roundPlace">До какого разряда округлить</label>
+                        <select id="roundPlace">
+                            <option value="1">До десятых</option>
+                            <option value="2" selected>До сотых</option>
+                            <option value="3">До тысячных</option>
+                        </select>
+                    </div>
+
+                    <div class="calc-actions">
+                        <button class="btn" id="roundCalcBtn">Посчитать</button>
+                        <button class="btn secondary" id="roundResetBtn">Сбросить</button>
+                    </div>
+
+                    <div class="spacer-18"></div>
+
+                    <div class="answer-box" id="roundOutput">
+                        <div>
+                            <div class="muted">Результат</div>
+                            <strong>3,86</strong>
+                        </div>
+                    </div>
+
+                    <div class="spacer-12"></div>
+
+                    <div class="answer-box" id="roundExplain">
+                        <div>
+                            Выбрали разряд сотых. Смотрим на следующую цифру: это 6. Значит, сотые увеличиваем на 1.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel calc-card">
+                    <h3>Калькулятор «дробь от числа»</h3>
+                    <div class="field">
+                        <label for="fracNumber">Число</label>
+                        <input id="fracNumber" type="text" value="11,7" inputmode="decimal" />
+                    </div>
+
+                    <div class="field">
+                        <label for="fracNum">Числитель дроби</label>
+                        <input id="fracNum" type="number" value="5" min="0" step="1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="fracDen">Знаменатель дроби</label>
+                        <input id="fracDen" type="number" value="9" min="1" step="1" />
+                    </div>
+
+                    <div class="calc-actions">
+                        <button class="btn" id="fracCalcBtn">Найти</button>
+                        <button class="btn secondary" id="fracResetBtn">Сбросить</button>
+                    </div>
+
+                    <div class="spacer-18"></div>
+
+                    <div class="answer-box" id="fracOutput">
+                        <div>
+                            <div class="muted">Ответ</div>
+                            <strong>6,5</strong>
+                        </div>
+                    </div>
+
+                    <div class="spacer-12"></div>
+
+                    <div class="answer-box" id="fracExplain">
+                        <div>
+                            Ищем 5/9 от 11,7: сначала 11,7 : 9 = 1,3, затем 1,3 · 5 = 6,5.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="theory" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Теория</span>
+                    <h2>Краткий учебный конспект</h2>
+                    <p>
+                        Всё самое важное собрано в раскрывающихся карточках. Можно читать сверху вниз,
+                        а можно открыть только нужный фрагмент перед решением задач.
+                    </p>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <article class="panel acc-item open">
+                    <button class="acc-head" type="button">
+                        <span>1. Алгоритм округления</span>
+                        <span class="chev">⌄</span>
+                    </button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            <ul>
+                                <li>Найди разряд, до которого нужно округлить.</li>
+                                <li>Посмотри на цифру справа от него.</li>
+                                <li>Если справа 0, 1, 2, 3 или 4 — оставь цифру без изменения.</li>
+                                <li>Если справа 5, 6, 7, 8 или 9 — увеличь её на 1.</li>
+                                <li>Все цифры правее убери.</li>
+                            </ul>
+                            <div class="math-line">50,57457 → до десятых → 50,6</div>
+                            <div class="math-line">1,8463 → до сотых → 1,85</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel acc-item">
+                    <button class="acc-head" type="button">
+                        <span>2. Сложение и вычитание десятичных дробей</span>
+                        <span class="chev">⌄</span>
+                    </button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            <ul>
+                                <li>Пиши числа по запятой.</li>
+                                <li>Если не хватает цифр после запятой — можно дописать нули.</li>
+                                <li>Дальше считай как обычные числа столбиком.</li>
+                            </ul>
+                            <div class="math-line">4,87 + 2,987 = 7,857</div>
+                            <div class="math-line">7,857 − 6,002 = 1,855</div>
+                            <div class="math-line">До сотых: 1,855 ≈ 1,86</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel acc-item">
+                    <button class="acc-head" type="button">
+                        <span>3. Деление десятичной дроби</span>
+                        <span class="chev">⌄</span>
+                    </button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            <ul>
+                                <li>При делении на натуральное число запятая в частном ставится тогда, когда она дошла в делимом.</li>
+                                <li>Если делим на десятичную дробь, удобно сначала умножить и делимое, и делитель на 10, 100, 1000…</li>
+                            </ul>
+                            <div class="math-line">57,2 : 8 = 7,15</div>
+                            <div class="math-line">9,6 : 1,2 = 96 : 12 = 8</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel acc-item">
+                    <button class="acc-head" type="button">
+                        <span>4. Обыкновенные дроби и дробь от числа</span>
+                        <span class="chev">⌄</span>
+                    </button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            <ul>
+                                <li>0,25 = 25/100 = 1/4</li>
+                                <li>Чтобы найти a/b от числа k, вычисляем: k · a / b</li>
+                                <li>Удобно сначала найти одну часть, а потом нужное число частей.</li>
+                            </ul>
+                            <div class="math-line">5/9 от 11,7 = 11,7 · 5 / 9 = 6,5</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel acc-item">
+                    <button class="acc-head" type="button">
+                        <span>5. Текстовые задачи: движение и части</span>
+                        <span class="chev">⌄</span>
+                    </button>
+                    <div class="acc-body">
+                        <div class="acc-inner">
+                            <ul>
+                                <li>Если движутся навстречу друг другу, скорость сближения равна сумме скоростей.</li>
+                                <li>Если величины даны по частям, удобно обозначить одну часть через x.</li>
+                            </ul>
+                            <div class="math-line">12,6 + 13,4 = 26</div>
+                            <div class="math-line">26 · 3 = 78</div>
+                            <div class="math-line">2x + 3x + 3x = 8x</div>
+                            <div class="math-line">Если всего 3,2 кг, то x = 0,4, а 2x = 0,8 кг</div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="examples" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Разбор задач</span>
+                    <h2>Два эталонных примера</h2>
+                    <p>
+                        Здесь показан не только ответ, но и логика. Можно раскрывать формулы, проговаривать шаги
+                        и сравнивать их со своими рассуждениями.
+                    </p>
+                </div>
+            </div>
+
+            <div class="examples-grid">
+                <article class="panel example">
+                    <h3>Пример 1. Округление числа 3,8563 до сотых</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div>
+                                <strong>Ищем разряд сотых.</strong><br>
+                                В числе 3,8563 сотые — это вторая цифра после запятой. Это цифра 5.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div>
+                                <strong>Смотрим на цифру справа.</strong><br>
+                                Справа от 5 стоит 6.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div>
+                                <strong>Принимаем решение.</strong><br>
+                                Так как 6 ≥ 5, округляем с прибавлением.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div>
+                                <strong>Записываем ответ.</strong><br>
+                                3,8563 ≈ 3,86
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel example">
+                    <h3>Пример 2. Найти 5/9 от числа 11,7</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div>
+                                <strong>Записываем действие.</strong><br>
+                                Нужно найти 11,7 · 5 / 9.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div>
+                                <strong>Находим одну девятую.</strong><br>
+                                11,7 : 9 = 1,3
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div>
+                                <strong>Берём 5 таких частей.</strong><br>
+                                1,3 · 5 = 6,5
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div>
+                                <strong>Ответ.</strong><br>
+                                5/9 от 11,7 равно 6,5.
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="cheat" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Cheat sheet</span>
+                    <h2>Шпаргалка в одном экране</h2>
+                    <p>
+                        Короткие формулировки для быстрого повторения перед самостоятельной работой.
+                    </p>
+                </div>
+            </div>
+
+            <div class="cheat-grid">
+                <article class="cheat">
+                    <h3>Округление</h3>
+                    <p>Смотри на <strong>следующую цифру справа</strong>. Если она 5, 6, 7, 8 или 9 — прибавь 1.</p>
+                </article>
+
+                <article class="cheat">
+                    <h3>Сложение и вычитание</h3>
+                    <p>Записывай числа <strong>по запятой</strong>. При необходимости добавляй нули.</p>
+                </article>
+
+                <article class="cheat">
+                    <h3>Деление</h3>
+                    <p>Если делитель — десятичная дробь, сделай его целым: <code>9,6 : 1,2 = 96 : 12</code>.</p>
+                </article>
+
+                <article class="cheat">
+                    <h3>Дробь от числа</h3>
+                    <p><code>k · a / b</code>. Сначала можно найти одну часть: <code>k : b</code>, потом умножить на <code>a</code>.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Самопроверка</span>
+                    <h2>Мини-квиз</h2>
+                    <p>
+                        Шесть коротких вопросов. После проверки система покажет итоговый счёт и выделит ошибки.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel quiz-card">
+                <div class="quiz-list" id="quizList"></div>
+                <div class="calc-actions">
+                    <button class="btn" id="checkQuizBtn">Проверить ответы</button>
+                    <button class="btn secondary" id="resetQuizBtn">Сбросить</button>
+                </div>
+                <div class="quiz-result" id="quizResult">
+                    Выберите варианты и нажмите «Проверить ответы».
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator" class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Генератор задач</span>
+                    <h2>Новые упражнения без случайных ошибок</h2>
+                    <p>
+                        Генератор использует только безопасные шаблоны: округление, вычисление, деление и дробь от числа.
+                        У каждой задачи заранее есть корректный ответ.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel generator-card">
+                <div class="calc-actions">
+                    <button class="btn" id="genTasksBtn">Сгенерировать 4 задачи</button>
+                    <button class="btn secondary" id="showAllAnswersBtn">Показать все ответы</button>
+                    <button class="btn secondary" id="hideAllAnswersBtn">Скрыть ответы</button>
+                </div>
+
+                <div class="generator-grid" id="tasksGrid"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="print" class="section">
+        <div class="wrap">
+            <div class="panel calc-card">
+                <div class="section-head" style="margin-bottom:0">
+                    <div>
+                        <span class="eyebrow">Печать</span>
+                        <h2>Версия для распечатки</h2>
+                        <p>
+                            При печати убираются лишние декоративные эффекты, но сохраняются теория, примеры,
+                            шпаргалка и тренировочные материалы.
+                        </p>
+                    </div>
+                </div>
+                <div class="calc-actions print-hide">
+                    <button class="btn" onclick="window.print()">Открыть печать</button>
+                </div>
+                <p class="print-note">Подсказка: перед печатью можно раскрыть все карточки и показать ответы в тренажёре.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="wrap">
+        Материал посвящён только теме округления десятичных дробей и связанным базовым вычислениям.
+    </div>
+</footer>
+
+<script>
+    (function(){
+        const qs = (s, root=document) => root.querySelector(s);
+        const qsa = (s, root=document) => [...root.querySelectorAll(s)];
+
+        function parseDecimal(input){
+            if(typeof input !== "string") input = String(input ?? "");
+            const raw = input.trim().replace(/\s+/g, "").replace(",", ".");
+            if(!/^[-+]?\d*(\.\d*)?$/.test(raw) || raw === "" || raw === "." || raw === "-" || raw === "+"){
+                return null;
+            }
+            const value = Number(raw);
+            return Number.isFinite(value) ? value : null;
+        }
+
+        function toComma(n, decimals=null){
+            if(typeof n === "string") return n.replace(".", ",");
+            let str = decimals === null ? String(n) : Number(n).toFixed(decimals);
+            return str.replace(".", ",");
+        }
+
+        function normalizeNumberString(s){
+            if(typeof s !== "string") s = String(s ?? "");
+            s = s.trim().replace(/\s+/g, "").replace(".", ",");
+            if(s.startsWith(",")) s = "0" + s;
+            if(s.startsWith("-,")) s = s.replace("-,", "-0,");
+            return s;
+        }
+
+        function roundHalfUp(value, places){
+            const factor = Math.pow(10, places);
+            return Math.round((value + Number.EPSILON) * factor) / factor;
+        }
+
+        function explainRounding(str, places){
+            const inputNorm = normalizeNumberString(str);
+            const val = parseDecimal(str);
+            if(val === null){
+                return {
+                    ok:false,
+                    result:"—",
+                    explanation:"Введите корректное десятичное число.",
+                    placeName:"—"
+                };
+            }
+
+            const absStr = normalizeNumberString(Math.abs(val).toString());
+            let [intPart, fracPart=""] = absStr.split(",");
+            while(fracPart.length < places + 1) fracPart += "0";
+
+            const keepDigit = fracPart[places - 1] || "0";
+            const nextDigit = fracPart[places] || "0";
+            const placeNames = {1:"десятых",2:"сотых",3:"тысячных"};
+            const rounded = roundHalfUp(val, places);
+
+            return {
+                ok:true,
+                result:toComma(rounded, places),
+                explanation:`Выбрали разряд ${placeNames[places]}. В этом разряде стоит ${keepDigit}. Следующая цифра справа — ${nextDigit}. ${Number(nextDigit) >= 5 ? "Так как она не меньше 5, округляем с прибавлением." : "Так как она меньше 5, цифру в нужном разряде не меняем."}`,
+                placeName:placeNames[places],
+                source:normalizeNumberString(str),
+                keepDigit,
+                nextDigit,
+                absStr
+            };
+        }
+
+        // ---------- HERO / NAV ----------
+        const printBtn = qs("#printBtn");
+        if(printBtn){
+            printBtn.addEventListener("click", (e)=>{
+                e.preventDefault();
+                window.print();
+            });
+        }
+
+        // ---------- VISUAL LAB ----------
+        const visualNumberInput = qs("#visualNumber");
+        const numberMirror = qs("#numberMirror");
+        const placeMirror = qs("#placeMirror");
+        const visualMainAnswer = qs("#visualMainAnswer");
+        const visualMiniExplain = qs("#visualMiniExplain");
+        const visualRule = qs("#visualRule");
+        const visualAnswer = qs("#visualAnswer");
+        const digitLayer = qs("#digitLayer");
+        const arrowLine = qs("#arrowLine");
+        const watchCircle = qs("#watchCircle");
+        const keepCircle = qs("#keepCircle");
+
+        let currentPlace = "tenths";
+        const placeMap = { tenths:1, hundredths:2, thousandths:3 };
+        const placeLabels = { tenths:"десятых", hundredths:"сотых", thousandths:"тысячных" };
+        const activeLayers = { keep:true, watch:true };
+
+        function updateVisual(){
+            const raw = visualNumberInput.value;
+            numberMirror.textContent = normalizeNumberString(raw);
+            placeMirror.textContent = placeLabels[currentPlace];
+            const info = explainRounding(raw, placeMap[currentPlace]);
+
+            digitLayer.innerHTML = "";
+
+            if(!info.ok){
+                visualMainAnswer.textContent = "—";
+                visualMiniExplain.textContent = info.explanation;
+                visualRule.textContent = "Введите корректное число.";
+                visualAnswer.textContent = "";
+                keepCircle.setAttribute("r", "0");
+                watchCircle.setAttribute("r", "0");
+                arrowLine.setAttribute("x1", "0");
+                arrowLine.setAttribute("x2", "0");
+                arrowLine.setAttribute("y1", "0");
+                arrowLine.setAttribute("y2", "0");
+                return;
+            }
+
+            const s = normalizeNumberString(raw);
+            const chars = s.split("");
+            const startX = 60;
+            const y = 190;
+            const boxW = 64;
+            const gap = 10;
+            const charPos = [];
+
+            chars.forEach((ch, i)=>{
+                const x = startX + i * (boxW + gap);
+                charPos.push({x, ch});
+                const isComma = ch === ",";
+                const rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", isComma ? y + 18 : y - 8);
+                rect.setAttribute("width", isComma ? 32 : boxW);
+                rect.setAttribute("height", isComma ? 32 : 70);
+                rect.setAttribute("rx", isComma ? 12 : 18);
+                rect.setAttribute("fill", "rgba(255,255,255,.04)");
+                rect.setAttribute("stroke", "rgba(255,255,255,.08)");
+                digitLayer.appendChild(rect);
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg","text");
+                text.setAttribute("x", x + (isComma ? 16 : boxW/2));
+                text.setAttribute("y", isComma ? y + 42 : y + 36);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-size", isComma ? "30" : "34");
+                text.setAttribute("font-weight", isComma ? "800" : "900");
+                text.textContent = ch;
+                digitLayer.appendChild(text);
+            });
+
+            const commaIndex = chars.indexOf(",");
+            const keepIndex = commaIndex + placeMap[currentPlace];
+            const watchIndex = keepIndex + 1;
+
+            const keepX = startX + keepIndex * (boxW + gap) + boxW/2;
+            const watchX = startX + watchIndex * (boxW + gap) + boxW/2;
+            const cy = y + 26;
+
+            keepCircle.setAttribute("cx", keepX);
+            keepCircle.setAttribute("cy", cy);
+            keepCircle.setAttribute("r", activeLayers.keep ? "38" : "0");
+
+            watchCircle.setAttribute("cx", watchX);
+            watchCircle.setAttribute("cy", cy);
+            watchCircle.setAttribute("r", activeLayers.watch ? "38" : "0");
+
+            arrowLine.setAttribute("x1", activeLayers.watch ? watchX : 0);
+            arrowLine.setAttribute("y1", activeLayers.watch ? cy + 44 : 0);
+            arrowLine.setAttribute("x2", activeLayers.keep ? keepX : 0);
+            arrowLine.setAttribute("y2", activeLayers.keep ? cy + 94 : 0);
+
+            const labels = [
+                {x: keepX, text:`сохраняемый разряд`, color:"#6cf1c8"},
+                {x: watchX, text:`цифра справа`, color:"#79d7ff"}
+            ];
+
+            labels.forEach((item, idx)=>{
+                if((idx===0 && !activeLayers.keep) || (idx===1 && !activeLayers.watch)) return;
+                const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+                t.setAttribute("x", item.x);
+                t.setAttribute("y", 120);
+                t.setAttribute("text-anchor", "middle");
+                t.setAttribute("font-size", "15");
+                t.setAttribute("font-weight", "700");
+                t.setAttribute("fill", item.color);
+                t.textContent = item.text;
+                digitLayer.appendChild(t);
+            });
+
+            visualMainAnswer.textContent = info.result;
+            visualMiniExplain.textContent = info.explanation;
+            visualRule.textContent = `Округляем до ${info.placeName}. Смотрим на цифру ${info.nextDigit} справа от нужного разряда.`;
+            visualAnswer.textContent = `${info.source} ≈ ${info.result}`;
+        }
+
+        qsa("#placeToggles .toggle").forEach(btn=>{
+            btn.addEventListener("click", ()=>{
+                qsa("#placeToggles .toggle").forEach(b=>b.classList.remove("active"));
+                btn.classList.add("active");
+                currentPlace = btn.dataset.place;
+                updateVisual();
+            });
+        });
+
+        qsa("[data-layer]").forEach(btn=>{
+            btn.addEventListener("click", ()=>{
+                const key = btn.dataset.layer;
+                activeLayers[key] = !activeLayers[key];
+                btn.classList.toggle("active", activeLayers[key]);
+                updateVisual();
+            });
+        });
+
+        visualNumberInput.addEventListener("input", updateVisual);
+        updateVisual();
+
+        // ---------- CALC 1 ----------
+        const roundInput = qs("#roundInput");
+        const roundPlace = qs("#roundPlace");
+        const roundOutput = qs("#roundOutput");
+        const roundExplain = qs("#roundExplain");
+
+        function updateRoundCalc(){
+            const places = Number(roundPlace.value);
+            const info = explainRounding(roundInput.value, places);
+            if(!info.ok){
+                roundOutput.innerHTML = `<div><div class="muted">Результат</div><strong>—</strong></div>`;
+                roundExplain.textContent = info.explanation;
+                return;
+            }
+            roundOutput.innerHTML = `<div><div class="muted">Результат</div><strong>${info.result}</strong></div>`;
+            roundExplain.textContent = info.explanation;
+        }
+
+        qs("#roundCalcBtn").addEventListener("click", updateRoundCalc);
+        qs("#roundResetBtn").addEventListener("click", ()=>{
+            roundInput.value = "3,8563";
+            roundPlace.value = "2";
+            updateRoundCalc();
+        });
+        updateRoundCalc();
+
+        // ---------- CALC 2 ----------
+        const fracNumber = qs("#fracNumber");
+        const fracNum = qs("#fracNum");
+        const fracDen = qs("#fracDen");
+        const fracOutput = qs("#fracOutput");
+        const fracExplain = qs("#fracExplain");
+
+        function updateFracCalc(){
+            const n = parseDecimal(fracNumber.value);
+            const a = Number(fracNum.value);
+            const b = Number(fracDen.value);
+
+            if(n === null || !Number.isFinite(a) || !Number.isFinite(b) || b === 0){
+                fracOutput.innerHTML = `<div><div class="muted">Ответ</div><strong>—</strong></div>`;
+                fracExplain.textContent = "Введите корректные данные. Знаменатель не может быть равен 0.";
+                return;
+            }
+
+            const onePart = n / b;
+            const ans = onePart * a;
+
+            fracOutput.innerHTML = `<div><div class="muted">Ответ</div><strong>${toComma(Number(ans.toFixed(10)).toString().replace(/\.?0+$/,''))}</strong></div>`;
+            fracExplain.textContent = `Ищем ${a}/${b} от ${toComma(n)}: сначала ${toComma(n)} : ${b} = ${toComma(Number(onePart.toFixed(10)).toString().replace(/\.?0+$/,''))}, затем умножаем на ${a} и получаем ${toComma(Number(ans.toFixed(10)).toString().replace(/\.?0+$/,''))}.`;
+        }
+
+        qs("#fracCalcBtn").addEventListener("click", updateFracCalc);
+        qs("#fracResetBtn").addEventListener("click", ()=>{
+            fracNumber.value = "11,7";
+            fracNum.value = "5";
+            fracDen.value = "9";
+            updateFracCalc();
+        });
+        updateFracCalc();
+
+        // ---------- ACCORDION ----------
+        qsa(".acc-item").forEach(item=>{
+            const head = qs(".acc-head", item);
+            head.addEventListener("click", ()=>{
+                item.classList.toggle("open");
+            });
+        });
+
+        // ---------- QUIZ ----------
+        const quizData = [
+            {
+                q:"Число 8,374 округляют до десятых. Какой ответ верный?",
+                opts:["8,3","8,4","8,37"],
+                answer:1
+            },
+            {
+                q:"При округлении 12,685 до сотых получается…",
+                opts:["12,68","12,69","12,70"],
+                answer:1
+            },
+            {
+                q:"Чему равно 57,2 : 8?",
+                opts:["7,25","7,15","6,15"],
+                answer:1
+            },
+            {
+                q:"Что значит найти 3/5 от числа 20?",
+                opts:["20 : 3 · 5","20 · 3 / 5","20 + 3 / 5"],
+                answer:1
+            },
+            {
+                q:"Чему равно 9,6 : 1,2?",
+                opts:["8","7,2","9,2"],
+                answer:0
+            },
+            {
+                q:"Если массы относятся как 2 : 3 : 2, то всего частей…",
+                opts:["5","6","7"],
+                answer:2
+            }
+        ];
+
+        const quizList = qs("#quizList");
+        const quizResult = qs("#quizResult");
+
+        function renderQuiz(){
+            quizList.innerHTML = "";
+            quizData.forEach((item, i)=>{
+                const block = document.createElement("div");
+                block.className = "q-item";
+                block.innerHTML = `
+            <h4>${i + 1}. ${item.q}</h4>
+            <div class="options">
+              ${item.opts.map((opt, j)=>`
+                <label class="option">
+                  <input type="radio" name="q${i}" value="${j}">
+                  <span>${opt}</span>
+                </label>
+              `).join("")}
+            </div>
+          `;
+                quizList.appendChild(block);
+            });
+            quizResult.textContent = "Выберите варианты и нажмите «Проверить ответы».";
+        }
+
+        function checkQuiz(){
+            let score = 0;
+            qsa(".q-item", quizList).forEach((item, i)=>{
+                item.classList.remove("correct", "wrong");
+                const picked = qs(`input[name="q${i}"]:checked`, item);
+                if(!picked){
+                    item.classList.add("wrong");
+                    return;
+                }
+                const chosen = Number(picked.value);
+                if(chosen === quizData[i].answer){
+                    item.classList.add("correct");
+                    score++;
+                }else{
+                    item.classList.add("wrong");
+                }
+            });
+            quizResult.innerHTML = `<strong>Результат: ${score} из ${quizData.length}</strong><br>${score === quizData.length ? "Отлично: все правила на месте." : score >= 4 ? "Хорошо: осталось добить пару тонких мест." : "Стоит ещё раз пройти блок с теорией и примерами."}`;
+        }
+
+        function resetQuiz(){
+            renderQuiz();
+        }
+
+        qs("#checkQuizBtn").addEventListener("click", checkQuiz);
+        qs("#resetQuizBtn").addEventListener("click", resetQuiz);
+        renderQuiz();
+
+        // ---------- TASK GENERATOR ----------
+        const tasksGrid = qs("#tasksGrid");
+
+        function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+        function choice(arr){ return arr[randInt(0, arr.length - 1)]; }
+
+        function genRoundTask(){
+            const intPart = randInt(1, 99);
+            const fracLen = choice([3,4,5]);
+            let frac = "";
+            for(let i=0;i<fracLen;i++) frac += randInt(0,9);
+            const numStr = `${intPart},${frac}`;
+            const places = choice([1,2,3]);
+            const info = explainRounding(numStr, places);
+            const names = {1:"десятых",2:"сотых",3:"тысячных"};
+            return {
+                title:"Округление",
+                text:`Округлите число ${numStr} до ${names[places]}.`,
+                answer:info.result
+            };
+        }
+
+        function genComputeTask(){
+            const a = (randInt(10,90)/10).toFixed(1);
+            const b = (randInt(100,999)/1000).toFixed(3);
+            const c = (randInt(100,999)/1000).toFixed(3);
+            const res = Number(a) + Number(b) - Number(c);
+            const rounded = roundHalfUp(res, 2).toFixed(2).replace(".", ",");
+            return {
+                title:"Вычисление и округление",
+                text:`Вычислите: ${toComma(a)} + ${toComma(b)} − ${toComma(c)}. Ответ округлите до сотых.`,
+                answer:rounded
+            };
+        }
+
+        function genDivisionTask(){
+            const divisor = choice([2,4,5,8,10]);
+            const quotient = (randInt(10,99)/10);
+            const dividend = Number((divisor * quotient).toFixed(1));
+            return {
+                title:"Деление",
+                text:`Выполните деление: ${toComma(dividend)} : ${divisor}.`,
+                answer:toComma(Number(quotient.toFixed(10)).toString().replace(/\.?0+$/,''))
+            };
+        }
+
+        function genFractionTask(){
+            const den = choice([2,4,5,8,10]);
+            const num = randInt(1, den - 1);
+            const base = choice([randInt(2,20), (randInt(10,90)/10)]);
+            const ans = base * num / den;
+            return {
+                title:"Дробь от числа",
+                text:`Найдите ${num}/${den} от числа ${toComma(base)}.`,
+                answer:toComma(Number(ans.toFixed(10)).toString().replace(/\.?0+$/,''))
+            };
+        }
+
+        function makeTaskCard(task, i){
+            return `
+          <article class="task-box panel strong">
+            <h4>${i + 1}. ${task.title}</h4>
+            <div>${task.text}</div>
+            <div class="calc-actions" style="margin-top:4px">
+              <button class="btn secondary small show-answer-btn" data-index="${i}">Показать ответ</button>
+            </div>
+            <div class="task-answer" id="taskAnswer${i}"><strong>Ответ:</strong> ${task.answer}</div>
+          </article>
+        `;
+        }
+
+        function generateTasks(){
+            const generators = [genRoundTask, genComputeTask, genDivisionTask, genFractionTask];
+            const tasks = [];
+            for(let i=0;i<4;i++){
+                tasks.push(generators[i % generators.length]());
+            }
+            tasksGrid.innerHTML = tasks.map(makeTaskCard).join("");
+            qsa(".show-answer-btn", tasksGrid).forEach(btn=>{
+                btn.addEventListener("click", ()=>{
+                    const idx = btn.dataset.index;
+                    const ans = qs(`#taskAnswer${idx}`);
+                    ans.classList.toggle("show");
+                    btn.textContent = ans.classList.contains("show") ? "Скрыть ответ" : "Показать ответ";
+                });
+            });
+        }
+
+        qs("#genTasksBtn").addEventListener("click", generateTasks);
+        qs("#showAllAnswersBtn").addEventListener("click", ()=>{
+            qsa(".task-answer", tasksGrid).forEach(ans=>ans.classList.add("show"));
+            qsa(".show-answer-btn", tasksGrid).forEach(btn=>btn.textContent = "Скрыть ответ");
+        });
+        qs("#hideAllAnswersBtn").addEventListener("click", ()=>{
+            qsa(".task-answer", tasksGrid).forEach(ans=>ans.classList.remove("show"));
+            qsa(".show-answer-btn", tasksGrid).forEach(btn=>btn.textContent = "Показать ответ");
+        });
+        generateTasks();
+    })();
+</script>
+</body>
+</html>
