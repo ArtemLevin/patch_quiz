@@ -1,0 +1,2053 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Интерактивная лаборатория уравнений</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0b1830;
+            --panel:rgba(16,28,52,.62);
+            --panel-strong:rgba(13,22,43,.88);
+            --line:rgba(167,199,255,.16);
+            --text:#eaf3ff;
+            --muted:#9db2d6;
+            --soft:#c8d7f2;
+            --accent:#7de2ff;
+            --accent2:#8d7dff;
+            --accent3:#7fffb4;
+            --danger:#ff8fa8;
+            --warn:#ffd77d;
+            --shadow:0 16px 48px rgba(0,0,0,.35);
+            --radius:22px;
+            --radius-sm:14px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        }
+
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+            radial-gradient(circle at 15% 20%, rgba(125,226,255,.16), transparent 30%),
+            radial-gradient(circle at 85% 18%, rgba(141,125,255,.14), transparent 28%),
+            radial-gradient(circle at 70% 82%, rgba(127,255,180,.10), transparent 24%),
+            linear-gradient(180deg, #07101e 0%, #081425 35%, #0a1324 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            opacity:.22;
+            background-image:
+            linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+            background-size:32px 32px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        .orb{
+            position:fixed;
+            width:42vw;height:42vw;max-width:620px;max-height:620px;
+            border-radius:50%;
+            filter:blur(40px);
+            opacity:.16;
+            pointer-events:none;
+            z-index:0;
+        }
+        .orb.a{left:-12vw;top:-12vw;background:radial-gradient(circle,#4fe0ff 0,transparent 62%)}
+        .orb.b{right:-14vw;top:8vh;background:radial-gradient(circle,#8d7dff 0,transparent 64%)}
+        .orb.c{right:8vw;bottom:-20vw;background:radial-gradient(circle,#7fffb4 0,transparent 60%)}
+
+        .shell{position:relative;z-index:1}
+        .container{width:min(1220px, calc(100% - 28px)); margin:0 auto}
+        .section{padding:32px 0}
+
+        .topbar{
+            position:sticky; top:0; z-index:30;
+            backdrop-filter: blur(18px);
+            background:linear-gradient(180deg, rgba(7,17,31,.88), rgba(7,17,31,.58));
+            border-bottom:1px solid var(--line);
+        }
+
+        .nav{
+            display:flex; align-items:center; justify-content:space-between;
+            gap:14px; min-height:72px;
+        }
+
+        .brand{
+            display:flex; gap:14px; align-items:center;
+            min-width:0;
+        }
+
+        .logo{
+            width:44px;height:44px;border-radius:14px;
+            background:
+            linear-gradient(135deg, rgba(125,226,255,.22), rgba(141,125,255,.18)),
+            rgba(255,255,255,.02);
+            border:1px solid rgba(255,255,255,.14);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.12), var(--shadow);
+            display:grid;place-items:center;
+        }
+
+        .logo svg{width:24px;height:24px}
+        .brand-text{min-width:0}
+        .brand-title{
+            font-size:1rem; font-weight:800; letter-spacing:.02em;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .brand-sub{
+            color:var(--muted); font-size:.86rem;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+
+        .nav-links{
+            display:flex; flex-wrap:wrap; gap:8px;
+            justify-content:flex-end;
+        }
+
+        .chip-link,.ghost-btn,.solid-btn,.tab-btn,.tiny-btn{
+            appearance:none; border:1px solid var(--line); color:var(--text);
+            background:rgba(255,255,255,.03);
+            border-radius:999px; padding:10px 14px;
+            font:inherit; cursor:pointer; transition:.25s ease;
+            text-decoration:none;
+            display:inline-flex; align-items:center; justify-content:center; gap:8px;
+        }
+
+        .chip-link:hover,.ghost-btn:hover,.solid-btn:hover,.tab-btn:hover,.tiny-btn:hover{
+            transform:translateY(-1px);
+            border-color:rgba(125,226,255,.34);
+            box-shadow:0 8px 18px rgba(0,0,0,.18);
+        }
+
+        .solid-btn{
+            background:linear-gradient(135deg, rgba(125,226,255,.20), rgba(141,125,255,.20));
+            border-color:rgba(125,226,255,.32);
+        }
+
+        .hero{
+            padding:52px 0 28px;
+        }
+
+        .hero-grid{
+            display:grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap:24px;
+            align-items:stretch;
+        }
+
+        .hero-card,.panel{
+            position:relative;
+            border:1px solid var(--line);
+            border-radius:var(--radius);
+            background:linear-gradient(180deg, rgba(18,31,58,.74), rgba(10,19,36,.82));
+            box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.08);
+            overflow:hidden;
+        }
+
+        .hero-card{
+            padding:34px;
+            isolation:isolate;
+        }
+
+        .hero-card::before{
+            content:"";
+            position:absolute; inset:0;
+            background:
+            radial-gradient(circle at 80% 20%, rgba(125,226,255,.10), transparent 26%),
+            radial-gradient(circle at 14% 8%, rgba(141,125,255,.10), transparent 24%);
+            z-index:-1;
+        }
+
+        .eyebrow{
+            display:inline-flex; align-items:center; gap:10px;
+            padding:8px 12px;
+            border-radius:999px;
+            border:1px solid rgba(125,226,255,.22);
+            background:rgba(125,226,255,.06);
+            color:var(--soft); font-size:.92rem; letter-spacing:.03em;
+        }
+
+        .eyebrow .dot{
+            width:8px;height:8px;border-radius:50%;
+            background:var(--accent);
+            box-shadow:0 0 18px rgba(125,226,255,.85);
+        }
+
+        .hero h1{
+            margin:18px 0 14px;
+            font-size:clamp(2rem, 4vw, 4.1rem);
+            line-height:.98;
+            letter-spacing:-.03em;
+            max-width:11ch;
+        }
+
+        .hero p.lead{
+            margin:0 0 22px;
+            color:var(--soft);
+            font-size:1.04rem;
+            line-height:1.7;
+            max-width:62ch;
+        }
+
+        .meta-row{
+            display:flex; flex-wrap:wrap; gap:10px;
+            margin-top:12px;
+        }
+
+        .meta{
+            padding:10px 12px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.03);
+            color:var(--muted);
+            font-size:.92rem;
+        }
+
+        .hero-side{
+            display:grid;
+            grid-template-rows: auto auto;
+            gap:20px;
+        }
+
+        .constellation{
+            padding:22px;
+            min-height:290px;
+        }
+
+        .constellation h3,
+        .panel h3{
+            margin:0 0 8px;
+            font-size:1.06rem;
+            letter-spacing:.01em;
+        }
+
+        .hint{color:var(--muted); font-size:.93rem; line-height:1.55}
+
+        .topic-list{
+            display:grid;
+            gap:10px;
+            margin-top:16px;
+        }
+
+        .topic-pill{
+            display:flex; align-items:center; justify-content:space-between;
+            gap:12px; padding:12px 14px; border-radius:16px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .topic-pill span:last-child{
+            color:var(--accent);
+            font-size:.9rem;
+            white-space:nowrap;
+        }
+
+        .svg-wrap{
+            width:100%; aspect-ratio:1.2/1;
+            display:grid; place-items:center;
+            margin-top:8px;
+        }
+
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:12px;
+            padding:18px;
+        }
+
+        .stat{
+            border-radius:18px;
+            padding:16px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.08);
+            min-height:100px;
+            display:flex; flex-direction:column; justify-content:center;
+        }
+        .stat strong{
+            font-size:1.45rem; line-height:1; margin-bottom:6px;
+            color:var(--accent);
+        }
+        .stat span{color:var(--muted); font-size:.92rem}
+
+        .section-head{
+            display:flex; align-items:end; justify-content:space-between; gap:18px;
+            margin-bottom:18px;
+        }
+        .section-head h2{
+            margin:0;
+            font-size:clamp(1.45rem, 2vw, 2.2rem);
+            letter-spacing:-.02em;
+        }
+        .section-head p{
+            margin:8px 0 0;
+            color:var(--muted);
+            max-width:62ch;
+            line-height:1.65;
+        }
+
+        .grid-2{
+            display:grid; grid-template-columns:1fr 1fr; gap:22px;
+        }
+        .grid-3{
+            display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
+        }
+
+        .panel{padding:22px}
+        .panel .mono,.formula,.result-box,.task-answer,.step-line code{
+            font-family:var(--mono);
+        }
+
+        .formula{
+            font-size:1.02rem;
+            line-height:1.7;
+            color:#f4f8ff;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;
+            padding:14px 16px;
+            overflow:auto;
+            word-break:break-word;
+        }
+
+        .formula + .formula{margin-top:10px}
+        .formula small{color:var(--muted)}
+
+        .step-stack{
+            display:grid; gap:12px;
+            margin-top:16px;
+        }
+
+        .step-line{
+            display:flex; gap:12px;
+            align-items:flex-start;
+            padding:14px 14px 14px 12px;
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+        }
+
+        .step-num{
+            width:28px;height:28px;border-radius:50%;
+            flex:0 0 28px;
+            display:grid;place-items:center;
+            font-weight:800;
+            color:#081425;
+            background:linear-gradient(135deg,var(--accent),#c0f7ff);
+        }
+
+        .step-line strong{display:block; margin-bottom:4px}
+        .step-line p{margin:0; color:var(--muted); line-height:1.55}
+
+        .tabs{
+            display:flex; flex-wrap:wrap; gap:8px;
+            margin:16px 0 18px;
+        }
+        .tab-btn.active{
+            background:linear-gradient(135deg, rgba(125,226,255,.16), rgba(141,125,255,.16));
+            border-color:rgba(125,226,255,.32);
+            color:#fff;
+        }
+
+        .lab-view{
+            display:none;
+            animation:fade .28s ease;
+        }
+        .lab-view.active{display:block}
+        @keyframes fade{
+            from{opacity:0; transform:translateY(8px)}
+            to{opacity:1; transform:translateY(0)}
+        }
+
+        .switchers{
+            display:flex; flex-wrap:wrap; gap:10px;
+            margin:14px 0 18px;
+        }
+
+        .toggle{
+            display:inline-flex; align-items:center; gap:10px;
+            padding:10px 12px; border-radius:14px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            cursor:pointer; user-select:none;
+        }
+
+        .toggle input{accent-color:var(--accent)}
+
+        .svg-board{
+            width:100%;
+            min-height:320px;
+            border-radius:22px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.08);
+            background:
+            radial-gradient(circle at 18% 20%, rgba(125,226,255,.10), transparent 24%),
+            linear-gradient(180deg, rgba(8,19,37,.96), rgba(6,13,28,.98));
+            position:relative;
+        }
+
+        .layer-note{
+            margin-top:12px; color:var(--muted); line-height:1.6; font-size:.95rem;
+        }
+
+        .controls{
+            display:grid; gap:14px;
+            margin-top:10px;
+        }
+
+        .field{
+            display:grid; gap:8px;
+        }
+
+        .field label{
+            color:var(--soft);
+            font-size:.95rem;
+        }
+
+        input[type="number"], input[type="range"], select{
+            width:100%;
+        }
+
+        input[type="number"], select{
+            background:rgba(255,255,255,.04);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.10);
+            border-radius:14px;
+            padding:12px 14px;
+            font:inherit;
+            outline:none;
+        }
+
+        input[type="number"]:focus, select:focus{
+            border-color:rgba(125,226,255,.32);
+            box-shadow:0 0 0 3px rgba(125,226,255,.10);
+        }
+
+        input[type="range"]{
+            accent-color:var(--accent);
+            cursor:pointer;
+        }
+
+        .range-row{
+            display:flex; align-items:center; justify-content:space-between; gap:12px;
+            color:var(--muted); font-size:.92rem;
+        }
+
+        .result-box{
+            margin-top:14px;
+            padding:16px;
+            border-radius:18px;
+            border:1px solid rgba(125,226,255,.18);
+            background:linear-gradient(135deg, rgba(125,226,255,.08), rgba(141,125,255,.06));
+            line-height:1.7;
+            overflow:auto;
+        }
+
+        .result-ok{color:var(--accent3)}
+        .result-bad{color:var(--danger)}
+        .result-warn{color:var(--warn)}
+
+        .accordion{
+            display:grid; gap:12px;
+        }
+
+        .acc-item{
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            overflow:hidden;
+        }
+
+        .acc-btn{
+            width:100%;
+            text-align:left;
+            border:0; background:transparent; color:var(--text);
+            padding:18px 18px 18px 16px;
+            display:flex; justify-content:space-between; align-items:center; gap:12px;
+            font:inherit; cursor:pointer;
+        }
+
+        .acc-btn strong{font-size:1rem}
+        .acc-btn span{color:var(--muted); font-size:.92rem}
+        .acc-icon{
+            width:30px;height:30px;border-radius:50%;
+            display:grid;place-items:center;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.03);
+            flex:0 0 30px;
+        }
+
+        .acc-body{
+            display:none;
+            padding:0 16px 18px;
+            color:var(--soft);
+            line-height:1.7;
+        }
+
+        .acc-item.open .acc-body{display:block}
+        .acc-item.open .acc-icon{background:rgba(125,226,255,.10); border-color:rgba(125,226,255,.24)}
+
+        .example-card{
+            display:grid;
+            gap:14px;
+            padding:18px;
+            border-radius:22px;
+            border:1px solid rgba(255,255,255,.08);
+            background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+        }
+
+        .example-header{
+            display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+        }
+
+        .tag{
+            display:inline-flex; align-items:center; gap:8px;
+            padding:7px 11px;
+            border-radius:999px;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.03);
+            color:var(--muted); font-size:.86rem;
+        }
+
+        .solve-steps{
+            display:grid; gap:10px;
+        }
+
+        .solve-step{
+            padding:12px 14px;
+            border-radius:16px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            line-height:1.65;
+        }
+
+        details{
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            padding:10px 14px;
+        }
+        details summary{
+            cursor:pointer;
+            font-weight:700;
+            list-style:none;
+        }
+        details summary::-webkit-details-marker{display:none}
+        details .inside{
+            margin-top:12px;
+            color:var(--soft);
+            line-height:1.7;
+        }
+
+        .cheat-grid{
+            display:grid; grid-template-columns:repeat(2,1fr); gap:16px;
+        }
+
+        .cheat-card{
+            padding:18px;
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+        }
+
+        .cheat-card h4{margin:0 0 10px}
+        .cheat-card ul{
+            margin:0; padding-left:18px; color:var(--soft); line-height:1.65;
+        }
+
+        .quiz-wrap{
+            display:grid; gap:16px;
+        }
+
+        .quiz-card{
+            padding:18px;
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+        }
+        .quiz-card h4{margin:0 0 14px}
+        .options{
+            display:grid; gap:10px;
+        }
+
+        .option{
+            display:flex; align-items:flex-start; gap:10px;
+            padding:12px 12px;
+            border-radius:14px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.02);
+            cursor:pointer;
+            transition:.2s ease;
+        }
+        .option:hover{border-color:rgba(125,226,255,.22)}
+        .option input{margin-top:3px; accent-color:var(--accent)}
+
+        .option.correct{
+            border-color:rgba(127,255,180,.36);
+            background:rgba(127,255,180,.09);
+        }
+        .option.wrong{
+            border-color:rgba(255,143,168,.36);
+            background:rgba(255,143,168,.09);
+        }
+
+        .quiz-score{
+            margin-top:14px;
+            padding:14px 16px;
+            border-radius:16px;
+            background:linear-gradient(135deg, rgba(125,226,255,.10), rgba(141,125,255,.08));
+            border:1px solid rgba(125,226,255,.16);
+        }
+
+        .task-box{
+            display:grid; gap:16px;
+        }
+        .task-card{
+            padding:18px;
+            border-radius:20px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+        }
+
+        .task-head{
+            display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+            margin-bottom:10px;
+        }
+
+        .task-body{
+            color:var(--soft);
+            line-height:1.7;
+        }
+
+        .task-answer{
+            display:none;
+            margin-top:12px;
+            padding:14px;
+            border-radius:16px;
+            background:rgba(125,226,255,.07);
+            border:1px solid rgba(125,226,255,.14);
+        }
+
+        .task-answer.show{display:block}
+
+        .footer-space{height:30px}
+
+        .tiny-row{display:flex; flex-wrap:wrap; gap:10px}
+
+        .center{
+            text-align:center;
+        }
+
+        .small{font-size:.92rem;color:var(--muted)}
+        .muted{color:var(--muted)}
+
+        .divider{
+            height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+            margin:4px 0 6px;
+        }
+
+        .pill-state{
+            display:inline-flex; gap:8px; align-items:center;
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--soft);
+            font-size:.9rem;
+        }
+
+        .note-box{
+            padding:16px;
+            border-radius:18px;
+            border:1px dashed rgba(255,255,255,.14);
+            background:rgba(255,255,255,.02);
+            color:var(--soft);
+            line-height:1.7;
+        }
+
+        .svg-caption{
+            font-size:.92rem;
+            color:var(--muted);
+            text-align:center;
+            margin-top:10px;
+        }
+
+        .right{
+            text-align:right;
+        }
+
+        @media (max-width: 1024px){
+            .hero-grid,.grid-2,.cheat-grid{grid-template-columns:1fr}
+            .grid-3{grid-template-columns:1fr}
+            .hero-side{grid-template-rows:auto}
+        }
+
+        @media (max-width: 760px){
+            .container{width:min(100% - 18px, 1220px)}
+            .nav{padding:8px 0}
+            .nav-links{display:none}
+            .hero{padding-top:28px}
+            .hero-card,.panel{border-radius:20px}
+            .hero-card{padding:22px}
+            .hero h1{max-width:none}
+            .hero-stats{grid-template-columns:1fr}
+            .constellation{min-height:auto}
+            .section{padding:24px 0}
+        }
+
+        @media print{
+            :root{
+                --bg:#fff; --text:#111; --muted:#444; --soft:#222;
+                --line:rgba(0,0,0,.18);
+                --panel:#fff;
+            }
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+            body::before,.orb,.topbar,.tiny-btn,.solid-btn,.ghost-btn,.chip-link,.tabs,.switchers,.controls .tiny-row, .quiz-actions{
+                display:none !important;
+            }
+            .hero,.section{padding:14px 0}
+            .hero-card,.panel,.task-card,.quiz-card,.example-card,.cheat-card,.acc-item,.formula,.solve-step,.step-line,.task-answer{
+                background:#fff !important;
+                box-shadow:none !important;
+                border:1px solid #bbb !important;
+                color:#111 !important;
+            }
+            .svg-board{
+                background:#fff !important;
+                border:1px solid #bbb !important;
+            }
+            .hero-grid,.grid-2,.grid-3,.cheat-grid{
+                display:block !important;
+            }
+            .hero-grid > *, .grid-2 > *, .grid-3 > *, .cheat-grid > *{
+                margin-bottom:14px;
+            }
+            a{color:#111 !important; text-decoration:none !important}
+            .task-answer{display:block !important}
+            .lab-view{display:block !important}
+            .acc-body{display:block !important}
+            .acc-item{page-break-inside:avoid}
+            .panel,.task-card,.quiz-card,.example-card{page-break-inside:avoid}
+        }
+    </style>
+</head>
+<body>
+<div class="orb a"></div>
+<div class="orb b"></div>
+<div class="orb c"></div>
+
+<div class="shell">
+    <header class="topbar">
+        <div class="container nav">
+            <div class="brand">
+                <div class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4 16c5-9 11-9 16 0" stroke="url(#g1)" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M6 7h12M12 4v16" stroke="rgba(234,243,255,.9)" stroke-width="1.4" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="g1" x1="4" y1="16" x2="20" y2="16">
+                                <stop stop-color="#7de2ff"/>
+                                <stop offset="1" stop-color="#8d7dff"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">Интерактивная лаборатория уравнений</div>
+                    <div class="brand-sub">Корни, степени, логарифмы — одна цельная система методов</div>
+                </div>
+            </div>
+            <nav class="nav-links" aria-label="Навигация по странице">
+                <a class="chip-link" href="#overview">Обзор</a>
+                <a class="chip-link" href="#lab">Визуализация</a>
+                <a class="chip-link" href="#calculator">Калькулятор</a>
+                <a class="chip-link" href="#theory">Теория</a>
+                <a class="chip-link" href="#examples">Разбор</a>
+                <a class="chip-link" href="#cheat">Сводка</a>
+                <a class="chip-link" href="#quiz">Квиз</a>
+                <a class="chip-link" href="#generator">Тренажёр</a>
+                <button class="solid-btn" onclick="window.print()">Печать</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-card">
+                    <div class="eyebrow"><span class="dot"></span> Учебная тема: иррациональные, показательные и логарифмические уравнения</div>
+                    <h1>Думаем не по шаблону, а по структуре.</h1>
+                    <p class="lead">
+                        Здесь собраны ключевые приёмы решения: фильтрующее ограничение для корня, замена в показательных уравнениях,
+                        переход к отношению (3/2)<sup>x</sup>, теорема Безу и аккуратная работа с ОДЗ в логарифмах.
+                        Всё подано как единая интерактивная лаборатория: смотри, переключай, вычисляй, проверяй.
+                    </p>
+                    <div class="tiny-row">
+                        <a class="solid-btn" href="#lab">Открыть визуальную лабораторию</a>
+                        <a class="ghost-btn" href="#examples">Сразу к разбору задач</a>
+                    </div>
+                    <div class="meta-row">
+                        <div class="meta">9 класс · подготовка к экзамену</div>
+                        <div class="meta">5 тем · 2 разбора · квиз · генератор</div>
+                        <div class="meta">Наглядно · Познавательно · Интерактивно </div>
+                    </div>
+                </div>
+
+                <div class="hero-side">
+                    <div class="hero-card constellation">
+                        <h3>Карта методов</h3>
+                        <div class="hint">Каждый тип уравнения решается своей «опорной идеей». Сильное решение начинается с правильного первого шага.</div>
+
+                        <div class="topic-list">
+                            <div class="topic-pill"><span>√f(x) = g(x)</span><span>сначала g(x) ≥ 0</span></div>
+                            <div class="topic-pill"><span>√f(x) = √g(x)</span><span>берём более простое ограничение</span></div>
+                            <div class="topic-pill"><span>8<sup>x</sup>, 4<sup>x</sup>, 2<sup>x+4</sup></span><span>замена t = 2<sup>x</sup></span></div>
+                            <div class="topic-pill"><span>27<sup>x</sup>, 18<sup>x</sup>, 12<sup>x</sup>, 8<sup>x</sup></span><span>t = (3/2)<sup>x</sup></span></div>
+                            <div class="topic-pill"><span>log</span><span>ОДЗ + равенство аргументов</span></div>
+                        </div>
+
+                        <div class="svg-wrap">
+                            <svg viewBox="0 0 520 280" width="100%" height="100%" aria-label="Схема методов">
+                                <defs>
+                                    <linearGradient id="edgeG" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#7de2ff" stop-opacity=".9"/>
+                                        <stop offset="1" stop-color="#8d7dff" stop-opacity=".9"/>
+                                    </linearGradient>
+                                    <linearGradient id="nodeG" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="rgba(125,226,255,.2)"/>
+                                        <stop offset="1" stop-color="rgba(141,125,255,.2)"/>
+                                    </linearGradient>
+                                </defs>
+
+                                <path d="M260 42 L140 112" stroke="url(#edgeG)" stroke-width="2"/>
+                                <path d="M260 42 L260 112" stroke="url(#edgeG)" stroke-width="2"/>
+                                <path d="M260 42 L380 112" stroke="url(#edgeG)" stroke-width="2"/>
+                                <path d="M140 112 L90 208" stroke="url(#edgeG)" stroke-width="2"/>
+                                <path d="M140 112 L190 208" stroke="url(#edgeG)" stroke-width="2"/>
+                                <path d="M260 112 L260 208" stroke="url(#edgeG)" stroke-width="2"/>
+                                <path d="M380 112 L330 208" stroke="url(#edgeG)" stroke-width="2"/>
+                                <path d="M380 112 L430 208" stroke="url(#edgeG)" stroke-width="2"/>
+
+                                <g fill="rgba(11,24,48,.92)" stroke="rgba(255,255,255,.16)">
+                                    <rect x="194" y="18" width="132" height="48" rx="16"/>
+                                    <rect x="90" y="88" width="100" height="48" rx="16"/>
+                                    <rect x="210" y="88" width="100" height="48" rx="16"/>
+                                    <rect x="330" y="88" width="100" height="48" rx="16"/>
+                                    <rect x="38" y="184" width="104" height="52" rx="16"/>
+                                    <rect x="144" y="184" width="92" height="52" rx="16"/>
+                                    <rect x="214" y="184" width="92" height="52" rx="16"/>
+                                    <rect x="300" y="184" width="110" height="52" rx="16"/>
+                                    <rect x="408" y="184" width="74" height="52" rx="16"/>
+                                </g>
+
+                                <g fill="#eaf3ff" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">
+                                    <text x="260" y="38" font-size="13" font-weight="700">выбери структуру</text>
+                                    <text x="260" y="54">а не только вид формулы</text>
+
+                                    <text x="140" y="108" font-size="12" font-weight="700">корень</text>
+                                    <text x="140" y="124">с одной стороны</text>
+
+                                    <text x="260" y="108" font-size="12" font-weight="700">показательное</text>
+                                    <text x="260" y="124">одна замена</text>
+
+                                    <text x="380" y="108" font-size="12" font-weight="700">логарифм</text>
+                                    <text x="380" y="124">общая база</text>
+
+                                    <text x="90" y="205" font-size="12" font-weight="700">g(x) ≥ 0</text>
+                                    <text x="90" y="221">потом квадрат</text>
+
+                                    <text x="190" y="205" font-size="12" font-weight="700">проверка</text>
+                                    <text x="190" y="221">лишних корней</text>
+
+                                    <text x="260" y="205" font-size="12" font-weight="700">t = 2<tspan dy="-4" font-size="9">x</tspan></text>
+                                    <text x="260" y="221">и t > 0</text>
+
+                                    <text x="355" y="205" font-size="12" font-weight="700">равенство</text>
+                                    <text x="355" y="221">аргументов</text>
+
+                                    <text x="445" y="205" font-size="12" font-weight="700">ОДЗ</text>
+                                    <text x="445" y="221">обязательно</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="hero-card hero-stats">
+                        <div class="stat"><strong>5</strong><span>ядровых алгоритмов решения</span></div>
+                        <div class="stat"><strong>2</strong><span>подробно разобранные задачи</span></div>
+                        <div class="stat"><strong>∞</strong><span>поводов не терять ОДЗ</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="overview" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Обзор темы</h2>
+                        <p>В этом блоке — короткий маршрут по всей главе. Он нужен, чтобы быстро вспомнить, какой метод запускается первым и какие ошибки чаще всего ломают решение.</p>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="panel">
+                        <h3>Иррациональные уравнения</h3>
+                        <div class="formula">√f(x) = g(x)  ⇒  сначала g(x) ≥ 0, потом f(x) = g(x)²</div>
+                        <div class="divider"></div>
+                        <div class="hint">Главная опасность: лишние корни после возведения в квадрат.</div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Показательные уравнения</h3>
+                        <div class="formula">8<sup>x</sup>, 4<sup>x</sup>, 2<sup>x+4</sup>  ⇒  всё к основанию 2, затем t = 2<sup>x</sup></div>
+                        <div class="divider"></div>
+                        <div class="hint">Главная опасность: забытый фильтр t &gt; 0.</div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Логарифмические уравнения</h3>
+                        <div class="formula">log<sub>5</sub>(2 − x) = log<sub>25</sub>(x⁴)  ⇒  общая база + ОДЗ + равенство аргументов</div>
+                        <div class="divider"></div>
+                        <div class="hint">Главная опасность: отбросить логарифмы до проверки области определения.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="lab" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Визуальная лаборатория</h2>
+                        <p>Переключай тип уравнения и включай слои. Это не просто иллюстрации: здесь зашита логика правильного первого шага.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="tabs" role="tablist" aria-label="Типы визуализации">
+                        <button class="tab-btn active" data-tab="lab-root">Корень и фильтр</button>
+                        <button class="tab-btn" data-tab="lab-exp">Замена t = 2<sup>x</sup></button>
+                        <button class="tab-btn" data-tab="lab-mix">Отношение (3/2)<sup>x</sup></button>
+                        <button class="tab-btn" data-tab="lab-log">Логарифм и ОДЗ</button>
+                    </div>
+
+                    <div id="lab-root" class="lab-view active">
+                        <div class="grid-2">
+                            <div>
+                                <div class="switchers">
+                                    <label class="toggle"><input type="checkbox" id="rootLayer1" checked> показать фильтр 3 − x ≥ 0</label>
+                                    <label class="toggle"><input type="checkbox" id="rootLayer2" checked> показать квадрат</label>
+                                    <label class="toggle"><input type="checkbox" id="rootLayer3" checked> показать проверку корней</label>
+                                </div>
+                                <div class="svg-board">
+                                    <svg id="rootSvg" viewBox="0 0 640 380" width="100%" height="100%">
+                                        <defs>
+                                            <linearGradient id="rg1" x1="0" y1="0" x2="1" y2="1">
+                                                <stop offset="0" stop-color="#7de2ff"/>
+                                                <stop offset="1" stop-color="#8d7dff"/>
+                                            </linearGradient>
+                                        </defs>
+
+                                        <rect x="18" y="18" width="604" height="344" rx="24" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"/>
+                                        <text x="40" y="52" fill="#eaf3ff" font-size="22" font-family="Arial, sans-serif" font-weight="700">Пример: √(x³ − 4x² − 10x + 29) = 3 − x</text>
+
+                                        <g id="root-layer-filter">
+                                            <rect x="40" y="82" width="240" height="54" rx="16" fill="rgba(125,226,255,.08)" stroke="rgba(125,226,255,.26)"/>
+                                            <text x="58" y="116" fill="#7de2ff" font-size="24" font-family="Arial, sans-serif">Фильтр: 3 − x ≥ 0  ⇒  x ≤ 3</text>
+                                        </g>
+
+                                        <g id="root-layer-square">
+                                            <rect x="40" y="154" width="560" height="96" rx="18" fill="rgba(141,125,255,.08)" stroke="rgba(141,125,255,.24)"/>
+                                            <text x="58" y="188" fill="#f0ecff" font-size="22" font-family="Arial, sans-serif">После возведения в квадрат:</text>
+                                            <text x="58" y="220" fill="#eaf3ff" font-size="22" font-family="Arial, sans-serif">x³ − 4x² − 10x + 29 = (3 − x)²</text>
+                                            <text x="58" y="246" fill="#eaf3ff" font-size="22" font-family="Arial, sans-serif">x³ − 5x² − 4x + 20 = 0 = (x − 5)(x − 2)(x + 2)</text>
+                                        </g>
+
+                                        <g id="root-layer-check">
+                                            <line x1="70" y1="308" x2="570" y2="308" stroke="url(#rg1)" stroke-width="2"/>
+                                            <circle cx="164" cy="308" r="6" fill="#7fffb4"/>
+                                            <circle cx="352" cy="308" r="6" fill="#7fffb4"/>
+                                            <circle cx="540" cy="308" r="6" fill="#ff8fa8"/>
+                                            <text x="154" y="334" fill="#eaf3ff" font-size="18" font-family="Arial, sans-serif">−2</text>
+                                            <text x="346" y="334" fill="#eaf3ff" font-size="18" font-family="Arial, sans-serif">2</text>
+                                            <text x="534" y="334" fill="#eaf3ff" font-size="18" font-family="Arial, sans-serif">5</text>
+                                            <text x="140" y="286" fill="#7fffb4" font-size="18" font-family="Arial, sans-serif">подходит</text>
+                                            <text x="330" y="286" fill="#7fffb4" font-size="18" font-family="Arial, sans-serif">подходит</text>
+                                            <text x="515" y="286" fill="#ff8fa8" font-size="18" font-family="Arial, sans-serif">не подходит</text>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <div class="svg-caption">В этом типе уравнений решает не «квадрат», а фильтрующее ограничение, записанное до квадрата.</div>
+                            </div>
+
+                            <div>
+                                <div class="formula">
+                                    Ключевая идея:<br>
+                                    √f(x) = g(x)  ⇔  { g(x) ≥ 0; f(x) = g(x)² }
+                                </div>
+                                <div class="step-stack">
+                                    <div class="step-line">
+                                        <div class="step-num">1</div>
+                                        <div>
+                                            <strong>Сначала проверяем правую часть</strong>
+                                            <p>Корень слева не может быть отрицательным, значит правая часть тоже должна быть неотрицательной.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">2</div>
+                                        <div>
+                                            <strong>Только потом возводим в квадрат</strong>
+                                            <p>Иначе можно получить лишние корни, которые формально решают квадратное уравнение, но не исходное.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">3</div>
+                                        <div>
+                                            <strong>Финальная фильтрация обязательна</strong>
+                                            <p>В нашем примере число 5 появилось после разложения, но не прошло условие x ≤ 3.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layer-note">
+                                    Переключатели слева позволяют буквально увидеть, как решение строится слоями:
+                                    ограничение → квадрат → проверка.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="lab-exp" class="lab-view">
+                        <div class="grid-2">
+                            <div>
+                                <div class="controls">
+                                    <div class="field">
+                                        <label for="expSlider">Ползунок t = 2<sup>x</sup></label>
+                                        <input id="expSlider" type="range" min="-4" max="10" step="0.1" value="4">
+                                        <div class="range-row">
+                                            <span>t = <strong id="expTValue">4.0</strong></span>
+                                            <span>P(t) = t³ − 7t² − 16t + 112</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="svg-board">
+                                    <svg id="expSvg" viewBox="0 0 640 380" width="100%" height="100%">
+                                        <rect x="18" y="18" width="604" height="344" rx="24" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"/>
+                                        <text x="40" y="52" fill="#eaf3ff" font-size="22" font-family="Arial, sans-serif" font-weight="700">Уравнение после замены</text>
+                                        <text x="40" y="85" fill="#7de2ff" font-size="24" font-family="Arial, sans-serif">t³ − 7t² − 16t + 112 = 0, где t = 2ˣ и t &gt; 0</text>
+
+                                        <line x1="60" y1="290" x2="590" y2="290" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
+                                        <line x1="120" y1="70" x2="120" y2="320" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+
+                                        <g id="expRoots">
+                                            <circle cx="248" cy="290" r="6" fill="#7fffb4"></circle>
+                                            <circle cx="380" cy="290" r="6" fill="#7fffb4"></circle>
+                                            <circle cx="116" cy="290" r="6" fill="#ff8fa8"></circle>
+                                            <text x="240" y="316" fill="#eaf3ff" font-size="18" font-family="Arial, sans-serif">4</text>
+                                            <text x="372" y="316" fill="#eaf3ff" font-size="18" font-family="Arial, sans-serif">7</text>
+                                            <text x="95" y="316" fill="#ffb9c6" font-size="18" font-family="Arial, sans-serif">−4</text>
+                                            <text x="195" y="344" fill="#7fffb4" font-size="18" font-family="Arial, sans-serif">положительные корни допустимы</text>
+                                        </g>
+
+                                        <circle id="expPoint" cx="248" cy="290" r="9" fill="#7de2ff" stroke="white" stroke-opacity=".75" stroke-width="2"/>
+                                        <text id="expPointLabel" x="260" y="272" fill="#7de2ff" font-size="20" font-family="Arial, sans-serif">t = 4.0</text>
+                                    </svg>
+                                </div>
+                                <div class="svg-caption">Точка движется по оси t. Хорошо видно, что отрицательный корень t = −4 сразу выбывает из-за условия t &gt; 0.</div>
+                            </div>
+                            <div>
+                                <div class="formula">
+                                    8<sup>x</sup> − 7·4<sup>x</sup> − 2<sup>x+4</sup> + 112 = 0<br>
+                                    ↓<br>
+                                    (2<sup>x</sup>)³ − 7(2<sup>x</sup>)² − 16·2<sup>x</sup> + 112 = 0<br>
+                                    ↓<br>
+                                    t³ − 7t² − 16t + 112 = 0
+                                </div>
+                                <div class="step-stack">
+                                    <div class="step-line">
+                                        <div class="step-num">1</div>
+                                        <div>
+                                            <strong>Всё к одной базе</strong>
+                                            <p>Если удаётся переписать все слагаемые через 2<sup>x</sup>, значит замена почти неизбежна и почти всегда полезна.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">2</div>
+                                        <div>
+                                            <strong>Записываем t &gt; 0</strong>
+                                            <p>Это экономит ошибки: корни t = 0 или t &lt; 0 не могут дать значения 2<sup>x</sup>.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">3</div>
+                                        <div>
+                                            <strong>Возвращаемся к x только в самом конце</strong>
+                                            <p>Сначала решаем алгебру по t, потом делаем обратную замену: 2<sup>x</sup> = 4, 2<sup>x</sup> = 7.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="expPolyState" class="result-box">P(4.0) = 0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="lab-mix" class="lab-view">
+                        <div class="grid-2">
+                            <div>
+                                <div class="switchers">
+                                    <label class="toggle"><input type="checkbox" id="mixLayer1" checked> показать замену a = 3<sup>x</sup>, b = 2<sup>x</sup></label>
+                                    <label class="toggle"><input type="checkbox" id="mixLayer2" checked> показать деление на b³</label>
+                                    <label class="toggle"><input type="checkbox" id="mixLayer3" checked> показать t = a / b</label>
+                                </div>
+
+                                <div class="svg-board">
+                                    <svg id="mixSvg" viewBox="0 0 640 380" width="100%" height="100%">
+                                        <rect x="18" y="18" width="604" height="344" rx="24" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"/>
+
+                                        <g id="mix-step1">
+                                            <rect x="38" y="46" width="564" height="82" rx="18" fill="rgba(125,226,255,.08)" stroke="rgba(125,226,255,.26)"/>
+                                            <text x="58" y="78" fill="#eaf3ff" font-size="20" font-family="Arial, sans-serif">27ˣ − 13·18ˣ + 42·12ˣ − 36·8ˣ = 0</text>
+                                            <text x="58" y="110" fill="#7de2ff" font-size="20" font-family="Arial, sans-serif">a = 3ˣ,  b = 2ˣ  ⇒  a³ − 13a²b + 42ab² − 36b³ = 0</text>
+                                        </g>
+
+                                        <g id="mix-step2">
+                                            <rect x="38" y="146" width="564" height="70" rx="18" fill="rgba(141,125,255,.08)" stroke="rgba(141,125,255,.24)"/>
+                                            <text x="58" y="178" fill="#f1edff" font-size="20" font-family="Arial, sans-serif">Делим на b³, потому что b = 2ˣ &gt; 0 и b³ ≠ 0</text>
+                                            <text x="58" y="206" fill="#eaf3ff" font-size="20" font-family="Arial, sans-serif">(a / b)³ − 13(a / b)² + 42(a / b) − 36 = 0</text>
+                                        </g>
+
+                                        <g id="mix-step3">
+                                            <rect x="38" y="234" width="564" height="94" rx="18" fill="rgba(127,255,180,.08)" stroke="rgba(127,255,180,.24)"/>
+                                            <text x="58" y="266" fill="#d9ffee" font-size="20" font-family="Arial, sans-serif">t = a / b = (3/2)ˣ</text>
+                                            <text x="58" y="296" fill="#eaf3ff" font-size="20" font-family="Arial, sans-serif">t³ − 13t² + 42t − 36 = 0</text>
+                                            <text x="58" y="322" fill="#eaf3ff" font-size="20" font-family="Arial, sans-serif">t = 3, 5 − √13, 5 + √13</text>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <div class="svg-caption">Эта схема показывает, как «смешанные основания» сводятся к одному отношению t = (3/2)<sup>x</sup>.</div>
+                            </div>
+
+                            <div>
+                                <div class="formula">
+                                    Теорема Безу в этом блоке особенно полезна.<br>
+                                    Если P(3) = 0, то P(t) делится на (t − 3).<br>
+                                    Для P(t) = t³ − 13t² + 42t − 36 получаем:<br>
+                                    P(t) = (t − 3)(t² − 10t + 12)
+                                </div>
+                                <div class="step-stack">
+                                    <div class="step-line">
+                                        <div class="step-num">1</div>
+                                        <div>
+                                            <strong>Не боимся двух оснований</strong>
+                                            <p>Если в уравнении есть 3<sup>x</sup> и 2<sup>x</sup>, это не повод отступать. Часто их отношение гораздо важнее самих степеней.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">2</div>
+                                        <div>
+                                            <strong>Деление нужно обосновать</strong>
+                                            <p>Мы делим только потому, что 2<sup>x</sup> всегда положительно. Это обязательная часть корректного решения.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">3</div>
+                                        <div>
+                                            <strong>Финальный переход</strong>
+                                            <p>(3/2)<sup>x</sup> = t  ⇒  x = log по основанию 3/2 от t. Затем остаётся сравнить корни с нужным отрезком.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="lab-log" class="lab-view">
+                        <div class="grid-2">
+                            <div>
+                                <div class="controls">
+                                    <div class="field">
+                                        <label for="logXCheck">Проверка ОДЗ для уравнения log<sub>5</sub>(2 − x) = log<sub>25</sub>(x⁴)</label>
+                                        <input id="logXCheck" type="number" step="0.1" value="1" />
+                                    </div>
+                                    <div class="tiny-row">
+                                        <button class="solid-btn" id="checkLogDomainBtn">Проверить x</button>
+                                    </div>
+                                </div>
+
+                                <div class="svg-board">
+                                    <svg viewBox="0 0 640 380" width="100%" height="100%">
+                                        <rect x="18" y="18" width="604" height="344" rx="24" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"/>
+                                        <text x="40" y="54" fill="#eaf3ff" font-size="22" font-family="Arial, sans-serif" font-weight="700">Логарифм: сначала область определения</text>
+
+                                        <rect x="40" y="86" width="260" height="64" rx="16" fill="rgba(125,226,255,.08)" stroke="rgba(125,226,255,.26)"/>
+                                        <text x="58" y="123" fill="#7de2ff" font-size="24" font-family="Arial, sans-serif">2 − x &gt; 0  ⇒  x &lt; 2</text>
+
+                                        <rect x="320" y="86" width="280" height="64" rx="16" fill="rgba(141,125,255,.08)" stroke="rgba(141,125,255,.26)"/>
+                                        <text x="338" y="123" fill="#ece9ff" font-size="22" font-family="Arial, sans-serif">x⁴ &gt; 0  ⇒  x ≠ 0</text>
+
+                                        <rect x="40" y="176" width="560" height="78" rx="18" fill="rgba(127,255,180,.08)" stroke="rgba(127,255,180,.24)"/>
+                                        <text x="58" y="210" fill="#eaf3ff" font-size="22" font-family="Arial, sans-serif">log₅(2 − x) = log₂₅(x⁴) = ½log₅(x⁴) = log₅(x²)</text>
+                                        <text x="58" y="240" fill="#d9ffee" font-size="22" font-family="Arial, sans-serif">2 − x = x²  ⇒  x² + x − 2 = 0  ⇒  x = −2, 1</text>
+
+                                        <line x1="70" y1="312" x2="580" y2="312" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
+                                        <circle cx="110" cy="312" r="5" fill="#ff8fa8"/>
+                                        <circle cx="410" cy="312" r="5" fill="#7fffb4"/>
+                                        <circle cx="520" cy="312" r="5" fill="#7fffb4"/>
+                                        <text x="100" y="338" fill="#ffb9c6" font-size="18" font-family="Arial, sans-serif">0</text>
+                                        <text x="404" y="338" fill="#eaf3ff" font-size="18" font-family="Arial, sans-serif">1</text>
+                                        <text x="514" y="338" fill="#eaf3ff" font-size="18" font-family="Arial, sans-serif">2</text>
+                                        <text x="440" y="286" fill="#7fffb4" font-size="18" font-family="Arial, sans-serif">решающие точки нужно ещё проверить</text>
+                                    </svg>
+                                </div>
+                                <div id="logDomainResult" class="result-box">Введите значение x и проверьте, проходит ли оно через ОДЗ.</div>
+                            </div>
+
+                            <div>
+                                <div class="formula">
+                                    Полезная цепочка преобразований:<br>
+                                    log<sub>25</sub>(x⁴) = ½log<sub>5</sub>(x⁴) = log<sub>5</sub>(x²)
+                                </div>
+                                <div class="step-stack">
+                                    <div class="step-line">
+                                        <div class="step-num">1</div>
+                                        <div>
+                                            <strong>У логарифма нет права на небрежность</strong>
+                                            <p>Аргумент каждого логарифма должен быть строго положительным. Ноль и отрицательные значения запрещены.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">2</div>
+                                        <div>
+                                            <strong>Общая база делает уравнение прозрачным</strong>
+                                            <p>Как только база становится одинаковой, можно приравнять аргументы и перейти к обычному квадратному уравнению.</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-line">
+                                        <div class="step-num">3</div>
+                                        <div>
+                                            <strong>Проверка остаётся последним фильтром</strong>
+                                            <p>Даже если корень получился красиво, он обязан пройти условия 2 − x &gt; 0 и x⁴ &gt; 0.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="calculator" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Калькулятор проверки корня</h2>
+                        <p>Выбери одно из уравнений, введи значение x и посмотри, является ли оно корнем. Это полезно для самопроверки и для тренировки внимательности к ОДЗ.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="panel">
+                        <div class="controls">
+                            <div class="field">
+                                <label for="equationSelect">Уравнение</label>
+                                <select id="equationSelect">
+                                    <option value="radical1">√(x³ − 4x² − 10x + 29) = 3 − x</option>
+                                    <option value="radical2">√(x² − x) = √(4x + 6)</option>
+                                    <option value="exp1">8ˣ − 7·4ˣ − 2ˣ⁺⁴ + 112 = 0</option>
+                                    <option value="exp2">27ˣ − 13·18ˣ + 42·12ˣ − 36·8ˣ = 0</option>
+                                    <option value="log1">log₅(2 − x) = log₂₅(x⁴)</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="xValueInput">Значение x</label>
+                                <input id="xValueInput" type="number" step="0.01" value="2">
+                            </div>
+                            <div class="tiny-row">
+                                <button class="solid-btn" id="checkRootBtn">Проверить</button>
+                                <button class="ghost-btn" id="suggestRootBtn">Подставить известный корень</button>
+                                <button class="ghost-btn" id="resetCalcBtn">Сбросить</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="pill-state">Режим: точная проверка с учётом области определения</div>
+                        <div id="calcOutput" class="result-box">
+                            Выберите уравнение и нажмите «Проверить».
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="theory" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Теория в карточках</h2>
+                        <p>Здесь собраны короткие, но сильные правила. Раскрывайте только то, что нужно прямо сейчас.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="acc-item open">
+                        <button class="acc-btn">
+                            <div>
+                                <strong>1. Если корень стоит только слева</strong>
+                                <span>Главное равносильное преобразование</span>
+                            </div>
+                            <div class="acc-icon">+</div>
+                        </button>
+                        <div class="acc-body">
+                            <div class="formula">√f(x) = g(x)  ⇔  { g(x) ≥ 0; f(x) = g(x)² }</div>
+                            Нельзя сразу возводить в квадрат, не проверив знак правой части. Именно это условие отсеивает лишние корни, которые почти всегда появляются в сложных иррациональных уравнениях.
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn">
+                            <div>
+                                <strong>2. Если корни стоят с обеих сторон</strong>
+                                <span>Выбираем удобное ограничение</span>
+                            </div>
+                            <div class="acc-icon">+</div>
+                        </button>
+                        <div class="acc-body">
+                            <div class="formula">√f(x) = √g(x)  ⇔  { f(x) ≥ 0; f(x) = g(x) } или { g(x) ≥ 0; f(x) = g(x) }</div>
+                            Не нужно усложнять себе жизнь. Достаточно взять то ограничение, которое проще вычислять. После этого подкоренные выражения можно приравнять.
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn">
+                            <div>
+                                <strong>3. Замена в показательных уравнениях</strong>
+                                <span>Как увидеть повторяющийся фрагмент</span>
+                            </div>
+                            <div class="acc-icon">+</div>
+                        </button>
+                        <div class="acc-body">
+                            <div class="formula">8ˣ = (2ˣ)³, 4ˣ = (2ˣ)², 2ˣ⁺⁴ = 16·2ˣ</div>
+                            После этого естественная замена:
+                            <div class="formula">t = 2ˣ, t &gt; 0</div>
+                            Важно не потерять условие t &gt; 0. Это не мелочь, а часть решения.
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn">
+                            <div>
+                                <strong>4. Смешанные основания 2 и 3</strong>
+                                <span>Почему удобно делить на 2ˣ или 8ˣ</span>
+                            </div>
+                            <div class="acc-icon">+</div>
+                        </button>
+                        <div class="acc-body">
+                            Обозначаем:
+                            <div class="formula">a = 3ˣ, b = 2ˣ</div>
+                            Получаем многочлен по a и b. Потом делим на положительное выражение b³ и переходим к отношению:
+                            <div class="formula">t = a / b = (3/2)ˣ</div>
+                            Это превращает громоздкое показательное уравнение в обычное алгебраическое.
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn">
+                            <div>
+                                <strong>5. Теорема Безу</strong>
+                                <span>Козырь, когда группировка не помогает</span>
+                            </div>
+                            <div class="acc-icon">+</div>
+                        </button>
+                        <div class="acc-body">
+                            Если для многочлена P(t) выполнено P(c) = 0, то P(t) делится на t − c.
+                            <div class="formula">P(t) = t³ − 13t² + 42t − 36, P(3) = 0 ⇒ P(t) делится на t − 3</div>
+                            Это позволяет расколоть кубический многочлен на линейный и квадратный множители.
+                        </div>
+                    </div>
+
+                    <div class="acc-item">
+                        <button class="acc-btn">
+                            <div>
+                                <strong>6. Логарифмы и ОДЗ</strong>
+                                <span>Что нельзя нарушать ни при каких условиях</span>
+                            </div>
+                            <div class="acc-icon">+</div>
+                        </button>
+                        <div class="acc-body">
+                            Аргумент логарифма должен быть строго положительным. Поэтому уравнение
+                            <div class="formula">log₅(2 − x) = log₂₅(x⁴)</div>
+                            начинается не с преобразования базы, а с ограничений:
+                            <div class="formula">2 − x &gt; 0 и x⁴ &gt; 0</div>
+                            Только потом можно переходить к равенству аргументов.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Разбор задач</h2>
+                        <p>Ниже — два полноценных решения. Они построены не как «ответы», а как образцы хода мысли.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="example-card">
+                        <div class="example-header">
+                            <div>
+                                <div class="tag">Разбор 1 · иррациональное уравнение</div>
+                                <h3>√(x³ − 4x² − 10x + 29) = 3 − x</h3>
+                            </div>
+                        </div>
+
+                        <div class="solve-steps">
+                            <div class="solve-step">
+                                <strong>Шаг 1. Записываем фильтр.</strong><br>
+                                3 − x ≥ 0, значит x ≤ 3.
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 2. Возводим в квадрат только после фильтра.</strong><br>
+                                x³ − 4x² − 10x + 29 = (3 − x)² = 9 − 6x + x²
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 3. Переносим всё влево.</strong><br>
+                                x³ − 5x² − 4x + 20 = 0
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 4. Группируем.</strong><br>
+                                (x³ − 5x²) + (−4x + 20) = 0<br>
+                                x²(x − 5) − 4(x − 5) = 0<br>
+                                (x − 5)(x² − 4) = 0
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 5. Находим кандидатов.</strong><br>
+                                x = 5, x = 2, x = −2
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 6. Возвращаемся к фильтру x ≤ 3.</strong><br>
+                                x = 5 не подходит, x = 2 и x = −2 подходят.
+                            </div>
+                        </div>
+
+                        <details>
+                            <summary>Показать итог и комментарий</summary>
+                            <div class="inside">
+                                <div class="formula">Ответ: x = −2, x = 2</div>
+                                Если дополнительно нужен отрезок [−√3; √30], то в него попадает только x = 2, потому что −2 &lt; −√3.
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="example-card">
+                        <div class="example-header">
+                            <div>
+                                <div class="tag">Разбор 2 · показательное уравнение</div>
+                                <h3>8ˣ − 7·4ˣ − 2ˣ⁺⁴ + 112 = 0</h3>
+                            </div>
+                        </div>
+
+                        <div class="solve-steps">
+                            <div class="solve-step">
+                                <strong>Шаг 1. Всё приводим к основанию 2.</strong><br>
+                                8ˣ = (2ˣ)³, 4ˣ = (2ˣ)², 2ˣ⁺⁴ = 16·2ˣ
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 2. Делаем замену.</strong><br>
+                                t = 2ˣ, t &gt; 0
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 3. Получаем кубическое уравнение.</strong><br>
+                                t³ − 7t² − 16t + 112 = 0
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 4. Разложение группировкой.</strong><br>
+                                (t³ − 7t²) + (−16t + 112) = 0<br>
+                                t²(t − 7) − 16(t − 7) = 0<br>
+                                (t − 7)(t² − 16) = 0
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 5. Решаем по t.</strong><br>
+                                t = 7, t = 4, t = −4
+                            </div>
+                            <div class="solve-step">
+                                <strong>Шаг 6. Учитываем t &gt; 0 и возвращаемся к x.</strong><br>
+                                t = −4 не подходит.<br>
+                                2ˣ = 4 ⇒ x = 2<br>
+                                2ˣ = 7 ⇒ x = log по основанию 2 от 7
+                            </div>
+                        </div>
+
+                        <details>
+                            <summary>Показать итог и комментарий</summary>
+                            <div class="inside">
+                                <div class="formula">Ответ: x = 2 и x = log<sub>2</sub>7</div>
+                                На отрезке [log<sub>2</sub>5; log<sub>2</sub>11] лежит только log<sub>2</sub>7. Число 2 — это log<sub>2</sub>4, а 4 &lt; 5.
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cheat" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Cheat sheet</h2>
+                        <p>Компактная сводка правил, которую удобно просмотреть перед самостоятельной работой.</p>
+                    </div>
+                </div>
+
+                <div class="cheat-grid">
+                    <div class="cheat-card">
+                        <h4>Корни и равносильность</h4>
+                        <ul>
+                            <li>√f(x) = g(x)  ⇒  сначала g(x) ≥ 0, потом квадрат.</li>
+                            <li>√f(x) = √g(x)  ⇒  можно взять одно удобное ограничение и приравнять подкоренные выражения.</li>
+                            <li>После квадрата обязательно проверяй кандидатов.</li>
+                        </ul>
+                    </div>
+
+                    <div class="cheat-card">
+                        <h4>Показательные замены</h4>
+                        <ul>
+                            <li>Ищи общий фрагмент: 8ˣ, 4ˣ, 2ˣ⁺⁴ почти кричат о замене t = 2ˣ.</li>
+                            <li>Всегда дописывай t &gt; 0.</li>
+                            <li>Обратная замена — только после полного решения по t.</li>
+                        </ul>
+                    </div>
+
+                    <div class="cheat-card">
+                        <h4>Смешанные основания</h4>
+                        <ul>
+                            <li>Если есть 3ˣ и 2ˣ, попробуй a = 3ˣ, b = 2ˣ.</li>
+                            <li>Деление на b³ допустимо, если заранее показано, что b &gt; 0.</li>
+                            <li>Часто всё сводится к t = (3/2)ˣ.</li>
+                        </ul>
+                    </div>
+
+                    <div class="cheat-card">
+                        <h4>Логарифмы</h4>
+                        <ul>
+                            <li>Сначала ОДЗ: аргументы логарифмов строго больше нуля.</li>
+                            <li>Потом приводи к одной базе.</li>
+                            <li>Только после этого переходи к равенству аргументов.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="quiz" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Мини-квиз</h2>
+                        <p>Пять коротких вопросов. После проверки ты увидишь правильные и неправильные выборы и общий результат.</p>
+                    </div>
+                </div>
+
+                <div class="quiz-wrap">
+                    <div class="quiz-card" data-q="0" data-answer="1">
+                        <h4>1. Какой первый шаг верен для уравнения √f(x) = g(x)?</h4>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q0" value="0"> Сразу возвести обе части в квадрат</label>
+                            <label class="option"><input type="radio" name="q0" value="1"> Сначала записать условие g(x) ≥ 0</label>
+                            <label class="option"><input type="radio" name="q0" value="2"> Сразу перенести всё влево</label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card" data-q="1" data-answer="2">
+                        <h4>2. В уравнении 8ˣ − 7·4ˣ − 2ˣ⁺⁴ + 112 = 0 естественная замена — это</h4>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q1" value="0"> t = x²</label>
+                            <label class="option"><input type="radio" name="q1" value="1"> t = 4ˣ</label>
+                            <label class="option"><input type="radio" name="q1" value="2"> t = 2ˣ</label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card" data-q="2" data-answer="0">
+                        <h4>3. Почему в показательных уравнениях отрицательный корень замены часто не подходит?</h4>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q2" value="0"> Потому что 2ˣ и 3ˣ всегда положительны</label>
+                            <label class="option"><input type="radio" name="q2" value="1"> Потому что отрицательные числа нельзя возводить в степень</label>
+                            <label class="option"><input type="radio" name="q2" value="2"> Потому что логарифм от них не существует</label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card" data-q="3" data-answer="2">
+                        <h4>4. Что обязательно нужно сделать перед тем, как отбросить логарифмы?</h4>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q3" value="0"> Убедиться, что уравнение квадратное</label>
+                            <label class="option"><input type="radio" name="q3" value="1"> Посчитать дискриминант</label>
+                            <label class="option"><input type="radio" name="q3" value="2"> Проверить область определения</label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card" data-q="4" data-answer="1">
+                        <h4>5. Если P(3) = 0 для многочлена P(t), что верно?</h4>
+                        <div class="options">
+                            <label class="option"><input type="radio" name="q4" value="0"> P(t) делится на t + 3</label>
+                            <label class="option"><input type="radio" name="q4" value="1"> P(t) делится на t − 3</label>
+                            <label class="option"><input type="radio" name="q4" value="2"> P(t) обязательно квадратный</label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions tiny-row">
+                        <button class="solid-btn" id="checkQuizBtn">Проверить квиз</button>
+                        <button class="ghost-btn" id="resetQuizBtn">Сбросить</button>
+                    </div>
+
+                    <div id="quizScore" class="quiz-score">Пока не проверено.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="generator" class="section">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <h2>Генератор тренировочных задач</h2>
+                        <p>Здесь используются только безопасные шаблоны с заранее проверенной корректностью. У каждой задачи есть готовый ответ, который скрыт до нажатия.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="panel">
+                        <div class="controls">
+                            <div class="field">
+                                <label for="taskTypeSelect">Тип задачи</label>
+                                <select id="taskTypeSelect">
+                                    <option value="random">Случайный тип</option>
+                                    <option value="radical-filter">Иррациональное с фильтром</option>
+                                    <option value="sqrt-sqrt">Два корня</option>
+                                    <option value="exp-sub">Показательное с заменой</option>
+                                    <option value="log-eq">Логарифмическое</option>
+                                </select>
+                            </div>
+                            <div class="tiny-row">
+                                <button class="solid-btn" id="newTaskBtn">Сгенерировать задачу</button>
+                                <button class="ghost-btn" id="revealTaskBtn">Показать ответ</button>
+                                <button class="ghost-btn" id="newTaskAgainBtn">Ещё одна</button>
+                            </div>
+                            <div class="note-box">
+                                Генератор не придумывает случайную «дикую» математику. Он берёт только те шаблоны, для которых заранее известны корректные корни и не пустая область допустимых значений.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="task-box">
+                        <div class="task-card">
+                            <div class="task-head">
+                                <div>
+                                    <div class="tag" id="taskTag">Готов к запуску</div>
+                                    <h3 id="taskTitle">Нажмите «Сгенерировать задачу»</h3>
+                                </div>
+                            </div>
+                            <div id="taskBody" class="task-body">
+                                Здесь появится корректная тренировочная задача по теме.
+                            </div>
+                            <div id="taskAnswer" class="task-answer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="footer-space"></div>
+    </main>
+</div>
+
+<script>
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+    function fmt(num, digits = 6){
+        if (!Number.isFinite(num)) return "не определено";
+        const rounded = Number(num.toFixed(digits));
+        return String(rounded).replace(".", ",");
+    }
+
+    function approxEqual(a, b, eps = 1e-8){
+        return Math.abs(a - b) <= eps;
+    }
+
+    function logBase(x, base){
+        return Math.log(x) / Math.log(base);
+    }
+
+    function setVisibility(id, show){
+        const node = document.getElementById(id);
+        if (node) node.style.display = show ? "" : "none";
+    }
+
+    // Tabs
+    $$(".tab-btn").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+            $$(".tab-btn").forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+            const target = btn.dataset.tab;
+            $$(".lab-view").forEach(v=>v.classList.remove("active"));
+            document.getElementById(target).classList.add("active");
+        });
+    });
+
+    // Accordion
+    $$(".acc-btn").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+            btn.parentElement.classList.toggle("open");
+        });
+    });
+
+    // Root layers
+    function updateRootLayers(){
+        setVisibility("root-layer-filter", $("#rootLayer1").checked);
+        setVisibility("root-layer-square", $("#rootLayer2").checked);
+        setVisibility("root-layer-check", $("#rootLayer3").checked);
+    }
+    ["rootLayer1","rootLayer2","rootLayer3"].forEach(id=>{
+        $("#"+id).addEventListener("change", updateRootLayers);
+    });
+    updateRootLayers();
+
+    // Mix layers
+    function updateMixLayers(){
+        setVisibility("mix-step1", $("#mixLayer1").checked);
+        setVisibility("mix-step2", $("#mixLayer2").checked);
+        setVisibility("mix-step3", $("#mixLayer3").checked);
+    }
+    ["mixLayer1","mixLayer2","mixLayer3"].forEach(id=>{
+        $("#"+id).addEventListener("change", updateMixLayers);
+    });
+    updateMixLayers();
+
+    // Exponential slider
+    function polyExp(t){
+        return t*t*t - 7*t*t - 16*t + 112;
+    }
+
+    function updateExpSlider(){
+        const t = parseFloat($("#expSlider").value);
+        $("#expTValue").textContent = t.toFixed(1);
+        const xMin = 120, xMax = 560;
+        const mapped = xMin + (t + 4) / 14 * (xMax - xMin);
+        const point = $("#expPoint");
+        const label = $("#expPointLabel");
+        point.setAttribute("cx", mapped.toFixed(1));
+        label.setAttribute("x", (mapped + 12).toFixed(1));
+        label.textContent = "t = " + t.toFixed(1);
+
+        const val = polyExp(t);
+        let cls = "result-warn";
+        if (Math.abs(val) < 1e-6) cls = "result-ok";
+        else if (t <= 0) cls = "result-bad";
+
+        $("#expPolyState").innerHTML = `
+        <span class="${cls}">P(${t.toFixed(1)}) = ${fmt(val, 4)}</span><br>
+        ${t > 0 ? "Фильтр t > 0 выполнен." : "Фильтр t > 0 не выполнен."}
+      `;
+    }
+    $("#expSlider").addEventListener("input", updateExpSlider);
+    updateExpSlider();
+
+    // Log domain check
+    $("#checkLogDomainBtn").addEventListener("click", ()=>{
+        const x = parseFloat($("#logXCheck").value);
+        if (!Number.isFinite(x)) return;
+        const c1 = 2 - x > 0;
+        const c2 = Math.pow(x,4) > 0;
+        const parts = [
+            `Проверяем x = ${fmt(x,4)}.`,
+            `Условие 2 − x > 0: <strong class="${c1 ? "result-ok":"result-bad"}">${c1 ? "выполнено" : "не выполнено"}</strong>.`,
+            `Условие x⁴ > 0: <strong class="${c2 ? "result-ok":"result-bad"}">${c2 ? "выполнено" : "не выполнено"}</strong>.`
+        ];
+        if(c1 && c2){
+            parts.push(`<span class="result-ok">Значение проходит через ОДЗ.</span>`);
+        }else{
+            parts.push(`<span class="result-bad">Значение не проходит через ОДЗ.</span>`);
+        }
+        $("#logDomainResult").innerHTML = parts.join("<br>");
+    });
+
+    // Calculator
+    const equations = {
+        radical1: {
+            title: "√(x³ − 4x² − 10x + 29) = 3 − x",
+            suggest: 2,
+            check(x){
+                const rad = x**3 - 4*x**2 - 10*x + 29;
+                const right = 3 - x;
+                if (rad < 0){
+                    return {ok:false, html:`Подкоренное выражение равно ${fmt(rad,6)}. Это меньше нуля, значит левая часть не определена.`};
+                }
+                const left = Math.sqrt(rad);
+                const valid = approxEqual(left, right, 1e-7);
+                const filter = right >= 0;
+                return {
+                    ok: valid,
+                    html: `
+              Левая часть: √(${fmt(rad,6)}) = ${fmt(left,6)}<br>
+              Правая часть: ${fmt(right,6)}<br>
+              Фильтр 3 − x ≥ 0: <strong class="${filter ? "result-ok":"result-bad"}">${filter ? "да" : "нет"}</strong><br>
+              <strong class="${valid ? "result-ok":"result-bad"}">${valid ? "Это корень уравнения." : "Это не корень уравнения."}</strong>
+            `
+                };
+            }
+        },
+        radical2: {
+            title: "√(x² − x) = √(4x + 6)",
+            suggest: -1,
+            check(x){
+                const a = x*x - x;
+                const b = 4*x + 6;
+                if (a < 0 || b < 0){
+                    return {ok:false, html:`Подкоренные выражения: x² − x = ${fmt(a,6)}, 4x + 6 = ${fmt(b,6)}. Одно из них отрицательно, уравнение не определено.`};
+                }
+                const left = Math.sqrt(a);
+                const right = Math.sqrt(b);
+                const valid = approxEqual(left, right, 1e-7);
+                return {
+                    ok: valid,
+                    html: `
+              Левая часть: ${fmt(left,6)}<br>
+              Правая часть: ${fmt(right,6)}<br>
+              <strong class="${valid ? "result-ok":"result-bad"}">${valid ? "Это корень уравнения." : "Это не корень уравнения."}</strong>
+            `
+                };
+            }
+        },
+        exp1: {
+            title: "8ˣ − 7·4ˣ − 2ˣ⁺⁴ + 112 = 0",
+            suggest: 2,
+            check(x){
+                const value = Math.pow(8,x) - 7*Math.pow(4,x) - Math.pow(2,x+4) + 112;
+                const valid = Math.abs(value) < 1e-7;
+                return {
+                    ok: valid,
+                    html: `
+              Значение левой части: ${fmt(value,8)}<br>
+              <strong class="${valid ? "result-ok":"result-bad"}">${valid ? "Это корень уравнения." : "Это не корень уравнения."}</strong><br>
+              Известные корни: 2 и log₂7 ≈ ${fmt(logBase(7,2),6)}
+            `
+                };
+            }
+        },
+        exp2: {
+            title: "27ˣ − 13·18ˣ + 42·12ˣ − 36·8ˣ = 0",
+            suggest: logBase(3,1.5),
+            check(x){
+                const value = Math.pow(27,x) - 13*Math.pow(18,x) + 42*Math.pow(12,x) - 36*Math.pow(8,x);
+                const valid = Math.abs(value) < 1e-6;
+                return {
+                    ok: valid,
+                    html: `
+              Значение левой части: ${fmt(value,8)}<br>
+              <strong class="${valid ? "result-ok":"result-bad"}">${valid ? "Это корень уравнения." : "Это не корень уравнения."}</strong><br>
+              Известные корни: log по основанию 3/2 от 3, 5 − √13, 5 + √13
+            `
+                };
+            }
+        },
+        log1: {
+            title: "log₅(2 − x) = log₂₅(x⁴)",
+            suggest: 1,
+            check(x){
+                const a = 2 - x;
+                const b = Math.pow(x,4);
+                if (a <= 0 || b <= 0){
+                    return {ok:false, html:`Проверка ОДЗ: 2 − x = ${fmt(a,6)}, x⁴ = ${fmt(b,6)}. Хотя бы один аргумент логарифма не положителен.`};
+                }
+                const left = logBase(a,5);
+                const right = logBase(b,25);
+                const valid = approxEqual(left, right, 1e-7);
+                return {
+                    ok: valid,
+                    html: `
+              Левая часть: ${fmt(left,8)}<br>
+              Правая часть: ${fmt(right,8)}<br>
+              <strong class="${valid ? "result-ok":"result-bad"}">${valid ? "Это корень уравнения." : "Это не корень уравнения."}</strong><br>
+              Известные корни: −2 и 1
+            `
+                };
+            }
+        }
+    };
+
+    function checkEquation(){
+        const key = $("#equationSelect").value;
+        const x = parseFloat($("#xValueInput").value);
+        if (!Number.isFinite(x)){
+            $("#calcOutput").innerHTML = `<span class="result-bad">Введите корректное число.</span>`;
+            return;
+        }
+        const result = equations[key].check(x);
+        $("#calcOutput").innerHTML = `<strong>${equations[key].title}</strong><br><br>${result.html}`;
+    }
+
+    $("#checkRootBtn").addEventListener("click", checkEquation);
+    $("#equationSelect").addEventListener("change", ()=>{
+        $("#calcOutput").innerHTML = "Выбрано новое уравнение. Нажмите «Проверить».";
+    });
+
+    $("#suggestRootBtn").addEventListener("click", ()=>{
+        const key = $("#equationSelect").value;
+        $("#xValueInput").value = fmt(equations[key].suggest, 6).replace(",", ".");
+        checkEquation();
+    });
+
+    $("#resetCalcBtn").addEventListener("click", ()=>{
+        $("#equationSelect").value = "radical1";
+        $("#xValueInput").value = "2";
+        $("#calcOutput").innerHTML = "Выберите уравнение и нажмите «Проверить».";
+    });
+
+    // Quiz
+    $("#checkQuizBtn").addEventListener("click", ()=>{
+        let score = 0;
+        $$(".quiz-card").forEach(card=>{
+            const q = card.dataset.q;
+            const answer = card.dataset.answer;
+            const selected = $(`input[name="q${q}"]:checked`);
+            $$(".option", card).forEach(op=>op.classList.remove("correct","wrong"));
+            if (!selected) return;
+            const parent = selected.closest(".option");
+            if (selected.value === answer){
+                parent.classList.add("correct");
+                score++;
+            } else {
+                parent.classList.add("wrong");
+                const correct = $(`input[name="q${q}"][value="${answer}"]`, card);
+                if (correct) correct.closest(".option").classList.add("correct");
+            }
+        });
+        const total = $$(".quiz-card").length;
+        const pct = Math.round(score / total * 100);
+        let msg = "Хорошее начало.";
+        if (pct === 100) msg = "Идеально. Все опорные идеи на месте.";
+        else if (pct >= 80) msg = "Очень сильный результат.";
+        else if (pct >= 60) msg = "База держится, но стоит повторить фильтры и ОДЗ.";
+        else msg = "Нужен ещё один спокойный проход по теории и разборам.";
+        $("#quizScore").innerHTML = `<strong>Результат: ${score} из ${total}</strong><br>${msg}`;
+    });
+
+    $("#resetQuizBtn").addEventListener("click", ()=>{
+        $$('input[type="radio"]').forEach(i=>{
+            if (i.name.startsWith("q")) i.checked = false;
+        });
+        $$(".option").forEach(op=>op.classList.remove("correct","wrong"));
+        $("#quizScore").textContent = "Пока не проверено.";
+    });
+
+    // Generator
+    const taskPools = {
+        "radical-filter": [
+            {
+                title: "Иррациональное уравнение с фильтром",
+                body: "Решите уравнение: √(x³ − 2x² − 5x + 18) = 4 − x. Затем укажите корни, принадлежащие отрезку [−3; √30].",
+                answer: "Фильтр: 4 − x ≥ 0, то есть x ≤ 4. После возведения в квадрат получаем x³ − 3x² + 3x + 2 = 0 = (x + 1)(x − 2)². Корни: x = −1 и x = 2. Оба проходят фильтр. На отрезке [−3; √30] лежат оба корня."
+            },
+            {
+                title: "Иррациональное уравнение с проверкой",
+                body: "Решите уравнение: √(x³ − 3x² − 4x + 12) = 2 − x.",
+                answer: "Фильтр: 2 − x ≥ 0, то есть x ≤ 2. После квадрата: x³ − 3x² − 4x + 12 = (2 − x)² = x² − 4x + 4. Получаем x³ − 4x² + 8 = 0 = (x − 2)(x² − 2x − 4). Кандидаты: x = 2, x = 1 − √5, x = 1 + √5. Фильтр оставляет x = 2 и x = 1 − √5."
+            }
+        ],
+        "sqrt-sqrt": [
+            {
+                title: "Два корня: выбираем удобное ограничение",
+                body: "Решите уравнение: √(x² + 2x) = √(5x + 14).",
+                answer: "Удобно взять ограничение 5x + 14 ≥ 0. Затем приравниваем подкоренные выражения: x² + 2x = 5x + 14, то есть x² − 3x − 14 = 0. Корни: x = 7 и x = −2. Оба подходят."
+            },
+            {
+                title: "Ещё один шаблон √f = √g",
+                body: "Решите уравнение: √(x² − 4x) = √(2x + 8).",
+                answer: "Берём ограничение 2x + 8 ≥ 0. Приравниваем подкоренные выражения: x² − 4x = 2x + 8, то есть x² − 6x − 8 = 0. Корни: x = 3 − √17 и x = 3 + √17. Оба удовлетворяют ограничению."
+            }
+        ],
+        "exp-sub": [
+            {
+                title: "Показательное уравнение с заменой",
+                body: "Решите уравнение: 9ˣ − 10·3ˣ + 9 = 0. Укажите корни на отрезке [log по основанию 3 от 2; log по основанию 3 от 10].",
+                answer: "Замена: t = 3ˣ, t > 0. Получаем t² − 10t + 9 = 0. Тогда t = 1 или t = 9. Значит x = 0 или x = 2. На данном отрезке лежит только x = 2."
+            },
+            {
+                title: "Показательное уравнение на одну замену",
+                body: "Решите уравнение: 16ˣ − 5·4ˣ + 4 = 0.",
+                answer: "Замена: t = 4ˣ, t > 0. Тогда t² − 5t + 4 = 0, откуда t = 1 или t = 4. Следовательно, x = 0 или x = 1."
+            }
+        ],
+        "log-eq": [
+            {
+                title: "Логарифмическое уравнение",
+                body: "Решите уравнение: log₂(3 − x) = log₄(x²). Укажите все корни, принадлежащие отрезку [−2; 2].",
+                answer: "ОДЗ: 3 − x > 0 и x² > 0, то есть x < 3 и x ≠ 0. log₄(x²) = ½log₂(x²) = log₂|x|. Тогда 3 − x = |x|. Случай x ≥ 0 даёт 3 − x = x, откуда x = 3/2. Случай x < 0 даёт 3 − x = −x, что невозможно. Ответ: x = 3/2, он лежит на [−2; 2]."
+            },
+            {
+                title: "Логарифм и равенство аргументов",
+                body: "Решите уравнение: log₃(4 − x) = log₉(x²).",
+                answer: "ОДЗ: 4 − x > 0 и x² > 0, то есть x < 4 и x ≠ 0. log₉(x²) = ½log₃(x²) = log₃|x|. Тогда 4 − x = |x|. При x ≥ 0 получаем 4 − x = x, значит x = 2. При x < 0 получаем 4 − x = −x, что невозможно. Ответ: x = 2."
+            }
+        ]
+    };
+
+    function randomItem(arr){
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function pickTask(type){
+        const keys = Object.keys(taskPools);
+        const realType = type === "random" ? randomItem(keys) : type;
+        return { type: realType, task: randomItem(taskPools[realType]) };
+    }
+
+    function renderTask(selection){
+        const labels = {
+            "radical-filter":"Иррациональное уравнение",
+            "sqrt-sqrt":"Два корня",
+            "exp-sub":"Показательное уравнение",
+            "log-eq":"Логарифмическое уравнение"
+        };
+        $("#taskTag").textContent = labels[selection.type];
+        $("#taskTitle").textContent = selection.task.title;
+        $("#taskBody").innerHTML = selection.task.body;
+        $("#taskAnswer").innerHTML = `<strong>Ответ и краткий ход:</strong><br>${selection.task.answer}`;
+        $("#taskAnswer").classList.remove("show");
+    }
+
+    let currentTask = null;
+
+    function generateTask(){
+        currentTask = pickTask($("#taskTypeSelect").value);
+        renderTask(currentTask);
+    }
+
+    $("#newTaskBtn").addEventListener("click", generateTask);
+    $("#newTaskAgainBtn").addEventListener("click", generateTask);
+    $("#revealTaskBtn").addEventListener("click", ()=>{
+        if (!currentTask) generateTask();
+        $("#taskAnswer").classList.add("show");
+    });
+
+    // Initial task
+    generateTask();
+</script>
+</body>
+</html>
