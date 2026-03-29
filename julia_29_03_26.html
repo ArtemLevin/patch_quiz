@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!doctype html>
+        <html lang="ru">
+        <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Медиана и биссектриса в треугольнике — интерактивный конспект</title>
+    <style>
+        :root{
+            --bg:#08111f;
+            --bg2:#0d1a2d;
+            --panel:rgba(16,27,46,.78);
+            --panel-strong:rgba(18,31,54,.92);
+            --line:rgba(120,180,255,.22);
+            --text:#edf4ff;
+            --muted:#9db2d3;
+            --soft:#c9d8f0;
+            --accent:#5de4d6;
+            --accent2:#7aa8ff;
+            --accent3:#9f7bff;
+            --good:#62d68b;
+            --bad:#ff7d8d;
+            --warn:#ffd36b;
+            --shadow:0 18px 60px rgba(0,0,0,.34);
+            --radius:24px;
+            --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:Inter,Arial,Helvetica,sans-serif;
+            color:var(--text);
+            background:
+            radial-gradient(1200px 600px at 15% -10%, rgba(93,228,214,.10), transparent 60%),
+            radial-gradient(900px 500px at 90% 5%, rgba(122,168,255,.12), transparent 55%),
+            radial-gradient(700px 500px at 80% 80%, rgba(159,123,255,.10), transparent 50%),
+            linear-gradient(180deg, #07101b 0%, #0a1220 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            background:
+            linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size:36px 36px;
+            mask-image:radial-gradient(circle at center, black 38%, transparent 88%);
+            opacity:.28;
+        }
+
+        .container{
+            width:min(1260px, calc(100vw - 32px));
+            margin:0 auto;
+        }
+
+        .topbar{
+            position:sticky;
+            top:0;
+            z-index:40;
+            backdrop-filter:blur(14px);
+            background:rgba(6,10,18,.62);
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .topbar-inner{
+            display:flex;
+            gap:14px;
+            align-items:center;
+            justify-content:space-between;
+            padding:12px 0;
+        }
+        .brand{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            min-width:0;
+        }
+        .brand-mark{
+            width:42px;height:42px;border-radius:14px;
+            background:
+            radial-gradient(circle at 30% 30%, rgba(255,255,255,.22), transparent 35%),
+            linear-gradient(135deg, rgba(93,228,214,.85), rgba(122,168,255,.9));
+            box-shadow:0 8px 28px rgba(93,228,214,.25);
+            position:relative;
+            overflow:hidden;
+        }
+        .brand-mark::after{
+            content:"△";
+            position:absolute; inset:0;
+            display:grid; place-items:center;
+            font-size:20px; font-weight:800; color:#06111d;
+        }
+        .brand-text{ min-width:0; }
+        .brand-title{
+            font-weight:800;
+            letter-spacing:.02em;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .brand-sub{
+            color:var(--muted);
+            font-size:13px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+        .nav{
+            display:flex; flex-wrap:wrap; gap:8px;
+            justify-content:flex-end;
+        }
+        .nav a,.nav button{
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+            color:var(--soft);
+            text-decoration:none;
+            padding:10px 14px;
+            border-radius:999px;
+            font-weight:700;
+            font-size:14px;
+            cursor:pointer;
+            transition:.2s ease;
+        }
+        .nav a:hover,.nav button:hover{
+            transform:translateY(-1px);
+            border-color:rgba(93,228,214,.35);
+            color:white;
+            background:rgba(93,228,214,.08);
+        }
+
+        .hero{ padding:42px 0 24px; }
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:22px;
+            align-items:stretch;
+        }
+        .glass{
+            background:linear-gradient(180deg, rgba(17,29,50,.88), rgba(12,21,37,.78));
+            border:1px solid rgba(255,255,255,.08);
+            box-shadow:var(--shadow);
+            border-radius:var(--radius);
+            position:relative;
+            overflow:hidden;
+        }
+        .glass::before{
+            content:"";
+            position:absolute; inset:-1px auto auto -1px;
+            width:40%;
+            height:1px;
+            background:linear-gradient(90deg, rgba(93,228,214,.0), rgba(93,228,214,.8), rgba(93,228,214,.0));
+            opacity:.75;
+        }
+        .hero-card{ padding:32px 30px 28px; }
+        .eyebrow{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 12px;
+            border-radius:999px;
+            font-size:12px;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+            color:#d8fbf7;
+            border:1px solid rgba(93,228,214,.2);
+            background:rgba(93,228,214,.08);
+            font-weight:800;
+        }
+        h1{
+            margin:16px 0 12px;
+            font-size:clamp(34px, 5vw, 64px);
+            line-height:.98;
+            letter-spacing:-.03em;
+        }
+        .lead{
+            color:var(--soft);
+            font-size:18px;
+            line-height:1.6;
+            max-width:64ch;
+        }
+        .hero-actions{
+            display:flex; flex-wrap:wrap; gap:12px; margin-top:22px;
+        }
+        .btn{
+            appearance:none;
+            border:none;
+            cursor:pointer;
+            padding:14px 18px;
+            border-radius:16px;
+            font-weight:800;
+            color:#07111d;
+            background:linear-gradient(135deg, var(--accent), #9df6ff);
+            box-shadow:0 10px 28px rgba(93,228,214,.24);
+        }
+        .btn.secondary{
+            color:var(--text);
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.09);
+            box-shadow:none;
+        }
+        .hero-meta{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:12px;
+            margin-top:22px;
+        }
+        .meta{
+            padding:14px 14px 12px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.06);
+            border-radius:18px;
+        }
+        .meta .big{
+            font-size:24px; font-weight:900; margin-bottom:4px;
+            color:white;
+        }
+        .meta .small{
+            color:var(--muted); font-size:13px;
+        }
+
+        .hero-visual{
+            min-height:100%;
+            padding:20px;
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+            justify-content:space-between;
+        }
+        .visual-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+        }
+        .visual-title{
+            font-size:14px;
+            color:var(--muted);
+            font-weight:700;
+            letter-spacing:.06em;
+            text-transform:uppercase;
+        }
+        .chip{
+            display:inline-flex; align-items:center; gap:8px;
+            border-radius:999px;
+            padding:8px 12px;
+            background:rgba(122,168,255,.10);
+            border:1px solid rgba(122,168,255,.18);
+            color:#dbe7ff;
+            font-size:13px; font-weight:700;
+        }
+        .visual-stage{
+            flex:1;
+            min-height:420px;
+            border-radius:22px;
+            background:
+            radial-gradient(700px 280px at 50% 0%, rgba(93,228,214,.08), transparent 55%),
+            linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+            border:1px solid rgba(255,255,255,.06);
+            position:relative;
+            overflow:hidden;
+            display:grid;
+            place-items:center;
+            padding:8px;
+        }
+        .visual-controls{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:12px;
+        }
+        .control{
+            padding:12px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.06);
+        }
+        .control label{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            color:var(--soft);
+            font-size:14px;
+            margin-bottom:10px;
+            font-weight:700;
+        }
+        .control input[type="range"]{
+            width:100%;
+            accent-color:var(--accent);
+        }
+
+        section{ padding:18px 0; }
+
+        .section-title{
+            display:flex;
+            align-items:end;
+            justify-content:space-between;
+            gap:16px;
+            margin-bottom:18px;
+        }
+        .section-title h2{
+            margin:0;
+            font-size:clamp(24px, 3vw, 38px);
+            line-height:1.05;
+            letter-spacing:-.02em;
+        }
+        .section-title p{
+            margin:0;
+            color:var(--muted);
+            max-width:56ch;
+            line-height:1.5;
+        }
+
+        .grid-3{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:18px;
+        }
+        .grid-2{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:18px;
+        }
+        .card{
+            padding:22px;
+            border-radius:24px;
+            background:linear-gradient(180deg, rgba(15,26,44,.92), rgba(12,20,35,.88));
+            border:1px solid rgba(255,255,255,.07);
+            box-shadow:var(--shadow);
+            position:relative;
+            overflow:hidden;
+            min-width:0;
+        }
+        .card h3{
+            margin:0 0 12px;
+            font-size:22px;
+            letter-spacing:-.02em;
+        }
+        .card p{
+            margin:0 0 14px;
+            color:var(--soft);
+            line-height:1.6;
+        }
+        .formula{
+            font-family:var(--mono);
+            font-size:clamp(18px,2vw,24px);
+            line-height:1.5;
+            padding:14px 16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.06);
+            color:#f6fbff;
+            overflow:auto;
+        }
+        .formula.small{font-size:16px}
+        .muted{color:var(--muted)}
+        .bullets{
+            display:grid; gap:10px; margin-top:12px;
+        }
+        .bullet{
+            display:grid;
+            grid-template-columns:auto 1fr;
+            gap:10px;
+            align-items:start;
+            padding:10px 12px;
+            border-radius:16px;
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.05);
+            color:var(--soft);
+        }
+        .bullet .dot{
+            width:9px;height:9px;border-radius:50%;
+            background:linear-gradient(135deg, var(--accent), var(--accent2));
+            margin-top:8px;
+            box-shadow:0 0 18px rgba(93,228,214,.35);
+        }
+
+        .svg-frame{
+            border-radius:22px;
+            border:1px solid rgba(255,255,255,.06);
+            background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+            overflow:hidden;
+        }
+        .svg-frame svg,
+        .visual-stage svg,
+        .viz-mini svg{
+            width:100%;
+            height:100%;
+            display:block;
+        }
+        .svg-caption{
+            padding:10px 14px;
+            color:var(--muted);
+            font-size:13px;
+            border-top:1px solid rgba(255,255,255,.06);
+            background:rgba(255,255,255,.025);
+        }
+
+        .calc-wrap{
+            display:grid;
+            grid-template-columns:1.1fr .9fr;
+            gap:18px;
+        }
+        .stack{display:grid; gap:14px}
+        .field-grid{
+            display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+        }
+        .field{
+            display:grid; gap:8px;
+            min-width:0;
+        }
+        .field label{
+            font-size:13px; font-weight:700; color:var(--muted);
+        }
+        .field input, .field select{
+            width:100%;
+            border:1px solid rgba(255,255,255,.09);
+            background:rgba(255,255,255,.04);
+            color:white;
+            padding:13px 14px;
+            border-radius:14px;
+            outline:none;
+            font-size:16px;
+            min-width:0;
+        }
+        .field input:focus,.field select:focus{
+            border-color:rgba(93,228,214,.45);
+            box-shadow:0 0 0 4px rgba(93,228,214,.10);
+        }
+        .result{
+            padding:16px 18px;
+            border-radius:18px;
+            background:rgba(93,228,214,.08);
+            border:1px solid rgba(93,228,214,.18);
+            color:#e9fffb;
+            font-weight:700;
+            line-height:1.6;
+            overflow-wrap:anywhere;
+        }
+        .result .strong{
+            font-weight:900;
+            color:white;
+        }
+
+        .steps{
+            display:grid; gap:12px;
+        }
+        .step{
+            padding:14px 14px 14px 16px;
+            border-left:3px solid rgba(93,228,214,.45);
+            background:rgba(255,255,255,.03);
+            border-radius:0 18px 18px 0;
+            color:var(--soft);
+            line-height:1.55;
+            overflow-wrap:anywhere;
+        }
+        .step strong{color:white}
+
+        .examples{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:18px;
+        }
+
+        .example-header{
+            display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;
+            flex-wrap:wrap;
+        }
+        .pill{
+            padding:8px 12px;
+            border-radius:999px;
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            color:#dffeff;
+            border:1px solid rgba(93,228,214,.20);
+            background:rgba(93,228,214,.08);
+            font-weight:800;
+            max-width:100%;
+        }
+
+        .viz-mini{
+            height:240px;
+            border-radius:20px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.06);
+            background:rgba(255,255,255,.02);
+            margin:14px 0;
+            padding:6px;
+        }
+
+        .accordion{
+            display:grid; gap:10px;
+        }
+        details{
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,.07);
+            background:rgba(255,255,255,.03);
+            overflow:hidden;
+        }
+        summary{
+            cursor:pointer;
+            padding:16px 18px;
+            font-weight:800;
+            list-style:none;
+        }
+        summary::-webkit-details-marker{display:none}
+        details > div{
+            padding:0 18px 18px;
+            color:var(--soft);
+            line-height:1.6;
+            overflow-wrap:anywhere;
+        }
+
+        .quiz-grid, .generator-grid{
+            display:grid;
+            grid-template-columns:1.1fr .9fr;
+            gap:18px;
+        }
+        .question{
+            padding:16px 16px 14px;
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.06);
+            margin-bottom:12px;
+        }
+        .question h4{
+            margin:0 0 10px;
+            font-size:17px;
+            line-height:1.45;
+            overflow-wrap:anywhere;
+        }
+        .options{
+            display:grid; gap:8px;
+        }
+        .option{
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            padding:10px 12px;
+            border-radius:14px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.05);
+            line-height:1.45;
+            overflow-wrap:anywhere;
+        }
+        .option input{
+            accent-color:var(--accent);
+            margin-top:3px;
+            flex:0 0 auto;
+        }
+        .score{
+            font-size:18px;
+            font-weight:900;
+            color:white;
+        }
+        .status-good{color:var(--good)}
+        .status-bad{color:var(--bad)}
+        .tagrow{
+            display:flex; flex-wrap:wrap; gap:8px;
+        }
+        .tag{
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.06);
+            color:var(--soft);
+            font-size:13px;
+            font-weight:700;
+            max-width:100%;
+        }
+
+        .task-box{
+            padding:18px;
+            border-radius:20px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.07);
+            min-height:134px;
+            line-height:1.7;
+            color:var(--soft);
+            overflow-wrap:anywhere;
+        }
+        .answer-box{
+            margin-top:12px;
+            display:none;
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(98,214,139,.08);
+            border:1px solid rgba(98,214,139,.18);
+            color:#ebfff1;
+            overflow-wrap:anywhere;
+        }
+        .answer-box.show{display:block}
+
+        .footer{
+            padding:28px 0 46px;
+            color:var(--muted);
+            text-align:center;
+        }
+
+        .warning{
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(255,211,107,.08);
+            border:1px solid rgba(255,211,107,.22);
+            color:#fff6d6;
+            line-height:1.55;
+            overflow-wrap:anywhere;
+        }
+
+        .center{
+            display:flex; align-items:center; justify-content:center;
+        }
+
+        .mathline{
+            display:flex; flex-wrap:wrap; gap:10px;
+            align-items:center;
+            margin-top:12px;
+        }
+        .math-chip{
+            font-family:var(--mono);
+            background:rgba(122,168,255,.09);
+            border:1px solid rgba(122,168,255,.16);
+            color:#ecf2ff;
+            padding:9px 12px;
+            border-radius:14px;
+            font-size:15px;
+            max-width:100%;
+            overflow-wrap:anywhere;
+        }
+
+        .hide-print{display:inline-flex}
+        .show-print{display:none}
+
+        @media (max-width: 1100px){
+            .hero-grid,.grid-3,.grid-2,.calc-wrap,.examples,.quiz-grid,.generator-grid{
+                grid-template-columns:1fr;
+            }
+            .field-grid{grid-template-columns:repeat(2,1fr)}
+            .visual-stage{min-height:360px}
+        }
+
+        @media (max-width: 700px){
+            .container{width:min(100vw - 20px, 1260px)}
+            .topbar-inner{gap:10px; align-items:flex-start}
+            .nav{justify-content:flex-start}
+            .hero{padding-top:24px}
+            .hero-card,.card{padding:18px}
+            .hero-meta{grid-template-columns:1fr}
+            .visual-controls{grid-template-columns:1fr}
+            .field-grid{grid-template-columns:1fr}
+            h1{font-size:40px}
+            .lead{font-size:16px}
+            .formula{font-size:16px}
+            .viz-mini{height:220px}
+            .visual-stage{min-height:320px}
+            .svg-frame svg{height:auto}
+        }
+
+        @media print{
+            :root{
+                --bg:#fff;
+                --bg2:#fff;
+                --panel:#fff;
+                --panel-strong:#fff;
+                --line:rgba(0,0,0,.15);
+                --text:#111;
+                --muted:#444;
+                --soft:#222;
+                --accent:#0f766e;
+                --accent2:#1d4ed8;
+                --accent3:#6d28d9;
+                --good:#15803d;
+                --bad:#b91c1c;
+                --warn:#b45309;
+                --shadow:none;
+            }
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+            body::before{display:none}
+            .topbar, .nav, .hero-actions, .visual-controls, .btn, button, input, select, .hide-print{
+                display:none !important;
+            }
+            .show-print{display:block}
+            .glass, .card, .question, .task-box, .answer-box, details, .control, .meta{
+                background:#fff !important;
+                color:#111 !important;
+                border:1px solid #d8d8d8 !important;
+                box-shadow:none !important;
+            }
+            .formula{
+                background:#f6f6f6 !important;
+                color:#111 !important;
+                border:1px solid #ddd !important;
+            }
+            .svg-frame, .viz-mini, .visual-stage{
+                border:1px solid #ddd !important;
+                background:#fff !important;
+            }
+            a{color:#111 !important; text-decoration:none}
+            section{padding:10px 0}
+            .hero{padding-top:10px}
+            .container{width:100%; max-width:none}
+            .visual-stage{min-height:280px}
+            .answer-box{display:block !important}
+        }
+    </style>
+</head>
+<body>
+<header class="topbar hide-print">
+    <div class="container topbar-inner">
+        <div class="brand">
+            <div class="brand-mark"></div>
+            <div class="brand-text">
+                <div class="brand-title">Медиана и биссектриса в треугольнике</div>
+                <div class="brand-sub">Интерактивный учебный модуль: формулы, визуализация, тренажёр, квиз</div>
+            </div>
+        </div>
+        <nav class="nav">
+            <a href="#theory">Теория</a>
+            <a href="#demo">Демо</a>
+            <a href="#calc">Калькуляторы</a>
+            <a href="#examples">Примеры</a>
+            <a href="#generator">Генератор</a>
+            <a href="#quiz">Квиз</a>
+            <button onclick="window.print()">Печать</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="glass hero-card">
+                <div class="eyebrow">Геометрическая лаборатория</div>
+                <h1>Медиана и биссектриса:<br>ключевые идеи без перегруза</h1>
+                <p class="lead">
+                    Один сильный приём для медианы — <b>удвоение</b> с выходом на параллелограмм.
+                    Один главный факт для биссектрисы — <b>деление стороны в отношении прилежащих сторон</b>.
+                    Ниже — компактная теория, динамические чертежи, калькуляторы, типовые задачи и самопроверка.
+                </p>
+
+                <div class="hero-actions hide-print">
+                    <a class="btn" href="#demo">Открыть главный интерактивный блок</a>
+                    <a class="btn secondary" href="#generator">Сгенерировать задачу</a>
+                </div>
+
+                <div class="hero-meta">
+                    <div class="meta">
+                        <div class="big">2</div>
+                        <div class="small">базовые конструкции: медиана и биссектриса</div>
+                    </div>
+                    <div class="meta">
+                        <div class="big">5</div>
+                        <div class="small">типовых направлений: длины, площадь, угол, деление стороны, формулы</div>
+                    </div>
+                    <div class="meta">
+                        <div class="big">1</div>
+                        <div class="small">главная стратегия: переводить задачу в более удобную конфигурацию</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass hero-visual">
+                <div class="visual-head">
+                    <div class="visual-title">Живой чертёж</div>
+                    <div class="chip">двигайте вершину A</div>
+                </div>
+                <div class="visual-stage" id="heroStage">
+                    <svg id="heroSvg" viewBox="0 0 520 420" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" aria-label="Интерактивный чертёж медианы и биссектрисы"></svg>
+                </div>
+                <div class="visual-controls hide-print">
+                    <div class="control">
+                        <label><span>Положение A по горизонтали</span><span id="axVal">190</span></label>
+                        <input id="axRange" type="range" min="125" max="300" value="190">
+                    </div>
+                    <div class="control">
+                        <label><span>Положение A по вертикали</span><span id="ayVal">110</span></label>
+                        <input id="ayRange" type="range" min="70" max="170" value="110">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="theory">
+        <div class="container">
+            <div class="section-title">
+                <div>
+                    <h2>Короткая карта темы</h2>
+                </div>
+                <p>Сначала — смысл и формулы. Затем — как именно использовать их в решении.</p>
+            </div>
+
+            <div class="grid-3">
+                <article class="card">
+                    <h3>Медиана</h3>
+                    <p>Медиана соединяет вершину треугольника с серединой противоположной стороны.</p>
+                    <div class="formula">AM — медиана к BC, если BM = MC</div>
+                    <div class="bullets">
+                        <div class="bullet"><span class="dot"></span><span>Если продолжить AM за точку M так, чтобы AM = MF, то четырёхугольник ABFC — параллелограмм.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Отсюда: AF = 2AM, FC = AB, BF = AC.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Задача часто сводится к новому треугольнику AFC.</span></div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h3>Биссектриса</h3>
+                    <p>Биссектриса делит угол пополам и противоположную сторону — в отношении прилежащих сторон.</p>
+                    <div class="formula">BK / KC = AB / AC = c / b</div>
+                    <div class="bullets">
+                        <div class="bullet"><span class="dot"></span><span>Если известны AB, AC и BC, то можно найти BK и KC.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Дальше удобно вычислять длину биссектрисы или половину угла.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Часто сначала находят отрезки BK и KC, а потом уже саму биссектрису.</span></div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h3>Когда что работает</h3>
+                    <p>После хорошего дополнительного построения включаются стандартные теоремы.</p>
+                    <div class="mathline">
+                        <span class="math-chip">теорема косинусов</span>
+                        <span class="math-chip">теорема синусов</span>
+                        <span class="math-chip">формула Герона</span>
+                        <span class="math-chip">площади</span>
+                    </div>
+                    <div class="bullets" style="margin-top:14px">
+                        <div class="bullet"><span class="dot"></span><span>Найти угол по сторонам → обычно нужна теорема косинусов.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Все три стороны известны → можно брать Герона.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Сторона и два угла или две стороны с удобным углом → синусы.</span></div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="grid-2" style="margin-top:18px">
+                <article class="card">
+                    <h3>Формулы для медианы</h3>
+                    <div class="formula">m<sub>a</sub> = ½√(2b² + 2c² − a²)</div>
+                    <div class="formula small" style="margin-top:12px">a² + 4m<sub>a</sub>² = 2b² + 2c²</div>
+                    <div class="formula small" style="margin-top:12px">Для параллелограмма: d₁² + d₂² = 2x² + 2y²</div>
+                    <div class="warning" style="margin-top:14px">
+                        Если дана медиана к стороне a и известны b, c, m<sub>a</sub>, то сначала удобно найти a по формуле Аполлония, а затем при необходимости — угол по теореме косинусов.
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h3>Формулы для биссектрисы</h3>
+                    <div class="formula">l<sub>a</sub>² = bc − mn</div>
+                    <p class="muted" style="margin-top:8px">где BK = m, KC = n, а m + n = a</p>
+                    <div class="formula small" style="margin-top:12px">l<sub>a</sub> = 2bc·cos(∠BAC / 2) / (b + c)</div>
+                    <div class="formula small" style="margin-top:12px">S = ½bc·sin(∠BAC)</div>
+                    <div class="warning" style="margin-top:14px">
+                        В формуле с cos используется именно половина угла при вершине A. Это частая ошибка.
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo">
+        <div class="container">
+            <div class="section-title">
+                <div>
+                    <h2>Главный интерактивный блок</h2>
+                </div>
+                <p>Один чертёж показывает сразу две идеи: удвоение медианы и деление стороны биссектрисой.</p>
+            </div>
+
+            <div class="grid-2">
+                <article class="card">
+                    <h3>1) Удвоение медианы</h3>
+                    <p>
+                        В треугольнике ABC точка M — середина BC. Продлеваем AM до точки F так, чтобы AM = MF.
+                        Тогда M — середина и BC, и AF. Диагонали четырёхугольника ABFC делятся пополам, значит ABFC — параллелограмм.
+                    </p>
+                    <div class="svg-frame">
+                        <svg id="medianSvg" viewBox="0 0 560 320" preserveAspectRatio="xMidYMid meet" width="100%" height="320" aria-label="Удвоение медианы"></svg>
+                        <div class="svg-caption">Сразу видно: AF = 2AM, AB = FC, AC = BF.</div>
+                    </div>
+                    <div class="steps" style="margin-top:14px">
+                        <div class="step"><strong>Шаг 1.</strong> Найди середину стороны, к которой проведена медиана.</div>
+                        <div class="step"><strong>Шаг 2.</strong> Удвой медиану за эту середину.</div>
+                        <div class="step"><strong>Шаг 3.</strong> Получи параллелограмм и перенеси задачу в треугольник AFC.</div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h3>2) Биссектриса и отношение</h3>
+                    <p>
+                        Если AK — биссектриса угла A, то точка K делит сторону BC в отношении прилежащих сторон:
+                        BK / KC = AB / AC.
+                    </p>
+                    <div class="svg-frame">
+                        <svg id="bisectorSvg" viewBox="0 0 560 320" preserveAspectRatio="xMidYMid meet" width="100%" height="320" aria-label="Биссектриса"></svg>
+                        <div class="svg-caption">Полезно помнить: сначала отношение, потом — длина биссектрисы.</div>
+                    </div>
+                    <div class="steps" style="margin-top:14px">
+                        <div class="step"><strong>Шаг 1.</strong> Сразу записать BK / KC = AB / AC.</div>
+                        <div class="step"><strong>Шаг 2.</strong> Использовать BK + KC = BC.</div>
+                        <div class="step"><strong>Шаг 3.</strong> При необходимости вычислить l<sub>a</sub> по формуле l<sub>a</sub>² = bc − mn.</div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="calc">
+        <div class="container">
+            <div class="section-title">
+                <div>
+                    <h2>Калькуляторы по теме</h2>
+                </div>
+                <p>Без лишней теории: вводите данные и сразу видите формулу, вычисление и итог.</p>
+            </div>
+
+            <div class="calc-wrap">
+                <article class="card">
+                    <h3>Калькулятор медианы</h3>
+                    <p>Даны стороны a = BC, b = AC, c = AB. Найти m<sub>a</sub>.</p>
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="aInput">a = BC</label>
+                            <input id="aInput" type="number" step="any" value="10">
+                        </div>
+                        <div class="field">
+                            <label for="bInput">b = AC</label>
+                            <input id="bInput" type="number" step="any" value="13">
+                        </div>
+                        <div class="field">
+                            <label for="cInput">c = AB</label>
+                            <input id="cInput" type="number" step="any" value="13">
+                        </div>
+                    </div>
+                    <div class="hero-actions hide-print" style="margin-top:14px">
+                        <button class="btn" onclick="calcMedian()">Вычислить</button>
+                        <button class="btn secondary" onclick="fillMedianExample()">Пример 10, 13, 13</button>
+                    </div>
+                    <div id="medianResult" class="result" style="margin-top:14px"></div>
+                </article>
+
+                <article class="card">
+                    <h3>Калькулятор биссектрисы</h3>
+                    <p>Даны стороны AB = c, AC = b, BC = a. Находим BK, KC и l<sub>a</sub>.</p>
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="bisA">a = BC</label>
+                            <input id="bisA" type="number" step="any" value="5">
+                        </div>
+                        <div class="field">
+                            <label for="bisB">b = AC</label>
+                            <input id="bisB" type="number" step="any" value="4">
+                        </div>
+                        <div class="field">
+                            <label for="bisC">c = AB</label>
+                            <input id="bisC" type="number" step="any" value="3">
+                        </div>
+                    </div>
+                    <div class="hero-actions hide-print" style="margin-top:14px">
+                        <button class="btn" onclick="calcBisector()">Вычислить</button>
+                        <button class="btn secondary" onclick="fillBisectorExample()">Пример 5, 4, 3</button>
+                    </div>
+                    <div id="bisectorResult" class="result" style="margin-top:14px"></div>
+                </article>
+            </div>
+
+            <div class="grid-2" style="margin-top:18px">
+                <article class="card">
+                    <h3>Как найти угол, если дана медиана</h3>
+                    <div class="formula">1) a² = 2b² + 2c² − 4m<sub>a</sub>²</div>
+                    <div class="formula small" style="margin-top:12px">2) a² = b² + c² − 2bc·cos A</div>
+                    <div class="steps" style="margin-top:14px">
+                        <div class="step"><strong>Сначала</strong> восстановить сторону a по медиане.</div>
+                        <div class="step"><strong>Потом</strong> подставить a, b, c в теорему косинусов.</div>
+                        <div class="step"><strong>Наконец</strong> найти cos A и сам угол A.</div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h3>Площадь через удвоение медианы</h3>
+                    <div class="formula">S(△ABC) = S(△AFC)</div>
+                    <p style="margin-top:12px">
+                        После удвоения медианы получаем новый треугольник со сторонами
+                        AC = b, FC = c, AF = 2m<sub>a</sub>.
+                        Если эти три стороны известны, то площадь удобно искать по формуле Герона.
+                    </p>
+                    <div class="formula small" style="margin-top:12px">p = (x + y + z) / 2, S = √(p(p − x)(p − y)(p − z))</div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="examples">
+        <div class="container">
+            <div class="section-title">
+                <div>
+                    <h2>Разбор типовых задач</h2>
+                </div>
+                <p>Два компактных образца: один про медиану, второй — про биссектрису.</p>
+            </div>
+
+            <div class="examples">
+                <article class="card">
+                    <div class="example-header">
+                        <h3 style="margin:0">Пример 1. Найти медиану</h3>
+                        <span class="pill">Аполлоний</span>
+                    </div>
+                    <p>Дано: a = 10, b = 13, c = 13. Найти m<sub>a</sub>.</p>
+                    <div class="formula">m<sub>a</sub> = ½√(2·13² + 2·13² − 10²) = ½√576 = 12</div>
+                    <div class="viz-mini">
+                        <svg id="ex1Svg" viewBox="0 0 520 240" preserveAspectRatio="xMidYMid meet" width="100%" height="100%"></svg>
+                    </div>
+                    <div class="tagrow">
+                        <span class="tag">равнобедренный случай</span>
+                        <span class="tag">медиана к основанию</span>
+                        <span class="tag">быстрая проверка ответов</span>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="example-header">
+                        <h3 style="margin:0">Пример 2. Биссектриса в 3–4–5</h3>
+                        <span class="pill">отношение + длина</span>
+                    </div>
+                    <p>Дано: AB = 3, AC = 4, BC = 5. Биссектриса AK пересекает BC в точке K.</p>
+                    <div class="formula small">BK / KC = 3 / 4, BK + KC = 5</div>
+                    <div class="formula small" style="margin-top:12px">BK = 15/7, KC = 20/7</div>
+                    <div class="formula small" style="margin-top:12px">AK² = 3·4 − (15/7)(20/7) = 288/49, AK = 12√2 / 7</div>
+                    <div class="viz-mini">
+                        <svg id="ex2Svg" viewBox="0 0 520 240" preserveAspectRatio="xMidYMid meet" width="100%" height="100%"></svg>
+                    </div>
+                    <div class="tagrow">
+                        <span class="tag">отношение отрезков</span>
+                        <span class="tag">формула l<sub>a</sub>² = bc − mn</span>
+                        <span class="tag">частый школьный шаблон</span>
+                    </div>
+                </article>
+            </div>
+
+            <div class="grid-2" style="margin-top:18px">
+                <article class="card">
+                    <h3>Алгоритм, если в задаче есть медиана</h3>
+                    <div class="accordion">
+                        <details open>
+                            <summary>1. Сначала проверь, к какой стороне она проведена</summary>
+                            <div>Это определяет, какая из сторон будет называться a и какая формула Аполлония нужна.</div>
+                        </details>
+                        <details open>
+                            <summary>2. Попробуй удвоить медиану</summary>
+                            <div>Если дополнительное построение уместно, ты сразу получаешь параллелограмм и новый удобный треугольник.</div>
+                        </details>
+                        <details open>
+                            <summary>3. Подключай стандартные теоремы</summary>
+                            <div>Дальше чаще всего работают Герон, косинусы, синусы или формула диагоналей параллелограмма.</div>
+                        </details>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h3>Алгоритм, если в задаче есть биссектриса</h3>
+                    <div class="accordion">
+                        <details open>
+                            <summary>1. Сразу записать отношение BK / KC = AB / AC</summary>
+                            <div>Это главный первый ход. Он превращает геометрию в конкретные числа.</div>
+                        </details>
+                        <details open>
+                            <summary>2. Использовать сумму BK + KC = BC</summary>
+                            <div>Так удобно находить сами отрезки стороны BC.</div>
+                        </details>
+                        <details open>
+                            <summary>3. Потом находить длину биссектрисы или угол</summary>
+                            <div>Если нужны длина или половина угла, применяй формулы для l<sub>a</sub>.</div>
+                        </details>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator">
+        <div class="container">
+            <div class="section-title">
+                <div>
+                    <h2>Генератор корректных тренировочных задач</h2>
+                </div>
+                <p>Только безопасные шаблоны: без противоречивых условий и с заранее проверяемыми ответами.</p>
+            </div>
+
+            <div class="generator-grid">
+                <article class="card">
+                    <h3>Новая задача</h3>
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="taskType">Тип задачи</label>
+                            <select id="taskType">
+                                <option value="medianBySides">Медиана по трём сторонам</option>
+                                <option value="sideByMedian">Сторона по двум сторонам и медиане</option>
+                                <option value="bisectorSplit">Деление стороны биссектрисой</option>
+                                <option value="bisectorLength">Длина биссектрисы</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Действие</label>
+                            <button class="btn" onclick="generateTask()">Сгенерировать</button>
+                        </div>
+                        <div class="field">
+                            <label>Ответ</label>
+                            <button class="btn secondary" onclick="toggleTaskAnswer()">Показать / скрыть</button>
+                        </div>
+                    </div>
+
+                    <div id="taskText" class="task-box" style="margin-top:14px"></div>
+                    <div id="taskAnswer" class="answer-box"></div>
+                </article>
+
+                <article class="card">
+                    <h3>Мини-визуализация задачи</h3>
+                    <div class="svg-frame">
+                        <svg id="taskSvg" viewBox="0 0 560 340" preserveAspectRatio="xMidYMid meet" width="100%" height="320"></svg>
+                        <div class="svg-caption">Чертёж меняется под тип задачи: медиана или биссектриса.</div>
+                    </div>
+                    <div class="warning" style="margin-top:14px">
+                        Шаблоны подобраны так, чтобы вычисления были школьными, а ответы — корректными и однозначными.
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz">
+        <div class="container">
+            <div class="section-title">
+                <div>
+                    <h2>Мини-квиз</h2>
+                </div>
+                <p>Пять коротких вопросов на узнавание идей, формул и типовых действий.</p>
+            </div>
+
+            <div class="quiz-grid">
+                <article class="card">
+                    <div id="quizForm"></div>
+                    <div class="hero-actions hide-print" style="margin-top:8px">
+                        <button class="btn" onclick="checkQuiz()">Проверить</button>
+                        <button class="btn secondary" onclick="resetQuiz()">Сбросить</button>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h3>Результат</h3>
+                    <div id="quizResult" class="result">
+                        <div class="score">Пока без проверки</div>
+                        <div class="muted" style="margin-top:6px">Выберите ответы и нажмите «Проверить».</div>
+                    </div>
+
+                    <div class="bullets" style="margin-top:16px">
+                        <div class="bullet"><span class="dot"></span><span>Медиана → сначала думать про удвоение.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Биссектриса → сначала думать про отношение BK / KC = AB / AC.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Угол по сторонам → чаще всего косинусы.</span></div>
+                        <div class="bullet"><span class="dot"></span><span>Три стороны известны → можно брать Герона.</span></div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container grid-2">
+            <article class="card">
+                <h3>Типичные ошибки</h3>
+                <div class="bullets">
+                    <div class="bullet"><span class="dot"></span><span>Думать, что медиана только делит сторону пополам и больше ничего не даёт.</span></div>
+                    <div class="bullet"><span class="dot"></span><span>Забывать, что удвоение медианы создаёт параллелограмм.</span></div>
+                    <div class="bullet"><span class="dot"></span><span>Путать медиану и биссектрису.</span></div>
+                    <div class="bullet"><span class="dot"></span><span>Переворачивать отношение: верно BK / KC = AB / AC.</span></div>
+                    <div class="bullet"><span class="dot"></span><span>В формуле биссектрисы подставлять весь угол вместо половины.</span></div>
+                </div>
+            </article>
+
+            <article class="card">
+                <h3>Что надо помнить наизусть</h3>
+                <div class="mathline">
+                    <span class="math-chip">m<sub>a</sub> = ½√(2b² + 2c² − a²)</span>
+                    <span class="math-chip">a² + 4m<sub>a</sub>² = 2b² + 2c²</span>
+                    <span class="math-chip">BK / KC = AB / AC</span>
+                    <span class="math-chip">l<sub>a</sub>² = bc − mn</span>
+                    <span class="math-chip">l<sub>a</sub> = 2bc·cos(A/2)/(b+c)</span>
+                    <span class="math-chip">d₁² + d₂² = 2x² + 2y²</span>
+                </div>
+                <div class="show-print" style="margin-top:18px; color:#222; line-height:1.6">
+                    Эта страница адаптирована для печати: основные формулы, теория и примеры сохранены, а лишняя интерактивность скрыта.
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    Медиана → удвоение. Биссектриса → отношение. Дальше — правильная теорема в правильной конфигурации.
+</footer>
+
+<script>
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    function el(name, attrs = {}, parent){
+        const node = document.createElementNS(svgNS, name);
+        for(const [k,v] of Object.entries(attrs)) node.setAttribute(k, v);
+        if(parent) parent.appendChild(node);
+        return node;
+    }
+
+    function clearSvg(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+
+    function dist(P,Q){ return Math.hypot(P.x-Q.x, P.y-Q.y); }
+    function mid(P,Q){ return {x:(P.x+Q.x)/2, y:(P.y+Q.y)/2}; }
+    function add(P,Q){ return {x:P.x+Q.x, y:P.y+Q.y}; }
+    function sub(P,Q){ return {x:P.x-Q.x, y:P.y-Q.y}; }
+    function mul(P,k){ return {x:P.x*k, y:P.y*k}; }
+    function normalize(v){
+        const d = Math.hypot(v.x, v.y) || 1;
+        return {x:v.x/d, y:v.y/d};
+    }
+    function fmt(n){
+        if(!isFinite(n)) return "—";
+        const s = (Math.round(n*1000)/1000).toString();
+        return s.replace(".", ",");
+    }
+    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+    function drawPoint(svg, P, label, color="#fff", dx=10, dy=-10){
+        el("circle", {cx:P.x, cy:P.y, r:4.5, fill:color, stroke:"rgba(255,255,255,.45)", "stroke-width":"1.5"}, svg);
+        const t = el("text", {
+            x:P.x+dx, y:P.y+dy, fill:"#eef6ff", "font-size":"14", "font-weight":"700",
+            "paint-order":"stroke", stroke:"rgba(8,17,31,.9)", "stroke-width":"4", "stroke-linejoin":"round"
+        }, svg);
+        t.textContent = label;
+    }
+
+    function drawText(svg, x, y, text, fill="#b8c7e6", size=13, weight=700, anchor="start"){
+        const t = el("text", {
+            x, y, fill, "font-size":size, "font-weight":weight, "text-anchor":anchor,
+            "paint-order":"stroke", stroke:"rgba(8,17,31,.92)", "stroke-width":"5", "stroke-linejoin":"round"
+        }, svg);
+        t.textContent = text;
+        return t;
+    }
+
+    function drawLine(svg, P, Q, stroke, width=2, dash=""){
+        return el("line", {
+            x1:P.x, y1:P.y, x2:Q.x, y2:Q.y,
+            stroke, "stroke-width":width, "stroke-linecap":"round",
+            ...(dash ? {"stroke-dasharray":dash} : {})
+        }, svg);
+    }
+
+    function drawPolygon(svg, points, stroke="#cfe2ff", fill="rgba(255,255,255,.02)", width=2){
+        const d = points.map((p,i)=>(i===0?"M":"L")+p.x+" "+p.y).join(" ") + " Z";
+        el("path", {d, fill, stroke, "stroke-width":width, "stroke-linejoin":"round"}, svg);
+    }
+
+    function drawTickPair(svg, P, Q, count=1, color="#eaffff"){
+        const m = mid(P,Q);
+        const v = normalize(sub(Q,P));
+        const n = {x:-v.y, y:v.x};
+        for(let i=0;i<count;i++){
+            const shift = (i - (count-1)/2) * 7;
+            const c = add(m, mul(v, shift));
+            drawLine(svg, add(c, mul(n,-7)), add(c, mul(n,7)), color, 2);
+        }
+    }
+
+    function angleArcPath(A, B, C, r){
+        const v1 = normalize(sub(A,B));
+        const v2 = normalize(sub(C,B));
+        const p1 = add(B, mul(v1, r));
+        const p2 = add(B, mul(v2, r));
+        const cross = v1.x*v2.y - v1.y*v2.x;
+        const large = 0;
+        const sweep = cross < 0 ? 1 : 0;
+        return `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${large} ${sweep} ${p2.x} ${p2.y}`;
+    }
+
+    function drawAngle(svg, A, B, C, r=26, label="", color="#7aa8ff"){
+        el("path", {
+            d: angleArcPath(A,B,C,r),
+            fill:"none", stroke:color, "stroke-width":2.3
+        }, svg);
+        if(label){
+            const v1 = normalize(sub(A,B));
+            const v2 = normalize(sub(C,B));
+            const bis = normalize({x:v1.x+v2.x, y:v1.y+v2.y});
+            const pos = add(B, mul(bis, r+18));
+            drawText(svg, pos.x, pos.y+4, label, "#dfe9ff", 13, 800, "middle");
+        }
+    }
+
+    function bisectorPointOnBC(A,B,C){
+        const AB = dist(A,B), AC = dist(A,C);
+        const ratio = AB / (AB + AC);
+        return {x: B.x + ratio*(C.x-B.x), y: B.y + ratio*(C.y-B.y)};
+    }
+
+    function drawGrid(svg, w, h){
+        const g = el("g", {"stroke":"rgba(255,255,255,.05)", "stroke-width":"1"}, svg);
+        for(let x=0;x<=w;x+=40) el("line", {x1:x, y1:0, x2:x, y2:h}, g);
+        for(let y=0;y<=h;y+=40) el("line", {x1:0, y1:y, x2:w, y2:y}, g);
+    }
+
+    function renderHero(){
+        const svg = document.getElementById("heroSvg");
+        clearSvg(svg);
+        const w = 520, h = 420;
+        drawGrid(svg,w,h);
+
+        const ax = +document.getElementById("axRange").value;
+        const ay = +document.getElementById("ayRange").value;
+        document.getElementById("axVal").textContent = ax;
+        document.getElementById("ayVal").textContent = ay;
+
+        const B = {x:110,y:318};
+        const C = {x:410,y:318};
+        const A = {x:ax,y:ay};
+        const M = mid(B,C);
+        const F = add(M, sub(M,A));
+        const K = bisectorPointOnBC(A,B,C);
+
+        drawPolygon(svg,[A,B,C],"rgba(225,240,255,.9)","rgba(255,255,255,.03)",2.2);
+        drawPolygon(svg,[A,B,F,C],"rgba(122,168,255,.35)","rgba(122,168,255,.06)",1.6);
+
+        drawLine(svg,A,M,"#5de4d6",3);
+        drawLine(svg,M,F,"#5de4d6",3,"7 6");
+        drawLine(svg,A,K,"#9f7bff",2.7);
+        drawLine(svg,B,F,"rgba(122,168,255,.55)",1.8,"6 6");
+
+        drawTickPair(svg,B,M,1,"#faffff");
+        drawTickPair(svg,M,C,1,"#faffff");
+        drawTickPair(svg,A,M,2,"#d4fff7");
+        drawTickPair(svg,M,F,2,"#d4fff7");
+
+        drawAngle(svg,B,A,K,24,"α","#9f7bff");
+        drawAngle(svg,K,A,C,34,"α","#9f7bff");
+
+        drawPoint(svg,A,"A","#fff",10,-12);
+        drawPoint(svg,B,"B","#fff",-16,20);
+        drawPoint(svg,C,"C","#fff",10,20);
+        drawPoint(svg,M,"M","#fff",10,20);
+        drawPoint(svg,F,"F","#fff",10,-12);
+        drawPoint(svg,K,"K","#fff",10,20);
+
+        drawText(svg,26,32,"Живой чертёж: медиана AM, её удвоение до F и биссектриса AK", "#dbe9ff", 15, 800);
+        drawText(svg,26,54,"BM = MC, AM = MF, BK / KC = AB / AC", "#a8bddf", 13, 700);
+
+        const AB = dist(A,B), AC = dist(A,C), BK = dist(B,K), KC = dist(K,C), AM = dist(A,M);
+        const info = [
+            `AB ≈ ${fmt(AB)}`,
+            `AC ≈ ${fmt(AC)}`,
+            `AM ≈ ${fmt(AM)}`,
+            `BK:KC ≈ ${fmt(BK/KC)} : 1`
+        ];
+        info.forEach((t,i)=>drawText(svg,26, h-84+i*18, t, i===2?"#d6fff9":"#c6d7f3", 13, 700));
+    }
+
+    function renderMedianDemo(){
+        const svg = document.getElementById("medianSvg");
+        clearSvg(svg);
+        const B = {x:92,y:248}, C={x:284,y:248}, A={x:150,y:76};
+        const M = mid(B,C);
+        const F = add(M, sub(M,A));
+
+        drawPolygon(svg,[A,B,C],"rgba(238,246,255,.95)","rgba(255,255,255,.02)",2.2);
+        drawPolygon(svg,[A,B,F,C],"rgba(93,228,214,.28)","rgba(93,228,214,.06)",1.8);
+        drawLine(svg,A,M,"#5de4d6",3);
+        drawLine(svg,M,F,"#5de4d6",3,"7 6");
+        drawLine(svg,B,F,"rgba(122,168,255,.45)",1.7,"6 6");
+
+        drawTickPair(svg,B,M,1);
+        drawTickPair(svg,M,C,1);
+        drawTickPair(svg,A,M,2,"#d5fff8");
+        drawTickPair(svg,M,F,2,"#d5fff8");
+
+        [ [A,"A",10,-10],[B,"B",-18,16],[C,"C",10,16],[M,"M",10,16],[F,"F",10,-8] ]
+            .forEach(([P,L,dx,dy])=>drawPoint(svg,P,L,"#fff",dx,dy));
+
+        drawText(svg,378,76,"ABFC — параллелограмм", "#eaffff", 15, 800);
+        drawText(svg,378,108,"AF = 2AM", "#d8fff9", 15, 800);
+        drawText(svg,378,134,"FC = AB", "#d8fff9", 15, 800);
+        drawText(svg,378,160,"BF = AC", "#d8fff9", 15, 800);
+
+        drawText(svg,360,220,"Выгода:", "#ffffff", 15, 900);
+        drawText(svg,360,246,"новый треугольник AFC", "#c9d8f0", 14, 700);
+        drawText(svg,360,270,"часто имеет три удобные стороны", "#c9d8f0", 14, 700);
+    }
+
+    function renderBisectorDemo(){
+        const svg = document.getElementById("bisectorSvg");
+        clearSvg(svg);
+        const B = {x:92,y:248}, C={x:468,y:248}, A={x:190,y:76};
+        const K = bisectorPointOnBC(A,B,C);
+
+        drawPolygon(svg,[A,B,C],"rgba(238,246,255,.95)","rgba(255,255,255,.02)",2.2);
+        drawLine(svg,A,K,"#9f7bff",3);
+
+        drawAngle(svg,B,A,K,24,"α","#9f7bff");
+        drawAngle(svg,K,A,C,36,"α","#9f7bff");
+
+        [ [A,"A",10,-10],[B,"B",-18,16],[C,"C",10,16],[K,"K",10,16] ]
+            .forEach(([P,L,dx,dy])=>drawPoint(svg,P,L,"#fff",dx,dy));
+
+        const AB = dist(A,B), AC = dist(A,C), BK = dist(B,K), KC = dist(K,C);
+        drawText(svg,344,82,"BK / KC = AB / AC", "#f1eaff", 15, 800);
+        drawText(svg,344,112,`${fmt(BK)} / ${fmt(KC)} ≈ ${fmt(AB)} / ${fmt(AC)}`, "#dcd0ff", 14, 700);
+        drawText(svg,344,176,"Сначала находи BK и KC,", "#f8f2ff", 15, 800);
+        drawText(svg,344,204,"потом — длину биссектрисы", "#cbb4ff", 14, 700);
+        drawText(svg,344,232,"или половину угла", "#cbb4ff", 14, 700);
+    }
+
+    function renderExample1(){
+        const svg = document.getElementById("ex1Svg");
+        clearSvg(svg);
+        const B = {x:92,y:186}, C={x:428,y:186}, A={x:260,y:48}, M = mid(B,C);
+        drawPolygon(svg,[A,B,C],"rgba(238,246,255,.95)","rgba(255,255,255,.02)",2.2);
+        drawLine(svg,A,M,"#5de4d6",3);
+        drawTickPair(svg,B,M,1);
+        drawTickPair(svg,M,C,1);
+        drawPoint(svg,A,"A","#fff",8,-10);
+        drawPoint(svg,B,"B","#fff",-18,16);
+        drawPoint(svg,C,"C","#fff",10,16);
+        drawPoint(svg,M,"M","#fff",10,16);
+        drawText(svg,116,108,"AB = 13", "#d8e5ff", 14, 700);
+        drawText(svg,330,108,"AC = 13", "#d8e5ff", 14, 700);
+        drawText(svg,196,216,"BC = 12", "#d8e5ff", 14, 700);
+        drawText(svg,230,132,"AM = 12", "#d7fff9", 15, 800);
+    }
+
+    function renderExample2(){
+        const svg = document.getElementById("ex2Svg");
+        clearSvg(svg);
+        const B = {x:92,y:190}, C={x:428,y:190}, A={x:176,y:54};
+        const K = bisectorPointOnBC(A,B,C);
+        drawPolygon(svg,[A,B,C],"rgba(238,246,255,.95)","rgba(255,255,255,.02)",2.2);
+        drawLine(svg,A,K,"#9f7bff",3);
+        drawAngle(svg,B,A,K,22,"α","#9f7bff");
+        drawAngle(svg,K,A,C,32,"α","#9f7bff");
+        drawPoint(svg,A,"A","#fff",8,-10);
+        drawPoint(svg,B,"B","#fff",-18,16);
+        drawPoint(svg,C,"C","#fff",10,16);
+        drawPoint(svg,K,"K","#fff",10,16);
+        drawText(svg,100,110,"AB = 3", "#d8e5ff", 14, 700);
+        drawText(svg,284,104,"AC = 4", "#d8e5ff", 14, 700);
+        drawText(svg,208,220,"BC = 5", "#d8e5ff", 14, 700);
+        drawText(svg,102,158,"BK = 15/7", "#eadcff", 14, 700);
+        drawText(svg,286,158,"KC = 20/7", "#eadcff", 14, 700);
+    }
+
+    function calcMedian(){
+        const a = parseFloat(document.getElementById("aInput").value);
+        const b = parseFloat(document.getElementById("bInput").value);
+        const c = parseFloat(document.getElementById("cInput").value);
+        const out = document.getElementById("medianResult");
+
+        if(!(a>0 && b>0 && c>0)){
+            out.innerHTML = "Введите положительные длины сторон.";
+            return;
+        }
+        if(a+b<=c || a+c<=b || b+c<=a){
+            out.innerHTML = "Такие три числа не образуют треугольник.";
+            return;
+        }
+        const rad = 2*b*b + 2*c*c - a*a;
+        if(rad < 0){
+            out.innerHTML = "Подкоренное выражение получилось отрицательным. Проверьте данные.";
+            return;
+        }
+        const m = 0.5 * Math.sqrt(rad);
+        out.innerHTML =
+        `<div class="strong">m<sub>a</sub> = ½√(2b² + 2c² − a²)</div>
+         <div style="margin-top:8px">m<sub>a</sub> = ½√(2·${fmt(b)}² + 2·${fmt(c)}² − ${fmt(a)}²)</div>
+         <div style="margin-top:4px">m<sub>a</sub> = ½√(${fmt(2*b*b + 2*c*c - a*a)}) = <span class="strong">${fmt(m)}</span></div>`;
+    }
+
+    function fillMedianExample(){
+        document.getElementById("aInput").value = 10;
+        document.getElementById("bInput").value = 13;
+        document.getElementById("cInput").value = 13;
+        calcMedian();
+    }
+
+    function calcBisector(){
+        const a = parseFloat(document.getElementById("bisA").value);
+        const b = parseFloat(document.getElementById("bisB").value);
+        const c = parseFloat(document.getElementById("bisC").value);
+        const out = document.getElementById("bisectorResult");
+
+        if(!(a>0 && b>0 && c>0)){
+            out.innerHTML = "Введите положительные длины сторон.";
+            return;
+        }
+        if(a+b<=c || a+c<=b || b+c<=a){
+            out.innerHTML = "Такие три числа не образуют треугольник.";
+            return;
+        }
+
+        const BK = a * c / (b + c);
+        const KC = a * b / (b + c);
+        const rad = b*c - BK*KC;
+        if(rad < 0){
+            out.innerHTML = "Невозможно вычислить длину биссектрисы: проверьте данные.";
+            return;
+        }
+        const l = Math.sqrt(rad);
+
+        out.innerHTML =
+        `<div class="strong">BK / KC = AB / AC = c / b</div>
+         <div style="margin-top:8px">BK = a·c / (b + c) = ${fmt(a)}·${fmt(c)} / (${fmt(b)} + ${fmt(c)}) = <span class="strong">${fmt(BK)}</span></div>
+         <div>KC = a·b / (b + c) = ${fmt(a)}·${fmt(b)} / (${fmt(b)} + ${fmt(c)}) = <span class="strong">${fmt(KC)}</span></div>
+         <div style="margin-top:10px" class="strong">l<sub>a</sub>² = bc − mn</div>
+         <div style="margin-top:6px">l<sub>a</sub>² = ${fmt(b)}·${fmt(c)} − ${fmt(BK)}·${fmt(KC)} = ${fmt(rad)}</div>
+         <div>l<sub>a</sub> = <span class="strong">${fmt(l)}</span></div>`;
+    }
+
+    function fillBisectorExample(){
+        document.getElementById("bisA").value = 5;
+        document.getElementById("bisB").value = 4;
+        document.getElementById("bisC").value = 3;
+        calcBisector();
+    }
+
+    const quizData = [
+        {
+            q: "Какое дополнительное построение чаще всего полезно, если в задаче дана медиана?",
+            options: ["Провести высоту к той же стороне", "Удвоить медиану за её середину", "Описать окружность", "Провести две биссектрисы"],
+            correct: 1
+        },
+        {
+            q: "Какое равенство верно для биссектрисы AK в треугольнике ABC?",
+            options: ["BK / KC = AC / AB", "BK / KC = BC / AB", "BK / KC = AB / AC", "BK / KC = AB / BC"],
+            correct: 2
+        },
+        {
+            q: "Какая формула верна для медианы к стороне a?",
+            options: ["mₐ = √(b² + c² − a²)", "mₐ = ½√(2b² + 2c² − a²)", "mₐ = ½√(a² + b² + c²)", "mₐ = √(2a² + 2b² − c²)"],
+            correct: 1
+        },
+        {
+            q: "Если известны три стороны треугольника, чем удобно искать площадь?",
+            options: ["Только теоремой синусов", "Только высотой", "Формулой Герона", "Формулой биссектрисы"],
+            correct: 2
+        },
+        {
+            q: "Что обычно делают, если нужно найти угол при известных сторонах?",
+            options: ["Применяют теорему косинусов", "Сразу делят угол пополам", "Строят окружность", "Берут отношение площадей без формул"],
+            correct: 0
+        }
+    ];
+
+    function buildQuiz(){
+        const host = document.getElementById("quizForm");
+        host.innerHTML = "";
+        quizData.forEach((item, idx)=>{
+            const block = document.createElement("div");
+            block.className = "question";
+            block.innerHTML = `<h4>${idx+1}. ${item.q}</h4>`;
+            const options = document.createElement("div");
+            options.className = "options";
+            item.options.forEach((opt, j)=>{
+                const label = document.createElement("label");
+                label.className = "option";
+                label.innerHTML = `<input type="radio" name="q${idx}" value="${j}"><span>${opt}</span>`;
+                options.appendChild(label);
+            });
+            block.appendChild(options);
+            host.appendChild(block);
+        });
+    }
+
+    function checkQuiz(){
+        let score = 0;
+        const questionBlocks = [...document.querySelectorAll(".question")];
+        quizData.forEach((item, idx)=>{
+            const checked = document.querySelector(`input[name="q${idx}"]:checked`);
+            const labels = questionBlocks[idx].querySelectorAll(".option");
+            labels.forEach((lab, j)=>{
+                lab.style.borderColor = "rgba(255,255,255,.05)";
+                lab.style.background = "rgba(255,255,255,.03)";
+                if(j === item.correct){
+                    lab.style.borderColor = "rgba(98,214,139,.35)";
+                }
+            });
+            if(checked && +checked.value === item.correct){
+                score++;
+                checked.parentElement.style.background = "rgba(98,214,139,.10)";
+                checked.parentElement.style.borderColor = "rgba(98,214,139,.35)";
+            }else if(checked){
+                checked.parentElement.style.background = "rgba(255,125,141,.10)";
+                checked.parentElement.style.borderColor = "rgba(255,125,141,.35)";
+            }
+        });
+
+        const percent = Math.round(score / quizData.length * 100);
+        const status = percent >= 80 ? "status-good" : percent >= 50 ? "" : "status-bad";
+        document.getElementById("quizResult").innerHTML =
+        `<div class="score ${status}">${score} / ${quizData.length}</div>
+         <div style="margin-top:8px">Итог: ${percent}%</div>
+         <div class="muted" style="margin-top:8px">${percent>=80 ? "Отлично: основные идеи усвоены." : percent>=50 ? "Неплохо, но стоит ещё раз пройти формулы и алгоритмы." : "Нужен ещё один круг повторения теории и примеров."}</div>`;
+    }
+
+    function resetQuiz(){
+        buildQuiz();
+        document.getElementById("quizResult").innerHTML =
+        `<div class="score">Пока без проверки</div>
+         <div class="muted" style="margin-top:6px">Выберите ответы и нажмите «Проверить».</div>`;
+    }
+
+    let currentTaskAnswerShown = false;
+    let currentTaskAnswer = "";
+
+    function showTaskSvg(type, data){
+        const svg = document.getElementById("taskSvg");
+        clearSvg(svg);
+
+        if(type === "medianBySides" || type === "sideByMedian"){
+            const B = {x:92,y:262}, C={x:450,y:262}, A={x:170,y:86};
+            const M = mid(B,C);
+            const F = add(M, sub(M,A));
+
+            drawPolygon(svg,[A,B,C],"rgba(238,246,255,.95)","rgba(255,255,255,.02)",2.2);
+            drawLine(svg,A,M,"#5de4d6",3);
+            drawLine(svg,M,F,"#5de4d6",3,"7 6");
+            drawPoint(svg,A,"A","#fff",8,-10);
+            drawPoint(svg,B,"B","#fff",-18,16);
+            drawPoint(svg,C,"C","#fff",10,16);
+            drawPoint(svg,M,"M","#fff",10,16);
+
+            if(type === "medianBySides"){
+                drawText(svg,104,132,`AB = ${data.c}`, "#d8e5ff", 15, 700);
+                drawText(svg,312,118,`AC = ${data.b}`, "#d8e5ff", 15, 700);
+                drawText(svg,210,296,`BC = ${data.a}`, "#d8e5ff", 15, 700);
+                drawText(svg,196,168,"Найти AM", "#d6fff9", 15, 800);
+            }else{
+                drawText(svg,104,132,`AB = ${data.c}`, "#d8e5ff", 15, 700);
+                drawText(svg,312,118,`AC = ${data.b}`, "#d8e5ff", 15, 700);
+                drawText(svg,188,170,`AM = ${data.mText}`, "#d6fff9", 15, 800);
+                drawText(svg,212,296,"Найти BC", "#d6fff9", 15, 800);
+            }
+        }else{
+            const B = {x:92,y:262}, C={x:450,y:262}, A={x:170,y:86};
+            const K = bisectorPointOnBC(A,B,C);
+
+            drawPolygon(svg,[A,B,C],"rgba(238,246,255,.95)","rgba(255,255,255,.02)",2.2);
+            drawLine(svg,A,K,"#9f7bff",3);
+            drawAngle(svg,B,A,K,22,"α","#9f7bff");
+            drawAngle(svg,K,A,C,32,"α","#9f7bff");
+            drawPoint(svg,A,"A","#fff",8,-10);
+            drawPoint(svg,B,"B","#fff",-18,16);
+            drawPoint(svg,C,"C","#fff",10,16);
+            drawPoint(svg,K,"K","#fff",10,16);
+
+            drawText(svg,100,132,`AB = ${data.c}`, "#d8e5ff", 15, 700);
+            drawText(svg,308,118,`AC = ${data.b}`, "#d8e5ff", 15, 700);
+            drawText(svg,212,296,`BC = ${data.a}`, "#d8e5ff", 15, 700);
+
+            if(type === "bisectorSplit"){
+                drawText(svg,314,176,"Найти BK и KC", "#eadcff", 15, 800);
+            }else{
+                drawText(svg,332,176,"Найти AK", "#eadcff", 15, 800);
+            }
+        }
+    }
+
+    function generateTask(){
+        const type = document.getElementById("taskType").value;
+        const box = document.getElementById("taskText");
+        const ans = document.getElementById("taskAnswer");
+        ans.classList.remove("show");
+        currentTaskAnswerShown = false;
+
+        if(type === "medianBySides"){
+            const options = [
+                {a:10,b:13,c:13, ans:"mₐ = 12"},
+                {a:12,b:10,c:10, ans:"mₐ = 8"},
+                {a:16,b:10,c:10, ans:"mₐ = 6"},
+                {a:24,b:15,c:15, ans:"mₐ = 9"}
+            ];
+            const t = options[Math.floor(Math.random()*options.length)];
+            box.innerHTML = `В треугольнике ABC даны стороны BC = ${t.a}, AC = ${t.b}, AB = ${t.c}. Найдите медиану AM, проведённую к стороне BC.`;
+            currentTaskAnswer = `Формула: mₐ = ½√(2b² + 2c² − a²).<br>Ответ: <b>${t.ans}</b>.`;
+            showTaskSvg(type, t);
+        }
+
+        if(type === "sideByMedian"){
+            const options = [
+                {b:2,c:4,m:Math.sqrt(7), mText:"√7", ans:"BC = 2√3"},
+                {b:5,c:5,m:4, mText:"4", ans:"BC = 6"},
+                {b:13,c:13,m:12, mText:"12", ans:"BC = 10"},
+                {b:10,c:17,m:Math.sqrt(181)/2, mText:"√181 / 2", ans:"BC = 9"}
+            ];
+            const t = options[Math.floor(Math.random()*options.length)];
+            box.innerHTML = `В треугольнике ABC даны AC = ${t.b}, AB = ${t.c}, медиана AM = ${t.mText}, проведённая к стороне BC. Найдите BC.`;
+            currentTaskAnswer = `Используем a² = 2b² + 2c² − 4mₐ².<br>Ответ: <b>${t.ans}</b>.`;
+            showTaskSvg(type, t);
+        }
+
+        if(type === "bisectorSplit"){
+            const options = [
+                {a:5,b:4,c:3, ans:"BK = 15/7, KC = 20/7"},
+                {a:12,b:5,c:7, ans:"BK = 7, KC = 5"},
+                {a:15,b:6,c:9, ans:"BK = 9, KC = 6"},
+                {a:18,b:8,c:10, ans:"BK = 10, KC = 8"}
+            ];
+            const t = options[Math.floor(Math.random()*options.length)];
+            box.innerHTML = `В треугольнике ABC даны BC = ${t.a}, AC = ${t.b}, AB = ${t.c}. Биссектриса AK пересекает BC в точке K. Найдите BK и KC.`;
+            currentTaskAnswer = `Используем BK / KC = AB / AC = ${t.c} / ${t.b} и BK + KC = ${t.a}.<br>Ответ: <b>${t.ans}</b>.`;
+            showTaskSvg(type, t);
+        }
+
+        if(type === "bisectorLength"){
+            const options = [
+                {a:5,b:4,c:3, ans:"AK = 12√2 / 7"},
+                {a:12,b:5,c:7, ans:"AK = √35"},
+                {a:15,b:6,c:9, ans:"AK = 3√6"},
+                {a:18,b:8,c:10, ans:"AK = 4√5"}
+            ];
+            const t = options[Math.floor(Math.random()*options.length)];
+            box.innerHTML = `В треугольнике ABC даны BC = ${t.a}, AC = ${t.b}, AB = ${t.c}. Биссектриса AK пересекает BC в точке K. Найдите длину AK.`;
+            currentTaskAnswer = `Сначала находим BK и KC по отношению BK / KC = AB / AC, затем используем lₐ² = bc − mn.<br>Ответ: <b>${t.ans}</b>.`;
+            showTaskSvg(type, t);
+        }
+
+        ans.innerHTML = currentTaskAnswer;
+    }
+
+    function toggleTaskAnswer(){
+        const ans = document.getElementById("taskAnswer");
+        currentTaskAnswerShown = !currentTaskAnswerShown;
+        if(currentTaskAnswerShown) ans.classList.add("show");
+        else ans.classList.remove("show");
+    }
+
+    function init(){
+        document.getElementById("axRange").addEventListener("input", renderHero);
+        document.getElementById("ayRange").addEventListener("input", renderHero);
+
+        renderHero();
+        renderMedianDemo();
+        renderBisectorDemo();
+        renderExample1();
+        renderExample2();
+        calcMedian();
+        calcBisector();
+        buildQuiz();
+        generateTask();
+    }
+
+    window.addEventListener("resize", ()=>{
+        renderHero();
+        renderMedianDemo();
+        renderBisectorDemo();
+        renderExample1();
+        renderExample2();
+    });
+
+    init();
+</script>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>

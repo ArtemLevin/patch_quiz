@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Лаборатория интегралов | ∫ x dx/(y² – 9)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0a0f1e, #03060c);
+            font-family: system-ui, 'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #eef4ff;
+            line-height: 1.4;
+            scroll-behavior: smooth;
+        }
+
+        /* стеклянная подложка */
+        .glass-card {
+            background: rgba(15, 25, 45, 0.55);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid rgba(72, 187, 255, 0.2);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.05) inset;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 24px 48px -14px rgba(0, 160, 255, 0.2), 0 0 0 1px rgba(0, 255, 255, 0.2) inset;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+
+        /* hero */
+        .hero {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.7), rgba(0, 5, 15, 0.8));
+            border-radius: 2.5rem;
+            border-bottom: 2px solid #2c6e9e;
+        }
+
+        .hero h1 {
+            font-size: 2.7rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            background: linear-gradient(120deg, #c0e0ff, #6bc2ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero .formula-badge {
+            font-size: 1.8rem;
+            font-family: monospace;
+            background: rgba(0, 30, 60, 0.7);
+            display: inline-block;
+            padding: 0.4rem 1.5rem;
+            border-radius: 3rem;
+            backdrop-filter: blur(4px);
+            margin-top: 0.8rem;
+            border: 1px solid #2c7cb0;
+        }
+
+        .badge-param {
+            font-size: 1rem;
+            background: #0e2a3a;
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            display: inline-block;
+        }
+
+        /* сетка */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        /* интерактивные элементы */
+        .control-group {
+            background: rgba(10, 20, 35, 0.6);
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .mode-switch {
+            display: flex;
+            gap: 1rem;
+            background: #0f1a2c;
+            padding: 0.5rem;
+            border-radius: 2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .mode-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #bbd9ff;
+            font-weight: 600;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn.active {
+            background: #1e90ff;
+            color: white;
+            box-shadow: 0 0 10px #1e90ff80;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: #1e3a5f;
+            height: 4px;
+            border-radius: 4px;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]:focus {
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3bc0ff;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00a6ff;
+        }
+
+        .value-display {
+            font-family: monospace;
+            font-size: 1.2rem;
+            background: #00000055;
+            padding: 0.2rem 0.8rem;
+            border-radius: 1rem;
+            display: inline-block;
+        }
+
+        canvas {
+            background: #0a0f1c;
+            border-radius: 1.5rem;
+            width: 100%;
+            height: auto;
+            border: 1px solid #2c6588;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .math-expr {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.1rem;
+            background: #010a14;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            border-left: 4px solid #1e90ff;
+        }
+
+        button {
+            background: #1e3a5f;
+            border: none;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: #2c6e9e;
+            transform: scale(0.98);
+            box-shadow: 0 0 8px #2c6e9e;
+        }
+
+        .quiz-option {
+            background: #111c2c;
+            margin: 0.5rem 0;
+            padding: 0.6rem 1rem;
+            border-radius: 1.2rem;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid transparent;
+        }
+
+        .quiz-option.selected {
+            background: #1e4970;
+            border-color: #6bc2ff;
+        }
+
+        .correct-feedback {
+            color: #5effbc;
+        }
+
+        .wrong-feedback {
+            color: #ff9f7c;
+        }
+
+        hr {
+            border-color: #2c4c6e;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 800px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .glass-card, .hero {
+                background: white;
+                backdrop-filter: none;
+                border: 1px solid #ccc;
+                box-shadow: none;
+            }
+            button, .mode-switch, .quiz-option, .print-hide {
+                display: none;
+            }
+            canvas {
+                border: 1px solid black;
+                background: white;
+            }
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 2rem;
+            opacity: 0.6;
+        }
+        .inline-code {
+            font-family: monospace;
+            background: #00000055;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- hero -->
+    <div class="hero">
+        <h1>⚡ Интегральная лаборатория</h1>
+        <div class="formula-badge">∫ x·dx / (y² – 9)</div>
+        <p style="margin-top: 1rem; max-width: 700px; margin-left: auto; margin-right: auto;">Исследование неопределённого интеграла с параметром<br>и интегрирование рациональных функций</p>
+        <div class="badge-param">аналитический движок | визуализация | интерактив</div>
+    </div>
+
+    <!-- главный интерактивный блок: график + управление -->
+    <div class="grid-2col">
+        <div class="glass-card" style="padding: 1.4rem;">
+            <h3 style="margin-bottom: 1rem;">🎛️ Управление и визуализация</h3>
+            <div class="mode-switch" id="modeSwitch">
+                <button class="mode-btn active" data-mode="param">📌 y = const (параметр)</button>
+                <button class="mode-btn" data-mode="yx">🔄 y = x (функция)</button>
+            </div>
+            <div id="paramControl" style="transition: 0.2s;">
+                <div class="slider-container">
+                    <label>⚙️ Параметр y ( y ≠ ±3 ) : <span id="yValueDisplay" class="value-display">4.00</span></label>
+                    <input type="range" id="ySlider" min="-8" max="8" step="0.1" value="4">
+                    <div class="math-expr" style="font-size:0.9rem;">⚠️ y = ±3 → знаменатель нулевой, интеграл не определён.</div>
+                </div>
+            </div>
+            <div id="integralResult" class="math-expr" style="margin: 1rem 0; text-align: center; font-size: 1.2rem;">
+                ∫ x/(y²–9) dx = <strong id="formulaResult">x²/(2·(y²–9)) + C</strong>
+            </div>
+            <div class="slider-container">
+                <label>📐 Область x: от <span id="xminVal">-6</span> до <span id="xmaxVal">6</span></label>
+                <input type="range" id="xRangeMin" min="-10" max="9" step="0.5" value="-6">
+                <input type="range" id="xRangeMax" min="-9" max="10" step="0.5" value="6">
+            </div>
+            <button id="resetViewBtn" style="margin-top: 0.5rem;">⟳ Сбросить диапазон x</button>
+        </div>
+        <div class="glass-card" style="padding: 1rem; display: flex; flex-direction: column;">
+            <h3 style="margin-bottom: 0.5rem;">📈 График: f(x) и первообразная F(x)</h3>
+            <canvas id="mainCanvas" width="600" height="350" style="width:100%; height:auto; max-width:600px; aspect-ratio:600/350; margin: 0 auto;"></canvas>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size:0.8rem;">
+                <span>🔵 f(x) = подынтегральная</span>
+                <span>🟠 F(x) = первообразная + C₀</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- вычислительный блок + определённый интеграл -->
+    <div class="glass-card" style="padding: 1.4rem; margin-bottom: 2rem;">
+        <h3>🧮 Вычисление определённого интеграла ∫ₐᵇ f(x) dx</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end;">
+            <div><label>Нижний предел a: </label><input type="number" id="defA" value="-2" step="0.5" style="background:#0a1424; border:1px solid #2c6e9e; color:white; padding:0.4rem; border-radius: 1rem;"></div>
+            <div><label>Верхний предел b: </label><input type="number" id="defB" value="3" step="0.5" style="background:#0a1424; border:1px solid #2c6e9e; color:white; padding:0.4rem; border-radius: 1rem;"></div>
+            <button id="calcDefiniteBtn">Вычислить интеграл</button>
+        </div>
+        <div id="definiteResult" class="math-expr" style="margin-top: 1rem;">∫ₐᵇ f(x) dx = <span id="defValue">—</span></div>
+        <div class="badge-param" style="margin-top: 0.5rem;">* Для режима y = x: избегайте точек разрыва x = ±3</div>
+    </div>
+
+    <!-- теория + примеры в компактном виде с визуалом -->
+    <div class="grid-2col">
+        <div class="glass-card" style="padding: 1.4rem;">
+            <h3>📖 Теория & методы</h3>
+            <p>Неопределённый интеграл <strong>∫ f(x) dx</strong> — семейство первообразных. Если знаменатель не зависит от x (y = const), то выносим константу:</p>
+            <div class="math-expr">∫ x/(y²–9) dx = 1/(y²–9) · ∫ x dx = x²/(2(y²–9)) + C</div>
+            <p>Если <strong>y = x</strong> (зависимость), получаем интеграл вида:</p>
+            <div class="math-expr">∫ x/(x²–9) dx = ½·∫ 2x/(x²–9) dx = ½·ln|x²–9| + C</div>
+            <p>✔️ Логарифмическое интегрирование: ∫ f'(x)/f(x) dx = ln|f(x)| + C</p>
+            <div style="margin-top: 0.7rem; background: #0a1120; border-radius: 1rem; padding: 0.5rem;">
+                📌 <strong>Важно:</strong> при y = ±3 или x = ±3 интеграл расходится (особые точки).
+            </div>
+        </div>
+        <div class="glass-card" style="padding: 1.4rem;">
+            <h3>✍️ Разбор задач</h3>
+            <div><strong>Задача 1 (параметр):</strong> Вычислить ∫ x/(25–9) dx при y=5.</div>
+            <div class="math-expr">Решение: y²–9 = 25–9 = 16 → ∫ x/16 dx = x²/32 + C</div>
+            <button id="showTask1Answer" style="margin: 0.5rem 0;">Показать ответ</button>
+            <div id="task1Ans" style="display:none;" class="math-expr">✅ Ответ: x²/32 + C</div>
+            <hr>
+            <div><strong>Задача 2 (y = x):</strong> Найти ∫ x/(x²–9) dx.</div>
+            <div class="math-expr">Решение: замена u = x²–9, du=2x dx → (1/2)∫ du/u = ½ ln|x²–9| + C</div>
+            <button id="showTask2Answer" style="margin: 0.5rem 0;">Показать ответ</button>
+            <div id="task2Ans" style="display:none;" class="math-expr">✅ Ответ: ½ ln|x²–9| + C</div>
+        </div>
+    </div>
+
+    <!-- Генератор задач + мини визуализация -->
+    <div class="glass-card" style="padding: 1.4rem; margin-bottom: 2rem;">
+        <h3>🎲 Генератор тренировочных задач (интегралы)</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+            <div style="flex:2">
+                <div id="generatedTask" class="math-expr" style="font-size:1.2rem;">∫ x / (4² – 9) dx</div>
+                <button id="newTaskBtn">✨ Новая задача</button>
+                <button id="revealTaskAnswer">📖 Показать решение и ответ</button>
+            </div>
+            <div style="flex:1; min-width: 140px;">
+                <canvas id="taskMiniCanvas" width="180" height="100" style="background:#0a1020; border-radius:1rem; width:100%; height:auto;"></canvas>
+                <div style="font-size:0.7rem; text-align:center;">график f(x) для задачи</div>
+            </div>
+        </div>
+        <div id="taskAnswerBlock" class="math-expr" style="margin-top: 1rem; display:none;"></div>
+    </div>
+
+    <!-- квиз (самопроверка) -->
+    <div class="glass-card" style="padding: 1.4rem;">
+        <h3>📋 Квиз: основы интегрирования</h3>
+        <div id="quizContainer"></div>
+        <button id="submitQuiz">Проверить ответы</button>
+        <div id="quizScore" style="margin-top: 1rem; font-weight: bold;"></div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+        <button id="printBtn" class="print-hide">🖨️ Распечатать страницу</button>
+        <button id="scrollTopBtn" class="print-hide">⬆️ Наверх</button>
+    </div>
+    <footer>Интерактивная математическая лаборатория — интегралы, параметры, визуализация</footer>
+</div>
+
+<script>
+    // ---------- Глобальные переменные ----------
+    let currentMode = "param";   // "param" или "yx"
+    let paramY = 4.0;            // только для param режима
+    let xMin = -6, xMax = 6;
+    const canvas = document.getElementById("mainCanvas");
+    const ctx = canvas.getContext("2d");
+    let width = 600, height = 350;
+
+    function setCanvasDimensions() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = 600;
+        canvas.height = 350;
+        width = 600;
+        height = 350;
+    }
+    window.addEventListener('resize', () => { drawGraph(); });
+
+    // элементы управления
+    const ySlider = document.getElementById("ySlider");
+    const yValueDisplay = document.getElementById("yValueDisplay");
+    const paramControlDiv = document.getElementById("paramControl");
+    const formulaResultSpan = document.getElementById("formulaResult");
+    const xRangeMinSlider = document.getElementById("xRangeMin");
+    const xRangeMaxSlider = document.getElementById("xRangeMax");
+    const xminValSpan = document.getElementById("xminVal");
+    const xmaxValSpan = document.getElementById("xmaxVal");
+    const resetViewBtn = document.getElementById("resetViewBtn");
+    const definiteABtn = document.getElementById("defA");
+    const definiteBBtn = document.getElementById("defB");
+    const calcDefiniteBtn = document.getElementById("calcDefiniteBtn");
+    const defValueSpan = document.getElementById("defValue");
+
+    // функция обновления формул в зависимости от режима
+    function updateFormulaText() {
+        if (currentMode === "param") {
+            if (Math.abs(paramY - 3) < 0.01 || Math.abs(paramY + 3) < 0.01) {
+                formulaResultSpan.innerHTML = "⚠️ знаменатель равен 0 → интеграл не определён";
+            } else {
+                let denom = (paramY*paramY - 9).toFixed(4);
+                formulaResultSpan.innerHTML = `x²/(2·(${denom})) + C`;
+            }
+        } else { // y = x
+            formulaResultSpan.innerHTML = `½·ln|x²–9| + C`;
+        }
+    }
+
+    // получить подынтегральную функцию f(x) для текущего режима
+    function f(x) {
+        if (currentMode === "param") {
+            let denom = paramY*paramY - 9;
+            if (Math.abs(denom) < 1e-6) return NaN;
+            return x / denom;
+        } else {
+            if (Math.abs(x*x - 9) < 1e-6) return NaN;
+            return x / (x*x - 9);
+        }
+    }
+    // первообразная F(x) (без константы)
+    function F(x) {
+        if (currentMode === "param") {
+            let denom = paramY*paramY - 9;
+            if (Math.abs(denom) < 1e-6) return NaN;
+            return (x*x) / (2 * denom);
+        } else {
+            if (Math.abs(x*x - 9) < 1e-6) return NaN;
+            return 0.5 * Math.log(Math.abs(x*x - 9));
+        }
+    }
+
+    // рисование графика
+    function drawGraph() {
+        if (!ctx) return;
+        setCanvasDimensions();
+        ctx.clearRect(0, 0, width, height);
+        // оси
+        const xMinD = xMin, xMaxD = xMax;
+        const yMin = -4.5, yMax = 4.5;   // фиксированный диапазон y для наглядности
+        function toX(px) { return xMinD + (px / width) * (xMaxD - xMinD); }
+        function toY(py) { return yMax - (py / height) * (yMax - yMin); }
+        // сетка
+        ctx.beginPath();
+        ctx.strokeStyle = "#2c4f6e";
+        ctx.lineWidth = 0.8;
+        for (let x = Math.floor(xMinD); x <= xMaxD; x++) {
+            let screenX = ((x - xMinD)/(xMaxD - xMinD))*width;
+            ctx.moveTo(screenX, 0); ctx.lineTo(screenX, height);
+        }
+        for (let y = -4; y <= 4; y++) {
+            let screenY = ((yMax - y)/(yMax - yMin))*height;
+            ctx.moveTo(0, screenY); ctx.lineTo(width, screenY);
+        }
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = "#aaccff";
+        ctx.lineWidth = 1.5;
+        // ось X
+        let yZero = ((yMax - 0)/(yMax - yMin))*height;
+        ctx.moveTo(0, yZero); ctx.lineTo(width, yZero);
+        ctx.moveTo(0,0); ctx.lineTo(0, height);
+        ctx.stroke();
+
+        // функция f(x) синий
+        ctx.beginPath();
+        ctx.strokeStyle = "#3b9eff";
+        ctx.lineWidth = 2.2;
+        let first = true;
+        for (let px = 0; px <= width; px++) {
+            let x = toX(px);
+            let yVal = f(x);
+            if (isNaN(yVal) || Math.abs(yVal) > 8) { first = true; continue; }
+            let py = ((yMax - yVal)/(yMax - yMin))*height;
+            if (py < 0 || py > height) { first = true; continue; }
+            if (first) { ctx.moveTo(px, py); first = false; }
+            else { ctx.lineTo(px, py); }
+        }
+        ctx.stroke();
+
+        // первообразная F(x) оранжевый
+        ctx.beginPath();
+        ctx.strokeStyle = "#ffaa66";
+        ctx.lineWidth = 2;
+        first = true;
+        for (let px = 0; px <= width; px++) {
+            let x = toX(px);
+            let yVal = F(x);
+            if (isNaN(yVal) || Math.abs(yVal) > 8) { first = true; continue; }
+            let py = ((yMax - yVal)/(yMax - yMin))*height;
+            if (py < 0 || py > height) { first = true; continue; }
+            if (first) { ctx.moveTo(px, py); first = false; }
+            else { ctx.lineTo(px, py); }
+        }
+        ctx.stroke();
+        // подписи
+        ctx.fillStyle = "#c6e9ff";
+        ctx.font = "10px monospace";
+        ctx.fillText(`x min=${xMinD.toFixed(1)}`, 10, 20);
+        ctx.fillText(`y max=4.5`, 10, 40);
+    }
+
+    function updateAll() {
+        if (currentMode === "param") {
+            paramY = parseFloat(ySlider.value);
+            yValueDisplay.innerText = paramY.toFixed(2);
+            if (Math.abs(paramY - 3) < 0.05 || Math.abs(paramY + 3) < 0.05) {
+                formulaResultSpan.innerHTML = "⚠️ y = ±3 → знаменатель 0";
+            } else updateFormulaText();
+        } else {
+            updateFormulaText();
+        }
+        drawGraph();
+        updateDefiniteIntegralPreview();
+    }
+
+    function updateDefiniteIntegralPreview() {
+        let a = parseFloat(definiteABtn.value);
+        let b = parseFloat(definiteBBtn.value);
+        if (isNaN(a) || isNaN(b)) return;
+        if (currentMode === "param") {
+            let denom = paramY*paramY - 9;
+            if (Math.abs(denom) < 1e-6) { defValueSpan.innerText = "не определён (деление на 0)"; return; }
+            let integral = (b*b - a*a) / (2 * denom);
+            defValueSpan.innerText = integral.toFixed(6);
+        } else {
+            if ((a < 3 && b > 3) || (a < -3 && b > -3) || Math.abs(a-3)<1e-4 || Math.abs(a+3)<1e-4 || Math.abs(b-3)<1e-4 || Math.abs(b+3)<1e-4) {
+                defValueSpan.innerText = "особые точки x = ±3, интеграл расходится или требует осторожности";
+            } else {
+                let val = 0.5 * (Math.log(Math.abs(b*b-9)) - Math.log(Math.abs(a*a-9)));
+                defValueSpan.innerText = val.toFixed(6);
+            }
+        }
+    }
+
+    // генератор задач
+    const taskQuestionSpan = document.getElementById("generatedTask");
+    const taskAnswerBlock = document.getElementById("taskAnswerBlock");
+    const miniCanvas = document.getElementById("taskMiniCanvas");
+    let currentGenTask = { text: "", answer: "", fGen: null, xRange: [-4,4] };
+
+    function generateRandomTask() {
+        const type = Math.floor(Math.random() * 3);
+        if (type === 0) {
+            let c = (Math.floor(Math.random() * 12) + 2);
+            while (Math.abs(c) === 3) c++;
+            let denomVal = c*c - 9;
+            currentGenTask = {
+                text: `∫ x / (${c}² – 9) dx   (параметр y = ${c})`,
+                answer: `x²/(2·(${c}²–9)) + C = x²/(2·${denomVal}) + C`,
+                fGen: (x) => x / denomVal,
+                xRange: [-4,4]
+            };
+        } else {
+            let k = Math.floor(Math.random() * 7) + 1;
+            if (k === 3) k=4;
+            currentGenTask = {
+                text: `∫ x / (x² – ${k* k}) dx   (y = x)`,
+                answer: `½ ln|x² – ${k*k}| + C`,
+                fGen: (x) => x/(x*x - k*k),
+                xRange: [-5,5]
+            };
+        }
+        taskQuestionSpan.innerText = currentGenTask.text;
+        taskAnswerBlock.style.display = "none";
+        drawMiniGraph();
+    }
+
+    function drawMiniGraph() {
+        if (!miniCanvas) return;
+        const w = 180, h = 100;
+        miniCanvas.width = w; miniCanvas.height = h;
+        const ctxm = miniCanvas.getContext("2d");
+        ctxm.clearRect(0,0,w,h);
+        if (!currentGenTask.fGen) return;
+        let x1 = -4, x2 = 4;
+        if (currentGenTask.xRange) { x1=currentGenTask.xRange[0]; x2=currentGenTask.xRange[1]; }
+        const yMaxVal = 3, yMinVal = -3;
+        ctxm.beginPath(); ctxm.strokeStyle="#3b9eff"; ctxm.lineWidth=1.5;
+        let first=true;
+        for (let px=0; px<=w; px++) {
+            let x = x1 + (px/w)*(x2-x1);
+            let y = currentGenTask.fGen(x);
+            if (isNaN(y) || Math.abs(y)>5) { first=true; continue; }
+            let sx=px, sy = h - ((y - yMinVal)/(yMaxVal - yMinVal))*h;
+            if (sy<0 || sy>h) { first=true; continue; }
+            if (first) { ctxm.moveTo(sx,sy); first=false; }
+            else ctxm.lineTo(sx,sy);
+        }
+        ctxm.stroke();
+    }
+
+    // квиз
+    const quizData = [
+        { question: "∫ x dx = ?", options: ["x² + C", "x²/2 + C", "x + C", "2x + C"], correct: 1 },
+        { question: "∫ 1/(x) dx = ?", options: ["ln|x| + C", "x·ln|x| + C", "1/x² + C", "eˣ + C"], correct: 0 },
+        { question: "Если y = const, ∫ x/(y²–9) dx = ?", options: ["x²/(2(y²–9)) + C", "ln|y²–9| + C", "x·y² + C", "x/(y²–9) + C"], correct: 0 },
+        { question: "∫ x/(x²–4) dx = ?", options: ["½ ln|x²–4|+C", "ln|x²–4|+C", "x²/(x²–4)+C", "arctg(x/2)+C"], correct: 0 }
+    ];
+    let quizAnswers = new Array(quizData.length).fill(null);
+    function renderQuiz() {
+        const container = document.getElementById("quizContainer");
+        container.innerHTML = "";
+        quizData.forEach((q, idx) => {
+            const div = document.createElement("div");
+            div.style.marginBottom = "1rem";
+            div.innerHTML = `<strong>${idx+1}. ${q.question}</strong>`;
+            q.options.forEach((opt, optIdx) => {
+                const optDiv = document.createElement("div");
+                optDiv.className = "quiz-option";
+                optDiv.innerText = opt;
+                optDiv.onclick = () => {
+                    quizAnswers[idx] = optIdx;
+                    document.querySelectorAll(`#quizContainer .quiz-option`).forEach(el => el.classList.remove("selected"));
+                    optDiv.classList.add("selected");
+                };
+                div.appendChild(optDiv);
+            });
+            container.appendChild(div);
+        });
+    }
+    function checkQuiz() {
+        let score = 0;
+        for (let i=0;i<quizData.length;i++) {
+            if (quizAnswers[i] === quizData[i].correct) score++;
+        }
+        document.getElementById("quizScore").innerHTML = `✅ Результат: ${score} / ${quizData.length}  ${score===quizData.length ? "Отлично!" : "Попробуйте ещё раз"}`;
+    }
+
+    // обработчики режимов
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentMode = btn.dataset.mode;
+            if (currentMode === "param") {
+                paramControlDiv.style.display = "block";
+                updateFormulaText();
+            } else {
+                paramControlDiv.style.display = "none";
+                updateFormulaText();
+            }
+            updateAll();
+        });
+    });
+    ySlider.addEventListener("input", () => { updateAll(); });
+    xRangeMinSlider.addEventListener("input", () => { xMin = parseFloat(xRangeMinSlider.value); xminValSpan.innerText = xMin.toFixed(1); drawGraph(); });
+    xRangeMaxSlider.addEventListener("input", () => { xMax = parseFloat(xRangeMaxSlider.value); xmaxValSpan.innerText = xMax.toFixed(1); drawGraph(); });
+    resetViewBtn.addEventListener("click", () => { xMin=-6; xMax=6; xRangeMinSlider.value=-6; xRangeMaxSlider.value=6; xminValSpan.innerText="-6"; xmaxValSpan.innerText="6"; drawGraph(); });
+    calcDefiniteBtn.addEventListener("click", updateDefiniteIntegralPreview);
+    document.getElementById("showTask1Answer").addEventListener("click",()=>{document.getElementById("task1Ans").style.display="block";});
+    document.getElementById("showTask2Answer").addEventListener("click",()=>{document.getElementById("task2Ans").style.display="block";});
+    document.getElementById("newTaskBtn").addEventListener("click",()=>{ generateRandomTask(); });
+    document.getElementById("revealTaskAnswer").addEventListener("click",()=>{ taskAnswerBlock.style.display = "block"; taskAnswerBlock.innerHTML = `📐 Решение: ${currentGenTask.answer}`; });
+    document.getElementById("submitQuiz").addEventListener("click", checkQuiz);
+    document.getElementById("printBtn").addEventListener("click",()=>{ window.print(); });
+    document.getElementById("scrollTopBtn").addEventListener("click",()=>{ window.scrollTo({top:0,behavior:"smooth"}); });
+
+    // начальная инициализация
+    paramControlDiv.style.display = "block";
+    renderQuiz();
+    generateRandomTask();
+    setCanvasDimensions();
+    updateAll();
+    drawGraph();
+</script>
+</body>
+</html>

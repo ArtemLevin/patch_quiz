@@ -1,0 +1,1802 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Текстовые задачи на составление уравнений — интерактивная лаборатория</title>
+    <style>
+        :root{
+            --bg:#07111f;
+            --bg2:#0c1830;
+            --panel:rgba(13,26,48,.62);
+            --panel-strong:rgba(13,26,48,.86);
+            --line:rgba(151,196,255,.18);
+            --text:#eaf4ff;
+            --muted:#a6bbd7;
+            --soft:#84a8d6;
+            --accent:#77e7ff;
+            --accent2:#8f8cff;
+            --accent3:#78ffd6;
+            --good:#83f5b1;
+            --bad:#ff8fa7;
+            --warn:#ffd88a;
+            --shadow:0 18px 60px rgba(0,0,0,.35);
+            --radius:24px;
+            --radius-sm:16px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            --max: 1240px;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+            radial-gradient(circle at 15% 20%, rgba(119,231,255,.12), transparent 28%),
+            radial-gradient(circle at 85% 15%, rgba(143,140,255,.14), transparent 30%),
+            radial-gradient(circle at 50% 85%, rgba(120,255,214,.08), transparent 25%),
+            linear-gradient(180deg, #06101d 0%, #081425 32%, #0a1324 100%);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+        body::before{
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            background-image:
+            linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size:36px 36px;
+            mask-image:radial-gradient(circle at center, black 36%, transparent 100%);
+            opacity:.18;
+        }
+        .glow{
+            position:fixed;
+            inset:auto;
+            width:46vw;
+            height:46vw;
+            border-radius:50%;
+            filter:blur(80px);
+            opacity:.08;
+            pointer-events:none;
+            z-index:0;
+        }
+        .g1{left:-12vw; top:10vh; background:var(--accent)}
+        .g2{right:-12vw; top:30vh; background:var(--accent2)}
+        .g3{left:25vw; bottom:-18vw; background:var(--accent3)}
+        .wrap{position:relative; z-index:1}
+        .container{
+            width:min(var(--max), calc(100% - 28px));
+            margin:0 auto;
+        }
+        .topbar{
+            position:sticky;
+            top:0;
+            z-index:20;
+            backdrop-filter: blur(14px);
+            background:linear-gradient(180deg, rgba(5,10,20,.75), rgba(5,10,20,.48));
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .topbar-inner{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            width:min(var(--max), calc(100% - 24px));
+            margin:0 auto;
+            padding:12px 0;
+        }
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-width:0;
+        }
+        .brand-mark{
+            width:40px;height:40px;border-radius:14px;
+            background:
+            radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 40%),
+            linear-gradient(135deg, rgba(119,231,255,.28), rgba(143,140,255,.22));
+            border:1px solid rgba(255,255,255,.12);
+            box-shadow:0 10px 30px rgba(119,231,255,.12), inset 0 1px 0 rgba(255,255,255,.09);
+            position:relative;
+            overflow:hidden;
+        }
+        .brand-mark::before,
+        .brand-mark::after{
+            content:"";
+            position:absolute;
+            inset:auto;
+            border-radius:999px;
+            background:rgba(255,255,255,.9);
+            opacity:.85;
+        }
+        .brand-mark::before{width:20px;height:2px; left:10px; top:19px}
+        .brand-mark::after{width:2px;height:20px; left:19px; top:10px}
+        .brand-text{
+            min-width:0;
+        }
+        .brand-title{
+            font-size:14px;
+            letter-spacing:.16em;
+            text-transform:uppercase;
+            color:var(--muted);
+            margin-bottom:3px;
+        }
+        .brand-sub{
+            font-weight:700;
+            font-size:15px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .nav{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+        }
+        .nav a, .btn{
+            color:var(--text);
+            text-decoration:none;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:999px;
+            padding:10px 14px;
+            font-size:14px;
+            transition:.25s ease;
+            cursor:pointer;
+            font-family:inherit;
+        }
+        .nav a:hover, .btn:hover{
+            transform:translateY(-1px);
+            border-color:rgba(119,231,255,.35);
+            box-shadow:0 8px 24px rgba(119,231,255,.12);
+            background:rgba(255,255,255,.07);
+        }
+        .hero{
+            position:relative;
+            padding:72px 0 28px;
+        }
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:22px;
+            align-items:stretch;
+        }
+        .panel{
+            background:linear-gradient(180deg, rgba(17,30,54,.7), rgba(11,22,42,.56));
+            border:1px solid var(--line);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            backdrop-filter: blur(14px);
+        }
+        .hero-card{
+            padding:30px;
+            position:relative;
+            overflow:hidden;
+            min-height:480px;
+        }
+        .hero-card::before{
+            content:"";
+            position:absolute;
+            inset:-20%;
+            background:
+            radial-gradient(circle at 20% 20%, rgba(119,231,255,.18), transparent 25%),
+            radial-gradient(circle at 70% 10%, rgba(143,140,255,.15), transparent 22%),
+            radial-gradient(circle at 50% 72%, rgba(120,255,214,.1), transparent 26%);
+            pointer-events:none;
+        }
+        .eyebrow{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            color:var(--accent);
+            border:1px solid rgba(119,231,255,.18);
+            font-size:13px;
+            letter-spacing:.06em;
+            text-transform:uppercase;
+            margin-bottom:18px;
+        }
+        h1,h2,h3{margin:0}
+        .hero h1{
+            font-size:clamp(34px, 5.6vw, 72px);
+            line-height:.96;
+            letter-spacing:-.04em;
+            max-width:12ch;
+            margin-bottom:16px;
+        }
+        .hero h1 .grad{
+            background:linear-gradient(135deg, #f4fbff 0%, #b9f4ff 38%, #a8b6ff 75%, #9fffe2 100%);
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+            text-shadow:0 0 32px rgba(119,231,255,.08);
+        }
+        .lead{
+            font-size:18px;
+            line-height:1.65;
+            color:var(--muted);
+            max-width:68ch;
+            margin-bottom:22px;
+        }
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:14px;
+            margin:24px 0;
+        }
+        .stat{
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .stat-value{
+            font-size:28px;
+            font-weight:800;
+            letter-spacing:-.03em;
+            margin-bottom:4px;
+        }
+        .stat-label{
+            color:var(--muted);
+            font-size:13px;
+            line-height:1.4;
+        }
+        .hero-actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-top:18px;
+        }
+        .btn.primary{
+            background:linear-gradient(135deg, rgba(119,231,255,.16), rgba(143,140,255,.18));
+            border-color:rgba(119,231,255,.24);
+            box-shadow:0 10px 40px rgba(119,231,255,.12);
+        }
+        .hero-visual{
+            padding:20px;
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+            justify-content:space-between;
+        }
+        .mini-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+        }
+        .mini-card{
+            padding:18px;
+            border-radius:20px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+            min-height:132px;
+        }
+        .mini-card h3{
+            font-size:15px;
+            margin-bottom:10px;
+            color:#dff8ff;
+        }
+        .mini-card p{
+            margin:0;
+            color:var(--muted);
+            font-size:14px;
+            line-height:1.55;
+        }
+        .formula{
+            font-family:var(--mono);
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:14px;
+            padding:12px 14px;
+            color:#f5fbff;
+            overflow-wrap:anywhere;
+            line-height:1.55;
+            font-size:15px;
+        }
+        .section{
+            padding:26px 0;
+        }
+        .section-head{
+            display:flex;
+            align-items:end;
+            justify-content:space-between;
+            gap:18px;
+            margin-bottom:20px;
+        }
+        .section-title{
+            font-size:clamp(28px, 4vw, 48px);
+            line-height:1.02;
+            letter-spacing:-.04em;
+        }
+        .section-kicker{
+            color:var(--accent3);
+            text-transform:uppercase;
+            letter-spacing:.16em;
+            font-size:12px;
+            margin-bottom:8px;
+        }
+        .section-desc{
+            color:var(--muted);
+            max-width:72ch;
+            line-height:1.65;
+        }
+        .cards{
+            display:grid;
+            gap:18px;
+            grid-template-columns:repeat(12,1fr);
+        }
+        .card{
+            padding:22px;
+            border-radius:24px;
+            background:linear-gradient(180deg, rgba(16,29,54,.74), rgba(12,24,44,.6));
+            border:1px solid var(--line);
+            box-shadow:var(--shadow);
+        }
+        .span-4{grid-column:span 4}
+        .span-5{grid-column:span 5}
+        .span-6{grid-column:span 6}
+        .span-7{grid-column:span 7}
+        .span-8{grid-column:span 8}
+        .span-12{grid-column:span 12}
+        .subtle{
+            color:var(--muted);
+            line-height:1.65;
+        }
+        .tagrow{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:14px;
+        }
+        .tag{
+            padding:8px 10px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+            color:#d9f4ff;
+            font-size:13px;
+        }
+        .inputs{
+            display:grid;
+            gap:14px;
+            grid-template-columns:repeat(12,1fr);
+        }
+        .field{
+            grid-column:span 4;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+        label{
+            color:#d9e9ff;
+            font-size:14px;
+        }
+        input[type="number"], input[type="text"], select{
+            width:100%;
+            background:rgba(255,255,255,.05);
+            color:var(--text);
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:14px;
+            padding:13px 14px;
+            font:inherit;
+            outline:none;
+            transition:.22s ease;
+        }
+        input:focus, select:focus{
+            border-color:rgba(119,231,255,.42);
+            box-shadow:0 0 0 4px rgba(119,231,255,.08);
+        }
+        input[type="range"]{
+            width:100%;
+            accent-color:#89ebff;
+        }
+        .result{
+            border-radius:18px;
+            padding:16px;
+            background:linear-gradient(180deg, rgba(119,231,255,.08), rgba(119,231,255,.04));
+            border:1px solid rgba(119,231,255,.18);
+            line-height:1.7;
+        }
+        .result strong{color:#fff}
+        .toolbar{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin:16px 0;
+        }
+        .toolbar .btn.active{
+            background:linear-gradient(135deg, rgba(119,231,255,.14), rgba(143,140,255,.16));
+            border-color:rgba(119,231,255,.28);
+        }
+        .svg-wrap{
+            border-radius:20px;
+            background:
+            radial-gradient(circle at 20% 20%, rgba(119,231,255,.07), transparent 28%),
+            linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.01));
+            border:1px solid rgba(255,255,255,.08);
+            padding:14px;
+            overflow:hidden;
+        }
+        svg{width:100%; height:auto; display:block}
+        .legend{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:12px;
+        }
+        .legend-item{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 10px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--muted);
+            font-size:13px;
+        }
+        .dot{
+            width:10px;height:10px;border-radius:50%;
+            display:inline-block;
+        }
+        .accordion{
+            display:grid;
+            gap:12px;
+        }
+        details{
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            overflow:hidden;
+        }
+        summary{
+            list-style:none;
+            cursor:pointer;
+            padding:18px 20px;
+            font-weight:700;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:18px;
+            user-select:none;
+        }
+        summary::-webkit-details-marker{display:none}
+        .summary-text{display:flex; align-items:center; gap:12px}
+        .num{
+            width:32px;height:32px;border-radius:50%;
+            display:inline-flex;align-items:center;justify-content:center;
+            background:rgba(119,231,255,.12);
+            color:var(--accent);
+            border:1px solid rgba(119,231,255,.22);
+            flex:0 0 auto;
+            font-size:14px;
+        }
+        .acc-body{
+            padding:0 20px 20px;
+            color:var(--muted);
+            line-height:1.7;
+        }
+        .acc-body ul{margin:8px 0 0 18px; padding:0}
+        .acc-body li{margin:6px 0}
+        .steps{
+            display:grid;
+            gap:12px;
+            margin-top:14px;
+        }
+        .step{
+            padding:14px 16px;
+            border-radius:16px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .step .step-top{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            font-weight:700;
+            margin-bottom:8px;
+        }
+        .step-index{
+            width:28px;height:28px;border-radius:50%;
+            display:inline-flex;align-items:center;justify-content:center;
+            background:rgba(143,140,255,.14);
+            color:#d8d4ff;
+            border:1px solid rgba(143,140,255,.24);
+            font-size:13px;
+            flex:0 0 auto;
+        }
+        .table-like{
+            display:grid;
+            grid-template-columns:1.15fr 1fr 1fr;
+            gap:1px;
+            background:rgba(255,255,255,.1);
+            border-radius:18px;
+            overflow:hidden;
+            margin-top:12px;
+        }
+        .cell{
+            padding:14px;
+            background:rgba(10,22,40,.92);
+            min-height:60px;
+            display:flex;
+            align-items:center;
+            line-height:1.5;
+        }
+        .cell.head{
+            background:rgba(19,34,59,.98);
+            color:#eaf7ff;
+            font-weight:700;
+        }
+        .calc-grid{
+            display:grid;
+            grid-template-columns:repeat(12,1fr);
+            gap:18px;
+        }
+        .quiz-list{
+            display:grid;
+            gap:16px;
+        }
+        .question{
+            padding:18px;
+            border-radius:20px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .question-title{
+            font-weight:700;
+            margin-bottom:12px;
+            line-height:1.5;
+        }
+        .options{
+            display:grid;
+            gap:10px;
+        }
+        .option{
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            padding:12px 12px;
+            border-radius:14px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .option input{margin-top:3px}
+        .option.correct{
+            border-color:rgba(131,245,177,.36);
+            background:rgba(131,245,177,.08);
+        }
+        .option.wrong{
+            border-color:rgba(255,143,167,.36);
+            background:rgba(255,143,167,.08);
+        }
+        .score-box{
+            font-size:18px;
+            font-weight:700;
+        }
+        .cheats{
+            display:grid;
+            gap:12px;
+            grid-template-columns:repeat(2,1fr);
+        }
+        .cheat{
+            padding:16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .cheat h4{
+            margin:0 0 8px;
+            font-size:16px;
+            color:#f5fbff;
+        }
+        .generator-output{
+            margin-top:16px;
+            display:grid;
+            gap:14px;
+        }
+        .task-card{
+            padding:18px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .answer{
+            margin-top:12px;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(119,231,255,.08);
+            border:1px solid rgba(119,231,255,.18);
+            display:none;
+        }
+        .muted{
+            color:var(--muted);
+        }
+        .footer{
+            padding:44px 0 64px;
+            color:var(--muted);
+        }
+        .footer-panel{
+            padding:24px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            flex-wrap:wrap;
+        }
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+            font-size:13px;
+        }
+        .hidden-mobile{display:inline-flex}
+        .small{font-size:13px}
+        .center{display:flex; justify-content:center}
+        .spacer12{height:12px}
+        .inline-highlight{
+            color:#fff;
+            background:linear-gradient(120deg, rgba(119,231,255,.17), rgba(143,140,255,.12));
+            padding:2px 6px;
+            border-radius:8px;
+        }
+        .hr{
+            height:1px;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+            margin:16px 0;
+        }
+        .note{
+            font-size:14px;
+            color:var(--muted);
+            line-height:1.6;
+        }
+        .print-only{display:none}
+        @media (max-width: 1080px){
+            .hero-grid{grid-template-columns:1fr}
+            .span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 12}
+            .field{grid-column:span 6}
+            .cheats{grid-template-columns:1fr}
+        }
+        @media (max-width: 760px){
+            .topbar-inner{flex-direction:column; align-items:stretch}
+            .nav{justify-content:flex-start}
+            .hero-card{padding:22px; min-height:auto}
+            .hero-stats{grid-template-columns:1fr}
+            .mini-grid{grid-template-columns:1fr}
+            .field{grid-column:span 12}
+            .table-like{grid-template-columns:1fr 1fr; overflow:auto}
+            .table-like .cell:first-child{grid-column:1 / -1}
+            .section{padding:22px 0}
+            .section-head{flex-direction:column; align-items:flex-start}
+            .hidden-mobile{display:none}
+            .topbar{position:static}
+        }
+        @media print{
+            :root{
+                --bg:#ffffff;
+                --text:#111111;
+                --muted:#333333;
+                --panel:#ffffff;
+                --panel-strong:#ffffff;
+                --line:rgba(0,0,0,.15);
+                --shadow:none;
+            }
+            body{
+                background:#fff !important;
+                color:#111 !important;
+            }
+            body::before,.glow,.topbar,.hero-actions,.toolbar,.btn,.nav{display:none !important}
+            .panel,.card,.question,.task-card,.mini-card,.cheat,.result,.option,.footer-panel,.hero-card,.hero-visual,details{
+                background:#fff !important;
+                border:1px solid #bbb !important;
+                box-shadow:none !important;
+                color:#111 !important;
+            }
+            .brand-sub,.section-title,.question-title,.score-box,.stat-value,.formula,.result strong,.inline-highlight{
+                color:#111 !important;
+                background:none !important;
+            }
+            .lead,.subtle,.section-desc,.muted,.note,.stat-label,.acc-body{
+                color:#333 !important;
+            }
+            .answer{display:block !important; background:#fff !important; border-color:#bbb !important}
+            .print-only{display:block}
+            a{color:#111 !important; text-decoration:none !important}
+            .section{page-break-inside:avoid}
+        }
+    </style>
+</head>
+<body>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+<div class="glow g3"></div>
+
+<div class="wrap">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true"></div>
+                <div class="brand-text">
+                    <div class="brand-title">Интерактивная лаборатория</div>
+                    <div class="brand-sub">Текстовые задачи на составление уравнений</div>
+                </div>
+            </div>
+            <nav class="nav" aria-label="Навигация по странице">
+                <a href="#visual">Визуализация</a>
+                <a href="#calculator">Калькуляторы</a>
+                <a href="#theory">Теория</a>
+                <a href="#examples">Разбор</a>
+                <a href="#cheatsheet">Шпаргалка</a>
+                <a href="#quiz">Квиз</a>
+                <a href="#generator">Генератор</a>
+                <button class="btn hidden-mobile" id="printBtn" type="button">Печать</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="panel hero-card">
+                    <div class="eyebrow">Алгебра · 6 класс · перевод текста в уравнение</div>
+                    <h1><span class="grad">Сначала смысл, потом уравнение.</span></h1>
+                    <p class="lead">
+                        Эта страница посвящена самой важной идее текстовых задач: не угадывать формулу, а <span class="inline-highlight">строить модель</span> — таблицу, схему, остаток, перенос, равенство после изменения. Здесь собраны теория, визуальные модели, автоматические расчёты, разборы, мини-квиз и генератор новых задач по теме занятия.
+                    </p>
+
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">главные модели: «до / после», «больше / меньше», «часть пути от остатка»</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">типичных ошибок, которые ломают решение чаще всего</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">∞</div>
+                            <div class="stat-label">вариантов задач, если научиться выбирать правильную схему</div>
+                        </div>
+                    </div>
+
+                    <div class="formula">Ключевой принцип: выбираем x → описываем все величины через x → используем главное условие задачи → получаем уравнение.</div>
+
+                    <div class="hero-actions">
+                        <a class="btn primary" href="#visual">Открыть визуальную лабораторию</a>
+                        <a class="btn" href="#examples">Сразу к разбору задач</a>
+                        <a class="btn" href="#generator">Сгенерировать тренировку</a>
+                    </div>
+                </div>
+
+                <div class="panel hero-visual">
+                    <div class="mini-grid">
+                        <div class="mini-card">
+                            <h3>Таблица «до / после»</h3>
+                            <p>Нужна, если что-то переложили, перевели, пересыпали или изменили количество. Уравнение строится по новой ситуации.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h3>Схема пути</h3>
+                            <p>Нужна, если объект движется по частям. Особенно важно различать «часть всего пути» и «часть оставшегося пути».</p>
+                        </div>
+                        <div class="mini-card">
+                            <h3>Остаток</h3>
+                            <p>Если в первый день прошли 1/3 пути, то осталось не «что-то», а x − 1/3x = 2/3x.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h3>Скобки</h3>
+                            <p>Если число умножается на выражение с плюсом или минусом, скобки обязательны: 1,5(x + 6).</p>
+                        </div>
+                    </div>
+                    <div class="formula">
+                        Примеры записи без сырого LaTeX:<br>
+                        2x − 10 = x + 10<br>
+                        x − 1/3x = 2/3x<br>
+                        1/2 · 2/3x = 1/3x<br>
+                        1,5(x + 3) = x + 9
+                    </div>
+                    <div class="tagrow">
+                        <span class="tag">Выбор x</span>
+                        <span class="tag">Главное условие</span>
+                        <span class="tag">Равенство после изменения</span>
+                        <span class="tag">Часть от остатка</span>
+                        <span class="tag">Контроль знаков</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="visual">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <div class="section-kicker">Интерактивный визуальный блок</div>
+                        <h2 class="section-title">Две модели: ящики и путь</h2>
+                    </div>
+                    <p class="section-desc">
+                        Переключай визуальные слои и смотри, как из слов задачи рождается уравнение. Первая модель показывает таблицу «до / после», вторая — схему пути с остатком.
+                    </p>
+                </div>
+
+                <div class="cards">
+                    <div class="card span-8">
+                        <div class="toolbar" role="toolbar" aria-label="Переключение модели">
+                            <button class="btn active" data-view="boxes" type="button">Модель 1: ящики</button>
+                            <button class="btn" data-view="path" type="button">Модель 2: путь</button>
+                        </div>
+
+                        <div class="toolbar" id="layerToolbarBoxes" role="toolbar" aria-label="Слои модели ящиков">
+                            <button class="btn active layer-btn" data-target="boxes-before" type="button">Слой: до</button>
+                            <button class="btn active layer-btn" data-target="boxes-after" type="button">Слой: после</button>
+                            <button class="btn active layer-btn" data-target="boxes-eq" type="button">Слой: уравнение</button>
+                        </div>
+
+                        <div class="toolbar" id="layerToolbarPath" style="display:none" role="toolbar" aria-label="Слои модели пути">
+                            <button class="btn active layer-btn" data-target="path-day1" type="button">1-й день</button>
+                            <button class="btn active layer-btn" data-target="path-remain" type="button">Остаток</button>
+                            <button class="btn active layer-btn" data-target="path-day2" type="button">2-й день</button>
+                            <button class="btn active layer-btn" data-target="path-day3" type="button">3-й день</button>
+                            <button class="btn active layer-btn" data-target="path-eq" type="button">Уравнение</button>
+                        </div>
+
+                        <div class="svg-wrap">
+                            <svg id="visualSvg" viewBox="0 0 920 430" aria-label="Интерактивная схема">
+                                <defs>
+                                    <linearGradient id="glassLine" x1="0" x2="1">
+                                        <stop offset="0%" stop-color="#77e7ff" stop-opacity=".85"/>
+                                        <stop offset="100%" stop-color="#8f8cff" stop-opacity=".85"/>
+                                    </linearGradient>
+                                    <linearGradient id="boxFill" x1="0" x2="0" y1="0" y2="1">
+                                        <stop offset="0%" stop-color="rgba(119,231,255,.22)"/>
+                                        <stop offset="100%" stop-color="rgba(119,231,255,.04)"/>
+                                    </linearGradient>
+                                    <filter id="softGlow">
+                                        <feGaussianBlur stdDeviation="6" result="blur"></feGaussianBlur>
+                                        <feMerge>
+                                            <feMergeNode in="blur"></feMergeNode>
+                                            <feMergeNode in="SourceGraphic"></feMergeNode>
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+
+                                <g id="boxesView">
+                                    <text x="40" y="40" fill="#dff7ff" font-size="22" font-weight="700">Задача о двух ящиках</text>
+                                    <text x="40" y="66" fill="#9eb4d0" font-size="15">До: в первом 2x, во втором x. После перекладывания 10 яблок: 2x − 10 и x + 10.</text>
+
+                                    <g id="boxes-before">
+                                        <text x="140" y="105" fill="#77e7ff" font-size="16" font-weight="700">До изменения</text>
+                                        <rect x="80" y="130" width="240" height="150" rx="24" fill="rgba(119,231,255,.08)" stroke="rgba(119,231,255,.45)" stroke-width="2"></rect>
+                                        <rect x="360" y="130" width="180" height="150" rx="24" fill="rgba(143,140,255,.08)" stroke="rgba(143,140,255,.45)" stroke-width="2"></rect>
+                                        <text x="155" y="195" text-anchor="middle" fill="#f4fbff" font-size="20" font-weight="700">Первый ящик</text>
+                                        <text x="155" y="228" text-anchor="middle" fill="#bfefff" font-size="30" font-weight="800">2x</text>
+                                        <text x="450" y="195" text-anchor="middle" fill="#f4fbff" font-size="20" font-weight="700">Второй ящик</text>
+                                        <text x="450" y="228" text-anchor="middle" fill="#ddd8ff" font-size="30" font-weight="800">x</text>
+                                    </g>
+
+                                    <g id="boxes-after">
+                                        <text x="675" y="105" fill="#78ffd6" font-size="16" font-weight="700">После изменения</text>
+                                        <rect x="610" y="130" width="240" height="150" rx="24" fill="rgba(120,255,214,.08)" stroke="rgba(120,255,214,.38)" stroke-width="2"></rect>
+                                        <rect x="610" y="130" width="240" height="150" rx="24" fill="none" stroke="rgba(255,255,255,.06)" stroke-dasharray="6 8"></rect>
+                                        <text x="730" y="195" text-anchor="middle" fill="#f4fbff" font-size="20" font-weight="700">Сравнение после</text>
+                                        <text x="680" y="236" text-anchor="middle" fill="#c8fff0" font-size="26" font-weight="800">2x − 10</text>
+                                        <text x="780" y="236" text-anchor="middle" fill="#d8fff5" font-size="26" font-weight="800">x + 10</text>
+                                        <line x1="730" y1="245" x2="730" y2="195" stroke="rgba(255,255,255,.16)" stroke-width="2"></line>
+                                        <path d="M320 204 C 390 180, 480 170, 610 190" fill="none" stroke="url(#glassLine)" stroke-width="4" filter="url(#softGlow)"></path>
+                                        <polygon points="597,182 610,190 595,195" fill="#77e7ff"></polygon>
+                                        <text x="450" y="160" fill="#d7f6ff" font-size="18" font-weight="700">переложили 10</text>
+                                    </g>
+
+                                    <g id="boxes-eq">
+                                        <rect x="160" y="320" width="600" height="68" rx="18" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.09)"></rect>
+                                        <text x="460" y="362" text-anchor="middle" fill="#ffffff" font-size="30" font-weight="800">2x − 10 = x + 10</text>
+                                    </g>
+                                </g>
+
+                                <g id="pathView" style="display:none">
+                                    <text x="40" y="40" fill="#dff7ff" font-size="22" font-weight="700">Задача о пути по дням</text>
+                                    <text x="40" y="66" fill="#9eb4d0" font-size="15">Модель: весь путь — x. Важно различать долю от всего пути и долю от остатка.</text>
+
+                                    <g transform="translate(40,135)">
+                                        <line x1="0" y1="0" x2="820" y2="0" stroke="rgba(255,255,255,.18)" stroke-width="10" stroke-linecap="round"></line>
+                                        <g id="path-day1">
+                                            <line x1="0" y1="0" x2="273.3" y2="0" stroke="#77e7ff" stroke-width="14" stroke-linecap="round"></line>
+                                            <text x="110" y="-24" fill="#bff6ff" font-size="18" font-weight="700">1-й день: 1/3x</text>
+                                        </g>
+                                        <g id="path-remain">
+                                            <line x1="273.3" y1="0" x2="820" y2="0" stroke="rgba(143,140,255,.55)" stroke-width="14" stroke-linecap="round" stroke-dasharray="8 10"></line>
+                                            <text x="470" y="34" fill="#d9d5ff" font-size="18" font-weight="700">остаток после 1-го дня: x − 1/3x = 2/3x</text>
+                                        </g>
+                                        <g id="path-day2">
+                                            <line x1="273.3" y1="0" x2="546.6" y2="0" stroke="#8f8cff" stroke-width="14" stroke-linecap="round"></line>
+                                            <text x="360" y="-24" fill="#ddd8ff" font-size="18" font-weight="700">2-й день: 1/2 · 2/3x = 1/3x</text>
+                                        </g>
+                                        <g id="path-day3">
+                                            <line x1="546.6" y1="0" x2="820" y2="0" stroke="#78ffd6" stroke-width="14" stroke-linecap="round"></line>
+                                            <text x="645" y="-24" fill="#cbfff2" font-size="18" font-weight="700">3-й день: 15 км</text>
+                                        </g>
+                                        <circle cx="0" cy="0" r="8" fill="#f6fbff"></circle>
+                                        <circle cx="273.3" cy="0" r="8" fill="#f6fbff"></circle>
+                                        <circle cx="546.6" cy="0" r="8" fill="#f6fbff"></circle>
+                                        <circle cx="820" cy="0" r="8" fill="#f6fbff"></circle>
+                                        <g id="path-eq">
+                                            <rect x="110" y="82" width="600" height="68" rx="18" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.09)"></rect>
+                                            <text x="410" y="125" text-anchor="middle" fill="#ffffff" font-size="28" font-weight="800">1/3x + 1/3x + 15 = x</text>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="legend">
+                            <div class="legend-item"><span class="dot" style="background:#77e7ff"></span>Исходная величина или 1-й день</div>
+                            <div class="legend-item"><span class="dot" style="background:#8f8cff"></span>Остаток или 2-й день</div>
+                            <div class="legend-item"><span class="dot" style="background:#78ffd6"></span>Новая ситуация или 3-й день</div>
+                        </div>
+                    </div>
+
+                    <div class="card span-4">
+                        <h3 style="margin-bottom:10px;">Как читать визуальную модель</h3>
+                        <p class="subtle">
+                            В текстовой задаче нельзя сразу писать уравнение «по ощущениям». Сначала строится объектная модель:
+                        </p>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">1</span> Выбери неизвестное</div>
+                                <div class="muted">Чаще всего удобно взять за x меньшую величину или весь путь.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">2</span> Заполни схему</div>
+                                <div class="muted">Таблица «до / после» подходит для перемещений, схема-отрезок — для движения по частям.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">3</span> Найди главное условие</div>
+                                <div class="muted">«Стало поровну», «вместе 50», «второй день — половина остатка».</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">4</span> Только потом составь уравнение</div>
+                                <div class="muted">Смысл диктует равенство. Не наоборот.</div>
+                            </div>
+                        </div>
+                        <div class="hr"></div>
+                        <div class="note">
+                            Самая частая ошибка в задачах на путь: записывать 1/2x вместо 1/2 от остатка.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="calculator">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <div class="section-kicker">Вычислительные блоки</div>
+                        <h2 class="section-title">Два калькулятора модели</h2>
+                    </div>
+                    <p class="section-desc">
+                        Первый калькулятор показывает, как работает таблица «до / после». Второй вычисляет путь по дням, если даны доли и последний участок.
+                    </p>
+                </div>
+
+                <div class="calc-grid">
+                    <div class="card span-6">
+                        <h3 style="margin-bottom:10px;">Калькулятор 1. Равенство после перекладывания</h3>
+                        <p class="subtle">Шаблон: в первом объекте kx, во втором x. Из первого во второй перекладывают t, после чего становится поровну.</p>
+                        <div class="inputs" style="margin-top:14px;">
+                            <div class="field">
+                                <label for="kCoef">Во сколько раз первая величина больше второй</label>
+                                <input id="kCoef" type="number" min="1.1" step="0.1" value="2">
+                            </div>
+                            <div class="field">
+                                <label for="transfer">Сколько переложили / перевели</label>
+                                <input id="transfer" type="number" min="1" step="1" value="10">
+                            </div>
+                            <div class="field">
+                                <label for="xValue">Пробное значение x</label>
+                                <input id="xValue" type="range" min="1" max="60" step="1" value="20">
+                                <div class="muted small">Текущее x: <span id="xValueLabel">20</span></div>
+                            </div>
+                        </div>
+                        <div class="spacer12"></div>
+                        <div class="result" id="boxesCalcResult"></div>
+                    </div>
+
+                    <div class="card span-6">
+                        <h3 style="margin-bottom:10px;">Калькулятор 2. Путь по дням</h3>
+                        <p class="subtle">Шаблон: в первый день прошли a от всего пути, во второй — b от остатка, а в третий — последние c км.</p>
+                        <div class="inputs" style="margin-top:14px;">
+                            <div class="field">
+                                <label for="fracA">1-й день: доля от всего пути</label>
+                                <select id="fracA">
+                                    <option value="1/3">1/3</option>
+                                    <option value="5/11">5/11</option>
+                                    <option value="1/4">1/4</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="fracB">2-й день: доля от остатка</label>
+                                <select id="fracB">
+                                    <option value="1/2">1/2</option>
+                                    <option value="2/3">2/3</option>
+                                    <option value="3/4">3/4</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="lastKm">3-й день: последние километры</label>
+                                <input id="lastKm" type="number" min="1" step="1" value="15">
+                            </div>
+                        </div>
+                        <div class="spacer12"></div>
+                        <div class="result" id="pathCalcResult"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="theory">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <div class="section-kicker">Теория по теме</div>
+                        <h2 class="section-title">Чистая логика текстовой задачи</h2>
+                    </div>
+                    <p class="section-desc">
+                        Ниже — короткие аккордеоны по главным идеям урока: как выбрать x, когда нужна таблица, как считать остаток и где обязательно нужны скобки.
+                    </p>
+                </div>
+
+                <div class="cards">
+                    <div class="card span-7">
+                        <div class="accordion">
+                            <details open>
+                                <summary>
+                                    <span class="summary-text"><span class="num">1</span>Как выбирать x</span>
+                                    <span class="muted">основа модели</span>
+                                </summary>
+                                <div class="acc-body">
+                                    Чаще всего удобно брать за <strong>x</strong> меньшую величину или весь путь.
+                                    <ul>
+                                        <li>«в 2 раза больше» → 2x</li>
+                                        <li>«на 6 больше» → x + 6</li>
+                                        <li>«на 3 меньше» → x − 3</li>
+                                        <li>«весь путь» → x, тогда части выражаются через x</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span class="summary-text"><span class="num">2</span>Когда нужна таблица «до / после»</span>
+                                    <span class="muted">перекладывание и перевод</span>
+                                </summary>
+                                <div class="acc-body">
+                                    Таблица нужна, если величины меняются после действия.
+                                    <ul>
+                                        <li>было → стало</li>
+                                        <li>из первого убыло, во второй прибыло</li>
+                                        <li>уравнение составляется по новой ситуации</li>
+                                    </ul>
+                                    Пример: если было 2x и x, а переложили 10, то стало 2x − 10 и x + 10.
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span class="summary-text"><span class="num">3</span>Что значит «доля от остатка»</span>
+                                    <span class="muted">самая важная тонкость</span>
+                                </summary>
+                                <div class="acc-body">
+                                    Если сначала прошли часть всего пути, то остаток нужно посчитать отдельно.
+                                    <ul>
+                                        <li>1-й день: 1/3x</li>
+                                        <li>остаток: x − 1/3x = 2/3x</li>
+                                        <li>2-й день: 1/2 от остатка = 1/2 · 2/3x = 1/3x</li>
+                                    </ul>
+                                    Нельзя заменять «1/2 остатка» на «1/2x».
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span class="summary-text"><span class="num">4</span>Почему скобки обязательны</span>
+                                    <span class="muted">защита от ошибки</span>
+                                </summary>
+                                <div class="acc-body">
+                                    Если число умножается на сумму или разность, скобки нельзя убирать.
+                                    <ul>
+                                        <li>правильно: 1,5(x + 3)</li>
+                                        <li>неправильно: 1,5x + 3</li>
+                                    </ul>
+                                    Скобки особенно важны, если внутри уже есть плюс или минус.
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span class="summary-text"><span class="num">5</span>Как упростить уравнение с 1,5</span>
+                                    <span class="muted">технический приём</span>
+                                </summary>
+                                <div class="acc-body">
+                                    Если есть число 1,5, часто удобно умножить обе части уравнения на 2.
+                                    <ul>
+                                        <li>1,5x + 5 = 2(x − 5)</li>
+                                        <li>после умножения на 2: 3x + 10 = 4(x − 5)</li>
+                                    </ul>
+                                    Так уравнение становится проще и чище.
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <div class="card span-5">
+                        <h3 style="margin-bottom:14px;">Типичные ошибки</h3>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">A</span> Неверный выбор x</div>
+                                <div class="muted">Из-за этого всё выражение становится громоздким или неверным.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">B</span> «В 2 раза больше» записано как x + 2</div>
+                                <div class="muted">Правильно: 2x.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">C</span> Смешение «от всего» и «от остатка»</div>
+                                <div class="muted">Именно здесь чаще всего ломается задача на путь.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">D</span> Исчезли скобки</div>
+                                <div class="muted">Если множитель умножает сумму или разность, скобки обязательны.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">E</span> Уравнение составлено не по главному условию</div>
+                                <div class="muted">Например, забыто, что «стало поровну» относится именно к ситуации после изменения.</div>
+                            </div>
+                        </div>
+                        <div class="hr"></div>
+                        <div class="formula">Алгоритм: x → модель → выражения через x → главное условие → уравнение → решение → проверка.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="examples">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <div class="section-kicker">Разбор задач</div>
+                        <h2 class="section-title">От текста к уравнению — шаг за шагом</h2>
+                    </div>
+                    <p class="section-desc">
+                        Здесь разобраны две опорные задачи из темы: на таблицу «до / после» и на путь по частям. Все вычисления согласованы с ответами.
+                    </p>
+                </div>
+
+                <div class="cards">
+                    <div class="card span-6">
+                        <h3>Разбор 1. Ящики с яблоками</h3>
+                        <p class="subtle">
+                            В первом ящике яблок в 2 раза больше, чем во втором. Из первого ящика переложили 10 яблок во второй, и яблок стало поровну. Сколько яблок было сначала?
+                        </p>
+
+                        <div class="table-like">
+                            <div class="cell head"></div>
+                            <div class="cell head">Первый ящик</div>
+                            <div class="cell head">Второй ящик</div>
+
+                            <div class="cell head">До</div>
+                            <div class="cell">2x</div>
+                            <div class="cell">x</div>
+
+                            <div class="cell head">После</div>
+                            <div class="cell">2x − 10</div>
+                            <div class="cell">x + 10</div>
+                        </div>
+
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">1</span>Выбор неизвестного</div>
+                                <div class="muted">Пусть x — число яблок во втором ящике сначала.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">2</span>Главное условие</div>
+                                <div class="muted">После перекладывания яблок стало поровну.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">3</span>Уравнение</div>
+                                <div class="formula">2x − 10 = x + 10</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">4</span>Решение</div>
+                                <div class="formula">2x − x = 10 + 10 → x = 20</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">5</span>Ответ</div>
+                                <div class="muted">Во втором ящике было 20 яблок, в первом — 40 яблок.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card span-6">
+                        <h3>Разбор 2. Путь за три дня</h3>
+                        <p class="subtle">
+                            В первый день туристы прошли 1/3 всего пути, во второй — 1/2 оставшегося пути, а в третий — последние 15 км. Найди длину всего пути.
+                        </p>
+
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">1</span>Выбор неизвестного</div>
+                                <div class="muted">Пусть x — весь путь.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">2</span>Первый день</div>
+                                <div class="formula">1-й день: 1/3x</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">3</span>Остаток после первого дня</div>
+                                <div class="formula">x − 1/3x = 2/3x</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">4</span>Второй день</div>
+                                <div class="formula">1/2 · 2/3x = 1/3x</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">5</span>Уравнение</div>
+                                <div class="formula">1/3x + 1/3x + 15 = x</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">6</span>Решение</div>
+                                <div class="formula">2/3x + 15 = x → 15 = 1/3x → x = 45</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-top"><span class="step-index">7</span>Ответ</div>
+                                <div class="muted">Весь путь равен 45 км.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card span-12">
+                        <h3>Мини-разбор с 1,5</h3>
+                        <p class="subtle">
+                            Если после перевода учеников из одного класса в другой появляется число 1,5, удобно избавиться от десятичной дроби умножением обеих частей уравнения на 2.
+                        </p>
+                        <div class="formula">
+                            Пример формы: 1,5(x + 3) = x + 9<br>
+                            Умножаем обе части на 2:<br>
+                            3(x + 3) = 2(x + 9)<br>
+                            3x + 9 = 2x + 18<br>
+                            x = 9
+                        </div>
+                        <p class="note">
+                            Главное не убрать скобки раньше времени. Ошибка вида 1,5x + 3 вместо 1,5(x + 3) полностью меняет задачу.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="cheatsheet">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <div class="section-kicker">Сводка</div>
+                        <h2 class="section-title">Шпаргалка по теме</h2>
+                    </div>
+                    <p class="section-desc">
+                        Всё, что нужно быстро вспомнить перед решением: словарь фраз, формы записи и порядок действий.
+                    </p>
+                </div>
+
+                <div class="card span-12">
+                    <div class="cheats">
+                        <div class="cheat">
+                            <h4>Как переводить слова в выражения</h4>
+                            <div class="formula">
+                                в 2 раза больше → 2x<br>
+                                на 6 больше → x + 6<br>
+                                на 3 меньше → x − 3<br>
+                                стало поровну → левая величина = правая величина
+                            </div>
+                        </div>
+                        <div class="cheat">
+                            <h4>Когда делать таблицу</h4>
+                            <div class="formula">
+                                Было / стало<br>
+                                До / после<br>
+                                Переложили / перевели / пересыпали
+                            </div>
+                        </div>
+                        <div class="cheat">
+                            <h4>Как находить остаток</h4>
+                            <div class="formula">
+                                остаток = всё − уже использовано<br>
+                                x − 1/3x = 2/3x<br>
+                                x − 5/11x = 6/11x
+                            </div>
+                        </div>
+                        <div class="cheat">
+                            <h4>Доля от остатка</h4>
+                            <div class="formula">
+                                1/2 от остатка → 1/2 · остаток<br>
+                                2/3 от остатка → 2/3 · остаток
+                            </div>
+                        </div>
+                        <div class="cheat">
+                            <h4>Про скобки</h4>
+                            <div class="formula">
+                                правильно: 1,5(x + 3)<br>
+                                неправильно: 1,5x + 3
+                            </div>
+                        </div>
+                        <div class="cheat">
+                            <h4>Универсальный алгоритм</h4>
+                            <div class="formula">
+                                x → модель → выражения → главное условие → уравнение → решение → проверка
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="quiz">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <div class="section-kicker">Самопроверка</div>
+                        <h2 class="section-title">Мини-квиз по ключевым идеям</h2>
+                    </div>
+                    <p class="section-desc">
+                        Отметь ответы, проверь себя и посмотри итоговый счёт. Вопросы проверяют не вычисления, а понимание модели.
+                    </p>
+                </div>
+
+                <div class="cards">
+                    <div class="card span-8">
+                        <form id="quizForm" class="quiz-list">
+                            <div class="question" data-answer="b">
+                                <div class="question-title">1. Если в первом ящике в 2 раза больше яблок, чем во втором, и во втором x яблок, то в первом:</div>
+                                <div class="options">
+                                    <label class="option"><input type="radio" name="q1" value="a"> x + 2</label>
+                                    <label class="option"><input type="radio" name="q1" value="b"> 2x</label>
+                                    <label class="option"><input type="radio" name="q1" value="c"> x − 2</label>
+                                </div>
+                            </div>
+
+                            <div class="question" data-answer="c">
+                                <div class="question-title">2. Если в первый день прошли 1/3 пути, то осталось:</div>
+                                <div class="options">
+                                    <label class="option"><input type="radio" name="q2" value="a"> 1/3x</label>
+                                    <label class="option"><input type="radio" name="q2" value="b"> 1/2x</label>
+                                    <label class="option"><input type="radio" name="q2" value="c"> 2/3x</label>
+                                </div>
+                            </div>
+
+                            <div class="question" data-answer="a">
+                                <div class="question-title">3. После перекладывания яблок стало поровну. Какое условие нужно использовать для уравнения?</div>
+                                <div class="options">
+                                    <label class="option"><input type="radio" name="q3" value="a"> Количество после изменения в первом и во втором равно</label>
+                                    <label class="option"><input type="radio" name="q3" value="b"> Нужно сложить исходные количества</label>
+                                    <label class="option"><input type="radio" name="q3" value="c"> Нужно разделить одно количество на другое</label>
+                                </div>
+                            </div>
+
+                            <div class="question" data-answer="b">
+                                <div class="question-title">4. Что правильно записывает «половину остатка»?</div>
+                                <div class="options">
+                                    <label class="option"><input type="radio" name="q4" value="a"> 1/2x</label>
+                                    <label class="option"><input type="radio" name="q4" value="b"> 1/2 · (остаток)</label>
+                                    <label class="option"><input type="radio" name="q4" value="c"> x / 2 только после первого дня</label>
+                                </div>
+                            </div>
+
+                            <div class="question" data-answer="c">
+                                <div class="question-title">5. Какая запись верная?</div>
+                                <div class="options">
+                                    <label class="option"><input type="radio" name="q5" value="a"> 1,5x + 3, если сказано «1,5 от (x + 3)»</label>
+                                    <label class="option"><input type="radio" name="q5" value="b"> 1,5x3</label>
+                                    <label class="option"><input type="radio" name="q5" value="c"> 1,5(x + 3)</label>
+                                </div>
+                            </div>
+
+                            <div class="toolbar">
+                                <button class="btn primary" type="submit">Проверить квиз</button>
+                                <button class="btn" type="button" id="resetQuiz">Сбросить</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card span-4">
+                        <h3 style="margin-bottom:10px;">Результат</h3>
+                        <div class="result">
+                            <div class="score-box" id="quizScore">Пока не проверено</div>
+                            <div class="spacer12"></div>
+                            <div class="muted" id="quizFeedback">
+                                После проверки ты увидишь итоговый счёт и подсветку по каждому вопросу.
+                            </div>
+                        </div>
+                        <div class="hr"></div>
+                        <div class="note">
+                            Хороший результат — это не только правильные ответы, но и понимание, почему неверные варианты ошибочны.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="generator">
+            <div class="container">
+                <div class="section-head">
+                    <div>
+                        <div class="section-kicker">Практика</div>
+                        <h2 class="section-title">Генератор новых тренировочных задач</h2>
+                    </div>
+                    <p class="section-desc">
+                        Генератор использует только безопасные шаблоны, где условие и ответ математически согласованы. Для каждой задачи можно раскрыть ответ.
+                    </p>
+                </div>
+
+                <div class="cards">
+                    <div class="card span-4">
+                        <h3 style="margin-bottom:10px;">Выбери тип</h3>
+                        <div class="inputs">
+                            <div class="field" style="grid-column:span 12">
+                                <label for="genType">Шаблон задачи</label>
+                                <select id="genType">
+                                    <option value="boxes">Ящики: стало поровну после перекладывания</option>
+                                    <option value="warehouse">Склады: одна величина в несколько раз больше другой</option>
+                                    <option value="path13">Путь: 1/3 всего, 1/2 остатка, потом последние км</option>
+                                    <option value="path511">Путь: 5/11 всего, 2/3 остатка, потом последние км</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="toolbar">
+                            <button class="btn primary" type="button" id="generateTask">Сгенерировать задачу</button>
+                            <button class="btn" type="button" id="generateThree">Сгенерировать 3 задачи</button>
+                        </div>
+                        <div class="note">
+                            Все шаблоны составлены так, чтобы ответы получались целыми и проверяемыми.
+                        </div>
+                    </div>
+
+                    <div class="card span-8">
+                        <h3 style="margin-bottom:10px;">Новые задания</h3>
+                        <div id="generatorOutput" class="generator-output">
+                            <div class="task-card">
+                                Нажми на кнопку генерации, чтобы получить новую тренировочную задачу по теме.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="panel footer-panel">
+                    <div>
+                        <div style="font-weight:700; margin-bottom:6px;">Итог идеи</div>
+                        <div class="muted">Не угадывай уравнение. Сначала построй смысловую модель.</div>
+                    </div>
+                    <div class="pill">Таблица «до / после»</div>
+                    <div class="pill">Остаток пути</div>
+                    <div class="pill">Скобки обязательны</div>
+                    <div class="pill">Главное условие задачи</div>
+                </div>
+                <div class="print-only" style="margin-top:18px; color:#111;">
+                    Печатная версия: текстовые задачи на составление уравнений.
+                </div>
+            </div>
+        </footer>
+    </main>
+</div>
+
+<script>
+    (function(){
+        const $ = (sel, root=document) => root.querySelector(sel);
+        const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+        function gcd(a,b){
+            a = Math.abs(a); b = Math.abs(b);
+            while(b){ const t = b; b = a % b; a = t; }
+            return a || 1;
+        }
+
+        function parseFraction(str){
+            const [n,d] = str.split('/').map(Number);
+            return {n,d};
+        }
+
+        function simplifyFraction(n,d){
+            const g = gcd(n,d);
+            n /= g; d /= g;
+            if(d < 0){ n *= -1; d *= -1; }
+            return {n,d};
+        }
+
+        function fractionToText(n,d){
+            const s = simplifyFraction(n,d);
+            return s.d === 1 ? String(s.n) : (s.n + "/" + s.d);
+        }
+
+        function mulFrac(a,b){
+            return simplifyFraction(a.n * b.n, a.d * b.d);
+        }
+
+        function subFrac(a,b){
+            return simplifyFraction(a.n*b.d - b.n*a.d, a.d*b.d);
+        }
+
+        function fracToNumber(f){
+            return f.n / f.d;
+        }
+
+        function formatNumber(n){
+            if(Number.isInteger(n)) return String(n);
+            return String(Math.round(n * 1000) / 1000).replace('.', ',');
+        }
+
+        function updateBoxesCalc(){
+            const k = parseFloat($("#kCoef").value) || 2;
+            const t = parseFloat($("#transfer").value) || 10;
+            const x = parseFloat($("#xValue").value) || 20;
+            $("#xValueLabel").textContent = String(x);
+
+            const leftAfter = k * x - t;
+            const rightAfter = x + t;
+            const solution = (k !== 1) ? (2 * t) / (k - 1) : null;
+
+            let solutionText = "Уравнение невозможно составить: коэффициент не должен быть равен 1.";
+            if(solution !== null && Number.isFinite(solution)){
+                solutionText =
+                "Если после перекладывания стало поровну, то уравнение имеет вид: " +
+                "<strong>" + formatNumber(k) + "x − " + formatNumber(t) + " = x + " + formatNumber(t) + "</strong>.<br>" +
+                "Отсюда <strong>x = " + formatNumber(solution) + "</strong>.";
+            }
+
+            $("#boxesCalcResult").innerHTML =
+            "При текущем пробном значении <strong>x = " + formatNumber(x) + "</strong>:<br>" +
+            "до изменения: первая величина = <strong>" + formatNumber(k*x) + "</strong>, вторая = <strong>" + formatNumber(x) + "</strong>;<br>" +
+            "после изменения: первая = <strong>" + formatNumber(leftAfter) + "</strong>, вторая = <strong>" + formatNumber(rightAfter) + "</strong>.<br><br>" +
+            solutionText;
+        }
+
+        function updatePathCalc(){
+            const a = parseFraction($("#fracA").value);
+            const b = parseFraction($("#fracB").value);
+            const lastKm = parseFloat($("#lastKm").value) || 15;
+
+            const remainAfterDay1 = subFrac({n:1,d:1}, a);
+            const day2 = mulFrac(b, remainAfterDay1);
+            const day1plus2 = simplifyFraction(a.n*day2.d + day2.n*a.d, a.d*day2.d);
+            const day3Fraction = subFrac({n:1,d:1}, day1plus2);
+            const total = lastKm / fracToNumber(day3Fraction);
+
+            const text =
+            "1-й день: <strong>" + $("#fracA").value + "x</strong>.<br>" +
+            "Остаток после 1-го дня: <strong>x − " + $("#fracA").value + "x = " + fractionToText(remainAfterDay1.n, remainAfterDay1.d) + "x</strong>.<br>" +
+            "2-й день: <strong>" + $("#fracB").value + " · " + fractionToText(remainAfterDay1.n, remainAfterDay1.d) + "x = " + fractionToText(day2.n, day2.d) + "x</strong>.<br>" +
+            "На 3-й день осталось: <strong>" + fractionToText(day3Fraction.n, day3Fraction.d) + "x</strong>.<br>" +
+            "Если это <strong>" + formatNumber(lastKm) + " км</strong>, то весь путь: <strong>x = " + formatNumber(total) + " км</strong>.";
+
+            $("#pathCalcResult").innerHTML = text;
+        }
+
+        $("#kCoef").addEventListener("input", updateBoxesCalc);
+        $("#transfer").addEventListener("input", updateBoxesCalc);
+        $("#xValue").addEventListener("input", updateBoxesCalc);
+
+        $("#fracA").addEventListener("change", updatePathCalc);
+        $("#fracB").addEventListener("change", updatePathCalc);
+        $("#lastKm").addEventListener("input", updatePathCalc);
+
+        updateBoxesCalc();
+        updatePathCalc();
+
+        const viewBtns = $$("[data-view]");
+        const boxesView = $("#boxesView");
+        const pathView = $("#pathView");
+        const layerToolbarBoxes = $("#layerToolbarBoxes");
+        const layerToolbarPath = $("#layerToolbarPath");
+
+        viewBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                viewBtns.forEach(x => x.classList.remove("active"));
+                btn.classList.add("active");
+                const view = btn.dataset.view;
+                if(view === "boxes"){
+                    boxesView.style.display = "";
+                    pathView.style.display = "none";
+                    layerToolbarBoxes.style.display = "";
+                    layerToolbarPath.style.display = "none";
+                } else {
+                    boxesView.style.display = "none";
+                    pathView.style.display = "";
+                    layerToolbarBoxes.style.display = "none";
+                    layerToolbarPath.style.display = "";
+                }
+            });
+        });
+
+        $$(".layer-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const target = btn.dataset.target;
+                const el = document.getElementById(target);
+                const active = btn.classList.toggle("active");
+                el.style.display = active ? "" : "none";
+            });
+        });
+
+        $("#printBtn").addEventListener("click", () => window.print());
+
+        const quizForm = $("#quizForm");
+        const quizScore = $("#quizScore");
+        const quizFeedback = $("#quizFeedback");
+        const resetQuiz = $("#resetQuiz");
+
+        quizForm.addEventListener("submit", function(e){
+            e.preventDefault();
+            let score = 0;
+            const questions = $$(".question", quizForm);
+
+            questions.forEach((q, index) => {
+                const answer = q.dataset.answer;
+                const chosen = $(`input[name="q${index+1}"]:checked`, q);
+                $$(".option", q).forEach(opt => {
+                    opt.classList.remove("correct", "wrong");
+                    const input = $("input", opt);
+                    if(input.value === answer) opt.classList.add("correct");
+                    if(chosen && input.checked && input.value !== answer) opt.classList.add("wrong");
+                });
+                if(chosen && chosen.value === answer) score++;
+            });
+
+            quizScore.textContent = "Результат: " + score + " / " + questions.length;
+            if(score === questions.length){
+                quizFeedback.textContent = "Отлично. Ты уверенно различаешь модель, остаток и условие для уравнения.";
+            }else if(score >= 3){
+                quizFeedback.textContent = "Хорошо. Ошибки точечные: ещё раз посмотри на «долю от остатка» и на таблицу «до / после».";
+            }else{
+                quizFeedback.textContent = "Нужно повторить алгоритм: выбор x, построение модели, главное условие.";
+            }
+        });
+
+        resetQuiz.addEventListener("click", () => {
+            quizForm.reset();
+            $$(".option", quizForm).forEach(opt => opt.classList.remove("correct", "wrong"));
+            quizScore.textContent = "Пока не проверено";
+            quizFeedback.textContent = "После проверки ты увидишь итоговый счёт и подсветку по каждому вопросу.";
+        });
+
+        function randInt(min, max){
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function sample(arr){
+            return arr[randInt(0, arr.length - 1)];
+        }
+
+        function createTaskCard(title, text, answerText){
+            const card = document.createElement("div");
+            card.className = "task-card";
+
+            const h = document.createElement("div");
+            h.style.fontWeight = "700";
+            h.style.marginBottom = "8px";
+            h.textContent = title;
+
+            const p = document.createElement("div");
+            p.className = "muted";
+            p.style.lineHeight = "1.65";
+            p.textContent = text;
+
+            const row = document.createElement("div");
+            row.className = "toolbar";
+            row.style.marginTop = "12px";
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn";
+            btn.textContent = "Показать ответ";
+
+            const ans = document.createElement("div");
+            ans.className = "answer";
+            ans.innerHTML = "<strong>Ответ:</strong> " + answerText;
+
+            btn.addEventListener("click", () => {
+                const open = ans.style.display === "block";
+                ans.style.display = open ? "none" : "block";
+                btn.textContent = open ? "Показать ответ" : "Скрыть ответ";
+            });
+
+            row.appendChild(btn);
+            card.appendChild(h);
+            card.appendChild(p);
+            card.appendChild(row);
+            card.appendChild(ans);
+            return card;
+        }
+
+        function genBoxesTask(){
+            const x = randInt(12, 36);
+            const transfer = randInt(4, 12);
+            const k = 2;
+            const actualX = transfer * 2 / (k - 1);
+            const validX = (Math.abs(actualX - Math.round(actualX)) < 1e-9) ? actualX : 2*transfer;
+            const X = validX;
+            const first = k * X;
+            const second = X;
+            const task = "В первом ящике яблок в 2 раза больше, чем во втором. Из первого ящика переложили " + transfer + " яблок во второй, и яблок стало поровну. Сколько яблок было в каждом ящике сначала?";
+            const ans = "во втором ящике " + formatNumber(X) + ", в первом " + formatNumber(first) + ".";
+            return createTaskCard("Задача: ящики", task, ans);
+        }
+
+        function genWarehouseTask(){
+            const x = randInt(8, 25);
+            const k = sample([2,3,4]);
+            const total = x + k*x;
+            const task = "На первом складе зерна в " + k + " раза больше, чем на втором. Вместе на двух складах " + total + " т зерна. Сколько тонн зерна на каждом складе?";
+            const ans = "на втором складе " + x + " т, на первом " + (k*x) + " т.";
+            return createTaskCard("Задача: склады", task, ans);
+        }
+
+        function genPath13Task(){
+            const total = randInt(6, 18) * 3;
+            const last = total / 3;
+            const task = "В первый день туристы прошли 1/3 всего пути, во второй день — 1/2 оставшегося пути, а в третий день прошли последние " + last + " км. Найди длину всего пути.";
+            const ans = total + " км.";
+            return createTaskCard("Задача: путь 1/3 и 1/2 остатка", task, ans);
+        }
+
+        function genPath511Task(){
+            const total = randInt(3, 12) * 11;
+            const last = total * 2 / 11;
+            const task = "В первый день туристы прошли 5/11 всего пути, во второй день — 2/3 оставшегося пути, а в третий день прошли последние " + last + " км. Найди длину всего пути.";
+            const ans = total + " км.";
+            return createTaskCard("Задача: путь 5/11 и 2/3 остатка", task, ans);
+        }
+
+        function generateByType(type){
+            switch(type){
+                case "boxes": return genBoxesTask();
+                case "warehouse": return genWarehouseTask();
+                case "path13": return genPath13Task();
+                case "path511": return genPath511Task();
+                default: return genBoxesTask();
+            }
+        }
+
+        const genType = $("#genType");
+        const generatorOutput = $("#generatorOutput");
+        const generateTaskBtn = $("#generateTask");
+        const generateThreeBtn = $("#generateThree");
+
+        generateTaskBtn.addEventListener("click", () => {
+            generatorOutput.innerHTML = "";
+            generatorOutput.appendChild(generateByType(genType.value));
+        });
+
+        generateThreeBtn.addEventListener("click", () => {
+            generatorOutput.innerHTML = "";
+            const type = genType.value;
+            for(let i = 0; i < 3; i++){
+                generatorOutput.appendChild(generateByType(type));
+            }
+        });
+
+        const initialCards = [genBoxesTask(), genPath13Task()];
+        generatorOutput.innerHTML = "";
+        initialCards.forEach(card => generatorOutput.appendChild(card));
+    })();
+</script>
+</body>
+</html>
