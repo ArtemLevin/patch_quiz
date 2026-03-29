@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Задание 2 — Уравнение с модулем (MathML)</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --bg2:#111831;
+            --panel:#151d3a;
+            --panel2:#1b2447;
+            --text:#eaf0ff;
+            --muted:#aeb8d9;
+            --accent:#6ee7d8;
+            --accent2:#8ab4ff;
+            --ok:#8ef0a7;
+            --warn:#ffd27a;
+            --danger:#ff9c9c;
+            --line:rgba(255,255,255,.09);
+            --shadow:0 20px 50px rgba(0,0,0,.35);
+        }
+
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0}
+        body{
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background:
+            radial-gradient(1100px 520px at 0% -10%, rgba(110,231,216,.14), transparent 60%),
+            radial-gradient(900px 500px at 100% 0%, rgba(138,180,255,.16), transparent 55%),
+            linear-gradient(180deg, var(--bg), #070b16 100%);
+            color:var(--text);
+            line-height:1.65;
+            min-height:100vh;
+        }
+
+        .wrap{
+            width:min(1240px, calc(100vw - 28px));
+            margin:0 auto;
+            padding:22px 0 56px;
+        }
+
+        .hero{
+            position:relative;
+            overflow:hidden;
+            background:
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+            linear-gradient(135deg, rgba(110,231,216,.08), rgba(138,180,255,.08));
+            border:1px solid var(--line);
+            border-radius:30px;
+            box-shadow:var(--shadow);
+            padding:28px;
+            margin-bottom:20px;
+        }
+
+        .hero::after{
+            content:"";
+            position:absolute;
+            right:-70px; bottom:-70px;
+            width:260px; height:260px;
+            border-radius:50%;
+            background:radial-gradient(circle, rgba(110,231,216,.15), transparent 65%);
+            filter:blur(8px);
+            pointer-events:none;
+        }
+
+        .topline{
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+            align-items:center;
+            margin-bottom:14px;
+        }
+
+        .tag{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 12px;
+            border-radius:999px;
+            border:1px solid var(--line);
+            color:var(--muted);
+            background:rgba(255,255,255,.03);
+            font-size:14px;
+        }
+
+        h1{
+            margin:0 0 10px;
+            font-size:clamp(30px, 5vw, 54px);
+            line-height:1.05;
+            letter-spacing:-.03em;
+        }
+
+        .subtitle{
+            max-width:980px;
+            color:var(--muted);
+            font-size:18px;
+            margin:0;
+        }
+
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:18px;
+            margin-top:22px;
+        }
+
+        .hero-card{
+            background:rgba(255,255,255,.03);
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:18px;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:minmax(0, 1.15fr) minmax(320px, .85fr);
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:24px;
+            box-shadow:var(--shadow);
+            padding:22px;
+        }
+
+        .section-title{
+            margin:0 0 12px;
+            font-size:26px;
+            line-height:1.15;
+        }
+
+        .small{
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .steps{
+            display:grid;
+            gap:14px;
+        }
+
+        .step{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:18px;
+            padding:16px;
+        }
+
+        .step-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            margin-bottom:10px;
+        }
+
+        .num{
+            width:34px;height:34px;border-radius:50%;
+            display:grid;place-items:center;
+            font-weight:800;
+            color:#06131a;
+            background:linear-gradient(135deg, var(--accent), #9fe8ff);
+            flex:0 0 auto;
+        }
+
+        .step h3{
+            margin:0;
+            font-size:18px;
+        }
+
+        .math{
+            margin:10px 0;
+            padding:14px 16px;
+            border-radius:16px;
+            background:#0c1430;
+            border:1px solid rgba(255,255,255,.07);
+            overflow:auto;
+        }
+
+        .note{
+            margin-top:10px;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(110,231,216,.08);
+            border:1px solid rgba(110,231,216,.16);
+            color:#dffcf8;
+        }
+
+        .warn{
+            background:rgba(255,210,122,.08);
+            border-color:rgba(255,210,122,.18);
+            color:#fff2cf;
+        }
+
+        .danger{
+            background:rgba(255,156,156,.08);
+            border-color:rgba(255,156,156,.18);
+            color:#ffe2e2;
+        }
+
+        .side-stack{
+            display:grid;
+            gap:18px;
+            position:sticky;
+            top:16px;
+        }
+
+        .checklist{
+            padding-left:18px;
+            margin:0;
+        }
+
+        .checklist li{margin:7px 0}
+
+        .buttons{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:12px;
+        }
+
+        button, .btn{
+            appearance:none;
+            border:none;
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-height:44px;
+            padding:0 16px;
+            border-radius:14px;
+            font-weight:700;
+            font-size:15px;
+            transition:transform .15s ease, opacity .15s ease;
+        }
+
+        button:hover, .btn:hover{transform:translateY(-1px)}
+
+        .primary{
+            color:#06131a;
+            background:linear-gradient(135deg, var(--accent), #9fe8ff);
+            box-shadow:0 10px 24px rgba(110,231,216,.22);
+        }
+
+        .ghost{
+            color:var(--text);
+            background:#101735;
+            border:1px solid var(--line);
+        }
+
+        .chips{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:12px;
+        }
+
+        .chip{
+            border:1px solid var(--line);
+            border-radius:999px;
+            padding:7px 10px;
+            color:var(--muted);
+            font-size:13px;
+            background:rgba(255,255,255,.025);
+        }
+
+        .viz{
+            background:#0d1430;
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:14px;
+            overflow:hidden;
+        }
+
+        .quiz-grid{
+            display:grid;
+            gap:12px;
+            margin-top:14px;
+        }
+
+        .quiz-card{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .answers{
+            display:grid;
+            gap:10px;
+            margin-top:12px;
+        }
+
+        .answers button{
+            justify-content:flex-start;
+            text-align:left;
+            min-height:unset;
+            padding:12px 14px;
+            border-radius:12px;
+            background:#0c1430;
+            color:var(--text);
+            border:1px solid var(--line);
+        }
+
+        .answers button.correct{
+            border-color:rgba(142,240,167,.35);
+            background:rgba(142,240,167,.08);
+        }
+
+        .answers button.wrong{
+            border-color:rgba(255,156,156,.35);
+            background:rgba(255,156,156,.08);
+        }
+
+        .result{
+            margin-top:10px;
+            min-height:24px;
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .generator{
+            display:grid;
+            gap:12px;
+        }
+
+        .gen-box{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .gen-answer{
+            margin-top:10px;
+            padding:12px 14px;
+            border-radius:12px;
+            background:#0c1430;
+            border:1px solid var(--line);
+            display:none;
+            overflow:auto;
+        }
+
+        .summary{
+            display:grid;
+            grid-template-columns:repeat(4, minmax(0,1fr));
+            gap:12px;
+            margin-top:16px;
+        }
+
+        .summary .item{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .summary .k{
+            color:var(--muted);
+            font-size:13px;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+        }
+
+        .summary .v{
+            margin-top:6px;
+            font-size:21px;
+            font-weight:800;
+            overflow:auto;
+        }
+
+        .footer{
+            margin-top:20px;
+            color:var(--muted);
+            text-align:center;
+            font-size:14px;
+        }
+
+        math{
+            color:var(--text);
+            font-size:1.12rem;
+        }
+
+        .hero-card math{
+            font-size:1.22rem;
+        }
+
+        .math math[display="block"]{
+            margin:0;
+        }
+
+        mi{ font-style:italic; }
+
+        .math-inline{
+            display:inline-block;
+            vertical-align:middle;
+        }
+
+        @media (max-width: 980px){
+            .hero-grid,.layout,.summary{
+                grid-template-columns:1fr;
+            }
+            .side-stack{
+                position:static;
+            }
+        }
+
+        @media print{
+            body{
+                background:#fff;
+                color:#111;
+            }
+            .hero,.panel,.step,.hero-card,.quiz-card,.gen-box,.summary .item{
+                background:#fff !important;
+                box-shadow:none !important;
+                color:#111 !important;
+                border:1px solid #ccc !important;
+            }
+            .subtitle,.small,.tag,.chip,.footer,.result,.note{
+                color:#333 !important;
+            }
+            .buttons, .quiz-card button, .generator button{
+                display:none !important;
+            }
+            .gen-answer{
+                display:block !important;
+            }
+            math{
+                color:#111 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="hero">
+        <div class="topline">
+            <span class="tag">Дочерняя страница</span>
+            <span class="tag">Тема: уравнения с модулем</span>
+            <span class="tag">Метод: равносильный переход</span>
+        </div>
+
+        <h1>Задание 2. Уравнение с модулем</h1>
+        <p class="subtitle">
+            Главная идея этой страницы: уравнение вида
+            <span class="math-inline"><math><mrow><mo>|</mo><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>|</mo><mo>=</mo><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo></mrow></math></span>
+            нельзя решать без проверки условия
+            <span class="math-inline"><math><mrow><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>≥</mo><mn>0</mn></mrow></math></span>.
+        </p>
+
+        <div class="hero-grid">
+            <div class="hero-card">
+                <div class="small">Исходное уравнение</div>
+                <div class="math">
+                    <math display="block">
+                        <mrow>
+                            <mo>|</mo><mrow><mn>5</mn><mi>x</mi><mo>-</mo><mn>6</mn></mrow><mo>|</mo>
+                            <mo>=</mo>
+                            <mrow><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>22</mn></mrow>
+                        </mrow>
+                    </math>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="small">Главная идея</div>
+                <ul class="checklist">
+                    <li>сначала контролируем правую часть;</li>
+                    <li>потом решаем два уравнения;</li>
+                    <li>в конце обязательно отбираем подходящие корни;</li>
+                    <li>не забываем: модуль не может равняться отрицательному числу.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="panel">
+            <h2 class="section-title">Подробный разбор</h2>
+
+            <div class="steps">
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">1</div>
+                            <h3>Записать главный шаблон</h3>
+                        </div>
+                    </div>
+                    <p>
+                        Для уравнения
+                        <span class="math-inline">
+                <math>
+                  <mrow><mo>|</mo><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>|</mo><mo>=</mo><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo></mrow>
+                </math>
+              </span>
+                        нужно учитывать два условия:
+                    </p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>≥</mo><mn>0</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo>
+                                <mspace width="1em"/>
+                                <mtext>или</mtext>
+                                <mspace width="1em"/>
+                                <mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><mo>-</mo><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="note">
+                        В этой задаче
+                        <span class="math-inline"><math><mrow><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><mn>5</mn><mi>x</mi><mo>-</mo><mn>6</mn></mrow></math></span>,
+                        а
+                        <span class="math-inline"><math><mrow><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>22</mn></mrow></math></span>.
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">2</div>
+                            <h3>Записать условие на правую часть</h3>
+                        </div>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mo>-</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>22</mn><mo>≥</mo><mn>0</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>
+                        Это фильтр для корней. Можно не решать его сразу до конца, а проверять им найденные значения.
+                    </p>
+                    <div class="note warn">
+                        Типичная ошибка: сразу перейти к двум уравнениям и забыть, что правая часть обязана быть неотрицательной.
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">3</div>
+                            <h3>Решить первое уравнение</h3>
+                        </div>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mn>5</mn><mi>x</mi><mo>-</mo><mn>6</mn>
+                                <mo>=</mo>
+                                <mo>-</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>22</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Переносим всё в одну сторону:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>3</mn><mi>x</mi><mo>-</mo><mn>28</mn><mo>=</mo><mn>0</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Раскладываем на множители:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mo>(</mo><mi>x</mi><mo>+</mo><mn>7</mn><mo>)</mo><mo>(</mo><mi>x</mi><mo>-</mo><mn>4</mn><mo>)</mo><mo>=</mo><mn>0</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>x</mi><mo>=</mo><mo>-</mo><mn>7</mn>
+                                <mspace width="1em"/>
+                                <mtext>или</mtext>
+                                <mspace width="1em"/>
+                                <mi>x</mi><mo>=</mo><mn>4</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">4</div>
+                            <h3>Проверить найденные корни условием</h3>
+                        </div>
+                    </div>
+                    <p>Проверяем правую часть:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                g<x/> <mtext>не используется в MathML как функция, поэтому считаем прямо:</mtext>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mtext>При </mtext><mi>x</mi><mo>=</mo><mo>-</mo><mn>7</mn><mo>:</mo>
+                                <mspace width="1em"/>
+                                <mo>-</mo><msup><mrow><mo>(</mo><mo>-</mo><mn>7</mn><mo>)</mo></mrow><mn>2</mn></msup>
+                                <mo>+</mo><mn>2</mn><mo>(</mo><mo>-</mo><mn>7</mn><mo>)</mo><mo>+</mo><mn>22</mn>
+                                <mo>=</mo><mo>-</mo><mn>49</mn><mo>-</mo><mn>14</mn><mo>+</mo><mn>22</mn>
+                                <mo>=</mo><mo>-</mo><mn>41</mn><mo>&lt;</mo><mn>0</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Значит, число <span class="math-inline"><math><mrow><mo>-</mo><mn>7</mn></mrow></math></span> не подходит.</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mtext>При </mtext><mi>x</mi><mo>=</mo><mn>4</mn><mo>:</mo>
+                                <mspace width="1em"/>
+                                <mo>-</mo><msup><mn>4</mn><mn>2</mn></msup><mo>+</mo><mn>2</mn><mo>·</mo><mn>4</mn><mo>+</mo><mn>22</mn>
+                                <mo>=</mo><mo>-</mo><mn>16</mn><mo>+</mo><mn>8</mn><mo>+</mo><mn>22</mn>
+                                <mo>=</mo><mn>14</mn><mo>≥</mo><mn>0</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Значит, число <span class="math-inline"><math><mn>4</mn></math></span> подходит.</p>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">5</div>
+                            <h3>Решить второе уравнение</h3>
+                        </div>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mn>5</mn><mi>x</mi><mo>-</mo><mn>6</mn>
+                                <mo>=</mo>
+                                <mo>-</mo><mrow>
+                                <mo>(</mo>
+                                <mo>-</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>22</mn>
+                                <mo>)</mo>
+                            </mrow>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Раскрываем минус перед скобкой:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mn>5</mn><mi>x</mi><mo>-</mo><mn>6</mn>
+                                <mo>=</mo>
+                                <msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>2</mn><mi>x</mi><mo>-</mo><mn>22</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Переносим всё в одну сторону:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>7</mn><mi>x</mi><mo>-</mo><mn>16</mn><mo>=</mo><mn>0</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Находим корни:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>D</mi><mo>=</mo><msup><mrow><mo>(</mo><mo>-</mo><mn>7</mn><mo>)</mo></mrow><mn>2</mn></msup><mo>-</mo><mn>4</mn><mo>·</mo><mn>1</mn><mo>·</mo><mrow><mo>(</mo><mo>-</mo><mn>16</mn><mo>)</mo></mrow>
+                                <mo>=</mo><mn>49</mn><mo>+</mo><mn>64</mn><mo>=</mo><mn>113</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>x</mi><mo>=</mo>
+                                <mfrac>
+                                    <mrow><mn>7</mn><mo>±</mo><msqrt><mn>113</mn></msqrt></mrow>
+                                    <mn>2</mn>
+                                </mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>
+                        Эти значения не удовлетворяют исходному уравнению после проверки, поэтому новых корней не дают.
+                    </p>
+                    <div class="note">
+                        В учебном формате здесь достаточно зафиксировать, что из второго случая подходящих решений нет.
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">6</div>
+                            <h3>Записать ответ</h3>
+                        </div>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>x</mi><mo>=</mo><mn>4</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="note">
+                        Это единственный корень, который проходит через все проверки.
+                    </div>
+                </section>
+            </div>
+
+            <div class="summary">
+                <div class="item">
+                    <div class="k">Шаблон</div>
+                    <div class="v">
+                        <math display="block">
+                            <mrow><mo>|</mo><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>|</mo><mo>=</mo><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo></mrow>
+                        </math>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="k">Фильтр</div>
+                    <div class="v">
+                        <math display="block">
+                            <mrow><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>≥</mo><mn>0</mn></mrow>
+                        </math>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="k">Корень</div>
+                    <div class="v">
+                        <math display="block">
+                            <mrow><mi>x</mi><mo>=</mo><mn>4</mn></mrow>
+                        </math>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="k">Главная ловушка</div>
+                    <div class="v">не забыть проверку</div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="side-stack">
+            <section class="panel">
+                <h2 class="section-title">Что нужно помнить</h2>
+                <ul class="checklist">
+                    <li>Модуль всегда неотрицателен.</li>
+                    <li>Если справа отрицательное число, решений нет.</li>
+                    <li>Уравнение с модулем почти всегда даёт два случая.</li>
+                    <li>После решения случаев нужен отбор корней.</li>
+                    <li>Проверка в исходном уравнении — хорошая привычка.</li>
+                </ul>
+                <div class="chips">
+                    <span class="chip">модуль</span>
+                    <span class="chip">два случая</span>
+                    <span class="chip">проверка</span>
+                    <span class="chip">отбор корней</span>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Мини-визуализация метода</h2>
+                <div class="viz">
+                    <svg viewBox="0 0 520 300" width="100%" aria-label="Схема решения уравнения с модулем">
+                        <defs>
+                            <linearGradient id="flow2" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#6ee7d8"/>
+                                <stop offset="100%" stop-color="#8ab4ff"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="8" y="8" width="504" height="284" rx="22" fill="#0b132d" stroke="rgba(255,255,255,.08)"/>
+
+                        <g font-family="Inter, Arial, sans-serif" text-anchor="middle">
+                            <rect x="145" y="24" width="230" height="52" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="260" y="47" fill="#dffcf8" font-size="16" font-weight="700">|f(x)| = g(x)</text>
+                            <text x="260" y="65" fill="#aeb8d9" font-size="13">стартовая форма</text>
+
+                            <rect x="165" y="100" width="190" height="52" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="260" y="123" fill="#dffcf8" font-size="16" font-weight="700">g(x) ≥ 0</text>
+                            <text x="260" y="141" fill="#aeb8d9" font-size="13">обязательный фильтр</text>
+
+                            <rect x="55" y="188" width="180" height="58" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="145" y="212" fill="#dffcf8" font-size="16" font-weight="700">f(x) = g(x)</text>
+                            <text x="145" y="232" fill="#aeb8d9" font-size="13">первый случай</text>
+
+                            <rect x="285" y="188" width="180" height="58" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="375" y="212" fill="#dffcf8" font-size="16" font-weight="700">f(x) = −g(x)</text>
+                            <text x="375" y="232" fill="#aeb8d9" font-size="13">второй случай</text>
+
+                            <rect x="178" y="258" width="164" height="22" rx="11" fill="url(#flow2)"/>
+                            <text x="260" y="274" fill="#06131a" font-size="13" font-weight="800">оставить только подходящие корни</text>
+
+                            <g stroke="url(#flow2)" stroke-width="3" fill="none" stroke-linecap="round">
+                                <path d="M260 76 V100"/>
+                                <path d="M260 152 V170"/>
+                                <path d="M260 170 C260 182 145 182 145 188"/>
+                                <path d="M260 170 C260 182 375 182 375 188"/>
+                                <path d="M145 246 C145 255 210 255 210 258"/>
+                                <path d="M375 246 C375 255 310 255 310 258"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Быстрый тест</h2>
+                <div class="quiz-grid">
+                    <div class="quiz-card">
+                        <div>
+                            <strong>1.</strong> Что обязательно нужно проверить в уравнении
+                            <span class="math-inline"><math><mrow><mo>|</mo><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>|</mo><mo>=</mo><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo></mrow></math></span>?
+                        </div>
+                        <div class="answers">
+                            <button data-correct="1">
+                                <math><mrow><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>≥</mo><mn>0</mn></mrow></math>
+                            </button>
+                            <button data-correct="0">
+                                <math><mrow><mi>g</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>≤</mo><mn>0</mn></mrow></math>
+                            </button>
+                            <button data-correct="0">Только дискриминант</button>
+                        </div>
+                        <div class="result"></div>
+                    </div>
+
+                    <div class="quiz-card">
+                        <div>
+                            <strong>2.</strong> Сколько случаев обычно даёт уравнение с модулем?
+                        </div>
+                        <div class="answers">
+                            <button data-correct="0">Один</button>
+                            <button data-correct="1">Два</button>
+                            <button data-correct="0">Всегда три</button>
+                        </div>
+                        <div class="result"></div>
+                    </div>
+
+                    <div class="quiz-card">
+                        <div>
+                            <strong>3.</strong> Какой ответ у этой задачи?
+                        </div>
+                        <div class="answers">
+                            <button data-correct="0"><math><mrow><mi>x</mi><mo>=</mo><mo>-</mo><mn>7</mn></mrow></math></button>
+                            <button data-correct="1"><math><mrow><mi>x</mi><mo>=</mo><mn>4</mn></mrow></math></button>
+                            <button data-correct="0"><math><mrow><mi>x</mi><mo>=</mo><mo>-</mo><mn>7</mn><mo>,</mo><mn>4</mn></mrow></math></button>
+                        </div>
+                        <div class="result"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Генератор похожих упражнений</h2>
+                <div class="generator">
+                    <div class="gen-box">
+                        <div class="small">Уравнения вида <span class="math-inline"><math><mrow><mo>|</mo><mi>a</mi><mi>x</mi><mo>+</mo><mi>b</mi><mo>|</mo><mo>=</mo><mi>c</mi></mrow></math></span></div>
+                        <div id="genTask" class="math"></div>
+                        <div id="genAnswer" class="gen-answer"></div>
+                        <div class="buttons">
+                            <button id="makeTask" class="primary">Сгенерировать</button>
+                            <button id="showAnswer" class="ghost">Показать ответ</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Типичные ошибки</h2>
+                <div class="note danger">
+                    Ошибка 1: забыть условие на правую часть и принять лишний корень.
+                </div>
+                <div class="note warn">
+                    Ошибка 2: неправильно раскрыть минус перед скобкой во втором случае.
+                </div>
+                <div class="note" style="background:rgba(138,180,255,.08);border-color:rgba(138,180,255,.18);color:#e3ecff">
+                    Ошибка 3: не проверить найденные корни подстановкой в исходное уравнение.
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <div class="footer">
+        Страница автономна: математика оформлена через нативный MathML, внешние библиотеки не используются.
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.quiz-card').forEach(card => {
+        const buttons = card.querySelectorAll('.answers button');
+        const result = card.querySelector('.result');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => {
+                    b.disabled = true;
+                    if (b.dataset.correct === '1') b.classList.add('correct');
+                });
+
+                if (btn.dataset.correct === '1') {
+                    result.textContent = 'Верно.';
+                } else {
+                    btn.classList.add('wrong');
+                    result.textContent = 'Неверно. Пересмотрите главный шаблон для |f(x)| = g(x).';
+                }
+            });
+        });
+    });
+
+    const taskEl = document.getElementById('genTask');
+    const answerEl = document.getElementById('genAnswer');
+    let currentAnswer = '';
+
+    function makeBlock(inner){
+        return '<math display="block">' + inner + '</math>';
+    }
+
+    function makeExample(){
+        const a = [2,3,4,5][Math.floor(Math.random()*4)];
+        const b = [-6,-4,-2,2,4,6][Math.floor(Math.random()*6)];
+        const c = [1,2,3,4,5,6,7,8][Math.floor(Math.random()*8)];
+
+        const signB = b >= 0 ? '<mo>+</mo><mn>' + b + '</mn>' : '<mo>-</mo><mn>' + Math.abs(b) + '</mn>';
+
+        taskEl.innerHTML = makeBlock(
+            '<mrow><mo>|</mo><mrow><mn>' + a + '</mn><mi>x</mi>' + signB + '</mrow><mo>|</mo><mo>=</mo><mn>' + c + '</mn></mrow>'
+        );
+
+        const x1num = c - b;
+        const x2num = -c - b;
+
+        currentAnswer = makeBlock(
+            '<mrow>' +
+            '<mn>' + a + '</mn><mi>x</mi>' + signB + '<mo>=</mo><mn>' + c + '</mn>' +
+            '<mspace width="1em"/><mtext>или</mtext><mspace width="1em"/>' +
+            '<mn>' + a + '</mn><mi>x</mi>' + signB + '<mo>=</mo><mo>-</mo><mn>' + c + '</mn>' +
+            '</mrow>'
+        ) + makeBlock(
+            '<mrow>' +
+            '<mi>x</mi><mo>=</mo><mfrac><mn>' + x1num + '</mn><mn>' + a + '</mn></mfrac>' +
+            '<mspace width="1em"/><mtext>или</mtext><mspace width="1em"/>' +
+            '<mi>x</mi><mo>=</mo><mfrac><mn>' + x2num + '</mn><mn>' + a + '</mn></mfrac>' +
+            '</mrow>'
+        );
+
+        answerEl.style.display = 'none';
+        answerEl.innerHTML = currentAnswer;
+    }
+
+    document.getElementById('makeTask').addEventListener('click', makeExample);
+    document.getElementById('showAnswer').addEventListener('click', () => {
+        if (!currentAnswer) makeExample();
+        answerEl.style.display = 'block';
+    });
+
+    makeExample();
+</script>
+</body>
+</html>

@@ -1,0 +1,1156 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Задание 1 — Упрощение выражения (MathML)</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --bg2:#111831;
+            --panel:#151d3a;
+            --panel2:#1b2447;
+            --text:#eaf0ff;
+            --muted:#aeb8d9;
+            --accent:#6ee7d8;
+            --accent2:#8ab4ff;
+            --ok:#8ef0a7;
+            --warn:#ffd27a;
+            --danger:#ff9c9c;
+            --line:rgba(255,255,255,.09);
+            --shadow:0 20px 50px rgba(0,0,0,.35);
+        }
+
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0}
+        body{
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background:
+            radial-gradient(1100px 520px at 0% -10%, rgba(110,231,216,.14), transparent 60%),
+            radial-gradient(900px 500px at 100% 0%, rgba(138,180,255,.16), transparent 55%),
+            linear-gradient(180deg, var(--bg), #070b16 100%);
+            color:var(--text);
+            line-height:1.65;
+            min-height:100vh;
+        }
+
+        .wrap{
+            width:min(1240px, calc(100vw - 28px));
+            margin:0 auto;
+            padding:22px 0 56px;
+        }
+
+        .hero{
+            position:relative;
+            overflow:hidden;
+            background:
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+            linear-gradient(135deg, rgba(110,231,216,.08), rgba(138,180,255,.08));
+            border:1px solid var(--line);
+            border-radius:30px;
+            box-shadow:var(--shadow);
+            padding:28px;
+            margin-bottom:20px;
+        }
+
+        .hero::after{
+            content:"";
+            position:absolute;
+            right:-70px; bottom:-70px;
+            width:260px; height:260px;
+            border-radius:50%;
+            background:radial-gradient(circle, rgba(110,231,216,.15), transparent 65%);
+            filter:blur(8px);
+            pointer-events:none;
+        }
+
+        .topline{
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+            align-items:center;
+            margin-bottom:14px;
+        }
+
+        .tag{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 12px;
+            border-radius:999px;
+            border:1px solid var(--line);
+            color:var(--muted);
+            background:rgba(255,255,255,.03);
+            font-size:14px;
+        }
+
+        h1{
+            margin:0 0 10px;
+            font-size:clamp(30px, 5vw, 54px);
+            line-height:1.05;
+            letter-spacing:-.03em;
+        }
+
+        .subtitle{
+            max-width:980px;
+            color:var(--muted);
+            font-size:18px;
+            margin:0;
+        }
+
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:18px;
+            margin-top:22px;
+        }
+
+        .hero-card{
+            background:rgba(255,255,255,.03);
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:18px;
+        }
+
+        .layout{
+            display:grid;
+            grid-template-columns:minmax(0, 1.15fr) minmax(320px, .85fr);
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:24px;
+            box-shadow:var(--shadow);
+            padding:22px;
+        }
+
+        .section-title{
+            margin:0 0 12px;
+            font-size:26px;
+            line-height:1.15;
+        }
+
+        .small{
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .steps{
+            display:grid;
+            gap:14px;
+        }
+
+        .step{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:18px;
+            padding:16px;
+        }
+
+        .step-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            margin-bottom:10px;
+        }
+
+        .num{
+            width:34px;height:34px;border-radius:50%;
+            display:grid;place-items:center;
+            font-weight:800;
+            color:#06131a;
+            background:linear-gradient(135deg, var(--accent), #9fe8ff);
+            flex:0 0 auto;
+        }
+
+        .step h3{
+            margin:0;
+            font-size:18px;
+        }
+
+        .math{
+            margin:10px 0;
+            padding:14px 16px;
+            border-radius:16px;
+            background:#0c1430;
+            border:1px solid rgba(255,255,255,.07);
+            overflow:auto;
+        }
+
+        .note{
+            margin-top:10px;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(110,231,216,.08);
+            border:1px solid rgba(110,231,216,.16);
+            color:#dffcf8;
+        }
+
+        .warn{
+            background:rgba(255,210,122,.08);
+            border-color:rgba(255,210,122,.18);
+            color:#fff2cf;
+        }
+
+        .danger{
+            background:rgba(255,156,156,.08);
+            border-color:rgba(255,156,156,.18);
+            color:#ffe2e2;
+        }
+
+        .side-stack{
+            display:grid;
+            gap:18px;
+            position:sticky;
+            top:16px;
+        }
+
+        .checklist{
+            padding-left:18px;
+            margin:0;
+        }
+
+        .checklist li{margin:7px 0}
+
+        .buttons{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:12px;
+        }
+
+        button, .btn{
+            appearance:none;
+            border:none;
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-height:44px;
+            padding:0 16px;
+            border-radius:14px;
+            font-weight:700;
+            font-size:15px;
+            transition:transform .15s ease, opacity .15s ease;
+        }
+
+        button:hover, .btn:hover{transform:translateY(-1px)}
+
+        .primary{
+            color:#06131a;
+            background:linear-gradient(135deg, var(--accent), #9fe8ff);
+            box-shadow:0 10px 24px rgba(110,231,216,.22);
+        }
+
+        .ghost{
+            color:var(--text);
+            background:#101735;
+            border:1px solid var(--line);
+        }
+
+        .chips{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:12px;
+        }
+
+        .chip{
+            border:1px solid var(--line);
+            border-radius:999px;
+            padding:7px 10px;
+            color:var(--muted);
+            font-size:13px;
+            background:rgba(255,255,255,.025);
+        }
+
+        .viz{
+            background:#0d1430;
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:14px;
+            overflow:hidden;
+        }
+
+        .quiz-grid{
+            display:grid;
+            gap:12px;
+            margin-top:14px;
+        }
+
+        .quiz-card{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .answers{
+            display:grid;
+            gap:10px;
+            margin-top:12px;
+        }
+
+        .answers button{
+            justify-content:flex-start;
+            text-align:left;
+            min-height:unset;
+            padding:12px 14px;
+            border-radius:12px;
+            background:#0c1430;
+            color:var(--text);
+            border:1px solid var(--line);
+        }
+
+        .answers button.correct{
+            border-color:rgba(142,240,167,.35);
+            background:rgba(142,240,167,.08);
+        }
+
+        .answers button.wrong{
+            border-color:rgba(255,156,156,.35);
+            background:rgba(255,156,156,.08);
+        }
+
+        .result{
+            margin-top:10px;
+            min-height:24px;
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .generator{
+            display:grid;
+            gap:12px;
+        }
+
+        .gen-box{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .gen-answer{
+            margin-top:10px;
+            padding:12px 14px;
+            border-radius:12px;
+            background:#0c1430;
+            border:1px solid var(--line);
+            display:none;
+            overflow:auto;
+        }
+
+        .summary{
+            display:grid;
+            grid-template-columns:repeat(4, minmax(0,1fr));
+            gap:12px;
+            margin-top:16px;
+        }
+
+        .summary .item{
+            background:#101735;
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px;
+        }
+
+        .summary .k{
+            color:var(--muted);
+            font-size:13px;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+        }
+
+        .summary .v{
+            margin-top:6px;
+            font-size:21px;
+            font-weight:800;
+            overflow:auto;
+        }
+
+        .footer{
+            margin-top:20px;
+            color:var(--muted);
+            text-align:center;
+            font-size:14px;
+        }
+
+        /* MathML */
+        math{
+            color:var(--text);
+            font-size:1.12rem;
+        }
+
+        .hero-card math{
+            font-size:1.22rem;
+        }
+
+        .math math[display="block"]{
+            margin:0;
+        }
+
+        mfrac{
+            padding-inline:2px;
+        }
+
+        mi{
+            font-style:italic;
+        }
+
+        .math-inline{
+            display:inline-block;
+            vertical-align:middle;
+        }
+
+        @media (max-width: 980px){
+            .hero-grid,.layout,.summary{
+                grid-template-columns:1fr;
+            }
+            .side-stack{
+                position:static;
+            }
+        }
+
+        @media print{
+            body{
+                background:#fff;
+                color:#111;
+            }
+            .hero,.panel,.step,.hero-card,.quiz-card,.gen-box,.summary .item{
+                background:#fff !important;
+                box-shadow:none !important;
+                color:#111 !important;
+                border:1px solid #ccc !important;
+            }
+            .subtitle,.small,.tag,.chip,.footer,.result,.note{
+                color:#333 !important;
+            }
+            .buttons, .quiz-card button, .generator button{
+                display:none !important;
+            }
+            .gen-answer{
+                display:block !important;
+            }
+            math{
+                color:#111 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="hero">
+        <div class="topline">
+            <span class="tag">Дочерняя страница</span>
+            <span class="tag">Тема: упрощение выражений</span>
+            <span class="tag">Метод: замена переменной</span>
+        </div>
+
+        <h1>Задание 1. Упрощение выражения</h1>
+        <p class="subtitle">
+            Здесь важно не тащить всё выражение напрямую, а сначала увидеть повторяющийся фрагмент,
+            сделать замену, затем аккуратно поработать с отрицательной степенью и только потом сокращать.
+        </p>
+
+        <div class="hero-grid">
+            <div class="hero-card">
+                <div class="small">Исходное выражение</div>
+                <div class="math">
+                    <math display="block">
+                        <mrow>
+                            <msup>
+                                <mrow>
+                                    <mo>(</mo>
+                                    <mfrac>
+                                        <mrow>
+                                            <msqrt><mi>y</mi></msqrt>
+                                            <mo>+</mo>
+                                            <msup>
+                                                <mi>y</mi>
+                                                <mrow><mo>-</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow>
+                                            </msup>
+                                        </mrow>
+                                        <mn>2</mn>
+                                    </mfrac>
+                                    <mo>)</mo>
+                                </mrow>
+                                <mrow><mo>-</mo><mn>2</mn></mrow>
+                            </msup>
+                            <mo>·</mo>
+                            <mrow>
+                                <mo>(</mo>
+                                <mfrac>
+                                    <mrow><msqrt><mi>y</mi></msqrt><mo>+</mo><mn>1</mn></mrow>
+                                    <mrow><msqrt><mi>y</mi></msqrt><mo>-</mo><mn>1</mn></mrow>
+                                </mfrac>
+                                <mo>+</mo>
+                                <mfrac>
+                                    <mrow><msqrt><mi>y</mi></msqrt><mo>-</mo><mn>1</mn></mrow>
+                                    <mrow><msqrt><mi>y</mi></msqrt><mo>+</mo><mn>1</mn></mrow>
+                                </mfrac>
+                                <mo>)</mo>
+                            </mrow>
+                        </mrow>
+                    </math>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="small">Главная идея</div>
+                <ul class="checklist">
+                    <li>заметить повторение <span class="math-inline"><math><msqrt><mi>y</mi></msqrt></math></span>;</li>
+                    <li>ввести замену <span class="math-inline"><math><mi>t</mi><mo>=</mo><msqrt><mi>y</mi></msqrt></math></span>;</li>
+                    <li>заменить <span class="math-inline"><math><msup><mi>y</mi><mrow><mo>-</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup></math></span> на <span class="math-inline"><math><mfrac><mn>1</mn><mi>t</mi></mfrac></math></span>;</li>
+                    <li>привести всё к рациональному виду;</li>
+                    <li>не забыть ограничения: <span class="math-inline"><math><mi>y</mi><mo>&gt;</mo><mn>0</mn></math></span>, <span class="math-inline"><math><mi>y</mi><mo>≠</mo><mn>1</mn></math></span>.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="panel">
+            <h2 class="section-title">Подробный разбор</h2>
+
+            <div class="steps">
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">1</div>
+                            <h3>Увидеть удачную замену</h3>
+                        </div>
+                    </div>
+                    <p>
+                        В выражении несколько раз встречается один и тот же фрагмент:
+                        <span class="math-inline"><math><msqrt><mi>y</mi></msqrt></math></span>.
+                        Это почти всегда сигнал, что замена упростит запись.
+                    </p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>t</mi><mo>=</mo><msqrt><mi>y</mi></msqrt><mo>,</mo>
+                                <mspace width="1em"/>
+                                <mtext>тогда</mtext>
+                                <mspace width="1em"/>
+                                <msup>
+                                    <mi>y</mi>
+                                    <mrow><mo>-</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow>
+                                </msup>
+                                <mo>=</mo>
+                                <mfrac><mn>1</mn><msqrt><mi>y</mi></msqrt></mfrac>
+                                <mo>=</mo>
+                                <mfrac><mn>1</mn><mi>t</mi></mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>После замены исходное выражение становится таким:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <msup>
+                                    <mrow>
+                                        <mo>(</mo>
+                                        <mfrac>
+                                            <mrow>
+                                                <mi>t</mi><mo>+</mo><mfrac><mn>1</mn><mi>t</mi></mfrac>
+                                            </mrow>
+                                            <mn>2</mn>
+                                        </mfrac>
+                                        <mo>)</mo>
+                                    </mrow>
+                                    <mrow><mo>-</mo><mn>2</mn></mrow>
+                                </msup>
+                                <mo>·</mo>
+                                <mrow>
+                                    <mo>(</mo>
+                                    <mfrac><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow></mfrac>
+                                    <mo>+</mo>
+                                    <mfrac><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></mfrac>
+                                    <mo>)</mo>
+                                </mrow>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="note">
+                        Почему это хорошо: исчезли радикалы, а работать с рациональными дробями заметно проще.
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">2</div>
+                            <h3>Упростить первую скобку</h3>
+                        </div>
+                    </div>
+                    <p>Сначала приводим выражение в числителе к общему знаменателю:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mi>t</mi><mo>+</mo><mfrac><mn>1</mn><mi>t</mi></mfrac>
+                                <mo>=</mo>
+                                <mfrac>
+                                    <mrow><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow>
+                                    <mi>t</mi>
+                                </mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Значит,</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <msup>
+                                    <mrow>
+                                        <mo>(</mo>
+                                        <mfrac>
+                                            <mrow><mi>t</mi><mo>+</mo><mfrac><mn>1</mn><mi>t</mi></mfrac></mrow>
+                                            <mn>2</mn>
+                                        </mfrac>
+                                        <mo>)</mo>
+                                    </mrow>
+                                    <mrow><mo>-</mo><mn>2</mn></mrow>
+                                </msup>
+                                <mo>=</mo>
+                                <msup>
+                                    <mrow>
+                                        <mo>(</mo>
+                                        <mfrac>
+                                            <mrow><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow>
+                                            <mrow><mn>2</mn><mi>t</mi></mrow>
+                                        </mfrac>
+                                        <mo>)</mo>
+                                    </mrow>
+                                    <mrow><mo>-</mo><mn>2</mn></mrow>
+                                </msup>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Теперь используем правило отрицательной степени: дробь переворачивается.</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <msup>
+                                    <mrow>
+                                        <mo>(</mo>
+                                        <mfrac>
+                                            <mrow><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow>
+                                            <mrow><mn>2</mn><mi>t</mi></mrow>
+                                        </mfrac>
+                                        <mo>)</mo>
+                                    </mrow>
+                                    <mrow><mo>-</mo><mn>2</mn></mrow>
+                                </msup>
+                                <mo>=</mo>
+                                <msup>
+                                    <mrow>
+                                        <mo>(</mo>
+                                        <mfrac>
+                                            <mrow><mn>2</mn><mi>t</mi></mrow>
+                                            <mrow><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow>
+                                        </mfrac>
+                                        <mo>)</mo>
+                                    </mrow>
+                                    <mn>2</mn>
+                                </msup>
+                                <mo>=</mo>
+                                <mfrac>
+                                    <mrow><mn>4</mn><msup><mi>t</mi><mn>2</mn></msup></mrow>
+                                    <msup>
+                                        <mrow><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo></mrow>
+                                        <mn>2</mn>
+                                    </msup>
+                                </mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="note warn">
+                        Частая ошибка: забыть перевернуть дробь при отрицательной степени.
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">3</div>
+                            <h3>Упростить вторую скобку</h3>
+                        </div>
+                    </div>
+                    <p>Приводим к общему знаменателю:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mfrac><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow></mfrac>
+                                <mo>+</mo>
+                                <mfrac><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></mfrac>
+                                <mo>=</mo>
+                                <mfrac>
+                                    <mrow>
+                                        <msup><mrow><mo>(</mo><mi>t</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup>
+                                        <mo>+</mo>
+                                        <msup><mrow><mo>(</mo><mi>t</mi><mo>-</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup>
+                                    </mrow>
+                                    <mrow>
+                                        <mo>(</mo><mi>t</mi><mo>-</mo><mn>1</mn><mo>)</mo>
+                                        <mo>(</mo><mi>t</mi><mo>+</mo><mn>1</mn><mo>)</mo>
+                                    </mrow>
+                                </mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Раскрываем скобки:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <msup><mrow><mo>(</mo><mi>t</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup>
+                                <mo>+</mo>
+                                <msup><mrow><mo>(</mo><mi>t</mi><mo>-</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup>
+                                <mo>=</mo>
+                                <mrow><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>t</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow>
+                                <mo>+</mo>
+                                <mrow><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>-</mo><mn>2</mn><mi>t</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mo>=</mo>
+                                <mn>2</mn><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn>
+                                <mo>=</mo>
+                                <mn>2</mn><mrow><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo></mrow>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Получаем:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mfrac><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow></mfrac>
+                                <mo>+</mo>
+                                <mfrac><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></mfrac>
+                                <mo>=</mo>
+                                <mfrac>
+                                    <mrow><mn>2</mn><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo></mrow>
+                                    <mrow><msup><mi>t</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow>
+                                </mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">4</div>
+                            <h3>Перемножить и сократить</h3>
+                        </div>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mfrac>
+                                    <mrow><mn>4</mn><msup><mi>t</mi><mn>2</mn></msup></mrow>
+                                    <msup>
+                                        <mrow><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo></mrow>
+                                        <mn>2</mn>
+                                    </msup>
+                                </mfrac>
+                                <mo>·</mo>
+                                <mfrac>
+                                    <mrow><mn>2</mn><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo></mrow>
+                                    <mrow><msup><mi>t</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow>
+                                </mfrac>
+                                <mo>=</mo>
+                                <mfrac>
+                                    <mrow><mn>8</mn><msup><mi>t</mi><mn>2</mn></msup></mrow>
+                                    <mrow>
+                                        <mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo>
+                                        <mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn><mo>)</mo>
+                                    </mrow>
+                                </mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Дальше используем формулу разности квадратов:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo>
+                                <mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn><mo>)</mo>
+                                <mo>=</mo>
+                                <msup><mi>t</mi><mn>4</mn></msup>
+                                <mo>-</mo>
+                                <mn>1</mn>
+                            </mrow>
+                        </math>
+                    </div>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <mo>⇒</mo>
+                                <mfrac>
+                                    <mrow><mn>8</mn><msup><mi>t</mi><mn>2</mn></msup></mrow>
+                                    <mrow><msup><mi>t</mi><mn>4</mn></msup><mo>-</mo><mn>1</mn></mrow>
+                                </mfrac>
+                            </mrow>
+                        </math>
+                    </div>
+                </section>
+
+                <section class="step">
+                    <div class="step-head">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div class="num">5</div>
+                            <h3>Сделать обратную подстановку</h3>
+                        </div>
+                    </div>
+                    <p>
+                        Так как
+                        <span class="math-inline"><math><mi>t</mi><mo>=</mo><msqrt><mi>y</mi></msqrt></math></span>,
+                        то
+                    </p>
+                    <div class="math">
+                        <math display="block">
+                            <mrow>
+                                <msup><mi>t</mi><mn>2</mn></msup><mo>=</mo><mi>y</mi><mo>,</mo>
+                                <mspace width="1em"/>
+                                <msup><mi>t</mi><mn>4</mn></msup><mo>=</mo><msup><mi>y</mi><mn>2</mn></msup>
+                            </mrow>
+                        </math>
+                    </div>
+                    <p>Следовательно, окончательный ответ:</p>
+                    <div class="math">
+                        <math display="block">
+                            <mfrac>
+                                <mrow><mn>8</mn><mi>y</mi></mrow>
+                                <mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow>
+                            </mfrac>
+                        </math>
+                    </div>
+                    <div class="note">
+                        Это и есть аккуратная компактная форма ответа.
+                    </div>
+                </section>
+            </div>
+
+            <div class="summary">
+                <div class="item">
+                    <div class="k">Замена</div>
+                    <div class="v">
+                        <math display="block">
+                            <mrow><mi>t</mi><mo>=</mo><msqrt><mi>y</mi></msqrt></mrow>
+                        </math>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="k">Ключ</div>
+                    <div class="v">Рационализировать вид</div>
+                </div>
+                <div class="item">
+                    <div class="k">Ответ</div>
+                    <div class="v">
+                        <math display="block">
+                            <mfrac>
+                                <mrow><mn>8</mn><mi>y</mi></mrow>
+                                <mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow>
+                            </mfrac>
+                        </math>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="k">Ограничения</div>
+                    <div class="v">
+                        <math display="block">
+                            <mrow><mi>y</mi><mo>&gt;</mo><mn>0</mn><mo>,</mo><mspace width="0.7em"/><mi>y</mi><mo>≠</mo><mn>1</mn></mrow>
+                        </math>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="side-stack">
+            <section class="panel">
+                <h2 class="section-title">Что нужно помнить</h2>
+                <ul class="checklist">
+                    <li>Повторяющийся фрагмент часто выгодно заменить.</li>
+                    <li>Отрицательная степень переворачивает дробь.</li>
+                    <li>Формулы сокращённого умножения экономят много времени.</li>
+                    <li>Сокращать можно только одинаковые множители.</li>
+                    <li>Ограничения исходного выражения терять нельзя.</li>
+                </ul>
+                <div class="chips">
+                    <span class="chip">замена</span>
+                    <span class="chip">дроби</span>
+                    <span class="chip">ФСУ</span>
+                    <span class="chip">ограничения</span>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Мини-визуализация структуры</h2>
+                <div class="viz">
+                    <svg viewBox="0 0 520 290" width="100%" aria-label="Схема преобразования">
+                        <defs>
+                            <linearGradient id="flow" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#6ee7d8"/>
+                                <stop offset="100%" stop-color="#8ab4ff"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="8" y="8" width="504" height="274" rx="22" fill="#0b132d" stroke="rgba(255,255,255,.08)"/>
+                        <g font-family="Inter, Arial, sans-serif" text-anchor="middle">
+                            <rect x="36" y="34" width="138" height="56" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="105" y="56" fill="#dffcf8" font-size="16" font-weight="700">Исходное выражение</text>
+                            <text x="105" y="76" fill="#aeb8d9" font-size="13">корни + дроби + степени</text>
+
+                            <rect x="192" y="34" width="136" height="56" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="260" y="56" fill="#dffcf8" font-size="16" font-weight="700">Замена</text>
+                            <text x="260" y="76" fill="#aeb8d9" font-size="13">t = √y</text>
+
+                            <rect x="346" y="34" width="138" height="56" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="415" y="56" fill="#dffcf8" font-size="16" font-weight="700">Рациональный вид</text>
+                            <text x="415" y="76" fill="#aeb8d9" font-size="13">без радикалов</text>
+
+                            <rect x="96" y="160" width="148" height="60" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="170" y="184" fill="#dffcf8" font-size="16" font-weight="700">1-я скобка</text>
+                            <text x="170" y="204" fill="#aeb8d9" font-size="13">отрицательная степень</text>
+
+                            <rect x="276" y="160" width="148" height="60" rx="14" fill="#12204a" stroke="rgba(255,255,255,.08)"/>
+                            <text x="350" y="184" fill="#dffcf8" font-size="16" font-weight="700">2-я скобка</text>
+                            <text x="350" y="204" fill="#aeb8d9" font-size="13">общий знаменатель + ФСУ</text>
+
+                            <rect x="176" y="238" width="170" height="28" rx="12" fill="url(#flow)"/>
+                            <text x="261" y="257" fill="#06131a" font-size="14" font-weight="800">итог: 8y / (y² − 1)</text>
+
+                            <g stroke="url(#flow)" stroke-width="3" fill="none" stroke-linecap="round">
+                                <path d="M174 62 H192"/>
+                                <path d="M328 62 H346"/>
+                                <path d="M260 90 V125"/>
+                                <path d="M260 125 C260 138 170 138 170 160"/>
+                                <path d="M260 125 C260 138 350 138 350 160"/>
+                                <path d="M170 220 C170 236 220 236 220 238"/>
+                                <path d="M350 220 C350 236 300 236 300 238"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Быстрый тест</h2>
+                <div class="quiz-grid">
+                    <div class="quiz-card" data-quiz="q1">
+                        <div>
+                            <strong>1.</strong>
+                            Если
+                            <span class="math-inline"><math><mi>t</mi><mo>=</mo><msqrt><mi>y</mi></msqrt></math></span>,
+                            то чему равно
+                            <span class="math-inline">
+                  <math>
+                    <msup>
+                      <mi>y</mi>
+                      <mrow><mo>-</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow>
+                    </msup>
+                  </math>
+                </span>?
+                        </div>
+                        <div class="answers">
+                            <button data-correct="0"><math><mi>t</mi></math></button>
+                            <button data-correct="1"><math><mfrac><mn>1</mn><mi>t</mi></mfrac></math></button>
+                            <button data-correct="0"><math><mfrac><mn>1</mn><msup><mi>t</mi><mn>2</mn></msup></mfrac></math></button>
+                        </div>
+                        <div class="result"></div>
+                    </div>
+
+                    <div class="quiz-card" data-quiz="q2">
+                        <div><strong>2.</strong> Что делает отрицательная степень у дроби?</div>
+                        <div class="answers">
+                            <button data-correct="0">Умножает числитель на показатель</button>
+                            <button data-correct="1">Переворачивает дробь</button>
+                            <button data-correct="0">Убирает знаменатель</button>
+                        </div>
+                        <div class="result"></div>
+                    </div>
+
+                    <div class="quiz-card" data-quiz="q3">
+                        <div><strong>3.</strong> Какой ответ получается после обратной подстановки?</div>
+                        <div class="answers">
+                            <button data-correct="0">
+                                <math><mfrac><mrow><mn>8</mn><mi>y</mi></mrow><mrow><mi>y</mi><mo>-</mo><mn>1</mn></mrow></mfrac></math>
+                            </button>
+                            <button data-correct="1">
+                                <math><mfrac><mrow><mn>8</mn><mi>y</mi></mrow><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow></mfrac></math>
+                            </button>
+                            <button data-correct="0">
+                                <math><mfrac><mn>8</mn><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow></mfrac></math>
+                            </button>
+                        </div>
+                        <div class="result"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Генератор похожих тренировок</h2>
+                <div class="generator">
+                    <div class="gen-box">
+                        <div class="small">Шаблон с безопасной заменой</div>
+                        <div id="genTask" class="math"></div>
+                        <div id="genAnswer" class="gen-answer"></div>
+                        <div class="buttons">
+                            <button id="makeTask" class="primary">Сгенерировать</button>
+                            <button id="showAnswer" class="ghost">Показать ответ</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Типичные ошибки</h2>
+                <div class="note danger">
+                    Ошибка 1: сократить не множители, а только похожие куски выражения.
+                </div>
+                <div class="note warn">
+                    Ошибка 2: забыть, что степень
+                    <span class="math-inline">
+              <math>
+                <msup>
+                  <mi>y</mi>
+                  <mrow><mo>-</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow>
+                </msup>
+              </math>
+            </span>
+                    означает обратный корень.
+                </div>
+                <div class="note" style="background:rgba(138,180,255,.08);border-color:rgba(138,180,255,.18);color:#e3ecff">
+                    Ошибка 3: не вернуть замену обратно, оставив ответ в переменной
+                    <span class="math-inline"><math><mi>t</mi></math></span>.
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <div class="footer">
+        Страница автономна: математика оформлена через нативный MathML, внешние библиотеки не используются.
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.quiz-card').forEach(card => {
+        const buttons = card.querySelectorAll('.answers button');
+        const result = card.querySelector('.result');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => {
+                    b.disabled = true;
+                    if (b.dataset.correct === '1') b.classList.add('correct');
+                });
+
+                if (btn.dataset.correct === '1') {
+                    result.textContent = 'Верно. Это ключевой шаг в замене.';
+                } else {
+                    btn.classList.add('wrong');
+                    result.textContent = 'Неверно. Посмотрите ещё раз на связь между √y и y^−1/2.';
+                }
+            });
+        });
+    });
+
+    const taskEl = document.getElementById('genTask');
+    const answerEl = document.getElementById('genAnswer');
+    let currentAnswer = '';
+
+    function makeMathBlock(inner){
+        return '<math display="block">' + inner + '</math>';
+    }
+
+    function makeExample(){
+        const vars = ['a','m','p','k'];
+        const v = vars[Math.floor(Math.random() * vars.length)];
+
+        const templates = [
+            {
+                task:
+                makeMathBlock(
+                    '<msup>' +
+                    '<mrow><mo>(</mo>' +
+                    '<mfrac>' +
+                    '<mrow><msqrt><mi>' + v + '</mi></msqrt><mo>+</mo><msup><mi>' + v + '</mi><mrow><mo>-</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup></mrow>' +
+                    '<mn>2</mn>' +
+                    '</mfrac>' +
+                    '<mo>)</mo></mrow>' +
+                    '<mrow><mo>-</mo><mn>2</mn></mrow>' +
+                    '</msup>'
+                ),
+                answer:
+                makeMathBlock(
+                    '<mrow><mtext>После замены </mtext><mi>t</mi><mo>=</mo><msqrt><mi>' + v + '</mi></msqrt>' +
+                    '<mtext> получаем </mtext>' +
+                    '<msup><mrow><mo>(</mo><mfrac><mrow><mi>t</mi><mo>+</mo><mfrac><mn>1</mn><mi>t</mi></mfrac></mrow><mn>2</mn></mfrac><mo>)</mo></mrow><mrow><mo>-</mo><mn>2</mn></mrow></msup>' +
+                    '<mo>=</mo>' +
+                    '<mfrac><mrow><mn>4</mn><msup><mi>t</mi><mn>2</mn></msup></mrow><msup><mrow><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup></mfrac>' +
+                    '<mo>=</mo>' +
+                    '<mfrac><mrow><mn>4</mn><mi>' + v + '</mi></mrow><msup><mrow><mo>(</mo><mi>' + v + '</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></msup></mfrac></mrow>'
+                )
+            },
+            {
+                task:
+                makeMathBlock(
+                    '<mfrac><mrow><msqrt><mi>' + v + '</mi></msqrt><mo>+</mo><mn>1</mn></mrow><mrow><msqrt><mi>' + v + '</mi></msqrt><mo>-</mo><mn>1</mn></mrow></mfrac>' +
+                    '<mo>+</mo>' +
+                    '<mfrac><mrow><msqrt><mi>' + v + '</mi></msqrt><mo>-</mo><mn>1</mn></mrow><mrow><msqrt><mi>' + v + '</mi></msqrt><mo>+</mo><mn>1</mn></mrow></mfrac>'
+                ),
+                answer:
+                makeMathBlock(
+                    '<mrow><mtext>Замена </mtext><mi>t</mi><mo>=</mo><msqrt><mi>' + v + '</mi></msqrt><mo>.</mo>' +
+                    '<mspace width="0.7em"/>' +
+                    '<mfrac><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow></mfrac>' +
+                    '<mo>+</mo>' +
+                    '<mfrac><mrow><mi>t</mi><mo>-</mo><mn>1</mn></mrow><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></mfrac>' +
+                    '<mo>=</mo>' +
+                    '<mfrac><mrow><mn>2</mn><mo>(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mrow><msup><mi>t</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow></mfrac>' +
+                    '<mo>=</mo>' +
+                    '<mfrac><mrow><mn>2</mn><mo>(</mo><mi>' + v + '</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mrow><mi>' + v + '</mi><mo>-</mo><mn>1</mn></mrow></mfrac></mrow>'
+                )
+            },
+            {
+                task:
+                makeMathBlock(
+                    '<msup><mrow><mo>(</mo><msqrt><mi>' + v + '</mi></msqrt><mo>+</mo><msup><mi>' + v + '</mi><mrow><mo>-</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup>'
+                ),
+                answer:
+                makeMathBlock(
+                    '<mrow><mtext>Замена </mtext><mi>t</mi><mo>=</mo><msqrt><mi>' + v + '</mi></msqrt><mo>.</mo>' +
+                    '<mspace width="0.7em"/>' +
+                    '<msup><mrow><mo>(</mo><mi>t</mi><mo>+</mo><mfrac><mn>1</mn><mi>t</mi></mfrac><mo>)</mo></mrow><mn>2</mn></msup>' +
+                    '<mo>=</mo>' +
+                    '<msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mo>+</mo><mfrac><mn>1</mn><msup><mi>t</mi><mn>2</mn></msup></mfrac>' +
+                    '<mo>=</mo>' +
+                    '<mi>' + v + '</mi><mo>+</mo><mn>2</mn><mo>+</mo><mfrac><mn>1</mn><mi>' + v + '</mi></mfrac></mrow>'
+                )
+            }
+        ];
+
+        const ex = templates[Math.floor(Math.random() * templates.length)];
+        taskEl.innerHTML = ex.task;
+        currentAnswer = ex.answer;
+        answerEl.style.display = 'none';
+        answerEl.innerHTML = currentAnswer;
+    }
+
+    document.getElementById('makeTask').addEventListener('click', makeExample);
+    document.getElementById('showAnswer').addEventListener('click', () => {
+        if (!currentAnswer) makeExample();
+        answerEl.style.display = 'block';
+    });
+
+    makeExample();
+</script>
+</body>
+</html>
