@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Система с параметром: интерактивная визуализация решения</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --panel:#121933;
+            --panel2:#0f1630;
+            --line:#2a3764;
+            --text:#e8eefc;
+            --muted:#aab8dd;
+            --accent:#60a5fa;
+            --accent2:#34d399;
+            --accent3:#f59e0b;
+            --danger:#f87171;
+            --purple:#a78bfa;
+            --yellow:#fde68a;
+        }
+
+        *{box-sizing:border-box}
+        html,body{
+            margin:0;
+            padding:0;
+            width:100%;
+            height:100%;
+            background:var(--bg);
+            color:var(--text);
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            display:flex;
+            flex-direction:column;
+            min-height:100vh;
+        }
+
+        .header{
+            padding:16px 20px;
+            border-bottom:1px solid var(--line);
+            background:linear-gradient(180deg,#0d1430,#0b1020);
+        }
+
+        .header h1{
+            margin:0 0 8px 0;
+            font-size:24px;
+            line-height:1.2;
+        }
+
+        .header .sub{
+            color:var(--muted);
+            font-size:14px;
+            line-height:1.6;
+        }
+
+        .layout{
+            flex:1;
+            min-height:0;
+            display:grid;
+            grid-template-columns:minmax(540px,1.25fr) minmax(380px,0.95fr);
+            gap:14px;
+            padding:14px;
+        }
+
+        .leftCol,.rightCol{
+            min-height:0;
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+        }
+
+        .card{
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .controls{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            padding:12px;
+            background:linear-gradient(180deg,#121a36,#10172f);
+            border-bottom:1px solid var(--line);
+        }
+
+        button{
+            border:1px solid #3b4a7d;
+            background:#1a2445;
+            color:var(--text);
+            padding:9px 12px;
+            border-radius:10px;
+            cursor:pointer;
+            font-size:14px;
+            line-height:1.2;
+        }
+
+        button:hover{background:#23315d}
+        button.active{outline:2px solid var(--accent)}
+        .primary{background:#1d4ed8}
+        .primary:hover{background:#275de8}
+        .green{background:#166534}
+        .green:hover{background:#1b7a40}
+        .warn{background:#9a3412}
+        .warn:hover{background:#b24418}
+
+        .sliderBar{
+            display:grid;
+            grid-template-columns:1fr auto auto;
+            gap:12px;
+            align-items:center;
+            padding:12px;
+            border-bottom:1px solid var(--line);
+            background:#0f1630;
+        }
+
+        .sliderBar label{
+            color:var(--muted);
+            font-size:14px;
+            line-height:1.5;
+        }
+
+        input[type="range"]{
+            width:100%;
+        }
+
+        .badge{
+            min-width:110px;
+            text-align:center;
+            padding:8px 10px;
+            background:#182140;
+            border:1px solid #34457a;
+            border-radius:10px;
+            font-weight:bold;
+        }
+
+        .badge.small{
+            min-width:auto;
+            font-size:13px;
+            color:var(--muted);
+            font-weight:normal;
+        }
+
+        .planeWrap{
+            position:relative;
+            min-height:660px;
+            background:#090f1f;
+        }
+
+        canvas{
+            display:block;
+            width:100%;
+            height:100%;
+        }
+
+        .overlay{
+            position:absolute;
+            left:12px;
+            top:12px;
+            max-width:350px;
+            background:rgba(8,13,28,0.88);
+            border:1px solid var(--line);
+            border-radius:14px;
+            padding:12px 14px;
+            backdrop-filter:blur(4px);
+            pointer-events:none;
+        }
+
+        .overlay h3{
+            margin:0 0 8px 0;
+            font-size:16px;
+        }
+
+        .overlay .row{
+            margin:6px 0;
+            color:var(--muted);
+            font-size:13px;
+            line-height:1.45;
+        }
+
+        .stepControls{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            padding:12px;
+            border-top:1px solid var(--line);
+            background:#0f1630;
+            align-items:center;
+        }
+
+        .stepIndicator{
+            margin-left:auto;
+            background:#182140;
+            border:1px solid #34457a;
+            border-radius:10px;
+            padding:8px 10px;
+            font-size:14px;
+            color:var(--muted);
+        }
+
+        .panels{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+            min-height:0;
+        }
+
+        .panel{
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px 16px;
+            min-height:170px;
+            overflow:auto;
+        }
+
+        .panel.large{min-height:250px}
+        .panel.xlarge{min-height:330px}
+
+        .panel h3{
+            margin:0 0 10px 0;
+            font-size:17px;
+            color:#f4f7ff;
+        }
+
+        .content{
+            color:var(--muted);
+            font-size:14px;
+            line-height:1.62;
+            white-space:normal;
+            word-break:break-word;
+        }
+
+        .formula{
+            display:block;
+            margin:8px 0;
+            padding:10px 12px;
+            border-radius:12px;
+            background:#0d1430;
+            border:1px solid #2b3964;
+            color:#dce9ff;
+            white-space:pre-wrap;
+            font-family:"Courier New", monospace;
+            line-height:1.5;
+        }
+
+        .box{
+            margin:8px 0;
+            padding:10px 12px;
+            border-radius:12px;
+            background:#0e1631;
+            border:1px solid #27365e;
+        }
+
+        .good{color:#86efac}
+        .bad{color:#fca5a5}
+        .accent{color:#93c5fd}
+        .purple{color:#c4b5fd}
+        .warnText{color:#fcd34d}
+        .mono{font-family:"Courier New", monospace}
+
+        .footer{
+            padding:12px 14px;
+            border-top:1px solid var(--line);
+            background:#0d142b;
+            color:var(--muted);
+            font-size:14px;
+            line-height:1.6;
+        }
+
+        @media (max-width:1180px){
+            .layout{grid-template-columns:1fr}
+            .planeWrap{min-height:560px}
+        }
+
+        @media (max-width:720px){
+            .panels{grid-template-columns:1fr}
+            .sliderBar{grid-template-columns:1fr}
+            .stepIndicator{margin-left:0;width:100%}
+            .planeWrap{min-height:470px}
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Система уравнений с параметром \(a\): пошаговая интерактивная визуализация</h1>
+    <div class="sub">
+        Исследуем систему
+        <span class="mono">√(19 − y²) = √(19 − a²x²)</span>,
+        <span class="mono">x² + y² = 6x + 4y</span>.
+        На координатной плоскости показаны окружность, прямые двух случаев, полоса ОДЗ, кандидатные точки,
+        карта зависимости числа решений от параметра и пошаговый ход строгого решения.
+    </div>
+</div>
+
+<div class="layout">
+    <div class="leftCol">
+        <div class="card">
+            <div class="controls">
+                <button onclick="zoomView(1.18)">Приблизить</button>
+                <button onclick="zoomView(1/1.18)">Отдалить</button>
+                <button onclick="resetView()">Сбросить вид</button>
+
+                <button id="btnGrid" class="active" onclick="toggleFlag('showGrid')">Сетка</button>
+                <button id="btnAxes" class="active" onclick="toggleFlag('showAxes')">Оси</button>
+                <button id="btnLabels" class="active" onclick="toggleFlag('showLabels')">Подписи</button>
+                <button id="btnHelpers" class="active" onclick="toggleFlag('showHelpers')">Вспомогательные</button>
+                <button id="btnRestrictions" class="active" onclick="toggleFlag('showRestrictions')">ОДЗ</button>
+                <button id="btnCases" class="active" onclick="toggleFlag('showCases')">Случаи</button>
+                <button id="btnGraphic" class="active" onclick="toggleFlag('showGraphicInterpretation')">Графическая интерпретация</button>
+            </div>
+
+            <div class="sliderBar">
+                <div>
+                    <label for="paramSlider">
+                        Параметр <span class="mono">a</span>:
+                        двигайте ползунок и наблюдайте, как меняются прямые
+                        <span class="mono">y=ax</span>, <span class="mono">y=-ax</span>,
+                        допустимость точек <span class="mono">P₊</span>, <span class="mono">P₋</span>
+                        и число решений системы.
+                    </label>
+                    <input id="paramSlider" type="range" min="-20" max="20" step="0.01" value="0.50" oninput="updateParameterFromSlider()">
+                </div>
+                <div class="badge" id="paramBadge">a = 0.5</div>
+                <div class="badge small" id="statusBadge">N(a) = 3</div>
+            </div>
+
+            <div class="planeWrap">
+                <canvas id="scene"></canvas>
+                <div class="overlay">
+                    <h3>Легенда</h3>
+                    <div class="row"><span style="color:#60a5fa">●</span> окружность \((x-3)^2+(y-2)^2=13\)</div>
+                    <div class="row"><span style="color:#f59e0b">●</span> прямая случая \(y=ax\)</div>
+                    <div class="row"><span style="color:#a78bfa">●</span> прямая случая \(y=-ax\)</div>
+                    <div class="row"><span style="color:#34d399">●</span> полоса ОДЗ \(|y|\le \sqrt{19}\)</div>
+                    <div class="row"><span style="color:#f87171">●</span> недопустимая кандидатная точка</div>
+                    <div class="row"><span style="color:#fde68a">●</span> активный объект текущего шага</div>
+                </div>
+            </div>
+
+            <div class="stepControls">
+                <button class="primary" onclick="startSolution()">Старт решения</button>
+                <button onclick="prevStep()">Предыдущий шаг</button>
+                <button onclick="nextStep()">Следующий шаг</button>
+                <button class="green" id="autoBtn" onclick="toggleAutoPlay()">Пауза / Продолжить</button>
+                <button class="warn" onclick="resetStep()">Сброс шага</button>
+                <div class="stepIndicator" id="stepIndicator">Шаг 1 / 12</div>
+            </div>
+
+            <div class="footer" id="footerText"></div>
+        </div>
+    </div>
+
+    <div class="rightCol">
+        <div class="panels">
+            <div class="panel large">
+                <h3>Дано</h3>
+                <div class="content" id="givenPanel"></div>
+            </div>
+
+            <div class="panel large">
+                <h3>Найти</h3>
+                <div class="content" id="findPanel"></div>
+            </div>
+
+            <div class="panel large">
+                <h3>Алгебраическая модель</h3>
+                <div class="content" id="modelPanel"></div>
+            </div>
+
+            <div class="panel large">
+                <h3>Ограничения</h3>
+                <div class="content" id="restrictionsPanel"></div>
+            </div>
+
+            <div class="panel large">
+                <h3>Случаи</h3>
+                <div class="content" id="casesPanel"></div>
+            </div>
+
+            <div class="panel large">
+                <h3>Вычислено</h3>
+                <div class="content" id="computedPanel"></div>
+            </div>
+
+            <div class="panel xlarge">
+                <h3>Текущий шаг решения</h3>
+                <div class="content" id="stepPanel"></div>
+            </div>
+
+            <div class="panel large">
+                <h3>Формула шага</h3>
+                <div class="content" id="formulaPanel"></div>
+            </div>
+
+            <div class="panel large">
+                <h3>Проверка</h3>
+                <div class="content" id="checkPanel"></div>
+            </div>
+
+            <div class="panel xlarge">
+                <h3>Ответ</h3>
+                <div class="content" id="answerPanel"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ----------------------------- Глобальное состояние ----------------------------- */
+
+    // Здесь хранится вся логика сцены:
+    // параметр, вычисления, шаги решения, состояние кнопок и вид координатной плоскости.
+    const state = {
+        parameter: 0.5,
+        model: null,
+        derived: null,
+        steps: [],
+        currentStep: 0,
+        autoPlay: false,
+        autoTimer: null,
+        toggles: {
+            showGrid: true,
+            showAxes: true,
+            showLabels: true,
+            showHelpers: true,
+            showRestrictions: true,
+            showCases: true,
+            showGraphicInterpretation: true
+        },
+        view: {
+            scale: 50,
+            offsetX: 0,
+            offsetY: 0
+        },
+        drag: {
+            active: false,
+            lastX: 0,
+            lastY: 0
+        },
+        transition: {
+            t: 1
+        }
+    };
+
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d');
+
+    /* ----------------------------- Математическая модель ----------------------------- */
+
+    function buildModelFromTask() {
+        // Вся задача построена вокруг двух идей:
+        // 1) первая строка на ОДЗ даёт y² = a²x²;
+        // 2) вторая строка — окружность.
+        return {
+            variable: 'x, y',
+            parameterName: 'a',
+            taskType: 'система уравнений с параметром',
+            given: [
+                '√(19 − y²) = √(19 − a²x²)',
+                'x² + y² = 6x + 4y'
+            ],
+            circle: {
+                cx: 3,
+                cy: 2,
+                r: Math.sqrt(13)
+            },
+            sqrt19: Math.sqrt(19),
+            // Критические значения параметра найдены численно как корни
+            // уравнений допустимости для P₊ и P₋.
+            alpha: 0.761136578413832,
+            beta: 15.9566613086675
+        };
+    }
+
+    function computeDerivedValues(a) {
+        const m = state.model;
+        const denom = 1 + a * a;
+
+        // Точка O=(0,0) всегда попадает и на окружность, и на обе прямые.
+        const origin = { x: 0, y: 0, name: 'O' };
+
+        // Кандидат из случая y = ax.
+        const pPlus = {
+            x: (6 + 4 * a) / denom,
+            y: (a * (6 + 4 * a)) / denom,
+            name: 'P₊'
+        };
+
+        // Кандидат из случая y = -ax.
+        const pMinus = {
+            x: (6 - 4 * a) / denom,
+            y: (-a * (6 - 4 * a)) / denom,
+            name: 'P₋'
+        };
+
+        // Проверяем ОДЗ именно исходной системы.
+        // После перехода y² = a²x² нужно не забыть,
+        // что сами корни должны быть определены.
+        const validPlus = (19 - pPlus.y * pPlus.y) >= -1e-9;
+        const validMinus = (19 - pMinus.y * pMinus.y) >= -1e-9;
+
+        // Отдельно проверяем, не совпал ли кандидат с O.
+        const plusDistinct = distance(origin, pPlus) > 1e-8;
+        const minusDistinct = distance(origin, pMinus) > 1e-8;
+
+        const plusIsSolution = validPlus && plusDistinct;
+        const minusIsSolution = validMinus && minusDistinct;
+
+        const solutions = [origin];
+        if (plusIsSolution) solutions.push(pPlus);
+        if (minusIsSolution && !solutions.some(p => distance(p, pMinus) < 1e-8)) {
+            solutions.push(pMinus);
+        }
+
+        const count = solutions.length;
+
+        // Здесь строим словесную классификацию текущего параметра.
+        const parameterCase = classifyParameter(a, validPlus, validMinus, plusDistinct, minusDistinct);
+
+        return {
+            a,
+            denom,
+            origin,
+            pPlus,
+            pMinus,
+            validPlus,
+            validMinus,
+            plusDistinct,
+            minusDistinct,
+            plusIsSolution,
+            minusIsSolution,
+            solutions,
+            count,
+            parameterCase
+        };
+    }
+
+    function classifyParameter(a, validPlus, validMinus, plusDistinct, minusDistinct) {
+        const parts = [];
+
+        if (validPlus) {
+            parts.push(plusDistinct ? 'P₊ допустима' : 'P₊ совпала с O');
+        } else {
+            parts.push('P₊ вне ОДЗ');
+        }
+
+        if (validMinus) {
+            parts.push(minusDistinct ? 'P₋ допустима' : 'P₋ совпала с O');
+        } else {
+            parts.push('P₋ вне ОДЗ');
+        }
+
+        if (Math.abs(a) < 1e-9) {
+            parts.push('при a=0 обе прямые совпадают с осью y=0');
+        }
+
+        return parts.join('; ') + '.';
+    }
+
+    function buildSolutionSteps(model, d) {
+        const aText = formatNum(d.a, 4);
+        const s19 = formatNum(model.sqrt19, 4);
+        const alpha = formatNum(model.alpha, 10);
+        const beta = formatNum(model.beta, 10);
+
+        return [
+            {
+                title:'Шаг 1. Исходная запись задачи',
+                explanation:'Показываем систему, выделяем неизвестные x,y и параметр a. Нужно найти все решения системы и понять, как их число зависит от a.',
+                formula:'√(19 − y²) = √(19 − a²x²)\n' +
+                'x² + y² = 6x + 4y',
+                activeObjects:['condition']
+            },
+            {
+                title:'Шаг 2. Переменные, параметр и ограничения',
+                explanation:'Неизвестные — x,y. Параметр — a. Для первой строки обязателен смысл корней: подкоренные выражения должны быть неотрицательны.',
+                formula:'19 − y² ≥ 0,\n' +
+                '19 − a²x² ≥ 0\n' +
+                '⇒ |y| ≤ √19 ≈ ' + s19,
+                activeObjects:['restrictions']
+            },
+            {
+                title:'Шаг 3. Структура выражения',
+                explanation:'Левая и правая части первой строки — квадратные корни. На ОДЗ их равенство эквивалентно равенству подкоренных выражений.',
+                formula:'Если U≥0 и V≥0, то\n' +
+                '√U = √V  ⇔  U = V',
+                activeObjects:['condition','restrictions']
+            },
+            {
+                title:'Шаг 4. Выбранный метод решения',
+                explanation:'Используем аналитико-графический метод: превращаем первую строку в две прямые, а вторую — в окружность. Потом ищем их пересечения и проверяем ОДЗ.',
+                formula:'y² = a²x² ⇒ y = ax или y = −ax\n' +
+                'x² + y² = 6x + 4y ⇒ (x−3)² + (y−2)² = 13',
+                activeObjects:['circle','linePlus','lineMinus']
+            },
+            {
+                title:'Шаг 5. Первое ключевое преобразование',
+                explanation:'На ОДЗ из равенства корней получаем равенство подкоренных выражений.',
+                formula:'19 − y² = 19 − a²x²\n' +
+                'y² = a²x²',
+                activeObjects:['condition','restrictions']
+            },
+            {
+                title:'Шаг 6. Разбиение на случаи',
+                explanation:'Из y² = a²x² следует разбиение на два случая: y=ax и y=−ax. Каждый случай надо исследовать отдельно.',
+                formula:'Случай 1: y = ax\n' +
+                'Случай 2: y = −ax',
+                activeObjects:['linePlus','lineMinus','cases']
+            },
+            {
+                title:'Шаг 7. Графики и точки анализа',
+                explanation:'На плоскости это окружность и две прямые. Их точки пересечения дают кандидатов в решения.',
+                formula:'Окружность: (x−3)² + (y−2)² = 13\n' +
+                'Прямые: y=ax, y=−ax',
+                activeObjects:['circle','linePlus','lineMinus','pointOrigin','pointPlus','pointMinus']
+            },
+            {
+                title:'Шаг 8. Первая основная формула',
+                explanation:'Подставляем y=ax в окружность. Получаем факторизацию и сразу находим O и P₊.',
+                formula:'x² + a²x² = 6x + 4ax\n' +
+                'x[(1+a²)x − (6+4a)] = 0\n' +
+                'x=0 или x=(6+4a)/(1+a²)',
+                activeObjects:['linePlus','pointOrigin','pointPlus']
+            },
+            {
+                title:'Шаг 9. Промежуточное вычисление',
+                explanation:'Аналогично для случая y=−ax. Получаем O и P₋.',
+                formula:'x² + a²x² = 6x − 4ax\n' +
+                'x[(1+a²)x − (6−4a)] = 0\n' +
+                'x=0 или x=(6−4a)/(1+a²)',
+                activeObjects:['lineMinus','pointOrigin','pointMinus']
+            },
+            {
+                title:'Шаг 10. Следующая логическая связь',
+                explanation:'Точки пересечения прямых с окружностью ещё не обязаны быть решениями исходной системы. Нужно отдельно проверить ОДЗ для P₊ и P₋.',
+                formula:'P₊ = ((6+4a)/(1+a²), a(6+4a)/(1+a²))\n' +
+                'P₋ = ((6−4a)/(1+a²), −a(6−4a)/(1+a²))\n' +
+                '|y| ≤ √19',
+                activeObjects:['restrictions','pointPlus','pointMinus']
+            },
+            {
+                title:'Шаг 11. Получаем условие на параметр',
+                explanation:'Граница допустимости возникает, когда кандидатная точка лежит на линии y=±√19. Это даёт критические значения α и β.',
+                formula:'Для P₊: a²(6+4a)² ≤ 19(1+a²)²\n' +
+                'Для P₋: a²(6−4a)² ≤ 19(1+a²)²\n' +
+                'α ≈ ' + alpha + ', β ≈ ' + beta,
+                activeObjects:['restrictions','parameterMap','cases']
+            },
+            {
+                title:'Шаг 12. Окончательная проверка и ответ',
+                explanation:'Собираем итог: O есть всегда, P₊ и P₋ берём только после проверки ОДЗ и исключения совпадений с O. Для текущего a=' + aText + ' число решений равно ' + d.count + '.',
+                formula:'Текущий случай: ' + d.parameterCase + '\n' +
+                'Решения при a=' + aText + ': ' + solutionsToText(d.solutions),
+                activeObjects:['final','pointOrigin','pointPlus','pointMinus','parameterMap']
+            }
+        ];
+    }
+
+    /* ----------------------------- Управление шагами ----------------------------- */
+
+    function applyStep(index) {
+        state.currentStep = clamp(index, 0, state.steps.length - 1);
+        state.transition.t = 0;
+        animateTransition();
+        updateComputedText();
+        render();
+    }
+
+    function nextStep() {
+        applyStep(state.currentStep + 1);
+    }
+
+    function prevStep() {
+        applyStep(state.currentStep - 1);
+    }
+
+    function startSolution() {
+        applyStep(0);
+    }
+
+    function toggleAutoPlay() {
+        state.autoPlay = !state.autoPlay;
+
+        if (state.autoPlay) {
+            document.getElementById('autoBtn').textContent = 'Пауза';
+            if (state.autoTimer) clearInterval(state.autoTimer);
+            state.autoTimer = setInterval(() => {
+                if (state.currentStep < state.steps.length - 1) {
+                    nextStep();
+                } else {
+                    state.autoPlay = false;
+                    clearInterval(state.autoTimer);
+                    state.autoTimer = null;
+                    document.getElementById('autoBtn').textContent = 'Продолжить';
+                }
+            }, 2300);
+        } else {
+            document.getElementById('autoBtn').textContent = 'Продолжить';
+            if (state.autoTimer) clearInterval(state.autoTimer);
+            state.autoTimer = null;
+        }
+    }
+
+    function resetStep() {
+        if (state.autoTimer) clearInterval(state.autoTimer);
+        state.autoTimer = null;
+        state.autoPlay = false;
+        document.getElementById('autoBtn').textContent = 'Пауза / Продолжить';
+        applyStep(0);
+    }
+
+    /* ----------------------------- Проекция и движение вида ----------------------------- */
+
+    function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = Math.max(300, rect.width * dpr);
+        canvas.height = Math.max(300, rect.height * dpr);
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        render();
+    }
+
+    function setDefaultView() {
+        const rect = canvas.getBoundingClientRect();
+        state.view.scale = Math.min(rect.width / 18, rect.height / 12);
+        state.view.offsetX = rect.width * 0.12;
+        state.view.offsetY = rect.height * 0.02;
+    }
+
+    function resetView() {
+        setDefaultView();
+        render();
+    }
+
+    function mathToScreen(x, y) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: rect.width / 2 + state.view.offsetX + x * state.view.scale,
+            y: rect.height / 2 + state.view.offsetY - y * state.view.scale
+        };
+    }
+
+    function screenToMath(sx, sy) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (sx - rect.width / 2 - state.view.offsetX) / state.view.scale,
+            y: -(sy - rect.height / 2 - state.view.offsetY) / state.view.scale
+        };
+    }
+
+    function panView(dx, dy) {
+        state.view.offsetX += dx;
+        state.view.offsetY += dy;
+        render();
+    }
+
+    function zoomView(factor, centerX, centerY) {
+        const rect = canvas.getBoundingClientRect();
+        const cx = centerX !== undefined ? centerX : rect.width / 2;
+        const cy = centerY !== undefined ? centerY : rect.height / 2;
+
+        const before = screenToMath(cx, cy);
+        state.view.scale = clamp(state.view.scale * factor, 16, 220);
+        const after = mathToScreen(before.x, before.y);
+
+        state.view.offsetX += cx - after.x;
+        state.view.offsetY += cy - after.y;
+        render();
+    }
+
+    /* ----------------------------- Отрисовка базовых объектов ----------------------------- */
+
+    function drawGrid() {
+        if (!state.toggles.showGrid) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const step = chooseGridStep();
+        const topLeft = screenToMath(0, 0);
+        const bottomRight = screenToMath(rect.width, rect.height);
+
+        const xStart = Math.floor(topLeft.x / step) * step;
+        const xEnd = Math.ceil(bottomRight.x / step) * step;
+        const yStart = Math.floor(bottomRight.y / step) * step;
+        const yEnd = Math.ceil(topLeft.y / step) * step;
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(130,150,210,0.15)';
+        ctx.lineWidth = 1;
+
+        for (let x = xStart; x <= xEnd + 1e-9; x += step) {
+            const p1 = mathToScreen(x, yStart);
+            const p2 = mathToScreen(x, yEnd);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+        }
+
+        for (let y = yStart; y <= yEnd + 1e-9; y += step) {
+            const p1 = mathToScreen(xStart, y);
+            const p2 = mathToScreen(xEnd, y);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    function drawAxes() {
+        if (!state.toggles.showAxes) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const origin = mathToScreen(0, 0);
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(235,242,255,0.75)';
+        ctx.lineWidth = 1.4;
+
+        ctx.beginPath();
+        ctx.moveTo(0, origin.y);
+        ctx.lineTo(rect.width, origin.y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(origin.x, 0);
+        ctx.lineTo(origin.x, rect.height);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(235,242,255,0.85)';
+        ctx.font = '13px Arial';
+        ctx.fillText('x', rect.width - 16, origin.y - 8);
+        ctx.fillText('y', origin.x + 8, 16);
+
+        ctx.restore();
+    }
+
+    function drawFunction(object) {
+        if (!object || !state.toggles.showGraphicInterpretation) return;
+
+        const style = highlightObjects(object.key, object.color, object.width || 2.2);
+        ctx.save();
+        ctx.globalAlpha = style.alpha;
+        ctx.strokeStyle = style.color;
+        ctx.lineWidth = style.width;
+        ctx.setLineDash(object.dash || []);
+
+        if (object.type === 'line') {
+            const rect = canvas.getBoundingClientRect();
+            const left = screenToMath(0, rect.height / 2).x - 2;
+            const right = screenToMath(rect.width, rect.height / 2).x + 2;
+            const y1 = object.fn(left);
+            const y2 = object.fn(right);
+            const p1 = mathToScreen(left, y1);
+            const p2 = mathToScreen(right, y2);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+        }
+
+        if (object.type === 'circle') {
+            const c = mathToScreen(object.cx, object.cy);
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, object.r * state.view.scale, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    function drawPoint(point, color, key, radius = 5, filled = true) {
+        if (!point) return;
+
+        const style = highlightObjects(key, color, 2.2);
+        const p = mathToScreen(point.x, point.y);
+
+        ctx.save();
+        ctx.globalAlpha = style.alpha;
+        ctx.strokeStyle = style.color;
+        ctx.fillStyle = style.color;
+        ctx.lineWidth = style.width;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius + (style.boost ? 2 : 0), 0, Math.PI * 2);
+        if (filled) ctx.fill();
+        else ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawInterval(yMin, yMax, fillColor, key) {
+        const rect = canvas.getBoundingClientRect();
+        const top = mathToScreen(0, yMax).y;
+        const bottom = mathToScreen(0, yMin).y;
+        const style = highlightObjects(key, fillColor, 1.5);
+
+        ctx.save();
+        ctx.globalAlpha = style.alpha * 0.22;
+        ctx.fillStyle = style.color;
+        ctx.fillRect(0, top, rect.width, bottom - top);
+        ctx.restore();
+    }
+
+    function drawLabel(text, x, y, color) {
+        if (!state.toggles.showLabels) return;
+
+        const p = mathToScreen(x, y);
+        ctx.save();
+        ctx.font = '13px Arial';
+        const pad = 5;
+        const width = ctx.measureText(text).width + pad * 2;
+        const height = 22;
+
+        roundRect(ctx, p.x + 8, p.y - 28, width, height, 8);
+        ctx.fillStyle = 'rgba(10,15,29,0.9)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(110,130,185,0.5)';
+        ctx.stroke();
+
+        ctx.fillStyle = color || '#dbeafe';
+        ctx.fillText(text, p.x + 8 + pad, p.y - 12);
+        ctx.restore();
+    }
+
+    function drawRestrictions() {
+        if (!state.toggles.showRestrictions) return;
+
+        const m = state.model;
+        const yTop = m.sqrt19;
+        const yBottom = -m.sqrt19;
+
+        drawInterval(yBottom, yTop, '#34d399', 'restrictions');
+
+        drawFunction({
+            type:'line',
+            key:'restrictions',
+            fn:()=> yTop,
+            color:'#34d399',
+            width:1.5,
+            dash:[8,6]
+        });
+
+        drawFunction({
+            type:'line',
+            key:'restrictions',
+            fn:()=> yBottom,
+            color:'#34d399',
+            width:1.5,
+            dash:[8,6]
+        });
+    }
+
+    function drawCaseBoundaries() {
+        if (!state.toggles.showCases) return;
+
+        const rect = canvas.getBoundingClientRect();
+        ctx.save();
+        ctx.fillStyle = 'rgba(11,18,32,0.85)';
+        ctx.strokeStyle = 'rgba(125,137,174,0.45)';
+        roundRect(ctx, rect.width - 228, 14, 214, 68, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#e9e7ff';
+        ctx.font = '13px Arial';
+        ctx.fillText('Случаи:', rect.width - 212, 36);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText('1) y = ax', rect.width - 212, 56);
+        ctx.fillStyle = '#c4b5fd';
+        ctx.fillText('2) y = −ax', rect.width - 212, 74);
+        ctx.restore();
+    }
+
+    function drawIntersectionMarks() {
+        const d = state.derived;
+
+        drawPoint(d.origin, '#fde68a', 'pointOrigin', 5, true);
+
+        if (d.plusIsSolution) {
+            drawPoint(d.pPlus, '#38bdf8', 'pointPlus', 5, true);
+        } else {
+            drawCross(d.pPlus, '#f87171', 'pointPlus');
+        }
+
+        if (d.minusIsSolution) {
+            drawPoint(d.pMinus, '#c084fc', 'pointMinus', 5, true);
+        } else {
+            drawCross(d.pMinus, '#f87171', 'pointMinus');
+        }
+    }
+
+    function drawCross(point, color, key) {
+        const style = highlightObjects(key, color, 2);
+        const p = mathToScreen(point.x, point.y);
+        ctx.save();
+        ctx.globalAlpha = style.alpha;
+        ctx.strokeStyle = style.color;
+        ctx.lineWidth = style.width;
+        ctx.beginPath();
+        ctx.moveTo(p.x - 7, p.y - 7);
+        ctx.lineTo(p.x + 7, p.y + 7);
+        ctx.moveTo(p.x + 7, p.y - 7);
+        ctx.lineTo(p.x - 7, p.y + 7);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawProjectionLine(point, color, key) {
+        if (!state.toggles.showHelpers || !point) return;
+
+        const style = highlightObjects(key, color, 1.2);
+        const p = mathToScreen(point.x, point.y);
+        const px = mathToScreen(point.x, 0);
+        const py = mathToScreen(0, point.y);
+
+        ctx.save();
+        ctx.globalAlpha = style.alpha * 0.7;
+        ctx.strokeStyle = style.color;
+        ctx.lineWidth = style.width;
+        ctx.setLineDash([6,6]);
+
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(px.x, px.y);
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(py.x, py.y);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawPiecewiseGraph() {
+        drawFunction({
+            type:'line',
+            key:'linePlus',
+            fn:(x)=> state.parameter * x,
+            color:'#f59e0b',
+            width:2.3
+        });
+
+        drawFunction({
+            type:'line',
+            key:'lineMinus',
+            fn:(x)=> -state.parameter * x,
+            color:'#a78bfa',
+            width:2.3,
+            dash:[10,6]
+        });
+    }
+
+    function drawSignChart() {
+        // В этой задаче метод интервалов не является основным инструментом.
+        // Поэтому отдельной таблицы знаков на плоскости нет,
+        // а роль анализа случаев выполняют прямые y=ax и y=-ax
+        // и карта параметра N(a).
+    }
+
+    function drawDiscriminantPanel() {
+        const rect = canvas.getBoundingClientRect();
+        ctx.save();
+        ctx.fillStyle = 'rgba(245,158,11,0.12)';
+        ctx.strokeStyle = 'rgba(245,158,11,0.35)';
+        roundRect(ctx, 16, rect.height - 128, 340, 78, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#fde68a';
+        ctx.font = '13px Arial';
+        ctx.fillText('Здесь удобнее факторизация, а не дискриминант:', 30, rect.height - 96);
+        ctx.fillText('после подстановки получается множитель x.', 30, rect.height - 74);
+        ctx.restore();
+    }
+
+    function drawParameterMap() {
+        // Этот блок показывает зависимость числа решений от параметра.
+        // Размер увеличен, чтобы исключить наложение текста.
+        const m = state.model;
+        const a = state.parameter;
+        const rect = canvas.getBoundingClientRect();
+
+        const boxX = 18;
+        const boxY = rect.height - 318;
+        const boxW = 500;
+        const boxH = 150;
+        const left = boxX + 28;
+        const right = boxX + boxW - 28;
+        const axisY = boxY + 78;
+
+        function mapA(val){
+            const minA = -20;
+            const maxA = 20;
+            return left + (val - minA) / (maxA - minA) * (right - left);
+        }
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(8,13,28,0.92)';
+        ctx.strokeStyle = 'rgba(125,137,174,0.48)';
+        roundRect(ctx, boxX, boxY, boxW, boxH, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#dbeafe';
+        ctx.font = '14px Arial';
+        ctx.fillText('Карта параметра a и числа решений N(a)', boxX + 16, boxY + 24);
+
+        ctx.fillStyle = '#9fb2d6';
+        ctx.font = '12px Arial';
+        ctx.fillText('Синие участки: 3 решения, оранжевые: 2 решения, особые точки ±1.5: 1 решение.', boxX + 16, boxY + 44);
+
+        ctx.strokeStyle = 'rgba(226,232,240,0.72)';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(left, axisY);
+        ctx.lineTo(right, axisY);
+        ctx.stroke();
+
+        drawSegment(left, mapA(-m.beta), axisY, '#60a5fa');
+        drawSegment(mapA(-m.beta), mapA(-m.alpha), axisY, '#f59e0b');
+        drawSegment(mapA(-m.alpha), mapA(m.alpha), axisY, '#60a5fa');
+        drawSegment(mapA(m.alpha), mapA(m.beta), axisY, '#f59e0b');
+        drawSegment(mapA(m.beta), right, axisY, '#60a5fa');
+
+        drawTick(mapA(-m.beta), axisY, '−β');
+        drawTick(mapA(-m.alpha), axisY, '−α');
+        drawTick(mapA(-1.5), axisY, '−1.5');
+        drawTick(mapA(0), axisY, '0');
+        drawTick(mapA(m.alpha), axisY, 'α');
+        drawTick(mapA(1.5), axisY, '1.5');
+        drawTick(mapA(m.beta), axisY, 'β');
+
+        const px = mapA(a);
+        ctx.strokeStyle = '#fde68a';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(px, axisY - 24);
+        ctx.lineTo(px, axisY + 24);
+        ctx.stroke();
+
+        ctx.fillStyle = '#fde68a';
+        ctx.font = '13px Arial';
+        ctx.fillText('a=' + formatNum(a,2), px - 14, axisY - 30);
+
+        ctx.fillStyle = '#93c5fd';
+        ctx.fillText('3 решения', boxX + 18, boxY + 122);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText('2 решения', boxX + 120, boxY + 122);
+        ctx.fillStyle = '#f87171';
+        ctx.fillText('1 решение в точках a=±1.5', boxX + 220, boxY + 122);
+
+        ctx.restore();
+    }
+
+    function drawSegment(x1, x2, y, color) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x2, y);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawTick(x, y, label) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(230,240,255,0.75)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 8);
+        ctx.lineTo(x, y + 8);
+        ctx.stroke();
+        ctx.fillStyle = '#b8c7ea';
+        ctx.font = '11px Arial';
+        ctx.fillText(label, x - 12, y + 24);
+        ctx.restore();
+    }
+
+    function determineActiveObjects() {
+        const step = state.steps[state.currentStep];
+        return new Set(step ? step.activeObjects : []);
+    }
+
+    function highlightObjects(key, baseColor, baseWidth) {
+        const active = determineActiveObjects();
+        const isActive = active.has(key);
+        const faded = active.size > 0 && !isActive;
+
+        return {
+            color: baseColor,
+            width: isActive ? baseWidth + 1.8 : baseWidth,
+            alpha: faded ? 0.25 : (isActive ? 1 : 0.88),
+            boost: isActive
+        };
+    }
+
+    function showFinalAnswerHighlight() {
+        if (state.currentStep < state.steps.length - 1) return;
+
+        const d = state.derived;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(253,230,138,0.95)';
+        ctx.lineWidth = 3;
+
+        d.solutions.forEach((point, index) => {
+            const p = mathToScreen(point.x, point.y);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 10 + index, 0, Math.PI * 2);
+            ctx.stroke();
+        });
+
+        ctx.restore();
+    }
+
+    function drawInfoPanel() {
+        updateComputedText();
+    }
+
+    /* ----------------------------- Рендер всей сцены ----------------------------- */
+
+    function render() {
+        const rect = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        const grd = ctx.createLinearGradient(0, 0, 0, rect.height);
+        grd.addColorStop(0, '#09101e');
+        grd.addColorStop(1, '#0a1224');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, rect.width, rect.height);
+
+        drawGrid();
+        drawAxes();
+        drawRestrictions();
+
+        drawFunction({
+            type:'circle',
+            key:'circle',
+            cx: state.model.circle.cx,
+            cy: state.model.circle.cy,
+            r: state.model.circle.r,
+            color:'#60a5fa',
+            width:2.6
+        });
+
+        drawPiecewiseGraph();
+
+        drawProjectionLine(state.derived.origin, '#fde68a', 'pointOrigin');
+        drawProjectionLine(state.derived.pPlus, '#38bdf8', 'pointPlus');
+        drawProjectionLine(state.derived.pMinus, '#c084fc', 'pointMinus');
+
+        drawIntersectionMarks();
+        drawCaseBoundaries();
+        drawDiscriminantPanel();
+        drawSignChart();
+        drawParameterMap();
+
+        if (state.toggles.showLabels) {
+            drawLabel('O(0,0)', 0, 0, '#fde68a');
+            drawLabel('C(3,2)', 3, 2, '#93c5fd');
+            drawLabel('P₊ ' + pointText(state.derived.pPlus), state.derived.pPlus.x, state.derived.pPlus.y, state.derived.plusIsSolution ? '#7dd3fc' : '#fca5a5');
+            drawLabel('P₋ ' + pointText(state.derived.pMinus), state.derived.pMinus.x, state.derived.pMinus.y, state.derived.minusIsSolution ? '#d8b4fe' : '#fca5a5');
+            drawLabel('y=√19', 0.8, state.model.sqrt19, '#86efac');
+            drawLabel('y=−√19', 1.0, -state.model.sqrt19, '#86efac');
+        }
+
+        showFinalAnswerHighlight();
+        drawInfoPanel();
+    }
+
+    /* ----------------------------- Анимация шага ----------------------------- */
+
+    function animateTransition() {
+        state.transition.t = 0;
+        const start = performance.now();
+        const duration = 300;
+
+        function frame(now) {
+            const k = clamp((now - start) / duration, 0, 1);
+            state.transition.t = interpolateState(0, 1, easeInOut(k));
+            render();
+            if (k < 1) requestAnimationFrame(frame);
+        }
+
+        requestAnimationFrame(frame);
+    }
+
+    function interpolateState(a, b, t) {
+        return a + (b - a) * t;
+    }
+
+    /* ----------------------------- Текстовые панели ----------------------------- */
+
+    function updateComputedText() {
+        const m = state.model;
+        const d = state.derived;
+        const step = state.steps[state.currentStep];
+
+        document.getElementById('paramBadge').textContent = 'a = ' + formatNum(d.a, 2);
+        document.getElementById('statusBadge').textContent = 'N(a) = ' + d.count;
+        document.getElementById('stepIndicator').textContent = 'Шаг ' + (state.currentStep + 1) + ' / ' + state.steps.length;
+
+        document.getElementById('givenPanel').innerHTML = `
+    <div class="box">
+      Система:
+      <div class="formula">√(19 − y²) = √(19 − a²x²)
+x² + y² = 6x + 4y</div>
+    </div>
+    <div class="box">
+      <strong>Неизвестные:</strong> <span class="mono">x, y</span>.<br>
+      <strong>Параметр:</strong> <span class="mono">a</span>.
+    </div>
+    <div class="box">
+      Вторая строка — окружность с центром <span class="mono">(3,2)</span> и радиусом <span class="mono">√13</span>.
+    </div>
+  `;
+
+        document.getElementById('findPanel').innerHTML = `
+    <div class="box">Найти все решения системы при фиксированном параметре <span class="mono">a</span>.</div>
+    <div class="box">Понять, какие кандидатные точки проходят ОДЗ.</div>
+    <div class="box">Определить число решений как функцию параметра <span class="mono">N(a)</span>.</div>
+  `;
+
+        document.getElementById('modelPanel').innerHTML = `
+    <div class="box">
+      На ОДЗ из первой строки:
+      <div class="formula">19 − y² = 19 − a²x²
+y² = a²x²
+y = ax  или  y = −ax</div>
+    </div>
+    <div class="box">
+      Значит задача сводится к пересечению окружности
+      <span class="mono">(x−3)²+(y−2)²=13</span>
+      с прямыми <span class="mono">y=ax</span> и <span class="mono">y=−ax</span>.
+    </div>
+  `;
+
+        document.getElementById('restrictionsPanel').innerHTML = `
+    <div class="box">
+      Для корней обязательно:
+      <div class="formula">19 − y² ≥ 0
+19 − a²x² ≥ 0</div>
+    </div>
+    <div class="box">
+      После перехода <span class="mono">y²=a²x²</span> достаточно контролировать
+      <span class="mono">|y| ≤ √19 ≈ ${formatNum(m.sqrt19,4)}</span>.
+    </div>
+    <div class="box">
+      На координатной плоскости эта область показана зелёной полосой между линиями
+      <span class="mono">y=±√19</span>.
+    </div>
+  `;
+
+        document.getElementById('casesPanel').innerHTML = `
+    <div class="box">
+      <strong>Случай 1:</strong> <span class="mono">y=ax</span><br>
+      даёт точки <span class="mono">O</span> и <span class="mono">P₊</span>.
+    </div>
+    <div class="box">
+      <strong>Случай 2:</strong> <span class="mono">y=−ax</span><br>
+      даёт точки <span class="mono">O</span> и <span class="mono">P₋</span>.
+    </div>
+    <div class="box">
+      <strong>Критические значения параметра:</strong><br>
+      <span class="mono">α ≈ ${formatNum(m.alpha,10)}</span>,<br>
+      <span class="mono">β ≈ ${formatNum(m.beta,10)}</span>.
+    </div>
+  `;
+
+        document.getElementById('computedPanel').innerHTML = `
+    <div class="box">
+      <strong>Текущий параметр:</strong> <span class="mono">a=${formatNum(d.a,6)}</span>
+    </div>
+    <div class="box">
+      <div class="formula">P₊ = (${formatNum(d.pPlus.x,6)}, ${formatNum(d.pPlus.y,6)})
+P₋ = (${formatNum(d.pMinus.x,6)}, ${formatNum(d.pMinus.y,6)})</div>
+    </div>
+    <div class="box">
+      <strong>Проверка кандидатов:</strong><br>
+      P₊: ${d.validPlus ? '<span class="good">ОДЗ проходит</span>' : '<span class="bad">вне ОДЗ</span>'}<br>
+      P₋: ${d.validMinus ? '<span class="good">ОДЗ проходит</span>' : '<span class="bad">вне ОДЗ</span>'}
+    </div>
+    <div class="box">
+      <strong>Совпадение с O:</strong><br>
+      P₊ ${d.plusDistinct ? 'не совпадает' : 'совпадает'} с O<br>
+      P₋ ${d.minusDistinct ? 'не совпадает' : 'совпадает'} с O
+    </div>
+    <div class="box">
+      <strong>Число решений:</strong> <span class="accent">${d.count}</span>
+    </div>
+  `;
+
+        document.getElementById('stepPanel').innerHTML = `
+    <div><strong>${escapeHtml(step.title)}</strong></div>
+    <div class="box">${escapeHtml(step.explanation)}</div>
+    <div class="box">
+      <strong>Активные объекты:</strong><br>
+      ${step.activeObjects.map(item => `<span class="mono">${escapeHtml(item)}</span>`).join(', ')}
+    </div>
+    <div class="box">
+      <strong>Текущий комментарий по параметру:</strong><br>
+      ${escapeHtml(d.parameterCase)}
+    </div>
+  `;
+
+        document.getElementById('formulaPanel').innerHTML = `
+    <div class="formula">${escapeHtml(step.formula)}</div>
+  `;
+
+        document.getElementById('checkPanel').innerHTML = `
+    <div class="box">
+      <strong>Для O=(0,0):</strong><br>
+      <span class="good">19−0≥0</span> и <span class="good">19−0≥0</span>, значит O всегда является решением.
+    </div>
+    <div class="box">
+      <strong>Для P₊:</strong><br>
+      <span class="${d.validPlus ? 'good' : 'bad'}">19 − y(P₊)² = ${formatNum(19 - d.pPlus.y * d.pPlus.y, 6)}</span>
+    </div>
+    <div class="box">
+      <strong>Для P₋:</strong><br>
+      <span class="${d.validMinus ? 'good' : 'bad'}">19 − y(P₋)² = ${formatNum(19 - d.pMinus.y * d.pMinus.y, 6)}</span>
+    </div>
+    <div class="box">
+      В исходную систему входят только те кандидатные точки,
+      для которых корни действительно определены.
+    </div>
+  `;
+
+        document.getElementById('answerPanel').innerHTML = `
+    <div class="box">
+      <strong>Общий вид решений:</strong>
+      <div class="formula">O=(0,0)
+
+P₊(a)=((6+4a)/(1+a²), a(6+4a)/(1+a²))
+
+P₋(a)=((6−4a)/(1+a²), −a(6−4a)/(1+a²))</div>
+    </div>
+
+    <div class="box">
+      <strong>P₊ входит в ответ, если</strong><br>
+      <span class="mono">a²(6+4a)² ≤ 19(1+a²)²</span>.
+    </div>
+
+    <div class="box">
+      <strong>P₋ входит в ответ, если</strong><br>
+      <span class="mono">a²(6−4a)² ≤ 19(1+a²)²</span>.
+    </div>
+
+    <div class="box">
+      <strong>Число решений:</strong><br>
+      <span class="mono">N(a)=3</span> при
+      <span class="mono">a∈(−∞,−β]∪[−α,α]∪[β,+∞)</span>, кроме <span class="mono">a=0</span>, где <span class="mono">N(0)=2</span>;<br><br>
+
+      <span class="mono">N(a)=2</span> при
+      <span class="mono">a∈(−β,−α)\\{−1.5}</span> или
+      <span class="mono">a∈(α,β)\\{1.5}</span>;<br><br>
+
+      <span class="mono">N(a)=1</span> при
+      <span class="mono">a=−1.5</span> и <span class="mono">a=1.5</span>.
+    </div>
+
+    <div class="box">
+      <strong>Для текущего параметра:</strong><br>
+      ${d.solutions.map(p => `<div class="mono">(${formatNum(p.x,6)}, ${formatNum(p.y,6)})</div>`).join('')}
+    </div>
+  `;
+
+        document.getElementById('footerText').innerHTML = `
+    Сейчас <span class="mono">a=${formatNum(d.a,4)}</span>.
+    Решения: ${d.solutions.map(p => `<span class="mono">(${formatNum(p.x,4)}, ${formatNum(p.y,4)})</span>`).join(', ')}.
+    Число решений: <span class="accent">${d.count}</span>.
+  `;
+    }
+
+    /* ----------------------------- Ползунок параметра ----------------------------- */
+
+    function updateParameterFromSlider() {
+        state.parameter = parseFloat(document.getElementById('paramSlider').value);
+        recomputeAll();
+    }
+
+    /* ----------------------------- Переключатели ----------------------------- */
+
+    function toggleFlag(name) {
+        state.toggles[name] = !state.toggles[name];
+
+        const map = {
+            showGrid:'btnGrid',
+            showAxes:'btnAxes',
+            showLabels:'btnLabels',
+            showHelpers:'btnHelpers',
+            showRestrictions:'btnRestrictions',
+            showCases:'btnCases',
+            showGraphicInterpretation:'btnGraphic'
+        };
+
+        const btn = document.getElementById(map[name]);
+        if (btn) btn.classList.toggle('active', state.toggles[name]);
+
+        render();
+    }
+
+    /* ----------------------------- Пересчёт ----------------------------- */
+
+    function recomputeAll() {
+        state.derived = computeDerivedValues(state.parameter);
+        state.steps = buildSolutionSteps(state.model, state.derived);
+        updateComputedText();
+        render();
+    }
+
+    /* ----------------------------- Вспомогательные функции ----------------------------- */
+
+    function solutionsToText(points) {
+        return points.map(p => '(' + formatNum(p.x,4) + ', ' + formatNum(p.y,4) + ')').join(', ');
+    }
+
+    function pointText(p) {
+        return '(' + formatNum(p.x,3) + ', ' + formatNum(p.y,3) + ')';
+    }
+
+    function distance(a, b) {
+        return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function clamp(v, a, b) {
+        return Math.max(a, Math.min(b, v));
+    }
+
+    function formatNum(v, digits) {
+        return Number(v).toFixed(digits).replace(/\.?0+$/,'');
+    }
+
+    function chooseGridStep() {
+        const px = state.view.scale;
+        if (px < 22) return 2;
+        if (px < 46) return 1;
+        if (px < 90) return 0.5;
+        return 0.25;
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+    }
+
+    function easeInOut(t) {
+        return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+    }
+
+    function escapeHtml(text) {
+        return String(text)
+            .replaceAll('&','&amp;')
+            .replaceAll('<','&lt;')
+            .replaceAll('>','&gt;');
+    }
+
+    /* ----------------------------- События мыши ----------------------------- */
+
+    canvas.addEventListener('mousedown', (e) => {
+        state.drag.active = true;
+        state.drag.lastX = e.offsetX;
+        state.drag.lastY = e.offsetY;
+    });
+
+    window.addEventListener('mouseup', () => {
+        state.drag.active = false;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!state.drag.active) return;
+        const dx = e.offsetX - state.drag.lastX;
+        const dy = e.offsetY - state.drag.lastY;
+        state.drag.lastX = e.offsetX;
+        state.drag.lastY = e.offsetY;
+        panView(dx, dy);
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        zoomView(e.deltaY < 0 ? 1.12 : 1/1.12, x, y);
+    }, {passive:false});
+
+    window.addEventListener('resize', resizeCanvas);
+
+    /* ----------------------------- Инициализация ----------------------------- */
+
+    function init() {
+        state.model = buildModelFromTask();
+        setDefaultView();
+        recomputeAll();
+        resizeCanvas();
+        applyStep(0);
+    }
+
+    init();
+</script>
+</body>
+</html>
