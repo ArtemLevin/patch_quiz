@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Супер-математика — расстояние между BB₁ и CF₁</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --panel: #121936;
+            --panel-2: #0f1530;
+            --text: #eef2ff;
+            --muted: #aab6e8;
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --good: #86efac;
+            --warn: #fcd34d;
+            --danger: #fca5a5;
+            --line: rgba(170, 182, 232, 0.18);
+            --shadow: 0 20px 60px rgba(0,0,0,0.35);
+            --radius: 22px;
+        }
+
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at top, #172048 0%, var(--bg) 45%);
+            color: var(--text);
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
+        body { min-height: 100vh; }
+
+        .wrap { max-width: 1500px; margin: 0 auto; padding: 28px 20px 56px; }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(125,211,252,0.12), rgba(167,139,250,0.12));
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 22px;
+        }
+        .hero h1 {
+            margin: 0 0 12px;
+            font-size: clamp(28px, 4vw, 42px);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+        .hero p { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.6; }
+
+        .meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .meta-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px 16px;
+        }
+        .meta-card .k {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(360px, 0.8fr);
+            gap: 22px;
+            align-items: start;
+        }
+        .left { min-width: 0; }
+        .right {
+            position: sticky;
+            top: 18px;
+            align-self: start;
+            max-height: calc(100vh - 24px);
+            overflow: auto;
+            padding-right: 6px;
+        }
+        .right::-webkit-scrollbar { width: 10px; }
+        .right::-webkit-scrollbar-thumb { background: rgba(170,182,232,0.25); border-radius: 999px; }
+
+        .card {
+            background: linear-gradient(180deg, rgba(18,25,54,0.98), rgba(11,16,32,0.96));
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+        .card h2 { margin: 0 0 12px; font-size: clamp(22px, 2.6vw, 30px); letter-spacing: -0.02em; }
+        .card h3 { margin: 0 0 10px; font-size: 20px; letter-spacing: -0.01em; }
+        .sub { color: var(--muted); line-height: 1.65; font-size: 16px; }
+
+        .pill-row, .btn-row, .toggle-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .pill, .toggle {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .toggle.active { background: rgba(125,211,252,0.16); }
+
+        .scheme { display: grid; gap: 10px; margin-top: 14px; }
+        .scheme-item {
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            line-height: 1.55;
+        }
+        .scheme-item b { color: var(--accent); }
+
+        .step {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            margin-top: 14px;
+            background: rgba(255,255,255,0.025);
+            overflow: hidden;
+        }
+        .step-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 18px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .step-head:hover { background: rgba(255,255,255,0.03); }
+        .step-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .num {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(125,211,252,0.22), rgba(167,139,250,0.25));
+            border: 1px solid var(--line);
+            color: white;
+            font-weight: 800;
+        }
+        .step-body {
+            display: none;
+            padding: 0 18px 18px;
+            color: var(--text);
+            line-height: 1.72;
+            font-size: 16px;
+        }
+        .step.open .step-body { display: block; }
+
+        .formula {
+            margin: 14px 0;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(125,211,252,0.08);
+            border: 1px solid rgba(125,211,252,0.16);
+            overflow-x: auto;
+            font-family: "Times New Roman", Georgia, serif;
+            font-size: clamp(22px, 2.3vw, 28px);
+            line-height: 1.45;
+        }
+        .mini { margin-top: 10px; color: var(--muted); font-size: 15px; }
+        .idea, .check, .mistakes, .details-level, .generated, .answer-box {
+            padding: 16px;
+            border-radius: 18px;
+            margin-top: 14px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.03);
+        }
+        .idea { border-left: 4px solid var(--accent); }
+        .check { border-left: 4px solid var(--good); }
+        .mistakes { border-left: 4px solid var(--warn); }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .legend-item {
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.035);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .control-group { display: grid; gap: 8px; margin-top: 14px; }
+        .control-group label { font-size: 14px; color: var(--muted); }
+        input[type="range"] { width: 100%; }
+
+        button {
+            appearance: none;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(125,211,252,0.12), rgba(167,139,250,0.10));
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform .15s ease;
+        }
+        button:hover { transform: translateY(-1px); }
+        button.secondary { background: rgba(255,255,255,0.04); }
+
+        .canvas-box {
+            margin-top: 14px;
+            border-radius: 22px;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            overflow: hidden;
+        }
+        .canvas-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 14px;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            min-height: 380px;
+            height: auto;
+            background: radial-gradient(circle at 50% 20%, rgba(125,211,252,0.08), rgba(0,0,0,0));
+            cursor: grab;
+        }
+
+        .big-answer {
+            font-family: "Times New Roman", Georgia, serif;
+            font-size: clamp(28px, 3vw, 38px);
+            margin-top: 6px;
+        }
+        .quiz { display: grid; gap: 10px; margin-top: 12px; }
+        .quiz button { text-align: left; font-weight: 600; }
+        .quiz button.correct { outline: 2px solid var(--good); }
+        .quiz button.wrong { outline: 2px solid var(--danger); }
+        .result { margin-top: 10px; color: var(--muted); line-height: 1.55; min-height: 24px; }
+        .gen-box { display: grid; gap: 10px; margin-top: 14px; }
+        .footer-note { color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+        @media (max-width: 1100px) {
+            .layout { grid-template-columns: 1fr; }
+            .right {
+                position: static;
+                max-height: none;
+                overflow: visible;
+                padding-right: 0;
+            }
+        }
+
+        @media print {
+            body { background: white; color: black; }
+            .right { position: static; max-height: none; overflow: visible; }
+            .card, .hero, .meta-card, .step, .canvas-box { box-shadow: none; background: white; color: black; }
+            .sub, .mini, .footer-note, .legend-item, .meta-card, .details-level { color: #222; }
+            button, input { display: none !important; }
+            .step-body { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="hero">
+        <h1>Расстояние между прямыми <span style="color:var(--accent)">BB₁</span> и <span style="color:var(--accent-2)">CF₁</span> в правильной шестиугольной призме</h1>
+        <p>Подробное решение слева и исправленная интерактивная модель справа: холст подстраивается под размер панели, правый блок прокручивается, модель можно вращать и сдвигать.</p>
+        <div class="meta">
+            <div class="meta-card"><div class="k">Дано</div><div>Правильная шестиугольная призма, все рёбра равны <b>1</b>.</div></div>
+            <div class="meta-card"><div class="k">Найти</div><div>Расстояние между скрещивающимися прямыми <b>BB₁</b> и <b>CF₁</b>.</div></div>
+            <div class="meta-card"><div class="k">Метод</div><div>Плоскость через <b>CF₁</b>, параллельная <b>BB₁</b>, плюс координаты.</div></div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="left">
+            <section class="card">
+                <h2>Схема решения</h2>
+                <div class="scheme">
+                    <div class="scheme-item"><b>Что дано:</b> правильная шестиугольная призма с ребром основания 1 и высотой 1.</div>
+                    <div class="scheme-item"><b>Смысл условий:</b> прямая BB₁ вертикальна, а CF₁ — пространственная диагональ, поэтому прямые скрещиваются.</div>
+                    <div class="scheme-item"><b>Интерпретация:</b> если построить плоскость через CF₁, параллельную BB₁, то расстояние между прямыми станет расстоянием от точки B до этой плоскости.</div>
+                    <div class="scheme-item"><b>Ключевая идея:</b> сначала координаты, затем уравнение нужной плоскости, затем формула расстояния от точки до плоскости.</div>
+                    <div class="scheme-item"><b>Проверка:</b> ответ должен быть положительным, разумным по размеру и одинаковым для любой точки на BB₁.</div>
+                    <div class="scheme-item"><b>Вывод:</b> получим точное значение <b>√3 / 2</b>.</div>
+                </div>
+
+                <div class="idea">
+                    <h3>Идея решения</h3>
+                    <div class="sub">Проводим через прямую <b>CF₁</b> плоскость, параллельную <b>BB₁</b>. Тогда расстояние между прямыми равно расстоянию от точки <b>B</b> до этой плоскости. В координатах это считается особенно удобно.</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Пошаговое решение</h2>
+
+                <div class="step open" id="step1">
+                    <div class="step-head" onclick="toggleStep('step1')"><div class="step-title"><span class="num">1</span> Выбираем координаты</div><div>▾</div></div>
+                    <div class="step-body">
+                        Расположим нижнее основание в плоскости <b>z = 0</b>, верхнее — в плоскости <b>z = 1</b>. Для правильного шестиугольника со стороной 1 удобно взять:
+                        <div class="formula">A(1,0,0), B(1/2, √3/2, 0), C(−1/2, √3/2, 0), D(−1,0,0), E(−1/2, −√3/2,0), F(1/2, −√3/2,0).</div>
+                        Тогда
+                        <div class="formula">B₁(1/2, √3/2, 1), &nbsp; F₁(1/2, −√3/2, 1).</div>
+                    </div>
+                </div>
+
+                <div class="step" id="step2">
+                    <div class="step-head" onclick="toggleStep('step2')"><div class="step-title"><span class="num">2</span> Находим направляющие векторы</div><div>▾</div></div>
+                    <div class="step-body">
+                        <div class="formula">v₁ = BB₁ = (0, 0, 1), &nbsp;&nbsp; v₂ = CF₁ = (1, −√3, 1).</div>
+                    </div>
+                </div>
+
+                <div class="step" id="step3">
+                    <div class="step-head" onclick="toggleStep('step3')"><div class="step-title"><span class="num">3</span> Строим нужную плоскость</div><div>▾</div></div>
+                    <div class="step-body">
+                        Рассмотрим плоскость, проходящую через <b>CF₁</b> и параллельную <b>BB₁</b>. Она содержит два направления:
+                        <div class="formula">(1, −√3, 1) и (0, 0, 1).</div>
+                    </div>
+                </div>
+
+                <div class="step" id="step4">
+                    <div class="step-head" onclick="toggleStep('step4')"><div class="step-title"><span class="num">4</span> Находим нормаль</div><div>▾</div></div>
+                    <div class="step-body">
+                        <div class="formula">n = v₂ × v₁ = (1, −√3, 1) × (0,0,1) = (−√3, −1, 0).</div>
+                        Можно взять противоположную нормаль:
+                        <div class="formula">n = (√3, 1, 0).</div>
+                    </div>
+                </div>
+
+                <div class="step" id="step5">
+                    <div class="step-head" onclick="toggleStep('step5')"><div class="step-title"><span class="num">5</span> Уравнение плоскости</div><div>▾</div></div>
+                    <div class="step-body">
+                        Плоскость проходит через
+                        <div class="formula">C(−1/2, √3/2, 0)</div>
+                        и имеет нормаль
+                        <div class="formula">(√3,1,0).</div>
+                        Поэтому:
+                        <div class="formula">√3(x + 1/2) + (y − √3/2) = 0.</div>
+                        После упрощения:
+                        <div class="formula">√3x + y = 0.</div>
+                    </div>
+                </div>
+
+                <div class="step" id="step6">
+                    <div class="step-head" onclick="toggleStep('step6')"><div class="step-title"><span class="num">6</span> Расстояние от точки B до плоскости</div><div>▾</div></div>
+                    <div class="step-body">
+                        Берём точку
+                        <div class="formula">B(1/2, √3/2, 0).</div>
+                        Формула расстояния от точки до плоскости:
+                        <div class="formula">ρ = |Ax₀ + By₀ + Cz₀ + D| / √(A² + B² + C²).</div>
+                        Подставляем в плоскость <b>√3x + y = 0</b>:
+                        <div class="formula">ρ = |√3·(1/2) + √3/2| / √(3+1) = √3 / 2.</div>
+                    </div>
+                </div>
+
+                <div class="step" id="step7">
+                    <div class="step-head" onclick="toggleStep('step7')"><div class="step-title"><span class="num">7</span> Ответ и проверка</div><div>▾</div></div>
+                    <div class="step-body">
+                        <div class="formula">d(BB₁, CF₁) = √3 / 2.</div>
+                        Плоскость содержит <b>CF₁</b> и параллельна <b>BB₁</b>, так что переход к расстоянию от точки до плоскости корректен.
+                    </div>
+                </div>
+
+                <div class="check">
+                    <h3>Явная проверка ответа</h3>
+                    <div class="sub">Прямая <b>BB₁</b> параллельна плоскости <b>√3x + y = 0</b>, а прямая <b>CF₁</b> лежит в ней. Значит расстояние между прямыми действительно равно расстоянию от точки <b>B</b> до этой плоскости. Полученное значение <b>√3 / 2</b> согласуется с геометрией.</div>
+                </div>
+
+                <div class="mistakes">
+                    <h3>Типичные ошибки</h3>
+                    <div class="sub">1) неверные координаты шестиугольника; 2) неверный вектор <b>CF₁</b>; 3) ошибка в векторном произведении; 4) выбор плоскости, не параллельной <b>BB₁</b>; 5) подмена расстояния между прямыми расстоянием до случайной плоскости.</div>
+                </div>
+            </section>
+        </main>
+
+        <aside class="right">
+            <section class="card">
+                <h2>Интерактивная модель</h2>
+                <div class="sub">Исправленная версия: фигура автоматически подгоняется под размер окна. Без Shift — вращение модели, с Shift — сдвиг рисунка внутри окна. Колесо мыши меняет масштаб.</div>
+
+                <div class="toggle-row" id="toggles">
+                    <div class="toggle active" data-key="showPlane">Плоскость</div>
+                    <div class="toggle active" data-key="showBB1">BB₁</div>
+                    <div class="toggle active" data-key="showCF1">CF₁</div>
+                    <div class="toggle active" data-key="showCoords">Подписи</div>
+                </div>
+
+                <div class="control-group">
+                    <label for="zoomRange">Масштаб чертежа</label>
+                    <input id="zoomRange" type="range" min="0.6" max="2.2" step="0.01" value="1.12" />
+                </div>
+
+                <div class="btn-row">
+                    <button onclick="adjustZoom(0.1)">+</button>
+                    <button onclick="adjustZoom(-0.1)">−</button>
+                    <button class="secondary" onclick="resetView()">Сброс</button>
+                    <button class="secondary" onclick="openAllSteps()">Открыть все шаги</button>
+                </div>
+
+                <div class="canvas-box">
+                    <div class="canvas-top">
+                        <span>3D-эскиз призмы</span>
+                        <span id="viewInfo">масштаб 1.12×</span>
+                    </div>
+                    <canvas id="scene"></canvas>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><b>Голубая прямая</b><br>BB₁</div>
+                    <div class="legend-item"><b>Фиолетовая прямая</b><br>CF₁</div>
+                    <div class="legend-item"><b>Полупрозрачная область</b><br>плоскость √3x + y = 0</div>
+                    <div class="legend-item"><b>Зелёный отрезок</b><br>идея расстояния</div>
+                </div>
+
+                <div class="details-level">
+                    <b>Уровень подробности:</b>
+                    <div class="pill-row" style="margin-top:8px;">
+                        <span class="pill" onclick="setDetail('brief')">Кратко</span>
+                        <span class="pill" onclick="setDetail('medium')">Средне</span>
+                        <span class="pill" onclick="setDetail('full')">Подробно</span>
+                    </div>
+                    <div id="detailText" style="margin-top:10px; color: var(--muted); line-height:1.6;">Подробно: видна геометрическая идея, координаты, плоскость и проверка.</div>
+                </div>
+
+                <div class="answer-box">
+                    <div class="sub">Итоговый ответ</div>
+                    <div class="big-answer">√3 / 2</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Быстрая самопроверка</h2>
+                <div class="sub">Почему можно перейти к расстоянию от точки до плоскости?</div>
+                <div class="quiz" id="quiz">
+                    <button onclick="checkQuiz(0)">Потому что плоскость проходит через BB₁ и перпендикулярна CF₁.</button>
+                    <button onclick="checkQuiz(1)">Потому что плоскость проходит через CF₁ и параллельна BB₁.</button>
+                    <button onclick="checkQuiz(2)">Потому что обе прямые лежат в одной плоскости.</button>
+                </div>
+                <div class="result" id="quizResult"></div>
+            </section>
+
+            <section class="card">
+                <h2>Генератор похожих задач</h2>
+                <div class="sub">Тот же метод: координаты + плоскость, параллельная одной из прямых.</div>
+                <div class="gen-box">
+                    <div class="btn-row">
+                        <button onclick="generateTask()">Сгенерировать задачу</button>
+                        <button class="secondary" onclick="toggleAnswer()">Показать / скрыть ответ</button>
+                    </div>
+                    <div class="generated" id="generatedTask">Нажмите кнопку, чтобы получить похожую задачу.</div>
+                    <div class="generated" id="generatedAnswer" style="display:none;"></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const steps = ['step1','step2','step3','step4','step5','step6','step7'];
+    function toggleStep(id) { document.getElementById(id).classList.toggle('open'); }
+    function openAllSteps() { steps.forEach(id => document.getElementById(id).classList.add('open')); }
+
+    function checkQuiz(i) {
+        const buttons = [...document.querySelectorAll('#quiz button')];
+        buttons.forEach((b, idx) => {
+            b.classList.remove('correct', 'wrong');
+            if (idx === 1) b.classList.add('correct');
+        });
+        if (i !== 1) buttons[i].classList.add('wrong');
+        document.getElementById('quizResult').textContent = i === 1
+        ? 'Верно. Именно такая плоскость позволяет заменить задачу о расстоянии между прямыми задачей о расстоянии от точки до плоскости.'
+        : 'Нет. Нужна плоскость, которая проходит через CF₁ и параллельна BB₁.';
+    }
+
+    function setDetail(mode) {
+        const el = document.getElementById('detailText');
+        if (mode === 'brief') el.textContent = 'Кратко: координаты → плоскость через CF₁, параллельная BB₁ → расстояние от B до плоскости.';
+        else if (mode === 'medium') el.textContent = 'Средне: показаны координаты, направляющие векторы, нормаль и формула расстояния от точки до плоскости.';
+        else el.textContent = 'Подробно: видна геометрическая идея, координаты, плоскость и проверка.';
+    }
+
+    const generatedPool = [
+        {
+            task: 'В правильной шестиугольной призме со стороной основания 1 и высотой 1 найдите расстояние между прямыми AA₁ и DF₁. Решите через плоскость, проходящую через DF₁ и параллельную AA₁.',
+            answer: 'После введения координат и составления уравнения нужной плоскости получается ответ: √3 / 2.'
+        },
+        {
+            task: 'В той же призме найдите расстояние между прямыми CC₁ и AF₁. Постройте плоскость через AF₁, параллельную CC₁.',
+            answer: 'Алгоритм тот же: координаты, два направляющих вектора плоскости, нормаль, уравнение плоскости, формула расстояния. Ответ: √3 / 2.'
+        },
+        {
+            task: 'В правильной шестиугольной призме со всеми рёбрами 1 найдите расстояние между прямыми DD₁ и CA₁. Используйте координаты и плоскость, параллельную DD₁.',
+            answer: 'После аккуратных вычислений снова получается расстояние √3 / 2.'
+        }
+    ];
+    let currentGenerated = null;
+    function generateTask() {
+        currentGenerated = generatedPool[Math.floor(Math.random() * generatedPool.length)];
+        document.getElementById('generatedTask').textContent = currentGenerated.task;
+        const ans = document.getElementById('generatedAnswer');
+        ans.textContent = currentGenerated.answer;
+        ans.style.display = 'none';
+    }
+    function toggleAnswer() {
+        if (!currentGenerated) generateTask();
+        const ans = document.getElementById('generatedAnswer');
+        ans.style.display = ans.style.display === 'none' ? 'block' : 'none';
+    }
+
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d');
+    const sqrt3 = Math.sqrt(3);
+
+    const state = {
+        scale: 1.12,
+        tx: 0,
+        ty: 0,
+        rotY: -0.62,
+        rotX: 0.50,
+        showPlane: true,
+        showBB1: true,
+        showCF1: true,
+        showCoords: true,
+        dragging: false,
+        lastX: 0,
+        lastY: 0
+    };
+
+    const points = {
+        A: [1,0,0], B: [0.5, sqrt3/2, 0], C: [-0.5, sqrt3/2, 0],
+        D: [-1,0,0], E: [-0.5,-sqrt3/2,0], F: [0.5,-sqrt3/2,0],
+        A1:[1,0,1], B1:[0.5,sqrt3/2,1], C1:[-0.5,sqrt3/2,1],
+        D1:[-1,0,1], E1:[-0.5,-sqrt3/2,1], F1:[0.5,-sqrt3/2,1],
+        P0:[0,0,0], P1:[0,0,1], P2:[0,1.12,1], P3:[0,1.12,0],
+        G:[0, sqrt3/2, 0]
+    };
+
+    const edges = [
+        ['A','B'],['B','C'],['C','D'],['D','E'],['E','F'],['F','A'],
+        ['A1','B1'],['B1','C1'],['C1','D1'],['D1','E1'],['E1','F1'],['F1','A1'],
+        ['A','A1'],['B','B1'],['C','C1'],['D','D1'],['E','E1'],['F','F1']
+    ];
+
+    function fitCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
+        const cssWidth = Math.max(320, Math.round(rect.width || 520));
+        const cssHeight = Math.max(380, Math.round(cssWidth * 0.78));
+        canvas.style.height = cssHeight + 'px';
+        const targetWidth = Math.round(cssWidth * ratio);
+        const targetHeight = Math.round(cssHeight * ratio);
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+        }
+        ctx.setTransform(1,0,0,1,0,0);
+        ctx.scale(ratio, ratio);
+        return { cssWidth, cssHeight };
+    }
+
+    function project([x,y,z], size) {
+        let cx = x, cy = y, cz = z - 0.5;
+        const cosy = Math.cos(state.rotY), siny = Math.sin(state.rotY);
+        const cosx = Math.cos(state.rotX), sinx = Math.sin(state.rotX);
+        const x1 = cx * cosy + cz * siny;
+        const z1 = -cx * siny + cz * cosy;
+        const y1 = cy * cosx - z1 * sinx;
+        const z2 = cy * sinx + z1 * cosx;
+        const perspective = 360 / (3.8 + z2);
+        return [
+            size.cssWidth / 2 + state.tx + x1 * perspective * 78 * state.scale,
+            size.cssHeight / 2 + state.ty - y1 * perspective * 78 * state.scale,
+            z2
+        ];
+    }
+
+    function drawLine(p, q, size, width=2, color='rgba(238,242,255,0.7)', dash=[]) {
+        const a = project(p, size), b = project(q, size);
+        ctx.save();
+        ctx.setLineDash(dash);
+        ctx.lineWidth = width;
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(b[0], b[1]);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawPoint(name, p, size, color='white') {
+        const [x,y] = project(p, size);
+        ctx.beginPath();
+        ctx.arc(x, y, 4.2, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        if (state.showCoords) {
+            ctx.fillStyle = 'rgba(238,242,255,0.94)';
+            ctx.font = `${Math.max(13, Math.round(size.cssWidth / 42))}px Inter, sans-serif`;
+            ctx.fillText(name, x + 8, y - 8);
+        }
+    }
+
+    function drawPlane(size) {
+        if (!state.showPlane) return;
+        const poly = [points.P0, points.P1, points.P2, points.P3].map(p => project(p, size));
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(poly[0][0], poly[0][1]);
+        for (let i = 1; i < poly.length; i++) ctx.lineTo(poly[i][0], poly[i][1]);
+        ctx.closePath();
+        const grad = ctx.createLinearGradient(poly[0][0], poly[0][1], poly[2][0], poly[2][1]);
+        grad.addColorStop(0, 'rgba(125,211,252,0.18)');
+        grad.addColorStop(1, 'rgba(167,139,250,0.13)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(125,211,252,0.40)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawDistanceHint(size) {
+        drawLine(points.B, points.G, size, 4, 'rgba(134,239,172,0.95)');
+    }
+
+    function render() {
+        const size = fitCanvas();
+        ctx.clearRect(0, 0, size.cssWidth, size.cssHeight);
+
+        drawPlane(size);
+        edges.forEach(([u,v]) => drawLine(points[u], points[v], size, 1.8, 'rgba(220,228,255,0.42)'));
+        if (state.showBB1) drawLine(points.B, points.B1, size, 5, 'rgba(125,211,252,0.95)');
+        if (state.showCF1) drawLine(points.C, points.F1, size, 5, 'rgba(167,139,250,0.95)');
+        drawDistanceHint(size);
+
+        ['A','B','C','D','E','F','A1','B1','C1','D1','E1','F1'].forEach(name => {
+            const color = name === 'B' || name === 'B1' ? 'rgba(125,211,252,1)' : (name === 'C' || name === 'F1' ? 'rgba(167,139,250,1)' : 'rgba(255,255,255,0.9)');
+            drawPoint(name, points[name], size, color);
+        });
+
+        document.getElementById('viewInfo').textContent = `масштаб ${state.scale.toFixed(2)}× · drag = вращение · Shift+drag = сдвиг`;
+    }
+
+    function adjustZoom(delta) {
+        state.scale = Math.max(0.6, Math.min(2.2, state.scale + delta));
+        document.getElementById('zoomRange').value = state.scale;
+        render();
+    }
+    function resetView() {
+        state.scale = 1.12;
+        state.tx = 0;
+        state.ty = 0;
+        state.rotY = -0.62;
+        state.rotX = 0.50;
+        document.getElementById('zoomRange').value = state.scale;
+        render();
+    }
+
+    document.getElementById('zoomRange').addEventListener('input', (e) => {
+        state.scale = parseFloat(e.target.value);
+        render();
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        adjustZoom(e.deltaY < 0 ? 0.08 : -0.08);
+    }, { passive: false });
+
+    canvas.addEventListener('mousedown', (e) => {
+        state.dragging = true;
+        state.lastX = e.clientX;
+        state.lastY = e.clientY;
+        canvas.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mouseup', () => {
+        state.dragging = false;
+        canvas.style.cursor = 'grab';
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!state.dragging) return;
+        const dx = e.clientX - state.lastX;
+        const dy = e.clientY - state.lastY;
+        if (e.shiftKey) {
+            state.tx += dx;
+            state.ty += dy;
+        } else {
+            state.rotY += dx * 0.01;
+            state.rotX += dy * 0.01;
+        }
+        state.lastX = e.clientX;
+        state.lastY = e.clientY;
+        render();
+    });
+
+    document.querySelectorAll('.toggle').forEach(el => {
+        el.addEventListener('click', () => {
+            const key = el.dataset.key;
+            state[key] = !state[key];
+            el.classList.toggle('active', state[key]);
+            render();
+        });
+    });
+
+    window.addEventListener('resize', render);
+    window.addEventListener('load', () => {
+        render();
+        setTimeout(render, 120);
+        setTimeout(render, 500);
+    });
+    requestAnimationFrame(render);
+</script>
+</body>
+</html>

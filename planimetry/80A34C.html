@@ -314,6 +314,17 @@
             font-size: 0.98rem;
         }
 
+        @keyframes softPulse {
+            0%, 100% { opacity: 0.45; transform: scale(1); }
+            50% { opacity: 0.95; transform: scale(1.18); }
+        }
+
+        #pulseA, #pulseB, #pulseD {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: softPulse 1.8s ease-in-out infinite;
+        }
+
         @media (max-width: 1150px) {
             .layout { grid-template-columns: 1fr; }
             .sticky-wrap { position: relative; top: 0; max-height: none; }
@@ -401,6 +412,8 @@
                     <div class="btn-row">
                         <button id="btnArc" class="active">Дуга AB</button>
                         <button id="btnCentral" class="active">∠AOD</button>
+                        <button id="btnInscribed" class="active">∠ACB</button>
+                        <button id="btnDiam">Диаметры</button>
                         <button id="btnHint">Подсказка</button>
                     </div>
                 </div>
@@ -443,24 +456,49 @@
                         <text x="590" y="430" class="label">D</text>
                         <text x="365" y="385" class="label">O</text>
 
-                        <text x="205" y="232" class="small-label">дуга AB = 82°</text>
-                        <text x="400" y="300" class="angle-label">98°</text>
-                        <text x="230" y="565" class="angle-label">41°</text>
+                        <text id="labelArcAB" x="205" y="232" class="small-label">дуга AB = 82°</text>
+                        <text id="labelAOD" x="400" y="300" class="angle-label">98°</text>
+                        <text id="labelACB" x="230" y="565" class="angle-label">41°</text>
+
+                        <circle id="pulseA" cx="350" cy="160" r="11" fill="rgba(56,189,248,0.16)" stroke="#38bdf8" stroke-width="2"></circle>
+                        <circle id="pulseB" cx="122.2" cy="358" r="11" fill="rgba(251,191,36,0.16)" stroke="#fbbf24" stroke-width="2"></circle>
+                        <circle id="pulseD" cx="577.8" cy="422" r="11" fill="rgba(52,211,153,0.16)" stroke="#34d399" stroke-width="2"></circle>
                     </svg>
                 </div>
 
                 <div class="info-grid">
                     <div class="info-cell">
                         <div class="info-k">Вписанный угол</div>
-                        <div class="info-v">41°</div>
+                        <div class="info-v" id="infoInscribed">41°</div>
                     </div>
                     <div class="info-cell">
                         <div class="info-k">Дуга AB</div>
-                        <div class="info-v">82°</div>
+                        <div class="info-v" id="infoArc">82°</div>
                     </div>
                     <div class="info-cell">
                         <div class="info-k">∠AOD</div>
-                        <div class="info-v">98°</div>
+                        <div class="info-v" id="infoCentral">98°</div>
+                    </div>
+                </div>
+
+                <div class="footer-note" id="stepExplain" style="margin-top:12px; background: rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.22); color:#d8f3ff;">
+                    Шаг 1. Вписанный угол 41° опирается на дугу AB, значит дуга AB равна 82°.
+                </div>
+
+                <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
+                    <h3 style="color: var(--accent); margin-bottom: 10px;">🎲 Генератор похожих задач</h3>
+                    <p style="font-size:0.95rem; margin-bottom:12px;">Каждый раз строится задача того же типа: по вписанному углу нужно найти центральный угол к диаметрально противоположной точке.</p>
+                    <div class="btn-row" style="margin-bottom:12px;">
+                        <button id="genBtn" class="active">Сгенерировать</button>
+                        <button id="showAnswerBtn">Показать ответ</button>
+                        <button id="applyToModelBtn">Показать на модели</button>
+                    </div>
+                    <div class="problem-box" id="generatedTaskBox" style="margin:0 0 12px 0;">
+                        <p id="generatedTaskText" style="margin:0; color:var(--text);">Нажмите «Сгенерировать», чтобы получить похожую задачу.</p>
+                    </div>
+                    <div class="result-box" id="generatedAnswerBox" style="display:none; margin:0;">
+                        <h3 style="margin-bottom:8px;">Ответ к сгенерированной задаче</h3>
+                        <div class="math-block" id="generatedAnswerText" style="margin:0;">∠AOD = 0°</div>
                     </div>
                 </div>
 
@@ -475,18 +513,38 @@
 <script>
     const btnArc = document.getElementById('btnArc');
     const btnCentral = document.getElementById('btnCentral');
+    const btnInscribed = document.getElementById('btnInscribed');
+    const btnDiam = document.getElementById('btnDiam');
     const btnHint = document.getElementById('btnHint');
     const arcAB = document.getElementById('arcAB');
     const angleAOD = document.getElementById('angleAOD');
     const angleACB = document.getElementById('angleACB');
     const hintBox = document.getElementById('hintBox');
+    const diamAC = document.getElementById('diamAC');
+    const diamBD = document.getElementById('diamBD');
+    const labelArcAB = document.getElementById('labelArcAB');
+    const labelAOD = document.getElementById('labelAOD');
+    const labelACB = document.getElementById('labelACB');
+    const infoInscribed = document.getElementById('infoInscribed');
+    const infoArc = document.getElementById('infoArc');
+    const infoCentral = document.getElementById('infoCentral');
+    const stepExplain = document.getElementById('stepExplain');
+    const genBtn = document.getElementById('genBtn');
+    const showAnswerBtn = document.getElementById('showAnswerBtn');
+    const applyToModelBtn = document.getElementById('applyToModelBtn');
+    const generatedTaskText = document.getElementById('generatedTaskText');
+    const generatedAnswerBox = document.getElementById('generatedAnswerBox');
+    const generatedAnswerText = document.getElementById('generatedAnswerText');
 
     const O = { x: 350, y: 390 };
     const R = 230;
     const Aang = -90;
-    const Bang = 188;
-    const Dang = 8;
     const Cang = 90;
+    let currentInscribed = 41;
+    let currentArc = 82;
+    let currentCentral = 98;
+    let currentBang = 188;
+    let currentDang = 8;
 
     function pt(angleDeg, radius = R) {
         const a = angleDeg * Math.PI / 180;
@@ -517,31 +575,143 @@
     // Малая дуга AB: от -90 до -172 эквивалентно до 188 по короткому пути против часовой?
     // Для явной прорисовки задаём от 188 к 270+? Лучше напрямую через близкие углы: 188 -> 270 -> 360 -> 270?
     // Используем эквивалент A = 270, B = 188, малая дуга = 82 градусов.
-    arcAB.setAttribute('d', arcPath(O.x, O.y, R, 188, 270));
-    angleAOD.setAttribute('d', ringSectorPath(O.x, O.y, 95, -90, 8));
+    function updateGeometry(inscribedAngle) {
+        currentInscribed = inscribedAngle;
+        currentArc = inscribedAngle * 2;
+        currentCentral = 180 - currentArc;
+        currentBang = 270 - currentArc;
+        currentDang = (currentBang + 180) % 360;
 
-    const C = pt(Cang);
-    const c1 = { x: C.x, y: C.y };
-    const pCA = { x: C.x, y: C.y - 66 };
-    const pCB = { x: C.x - 44, y: C.y - 50 };
-    angleACB.setAttribute('d', `M ${c1.x} ${c1.y} L ${pCA.x} ${pCA.y} A 66 66 0 0 0 ${pCB.x} ${pCB.y} Z`);
+        const B = pt(currentBang);
+        const D = pt(currentDang);
+        const C = pt(Cang);
+
+        document.getElementById('diamBD').setAttribute('x1', B.x.toFixed(1));
+        document.getElementById('diamBD').setAttribute('y1', B.y.toFixed(1));
+        document.getElementById('diamBD').setAttribute('x2', D.x.toFixed(1));
+        document.getElementById('diamBD').setAttribute('y2', D.y.toFixed(1));
+
+        document.getElementById('OD').setAttribute('x2', D.x.toFixed(1));
+        document.getElementById('OD').setAttribute('y2', D.y.toFixed(1));
+        document.getElementById('CB').setAttribute('x2', B.x.toFixed(1));
+        document.getElementById('CB').setAttribute('y2', B.y.toFixed(1));
+
+        document.getElementById('pulseB').setAttribute('cx', B.x.toFixed(1));
+        document.getElementById('pulseB').setAttribute('cy', B.y.toFixed(1));
+        document.getElementById('pulseD').setAttribute('cx', D.x.toFixed(1));
+        document.getElementById('pulseD').setAttribute('cy', D.y.toFixed(1));
+
+        const bDot = document.querySelectorAll('circle')[2];
+        const dDot = document.querySelectorAll('circle')[4];
+        bDot.setAttribute('cx', B.x.toFixed(1));
+        bDot.setAttribute('cy', B.y.toFixed(1));
+        dDot.setAttribute('cx', D.x.toFixed(1));
+        dDot.setAttribute('cy', D.y.toFixed(1));
+
+        const bLabel = document.querySelector('text:nth-of-type(2)');
+        const dLabel = document.querySelector('text:nth-of-type(4)');
+        bLabel.setAttribute('x', (B.x - 27).toFixed(1));
+        bLabel.setAttribute('y', (B.y - 6).toFixed(1));
+        dLabel.setAttribute('x', (D.x + 12).toFixed(1));
+        dLabel.setAttribute('y', (D.y + 8).toFixed(1));
+
+        arcAB.setAttribute('d', arcPath(O.x, O.y, R, currentBang, 270));
+        angleAOD.setAttribute('d', ringSectorPath(O.x, O.y, 95, -90, currentDang));
+
+        const pCA = { x: C.x, y: C.y - 66 };
+        const rayToB = { x: C.x + 66 * Math.cos((currentBang + 180) * Math.PI / 180), y: C.y + 66 * Math.sin((currentBang + 180) * Math.PI / 180) };
+        const diff = ((currentBang + 180) - (-90) + 360) % 360;
+        const largeArc = diff > 180 ? 1 : 0;
+        angleACB.setAttribute('d', `M ${C.x} ${C.y} L ${pCA.x} ${pCA.y} A 66 66 0 ${largeArc} 0 ${rayToB.x} ${rayToB.y} Z`);
+
+        labelArcAB.textContent = `дуга AB = ${currentArc}°`;
+        labelArcAB.setAttribute('x', ((B.x + 350) / 2 - 30).toFixed(1));
+        labelArcAB.setAttribute('y', (Math.min(B.y, 160) - 35).toFixed(1));
+
+        labelAOD.textContent = `${currentCentral}°`;
+        labelACB.textContent = `${currentInscribed}°`;
+        labelAOD.setAttribute('x', (410 + (currentDang / 8)).toFixed(1));
+        labelAOD.setAttribute('y', '300');
+        labelACB.setAttribute('x', (C.x - 110).toFixed(1));
+        labelACB.setAttribute('y', (C.y - 55).toFixed(1));
+
+        infoInscribed.textContent = `${currentInscribed}°`;
+        infoArc.textContent = `${currentArc}°`;
+        infoCentral.textContent = `${currentCentral}°`;
+
+        stepExplain.textContent = `Шаг 1. Вписанный угол ${currentInscribed}° опирается на дугу AB, значит дуга AB равна ${currentArc}°. Шаг 2. Так как BD — диаметр, луч OD противоположен лучу OB. Поэтому ∠AOD = 180° − ${currentArc}° = ${currentCentral}°.`;
+    }
+
+    updateGeometry(41);
 
     btnArc.addEventListener('click', () => {
         const on = arcAB.style.opacity !== '0';
         arcAB.style.opacity = on ? '0' : '1';
+        labelArcAB.style.opacity = on ? '0' : '1';
         btnArc.classList.toggle('active', !on);
     });
 
     btnCentral.addEventListener('click', () => {
         const on = angleAOD.style.opacity !== '0';
         angleAOD.style.opacity = on ? '0' : '1';
+        labelAOD.style.opacity = on ? '0' : '1';
         btnCentral.classList.toggle('active', !on);
+    });
+
+    btnInscribed.addEventListener('click', () => {
+        const on = angleACB.style.opacity !== '0';
+        angleACB.style.opacity = on ? '0' : '1';
+        labelACB.style.opacity = on ? '0' : '1';
+        btnInscribed.classList.toggle('active', !on);
+    });
+
+    btnDiam.addEventListener('click', () => {
+        const on = diamAC.style.opacity !== '0';
+        diamAC.style.opacity = on ? '0' : '1';
+        diamBD.style.opacity = on ? '0' : '1';
+        btnDiam.classList.toggle('active', !on);
     });
 
     btnHint.addEventListener('click', () => {
         const shown = hintBox.style.display === 'block';
         hintBox.style.display = shown ? 'none' : 'block';
         btnHint.classList.toggle('active', !shown);
+    });
+
+    let generated = null;
+
+    function generateSimilarTask() {
+        const variants = [18, 22, 27, 31, 34, 38, 43, 47, 52, 59, 63, 68, 71, 76, 84];
+        const inscribed = variants[Math.floor(Math.random() * variants.length)];
+        const arc = inscribed * 2;
+        const central = 180 - arc;
+        generated = { inscribed, arc, central };
+        generatedTaskText.textContent = `Отрезки AC и BD — диаметры окружности с центром O. Угол ACB равен ${inscribed}°. Найдите величину угла AOD. Ответ дайте в градусах.`;
+        generatedAnswerText.textContent = `∠AOD = 180° − 2·${inscribed}° = ${central}°`;
+        generatedAnswerBox.style.display = 'none';
+        showAnswerBtn.classList.remove('active');
+    }
+
+    genBtn.addEventListener('click', () => {
+        generateSimilarTask();
+        genBtn.classList.add('active');
+        setTimeout(() => genBtn.classList.remove('active'), 250);
+    });
+
+    showAnswerBtn.addEventListener('click', () => {
+        if (!generated) generateSimilarTask();
+        const shown = generatedAnswerBox.style.display === 'block';
+        generatedAnswerBox.style.display = shown ? 'none' : 'block';
+        showAnswerBtn.classList.toggle('active', !shown);
+    });
+
+    applyToModelBtn.addEventListener('click', () => {
+        if (!generated) generateSimilarTask();
+        updateGeometry(generated.inscribed);
+        hintBox.style.display = 'block';
+        btnHint.classList.add('active');
+        applyToModelBtn.classList.add('active');
+        setTimeout(() => applyToModelBtn.classList.remove('active'), 350);
     });
 </script>
 </body>

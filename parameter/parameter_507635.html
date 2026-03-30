@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Наглядная математика с генерацией — задача с параметром</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --panel:#121936;
+            --panel2:#0f1530;
+            --text:#edf2ff;
+            --muted:#aeb8d8;
+            --accent:#8fb3ff;
+            --accent2:#7ef0d2;
+            --warn:#ffd27a;
+            --danger:#ff8f8f;
+            --ok:#8fffb4;
+            --line:#2b3568;
+            --shadow:0 18px 50px rgba(0,0,0,.35);
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:radial-gradient(circle at top,#17214b 0%,#0b1020 45%,#070b16 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+        body{line-height:1.6}
+        .wrap{max-width:1500px;margin:0 auto;padding:28px}
+        h1,h2,h3{line-height:1.2;margin:0 0 14px}
+        h1{font-size:clamp(28px,4vw,44px)}
+        h2{font-size:clamp(22px,3vw,30px);margin-top:28px}
+        h3{font-size:20px;margin-top:20px}
+        .lead{font-size:18px;color:#d8e2ff}
+        .grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr);gap:22px;align-items:start}
+        .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));border:1px solid rgba(173,191,255,.14);border-radius:24px;box-shadow:var(--shadow)}
+        .left{padding:26px 28px}
+        .sticky{position:sticky;top:16px;padding:18px;background:linear-gradient(180deg,rgba(27,39,82,.86),rgba(11,16,32,.95));backdrop-filter:blur(8px)}
+        .eq{font-family:"Times New Roman",Georgia,serif;font-size:30px;overflow:auto;padding:16px 18px;background:#0d1328;border-radius:18px;border:1px solid rgba(255,255,255,.08);margin:18px 0}
+        .muted{color:var(--muted)}
+        .step{padding:16px 18px;border-left:3px solid var(--accent);background:rgba(143,179,255,.07);border-radius:0 18px 18px 0;margin:14px 0}
+        .good{color:var(--ok);font-weight:700}
+        .warn{color:var(--warn);font-weight:700}
+        .danger{color:var(--danger);font-weight:700}
+        .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
+        .pill{padding:8px 12px;border-radius:999px;background:#151d3c;border:1px solid rgba(255,255,255,.08);color:#dbe5ff}
+        .final{font-size:26px;font-weight:800;padding:16px 18px;border-radius:18px;background:linear-gradient(90deg,rgba(126,240,210,.14),rgba(143,179,255,.14));border:1px solid rgba(255,255,255,.1);margin-top:20px}
+        .controls,.mini-controls{display:grid;gap:12px}
+        .controls{padding:14px 14px 10px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+        .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+        label{font-weight:650}
+        input[type="range"]{width:100%}
+        button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,#24305e,#18224a);color:white;padding:10px 14px;border-radius:14px;font-weight:700}
+        button:hover{filter:brightness(1.08)}
+        .ghost{background:#121936}
+        .svgbox{margin-top:14px;background:#091022;border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:10px}
+        svg{width:100%;height:auto;display:block;touch-action:none}
+        .readout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+        .readout .tile{padding:12px;border-radius:16px;background:#121936;border:1px solid rgba(255,255,255,.08)}
+        .k{font-size:13px;color:var(--muted)}
+        .v{font-size:18px;font-weight:800}
+        .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+        .legend span{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#dbe5ff}
+        .dot{width:14px;height:14px;border-radius:50%}
+        .toggle-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+        .toggle{padding:10px 12px;border-radius:14px;background:#0f1734;border:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center}
+        .toggle input{transform:scale(1.15)}
+        .hint{padding:14px 16px;background:rgba(126,240,210,.08);border:1px solid rgba(126,240,210,.18);border-radius:18px}
+        .gen{margin-top:22px;padding:18px;border-radius:22px;background:linear-gradient(180deg,rgba(143,179,255,.08),rgba(126,240,210,.06));border:1px solid rgba(255,255,255,.08)}
+        .taskbox{padding:16px;border-radius:18px;background:#0d1328;border:1px solid rgba(255,255,255,.08);white-space:pre-wrap}
+        .foot{margin-top:30px;color:var(--muted);font-size:14px}
+        .small{font-size:14px}
+        code{background:#0d1328;padding:2px 6px;border-radius:8px}
+        @media (max-width:1100px){.grid{grid-template-columns:1fr}.sticky{position:relative;top:auto}}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="grid">
+        <section class="card left">
+            <h1>Наглядная математика с генерацией</h1>
+            <p class="lead">Задача: найти все значения параметра <b>a</b>, при которых система имеет <b>ровно одно</b> решение.</p>
+            <div class="eq" style="display:flex;align-items:flex-start;gap:12px">
+                <div style="font-size:44px;line-height:.92;transform:translateY(2px)">⎧<br>⎨<br>⎩</div>
+                <div style="font-size:30px;line-height:1.55">
+                    <div>|x + 2y + 1| ≤ 11,</div>
+                    <div>(x − a)² + (y − 2a)² = 2 + a</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <b>Геометрический смысл.</b><br>
+                Неравенство <code>|x+2y+1| ≤ 11</code> задаёт <b>полосу</b> между прямыми
+                <code>x+2y=10</code> и <code>x+2y=−12</code>.<br>
+                Уравнение <code>(x−a)² + (y−2a)² = 2+a</code> задаёт окружность с центром
+                <code>C(a,2a)</code> и радиусом <code>r = √(2+a)</code>.
+            </div>
+
+            <h2>1. Когда окружность вообще существует?</h2>
+            <div class="step">
+                Нужно, чтобы <code>2+a ≥ 0</code>, то есть <code>a ≥ −2</code>.
+            </div>
+
+            <h2>2. Удобно смотреть не на точки, а на величину <code>x+2y</code></h2>
+            <div class="step">
+                Для центра окружности <code>C(a,2a)</code> имеем
+                <div class="eq">x_C + 2y_C = a + 2·(2a) = 5a.</div>
+                Полоса задаётся условием
+                <div class="eq">−12 ≤ x+2y ≤ 10.</div>
+                Значит, окружность должна пересекать эту полосу ровно в одной точке.
+            </div>
+
+            <h2>3. Что значит «ровно одна точка»?</h2>
+            <div class="step">
+                Если окружность заходит внутрь полосы хотя бы чуть-чуть, то обычно получается не одна точка, а целая дуга.
+                Поэтому для невырожденной окружности ровно одна общая точка возможна только тогда, когда окружность <b>касается</b> одной из граничных прямых полосы и вся остальная окружность лежит вне полосы.
+            </div>
+
+            <h2>4. Проверим нижнюю границу <code>x+2y=−12</code></h2>
+            <div class="step">
+                Чтобы окружность касалась этой прямой «снаружи слева», надо было бы иметь
+                <div class="eq">5a + √(5(2+a)) = −12.</div>
+                Но при <code>a ≥ −2</code> левая часть не может дать нужную конфигурацию: центр уже не уходит настолько далеко влево, чтобы вся окружность лежала вне полосы и касалась только линии <code>x+2y=−12</code>.
+                Эта ветка решений не даёт.
+            </div>
+
+            <h2>5. Проверим верхнюю границу <code>x+2y=10</code></h2>
+            <div class="step">
+                Чтобы окружность была справа от полосы и касалась её в одной точке, нужно:
+                <div class="eq">5a − √(5(2+a)) = 10.</div>
+                Переносим корень:
+                <div class="eq">√(5a+10) = 5a − 10, &nbsp; поэтому &nbsp; a ≥ 2.</div>
+                Возводим в квадрат:
+                <div class="eq">5a + 10 = (5a − 10)²</div>
+                <div class="eq">5a + 10 = 25a² − 100a + 100</div>
+                <div class="eq">25a² − 105a + 90 = 0</div>
+                <div class="eq">5a² − 21a + 18 = 0</div>
+                <div class="eq">D = 21² − 4·5·18 = 81</div>
+                <div class="eq">a = (21 ± 9)/10.</div>
+                Получаем два корня:
+                <div class="eq">a = 3, &nbsp; a = 6/5.</div>
+                Но условие <code>a ≥ 2</code> оставляет только
+                <div class="eq"><b>a = 3</b>.</div>
+            </div>
+
+            <h2>6. Отдельно проверим вырожденный случай</h2>
+            <div class="step">
+                При <code>a = −2</code> радиус равен нулю, окружность превращается в единственную точку
+                <code>(−2,−4)</code>.
+                Проверка полосы:
+                <div class="eq">|−2 + 2·(−4) + 1| = |−9| = 9 ≤ 11.</div>
+                Значит, система действительно имеет ровно одно решение.
+            </div>
+
+            <div class="final">Ответ: <span class="good">a = −2</span> и <span class="good">a = 3</span>.</div>
+
+            <div class="hint" style="margin-top:18px">
+                Короткая идея: нужно, чтобы проекция окружности на направление нормали к прямым <code>x+2y=const</code> пересекла отрезок <code>[−12,10]</code> ровно в одной точке. Это даёт либо вырождение <code>a=−2</code>, либо касание снаружи при <code>a=3</code>.
+            </div>
+
+            <div class="gen">
+                <h2 style="margin-top:0">Генератор похожих задач</h2>
+                <p class="muted">Ниже можно сгенерировать задачу того же типа: полоса между параллельными прямыми и окружность с параметром. Генератор сразу показывает ответ.</p>
+                <div class="row">
+                    <button id="genBtn">Сгенерировать похожую задачу</button>
+                    <button id="showAnsBtn" class="ghost">Показать / скрыть ответ</button>
+                </div>
+                <div id="generatedTask" class="taskbox" style="margin-top:14px">Нажмите кнопку, чтобы получить новую задачу.</div>
+                <div id="generatedAnswer" class="taskbox" style="margin-top:12px;display:none"></div>
+            </div>
+
+            <div class="foot">Страница полностью автономная: весь CSS и JavaScript встроены, рисунок интерактивный, масштаб можно менять ползунком, кнопками и колёсиком мыши прямо на чертеже.</div>
+        </section>
+
+        <aside class="card sticky">
+            <h2 style="margin-top:4px">Интерактивная модель</h2>
+            <p class="muted small">Двигайте параметр <b>a</b> и следите, как окружность пересекает полосу. Справа сразу видно, сколько решений у системы.</p>
+
+            <div class="controls">
+                <div>
+                    <div class="row" style="justify-content:space-between">
+                        <label for="aRange">Параметр a</label>
+                        <div class="pill"><span id="aValue">3.00</span></div>
+                    </div>
+                    <input id="aRange" type="range" min="-2" max="6" step="0.01" value="3" />
+                    <div class="pillrow">
+                        <button data-set="-2">a = −2</button>
+                        <button data-set="3">a = 3</button>
+                        <button data-set="1.2">a = 6/5</button>
+                        <button data-set="0">a = 0</button>
+                    </div>
+                </div>
+
+                <div class="mini-controls">
+                    <div class="row" style="justify-content:space-between">
+                        <label for="zoomRange">Масштаб</label>
+                        <div class="pill"><span id="zoomValue">1.00×</span></div>
+                    </div>
+                    <input id="zoomRange" type="range" min="0.55" max="2.5" step="0.01" value="1" />
+                    <div class="row">
+                        <button id="zoomOut">−</button>
+                        <button id="zoomIn">+</button>
+                        <button id="zoomReset" class="ghost">Сброс</button>
+                    </div>
+                </div>
+
+                <div class="toggle-grid">
+                    <label class="toggle">Показать полосу <input id="showBand" type="checkbox" checked></label>
+                    <label class="toggle">Границы полосы <input id="showBounds" type="checkbox" checked></label>
+                    <label class="toggle">Центр окружности <input id="showCenter" type="checkbox" checked></label>
+                    <label class="toggle">Подсветка касания <input id="showTouch" type="checkbox" checked></label>
+                </div>
+            </div>
+
+            <div class="readout">
+                <div class="tile"><div class="k">Центр</div><div class="v" id="centerRead">(3.00; 6.00)</div></div>
+                <div class="tile"><div class="k">Радиус</div><div class="v" id="radiusRead">2.236</div></div>
+                <div class="tile"><div class="k">Значение 5a</div><div class="v" id="projRead">15.00</div></div>
+                <div class="tile"><div class="k">Число решений</div><div class="v" id="countRead">1</div></div>
+            </div>
+
+            <div id="verdict" class="hint" style="margin-top:12px"></div>
+
+            <div class="legend">
+                <span><i class="dot" style="background:#5b6ecb"></i> полоса</span>
+                <span><i class="dot" style="background:#ffd27a"></i> окружность</span>
+                <span><i class="dot" style="background:#7ef0d2"></i> точки решения</span>
+            </div>
+
+            <div class="svgbox">
+                <svg id="plot" viewBox="0 0 760 760" aria-label="График полосы и окружности">
+                    <defs>
+                        <clipPath id="clipArea"><rect x="0" y="0" width="760" height="760" rx="20" ry="20"></rect></clipPath>
+                    </defs>
+                    <rect x="0" y="0" width="760" height="760" rx="20" ry="20" fill="#07101f"></rect>
+                    <g id="viewport" clip-path="url(#clipArea)"></g>
+                </svg>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const W=760, H=760;
+        const baseScale=28;
+        const vp=document.getElementById('viewport');
+        const aRange=document.getElementById('aRange');
+        const aValue=document.getElementById('aValue');
+        const zoomRange=document.getElementById('zoomRange');
+        const zoomValue=document.getElementById('zoomValue');
+        const verdict=document.getElementById('verdict');
+        const centerRead=document.getElementById('centerRead');
+        const radiusRead=document.getElementById('radiusRead');
+        const projRead=document.getElementById('projRead');
+        const countRead=document.getElementById('countRead');
+        const toggles={
+            band:document.getElementById('showBand'),
+            bounds:document.getElementById('showBounds'),
+            center:document.getElementById('showCenter'),
+            touch:document.getElementById('showTouch')
+        };
+
+        let zoom=1;
+        const fmt=n => (Math.abs(n)<1e-9?0:n).toFixed(2);
+
+        function worldToScreen(x,y){
+            const s=baseScale*zoom;
+            return [W/2 + x*s, H/2 - y*s];
+        }
+        function lineSegmentForK(k){
+            const pts=[];
+            const xmin=-(W/2)/(baseScale*zoom)-1, xmax=(W/2)/(baseScale*zoom)+1;
+            pts.push([xmin,(k-xmin)/2]);
+            pts.push([xmax,(k-xmax)/2]);
+            return pts.map(([x,y])=>worldToScreen(x,y));
+        }
+        function bandPolygon(k1,k2){
+            const xmin=-(W/2)/(baseScale*zoom)-1, xmax=(W/2)/(baseScale*zoom)+1;
+            const p1=[xmin,(k1-xmin)/2], p2=[xmax,(k1-xmax)/2], p3=[xmax,(k2-xmax)/2], p4=[xmin,(k2-xmin)/2];
+            return [p1,p2,p3,p4].map(([x,y])=>worldToScreen(x,y));
+        }
+
+        function circleLineIntersections(a){
+            const cx=a, cy=2*a, r2=2+a;
+            if(r2<0) return [];
+            const r=Math.sqrt(r2);
+            const lines=[10,-12];
+            const eps=1e-9;
+            const pts=[];
+            for(const k of lines){
+                const d=Math.abs(cx+2*cy-k)/Math.sqrt(5);
+                if(d>r+1e-9) continue;
+                const footFactor=(k-(cx+2*cy))/5;
+                const fx=cx+footFactor;
+                const fy=cy+2*footFactor;
+                const along=Math.sqrt(Math.max(0,r*r-d*d))/Math.sqrt(5);
+                const dx=2*along, dy=-along;
+                if(Math.abs(r-d)<1e-8){
+                    pts.push({x:fx,y:fy,k,kind:'tangent'});
+                }else{
+                    pts.push({x:fx+dx,y:fy+dy,k,kind:'secant'});
+                    pts.push({x:fx-dx,y:fy-dy,k,kind:'secant'});
+                }
+            }
+            const filtered=[];
+            for(const p of pts){
+                if(p.x+2*p.y<=10+eps && p.x+2*p.y>=-12-eps){
+                    if(!filtered.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<1e-7)) filtered.push(p);
+                }
+            }
+            if(r<1e-10){
+                const x=cx,y=cy;
+                if(x+2*y<=10+eps && x+2*y>=-12-eps) return [{x,y,k:null,kind:'point'}];
+                return [];
+            }
+            return filtered;
+        }
+
+        function qualitative(a){
+            const r2=2+a;
+            if(r2<0) return {count:0,text:'Окружность не существует, потому что 2 + a < 0.', cls:'danger'};
+            const pts=circleLineIntersections(a);
+            if(r2<1e-10){
+                return pts.length===1
+                ? {count:1,text:'Окружность выродилась в одну точку, и эта точка лежит в полосе.', cls:'good'}
+                : {count:0,text:'Окружность выродилась в одну точку, но эта точка вне полосы.', cls:'danger'};
+            }
+            const [low,high]=[5*a-Math.sqrt(5*r2),5*a+Math.sqrt(5*r2)];
+            const overlapLeft=Math.max(low,-12), overlapRight=Math.min(high,10);
+            if(overlapRight<overlapLeft-1e-9) return {count:0,text:'Окружность целиком вне полосы: решений нет.', cls:'danger'};
+            if(Math.abs(overlapLeft-overlapRight)<1e-8 && pts.length===1) return {count:1,text:'Полоса касается окружности ровно в одной точке: система имеет единственное решение.', cls:'good'};
+            return {count:pts.length>0?'>1':'0',text:'Окружность заходит в полосу по дуге или в двух граничных точках, поэтому решений больше одного.', cls:'warn'};
+        }
+
+        function render(){
+            const a=+aRange.value;
+            zoom=+zoomRange.value;
+            aValue.textContent=(Math.abs(a-1.2)<0.0001?'1.20 (= 6/5)':fmt(a));
+            zoomValue.textContent=zoom.toFixed(2)+'×';
+
+            const cx=a, cy=2*a, r2=2+a, r=r2>=0?Math.sqrt(r2):0;
+            const pts=circleLineIntersections(a);
+            const q=qualitative(a);
+
+            centerRead.textContent=`(${fmt(cx)}; ${fmt(cy)})`;
+            radiusRead.textContent=r2>=0?r.toFixed(3):'не сущ.';
+            projRead.textContent=fmt(5*a);
+            countRead.textContent=String(q.count);
+            verdict.innerHTML=`<b>${q.cls==='good'?'Вывод':q.cls==='warn'?'Наблюдение':'Сейчас'}</b>: <span class="${q.cls}">${q.text}</span>`;
+
+            let html='';
+
+            // сетка
+            for(let x=-20;x<=20;x++){
+                const [x1,y1]=worldToScreen(x,-20), [x2,y2]=worldToScreen(x,20);
+                html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+            }
+            for(let y=-20;y<=20;y++){
+                const [x1,y1]=worldToScreen(-20,y), [x2,y2]=worldToScreen(20,y);
+                html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+            }
+
+            // оси
+            const [ox1,oy1]=worldToScreen(-20,0), [ox2,oy2]=worldToScreen(20,0);
+            const [vx1,vy1]=worldToScreen(0,-20), [vx2,vy2]=worldToScreen(0,20);
+            html += `<line x1="${ox1}" y1="${oy1}" x2="${ox2}" y2="${oy2}" stroke="rgba(255,255,255,.28)" stroke-width="2"/>`;
+            html += `<line x1="${vx1}" y1="${vy1}" x2="${vx2}" y2="${vy2}" stroke="rgba(255,255,255,.28)" stroke-width="2"/>`;
+
+            if(toggles.band.checked){
+                const poly=bandPolygon(10,-12).map(p=>p.join(',')).join(' ');
+                html += `<polygon points="${poly}" fill="rgba(91,110,203,.28)" stroke="none"/>`;
+            }
+            if(toggles.bounds.checked){
+                for(const k of [10,-12]){
+                    const seg=lineSegmentForK(k);
+                    html += `<line x1="${seg[0][0]}" y1="${seg[0][1]}" x2="${seg[1][0]}" y2="${seg[1][1]}" stroke="rgba(173,191,255,.92)" stroke-width="3" stroke-dasharray="10 8"/>`;
+                }
+            }
+
+            if(r2>=0){
+                const [sx,sy]=worldToScreen(cx,cy);
+                html += `<circle cx="${sx}" cy="${sy}" r="${baseScale*zoom*r}" fill="rgba(255,210,122,.12)" stroke="#ffd27a" stroke-width="4"/>`;
+                if(toggles.center.checked){
+                    html += `<circle cx="${sx}" cy="${sy}" r="7" fill="#7ef0d2"/>`;
+                    html += `<text x="${sx+12}" y="${sy-10}" fill="#dffef5" font-size="18" font-weight="700">C(a, 2a)</text>`;
+                }
+            }
+
+            if(toggles.touch.checked && pts.length===1){
+                const p=pts[0];
+                const [px,py]=worldToScreen(p.x,p.y);
+                html += `<circle cx="${px}" cy="${py}" r="14" fill="rgba(126,240,210,.15)" stroke="#7ef0d2" stroke-width="3"/>`;
+            }
+
+            for(const p of pts){
+                const [px,py]=worldToScreen(p.x,p.y);
+                html += `<circle cx="${px}" cy="${py}" r="8" fill="#7ef0d2" stroke="#ffffff" stroke-width="2"/>`;
+            }
+
+            html += `<text x="18" y="30" fill="#dbe5ff" font-size="20">Полоса: −12 ≤ x + 2y ≤ 10</text>`;
+            html += `<text x="18" y="56" fill="#dbe5ff" font-size="20">Окружность: (x − a)² + (y − 2a)² = 2 + a</text>`;
+            html += `<text x="18" y="84" fill="#aeb8d8" font-size="18">Колёсико мыши тоже меняет масштаб</text>`;
+
+            vp.innerHTML=html;
+        }
+
+        function setA(v){ aRange.value=v; render(); }
+
+        aRange.addEventListener('input', render);
+        zoomRange.addEventListener('input', render);
+        document.getElementById('zoomIn').addEventListener('click',()=>{ zoomRange.value=Math.min(2.5,+zoomRange.value+0.1); render(); });
+        document.getElementById('zoomOut').addEventListener('click',()=>{ zoomRange.value=Math.max(0.55,+zoomRange.value-0.1); render(); });
+        document.getElementById('zoomReset').addEventListener('click',()=>{ zoomRange.value=1; render(); });
+        document.querySelectorAll('[data-set]').forEach(btn=>btn.addEventListener('click',()=>setA(btn.dataset.set)));
+        Object.values(toggles).forEach(el=>el.addEventListener('change', render));
+        document.getElementById('plot').addEventListener('wheel',(e)=>{
+            e.preventDefault();
+            const next=Math.max(0.55,Math.min(2.5,+zoomRange.value + (e.deltaY<0?0.06:-0.06)));
+            zoomRange.value=next;
+            render();
+        },{passive:false});
+
+        // Генератор похожих задач
+        const taskEl=document.getElementById('generatedTask');
+        const ansEl=document.getElementById('generatedAnswer');
+        document.getElementById('showAnsBtn').addEventListener('click',()=>{
+            ansEl.style.display=ansEl.style.display==='none'?'block':'none';
+        });
+
+        function solveGenerated(alpha,beta,p,q,rShift){
+            // Полоса: |x + p y + q| <= beta  =>  -beta-q <= x+p y <= beta-q
+            // Окружность: (x-a)^2 + (y-rShift*a)^2 = alpha + a
+            // Ответ ищем численно по той же геометрии: вырождение + внешние касания
+            const low=-beta-q, high=beta-q;
+            const n2=1+p*p;
+            const res=[];
+            const eps=1e-9;
+            function addIf(a){ if(a>=-alpha-eps && !res.some(v=>Math.abs(v-a)<1e-7)) res.push(a); }
+            // вырождение
+            const a0=-alpha;
+            const t0=a0 + p*(rShift*a0);
+            if(t0>=low-eps && t0<=high+eps) addIf(a0);
+            // касание справа: t_center - sqrt(n2)*r = high
+            // t_center = a(1+p*rShift)
+            const m=1+p*rShift;
+            // n2(alpha+a) = (m a - high)^2 with condition ma-high>=0
+            const A=m*m;
+            const B=-(2*m*high+n2);
+            const C=high*high-n2*alpha;
+            const D=B*B-4*A*C;
+            if(Math.abs(A)>1e-12 && D>=-1e-9){
+                const s=Math.sqrt(Math.max(0,D));
+                for(const a of [(-B+s)/(2*A),(-B-s)/(2*A)]) if(m*a-high>=-1e-9) addIf(a);
+            }
+            // касание слева: t_center + sqrt(n2)*r = low with condition low-ma>=0
+            const A2=m*m;
+            const B2=-(2*m*low+n2);
+            const C2=low*low-n2*alpha;
+            const D2=B2*B2-4*A2*C2;
+            if(Math.abs(A2)>1e-12 && D2>=-1e-9){
+                const s=Math.sqrt(Math.max(0,D2));
+                for(const a of [(-B2+s)/(2*A2),(-B2-s)/(2*A2)]) if(low-m*a>=-1e-9) addIf(a);
+            }
+            return res.sort((x,y)=>x-y);
+        }
+
+        function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+        function fracStr(v){
+            const candidates=[[1.2,'6/5'],[1.5,'3/2'],[2.5,'5/2'],[0.5,'1/2'],[0.8,'4/5']];
+            for(const [num,s] of candidates) if(Math.abs(v-num)<1e-9) return s;
+            if(Math.abs(v-Math.round(v))<1e-9) return String(Math.round(v));
+            return v.toFixed(2);
+        }
+        document.getElementById('genBtn').addEventListener('click',()=>{
+            const alpha=rand([1,2,3]);
+            const beta=rand([7,8,9,10,11]);
+            const p=2;
+            const q=rand([-1,0,1,2]);
+            const rShift=rand([1,2,3]);
+            const answers=solveGenerated(alpha,beta,p,q,rShift);
+            taskEl.textContent=`Найдите все значения параметра a, при каждом из которых система\n\n|x + ${p===1?'':p}y ${q>=0?'+ '+q:'- '+Math.abs(q)}| ≤ ${beta},\n(x − a)² + (y − ${rShift===1?'a':rShift+'a'})² = ${alpha} + a\n\nимеет единственное решение.`;
+            ansEl.textContent = answers.length
+            ? `Ответ генератора: a = ${answers.map(fracStr).join(', ')}.`
+            : 'Ответ генератора: подходящих значений параметра нет.';
+            ansEl.style.display='block';
+        });
+
+        render();
+    })();
+</script>
+</body>
+</html>
