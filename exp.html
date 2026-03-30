@@ -19,12 +19,11 @@
             line-height: 1.45;
         }
 
-        /* Академический тёмный дизайн */
         .app-container {
             max-width: 1600px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 1fr;  /* ровно половина экрана */
+            grid-template-columns: 1fr 1fr;
             gap: 28px;
             align-items: start;
         }
@@ -40,7 +39,6 @@
             }
         }
 
-        /* Левая панель — решение */
         .solution-panel {
             background: #10161f;
             border-radius: 28px;
@@ -49,7 +47,6 @@
             border: 1px solid #2a3440;
         }
 
-        /* Правая панель — sticky canvas + контролы */
         .visual-panel {
             position: sticky;
             top: 20px;
@@ -73,14 +70,6 @@
             padding-left: 18px;
         }
 
-        h2 {
-            font-size: 1.3rem;
-            margin: 20px 0 12px 0;
-            color: #cbdffc;
-            border-bottom: 1px dashed #2e3a48;
-            padding-bottom: 6px;
-        }
-
         .idea-block, .given-block {
             background: #0e1722;
             border-left: 5px solid #f59e0b;
@@ -92,7 +81,6 @@
 
         .given-block {
             border-left-color: #3b82f6;
-            background: #0b1420;
         }
 
         .step {
@@ -100,13 +88,7 @@
             margin: 16px 0;
             padding: 12px 20px;
             border-radius: 18px;
-            transition: all 0.1s;
             border: 1px solid #232e3c;
-        }
-
-        .step-highlight {
-            border-left: 6px solid #f97316;
-            background: #1a2533;
         }
 
         .badge {
@@ -120,7 +102,7 @@
             color: #94a3b8;
         }
 
-        button, .ctrl-btn {
+        button {
             background: #1f2a3c;
             border: none;
             color: white;
@@ -137,7 +119,6 @@
         button:hover {
             background: #2f3e56;
             transform: scale(0.97);
-            border-color: #5b7a9c;
         }
 
         .zoom-controls {
@@ -223,25 +204,6 @@
             font-weight: bold;
         }
 
-        hr {
-            border-color: #253040;
-            margin: 18px 0;
-        }
-        select, .mode-select {
-            background: #1f2a3c;
-            color: white;
-            border-radius: 30px;
-            padding: 5px 12px;
-            border: 1px solid #3a4a60;
-        }
-        .current-condition {
-            font-size: 1rem;
-            background: #0e1622;
-            padding: 8px 12px;
-            border-radius: 28px;
-            text-align: center;
-            margin-top: 8px;
-        }
         @media print {
             body { background: white; color: black; }
             .visual-panel { position: relative; break-inside: avoid; }
@@ -251,26 +213,23 @@
 </head>
 <body>
 <div class="app-container">
-    <!-- ЛЕВАЯ ПАНЕЛЬ: РЕШЕНИЕ + ВСЕ БЛОКИ -->
-    <div class="solution-panel" id="solutionPanel">
+    <div class="solution-panel">
         <h1>📐 Задача 13.7</h1>
-        <div id="dynamicGivenBlock" class="given-block">
+        <div class="given-block">
             <strong>📌 Что дано</strong><br>
             Острый угол с вершиной A. Из точки P внутри угла опущены перпендикуляры PB и PC на стороны угла.<br>
             <strong id="conditionValue">∠CBP = 25°</strong>. Найти ∠CAP.
         </div>
 
-        <!-- Блок ИДЕЯ РЕШЕНИЯ (всегда виден) -->
         <div class="idea-block">
-            <strong>✨ Идея решения (ключевая стратегия)</strong><br>
-            1. Перпендикуляры создают два прямых угла: ∠ABP = 90°, ∠ACP = 90°.<br>
-            2. В четырёхугольнике ABPC сумма противоположных углов 180° → он вписанный, AP — диаметр окружности.<br>
-            3. Вписанные углы ∠CAP и ∠CBP опираются на одну дугу CP → они равны.<br>
-            4. Следовательно, ∠CAP = ∠CBP. Ответ всегда равен данному углу CBP.
+            <strong>✨ Идея решения</strong><br>
+            1. Перпендикуляры → ∠ABP = 90°, ∠ACP = 90°.<br>
+            2. Четырёхугольник ABPC вписан в окружность (сумма противоположных углов 180°), AP — диаметр.<br>
+            3. Вписанные углы ∠CAP и ∠CBP опираются на дугу CP ⇒ ∠CAP = ∠CBP.<br>
+            4. Ответ: ∠CAP = 25°.
         </div>
 
-        <!-- УРОВНИ ПОДРОБНОСТИ + ПОШАГОВЫЙ РЕЖИМ -->
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 10px 0 10px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 10px 0;">
             <div><span class="badge">📖 Детальность:</span>
                 <select id="detailSelect">
                     <option value="short">Кратко</option>
@@ -279,42 +238,36 @@
                 </select>
             </div>
             <div><span class="badge">🎬 Пошагово:</span>
-                <button id="stepModeBtn" style="background:#2c3e55;">Включить пошагово</button>
-                <button id="resetStepsBtn" style="background:#1f2a3c;">Показать всё</button>
+                <button id="stepModeBtn">Включить пошагово</button>
+                <button id="resetStepsBtn">Показать всё</button>
             </div>
         </div>
 
-        <!-- Динамическая область решения -->
         <div id="dynamicSolution"></div>
 
-        <!-- Блок проверки и вывода (встроен в решение, но дублируем для наглядности) -->
         <div id="verificationBlock" style="margin-top: 20px; background: #0f1822; border-radius: 20px; padding: 12px 16px;">
             <strong>✅ Проверка & вывод</strong><br>
             <span id="verificationText">На модели видно: ∠CAP = ∠CBP. Подстановка условия даёт ответ.</span>
         </div>
 
-        <!-- ТИПИЧНЫЕ ОШИБКИ -->
         <div class="error-list">
             <strong>⚠️ Типичные ошибки</strong>
             <ul style="margin-left: 20px; margin-top: 8px;">
                 <li>❌ Считать, что равенство углов зависит от положения P — неверно, оно всегда выполняется.</li>
                 <li>❌ Не заметить прямые углы и пропустить вписанность.</li>
                 <li>❌ Перепутать дуги, на которые опираются углы.</li>
-                <li>❌ Пытаться решать через теорему синусов без окружности.</li>
                 <li>❌ Не проверить, что точка P внутри острого угла.</li>
             </ul>
         </div>
 
-        <!-- ГЕНЕРАТОР ПОХОЖИХ ЗАДАЧ (меняет условие и модель) -->
-        <div class="generated-task" id="genTaskBlock">
+        <div class="generated-task">
             <strong>🌀 Генератор похожих задач</strong>
             <button id="generateTaskBtn">🎲 Сгенерировать новую задачу</button>
             <div id="generatedTaskContent" style="margin-top: 12px; font-size: 0.9rem;"></div>
         </div>
 
-        <!-- МИНИ-КВИЗ И САМОПРОВЕРКА -->
         <div class="quiz-area">
-            <strong>📌 Мини-квиз (проверь понимание)</strong>
+            <strong>📌 Мини-квиз</strong>
             <p style="margin: 8px 0;">Если ∠CBP = 40°, то ∠CAP = ?</p>
             <div>
                 <button id="quizAns1">40°</button>
@@ -325,18 +278,19 @@
             </div>
         </div>
         <div class="self-check">
-            <strong>✍️ Самопроверка (исходная задача)</strong>
+            <strong>✍️ Самопроверка</strong>
             <p>Введите ∠CAP: <input type="number" id="userAnswer" placeholder="градусы" style="width:80px; background:#1f2a3c; border:none; color:white; padding:5px; border-radius:20px;">
                 <button id="checkAnswerBtn">Проверить</button> <span id="checkFeedback"></span></p>
-            <p style="font-size:0.8rem">*Подсказка: ∠CAP = ∠CBP</p>
         </div>
         <footer>Наглядная геометрия • Вписанный четырёхугольник • Динамическая модель</footer>
     </div>
 
-    <!-- ПРАВАЯ ПАНЕЛЬ: ИНТЕРАКТИВНЫЙ ЧЕРТЕЖ + ЗУМ + ПОДСВЕТКА -->
     <div class="visual-panel">
         <h3 style="margin-top: 0;">⚡ Интерактивная модель</h3>
-        <div style="text-align: center; font-size:0.85rem;">🖱️ Перетащите точку <span style="color:#facc15;">P</span> мышью</div>
+        <div style="text-align: center; font-size:0.85rem;">
+            🖱️ Перетащите точку <span style="color:#facc15;">P</span> мышью<br>
+            <span style="font-size:0.75rem;">⇨ Для перемещения вида (панорамирование) тяните фон холста</span>
+        </div>
         <canvas id="mainCanvas" width="500" height="500" style="width:100%; height:auto; max-width:500px; aspect-ratio:1/1"></canvas>
 
         <div class="zoom-controls">
@@ -350,6 +304,7 @@
             <span style="border-bottom:2px solid #f97316;">∠CBP</span>
             <span style="border-bottom:2px solid #3b82f6;">∠CAP</span>
             <span style="border-bottom:2px solid #a78bfa;">◌ окружность (AP — диаметр)</span>
+            <span style="border-bottom:2px solid #ffd966;">— AP, BC</span>
         </div>
         <div class="info-angle" id="liveAngles">
             📐 ∠CBP = --° &nbsp;&nbsp;|&nbsp;&nbsp; ∠CAP = --°
@@ -364,25 +319,24 @@
 
 <script>
     (function() {
-        // ---------- ГЕОМЕТРИЯ ----------
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         let width = 500, height = 500;
         canvas.width = width; canvas.height = height;
 
-        const angleA_deg = 68;      // острый угол для наглядности
+        const angleA_deg = 68;
         const angleA_rad = angleA_deg * Math.PI / 180;
         const A = { x: 220, y: 400 };
         const dirAB = { x: 1, y: 0 };
         const dirAC = { x: Math.cos(angleA_rad), y: -Math.sin(angleA_rad) };
 
-        let P = { x: 315, y: 345 };   // начальное приближение (угол CBP ~25°)
+        let P = { x: 315, y: 345 };
         let scale = 1.0;
         let offsetX = 0, offsetY = 0;
-        let draggingP = false;
+        let dragMode = null; // 'pan' or 'point'
+        let dragStart = { x: 0, y: 0 };
         let highlightElem = null;
 
-        // ---- вспомогательные функции ----
         function projectOnRay(point, origin, dir) {
             const dx = point.x - origin.x, dy = point.y - origin.y;
             const dot = dx * dir.x + dy * dir.y;
@@ -429,14 +383,13 @@
             return (cross1 <= 0 && cross2 >= 0);
         }
 
-        // ---- отрисовка с зумом и подсветкой, включая окружность ----
         function draw() {
             ctx.clearRect(0, 0, width, height);
             ctx.save();
             ctx.translate(offsetX, offsetY);
             ctx.scale(scale, scale);
 
-            // ---- ОПИСАННАЯ ОКРУЖНОСТЬ (всегда) ----
+            // окружность
             const centerX = (A.x + P.x) / 2;
             const centerY = (A.y + P.y) / 2;
             const radius = Math.hypot(A.x - P.x, A.y - P.y) / 2;
@@ -463,11 +416,28 @@
             ctx.stroke();
 
             const { B, C } = getBC();
-            // перпендикуляры пунктиром
+
+            // ЛИНИИ AP и BC (добавлены)
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(P.x, P.y);
+            ctx.strokeStyle = '#ffd966';
+            ctx.lineWidth = 2.2/scale;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(B.x, B.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.strokeStyle = '#ffb347';
+            ctx.lineWidth = 2.2/scale;
+            ctx.stroke();
+
+            // перпендикуляры
             ctx.beginPath();
             ctx.setLineDash([6/scale, 8/scale]);
             ctx.moveTo(P.x, P.y);
             ctx.lineTo(B.x, B.y);
+            ctx.strokeStyle = '#9ca3af';
             ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(P.x, P.y);
@@ -490,8 +460,8 @@
             drawPoint(B, '#60a5fa', 'B');
             drawPoint(C, '#60a5fa', 'C');
 
+            // дуги углов
             const { angleCAP, angleCBP } = computeAngles();
-            // дуга ∠CAP
             const ACnorm = { x: dirAC.x, y: dirAC.y };
             const APdir = { x: P.x - A.x, y: P.y - A.y };
             if (Math.hypot(APdir.x, APdir.y) > 1e-4) {
@@ -506,7 +476,6 @@
                 ctx.lineWidth = 2.2/scale;
                 ctx.stroke();
             }
-            // дуга ∠CBP
             const BCvec = { x: C.x - B.x, y: C.y - B.y };
             const BPvec = { x: P.x - B.x, y: P.y - B.y };
             if (Math.hypot(BCvec.x, BCvec.y) > 1e-4 && Math.hypot(BPvec.x, BPvec.y) > 1e-4) {
@@ -529,7 +498,77 @@
             draw();
         }
 
-        // ---- установка угла CBP с помощью численной оптимизации ----
+        // ----- мышь: перемещение P или панорамирование -----
+        function getScreenCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const sx = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const sy = (e.clientY - rect.top) * (canvas.height / rect.height);
+            return { sx, sy };
+        }
+
+        function getWorldCoords(sx, sy) {
+            return { x: (sx - offsetX) / scale, y: (sy - offsetY) / scale };
+        }
+
+        function isNearP(world, threshold = 12) {
+            const screenDist = Math.hypot((world.x * scale + offsetX) - (P.x * scale + offsetX),
+                (world.y * scale + offsetY) - (P.y * scale + offsetY));
+            return screenDist < threshold;
+        }
+
+        let isDragging = false;
+        let dragStartWorld = null;
+
+        canvas.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const { sx, sy } = getScreenCoords(e);
+            const world = getWorldCoords(sx, sy);
+            if (isNearP(world, 12)) {
+                dragMode = 'point';
+                dragStartWorld = { x: P.x, y: P.y };
+            } else {
+                dragMode = 'pan';
+                dragStart = { x: sx, y: sy };
+            }
+            isDragging = true;
+            canvas.style.cursor = dragMode === 'pan' ? 'grabbing' : 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const { sx, sy } = getScreenCoords(e);
+            if (dragMode === 'pan') {
+                const dx = sx - dragStart.x;
+                const dy = sy - dragStart.y;
+                offsetX += dx;
+                offsetY += dy;
+                dragStart = { x: sx, y: sy };
+                refresh();
+            } else if (dragMode === 'point') {
+                const world = getWorldCoords(sx, sy);
+                if (isInsideAngle(world)) {
+                    P = { x: world.x, y: world.y };
+                    refresh();
+                    renderSolutionText();
+                }
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            dragMode = null;
+            canvas.style.cursor = 'grab';
+        });
+
+        // зум и кнопки
+        function initControls() {
+            document.getElementById('zoomInBtn').onclick = () => { scale = Math.min(2.5, scale + 0.1); document.getElementById('zoomSlider').value = scale; refresh(); };
+            document.getElementById('zoomOutBtn').onclick = () => { scale = Math.max(0.5, scale - 0.1); document.getElementById('zoomSlider').value = scale; refresh(); };
+            document.getElementById('resetZoomBtn').onclick = () => { scale = 1; offsetX = 0; offsetY = 0; refresh(); };
+            document.getElementById('zoomSlider').oninput = (e) => { scale = parseFloat(e.target.value); refresh(); };
+            canvas.addEventListener('wheel', (e) => { e.preventDefault(); scale = Math.min(2.5, Math.max(0.5, scale + (e.deltaY > 0 ? -0.08 : 0.08))); document.getElementById('zoomSlider').value = scale; refresh(); });
+        }
+
         function setAngleCBPto(targetDeg) {
             let bestP = { ...P };
             let bestDiff = Infinity;
@@ -571,18 +610,14 @@
             return computeAngles().angleCBP;
         }
 
-        // ---- обновление текста условия и решения ----
-        let currentConditionAngle = 25;   // исходный
+        let currentConditionAngle = 25;
         function updateConditionUI(angle) {
             document.getElementById('conditionValue').innerHTML = `∠CBP = ${angle}°`;
             currentConditionAngle = angle;
-            // обновляем блок проверки/вывода
             document.getElementById('verificationText').innerHTML = `По свойству вписанного четырёхугольника ∠CAP = ∠CBP = ${angle}°. Перетащите P на модели — равенство сохраняется. Ответ: ${angle}°.`;
-            // перерисовываем решение в зависимости от режима
             renderSolutionText();
         }
 
-        // ---- динамическое решение (уровень детализации, пошаговость) ----
         let stepModeActive = false;
         let currentStep = 0;
         const stepsData = [
@@ -613,13 +648,12 @@
                             <div class="step"><strong>3. Равенство:</strong> ∠CAP и ∠CBP опираются на дугу CP → ∠CAP = ∠CBP.</div>
                             <div class="step"><strong>4. Ответ:</strong> ∠CAP = ${currentConditionAngle}°.</div>`;
             } else {
-                mainText = `<div class="step"><strong>Подробное обоснование:</strong> PB⟂AB ⇒ ∠ABP=90°, PC⟂AC ⇒ ∠ACP=90°. Четырёхугольник ABPC имеет сумму углов при B и C = 180°, значит он вписанный, причём AP — диаметр (так как угол ABP прямой). В окружности вписанный угол ∠CAP опирается на хорду CP. Угол ∠CBP также опирается на ту же хорду CP. Следовательно, ∠CAP = ∠CBP. По условию ∠CBP = ${currentConditionAngle}°, поэтому ∠CAP = ${currentConditionAngle}°.</div>
+                mainText = `<div class="step"><strong>Подробное обоснование:</strong> PB⟂AB ⇒ ∠ABP=90°, PC⟂AC ⇒ ∠ACP=90°. Четырёхугольник ABPC имеет сумму углов при B и C = 180°, значит он вписанный, причём AP — диаметр. В окружности вписанный угол ∠CAP опирается на хорду CP. Угол ∠CBP также опирается на ту же хорду CP. Следовательно, ∠CAP = ∠CBP. По условию ∠CBP = ${currentConditionAngle}°, поэтому ∠CAP = ${currentConditionAngle}°.</div>
                             <div class="step"><strong>Проверка:</strong> При любом перемещении точки P на чертеже углы остаются равными, что подтверждает теорему. Других значений нет.</div>`;
             }
             document.getElementById('dynamicSolution').innerHTML = mainText;
         }
 
-        // ---- генератор похожих задач (меняет модель и условие) ----
         function generateNewTask() {
             let newAngle = Math.floor(Math.random() * (70 - 15 + 1) + 15);
             if (newAngle === currentConditionAngle) newAngle = (newAngle % 40) + 20;
@@ -635,46 +669,10 @@
             refresh();
         }
 
-        // ---- обработчики и инициализация ----
-        function setupCanvasDrag() {
-            const getMouseWorld = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-                const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-                return { x: (mx - offsetX) / scale, y: (my - offsetY) / scale };
-            };
-            canvas.addEventListener('mousedown', (e) => {
-                draggingP = true;
-                canvas.style.cursor = 'grabbing';
-                e.preventDefault();
-            });
-            window.addEventListener('mousemove', (e) => {
-                if (draggingP) {
-                    const world = getMouseWorld(e);
-                    if (isInsideAngle(world)) {
-                        P = world;
-                        refresh();
-                        const { angleCBP } = computeAngles();
-                        if (!stepModeActive) {
-                            // просто обновляем решение, но условие не меняем
-                        }
-                        renderSolutionText(); // обновляем числовые вставки
-                    }
-                }
-            });
-            window.addEventListener('mouseup', () => { draggingP = false; canvas.style.cursor = 'grab'; });
-        }
-
-        function initZoomAndEvents() {
-            document.getElementById('zoomInBtn').onclick = () => { scale = Math.min(2.5, scale + 0.1); document.getElementById('zoomSlider').value = scale; refresh(); };
-            document.getElementById('zoomOutBtn').onclick = () => { scale = Math.max(0.5, scale - 0.1); document.getElementById('zoomSlider').value = scale; refresh(); };
-            document.getElementById('resetZoomBtn').onclick = () => { scale = 1; offsetX = 0; offsetY = 0; refresh(); };
-            document.getElementById('zoomSlider').oninput = (e) => { scale = parseFloat(e.target.value); refresh(); };
-            canvas.addEventListener('wheel', (e) => { e.preventDefault(); scale = Math.min(2.5, Math.max(0.5, scale + (e.deltaY > 0 ? -0.08 : 0.08))); document.getElementById('zoomSlider').value = scale; refresh(); });
+        function initEventListeners() {
             document.getElementById('setConditionBtn').onclick = () => {
                 setAngleCBPto(25);
                 updateConditionUI(25);
-                renderSolutionText();
                 refresh();
             };
             document.getElementById('resetToDemoBtn').onclick = () => { P = { x: 315, y: 345 }; refresh(); updateConditionUI(currentConditionAngle); renderSolutionText(); };
@@ -705,11 +703,10 @@
             });
         }
 
-        // начальная установка: угол CBP ≈ 25°
         setAngleCBPto(25);
         updateConditionUI(25);
-        setupCanvasDrag();
-        initZoomAndEvents();
+        initControls();
+        initEventListeners();
         highlightFromText();
         renderSolutionText();
         refresh();
