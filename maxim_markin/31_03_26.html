@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Наглядная математика — скалярное произведение векторов</title>
+    <style>
+        :root{
+            --bg:#0d1117;
+            --panel:#121826;
+            --panel-2:#182132;
+            --soft:#1e2a40;
+            --text:#e8edf7;
+            --muted:#9fb0c8;
+            --accent:#49c5b6;
+            --accent-2:#7aa2ff;
+            --good:#9be37a;
+            --warn:#ffd166;
+            --bad:#ff7b7b;
+            --line:#2a3750;
+            --shadow:0 12px 36px rgba(0,0,0,.28);
+            --radius:18px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;scroll-behavior:smooth}
+        body{line-height:1.55}
+        a{color:var(--accent)}
+        .page{
+            width:min(1450px,100%);
+            margin:0 auto;
+            padding:18px 18px 70px;
+        }
+        .hero{
+            display:grid;
+            grid-template-columns: 1.05fr .95fr;
+            gap:18px;
+            margin-bottom:18px;
+        }
+        .hero-card,.panel,.step,.chip-panel,.quiz-card,.task-card,.mini-card{
+            background:linear-gradient(180deg,var(--panel),var(--panel-2));
+            border:1px solid var(--line);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+        }
+        .hero-card{padding:26px}
+        .eyebrow{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:7px 12px;border-radius:999px;background:rgba(73,197,182,.12);
+            border:1px solid rgba(73,197,182,.25);color:var(--accent);font-weight:700;font-size:13px;
+            letter-spacing:.02em
+        }
+        h1{
+            margin:14px 0 10px;font-size:clamp(28px,4vw,42px);line-height:1.1
+        }
+        .subtitle{color:var(--muted);max-width:65ch}
+        .hero-meta{
+            display:flex;flex-wrap:wrap;gap:10px;margin-top:18px
+        }
+        .meta-pill{
+            padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+            color:var(--muted);font-size:14px
+        }
+        .layout{
+            display:grid;
+            grid-template-columns: minmax(0,1fr) 480px;
+            gap:18px;
+            align-items:start;
+        }
+        .left{
+            min-width:0;
+        }
+        .right{
+            position:relative;
+            min-width:0;
+        }
+        .sticky{
+            position:sticky; top:14px;
+            display:flex; flex-direction:column; gap:14px;
+            max-height:calc(100vh - 28px);
+            overflow:auto;
+            padding-right:2px;
+        }
+        .panel{padding:16px}
+        .panel h2,.panel h3,.section-title{
+            margin:0 0 10px 0; line-height:1.15
+        }
+        .section-title{font-size:clamp(22px,3vw,30px);margin:24px 0 14px}
+        .idea-list, .mistakes-list, .check-list, .legend-list{
+            margin:0; padding-left:20px
+        }
+        .idea-list li, .mistakes-list li, .check-list li, .legend-list li{margin:.4em 0}
+        .grid-2{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px
+        }
+        .mini-card{padding:16px}
+        .mini-card h3{margin:0 0 8px;font-size:17px}
+        .formula{
+            font-family:var(--mono);
+            display:block;
+            background:rgba(255,255,255,.03);
+            border:1px solid var(--line);
+            padding:10px 12px;
+            border-radius:12px;
+            overflow:auto;
+            white-space:nowrap;
+        }
+        .step{
+            padding:16px 16px 14px;
+            margin-bottom:14px;
+            transition:transform .18s ease,border-color .18s ease,background .18s ease;
+        }
+        .step:hover, .step.active{
+            transform:translateY(-2px);
+            border-color:rgba(122,162,255,.45);
+            background:linear-gradient(180deg,#152033,#1b2740);
+        }
+        .step-header{
+            display:flex;justify-content:space-between;gap:12px;align-items:center;
+            flex-wrap:wrap;margin-bottom:8px
+        }
+        .step-title{
+            font-size:18px;font-weight:800
+        }
+        .tag{
+            border-radius:999px;padding:5px 9px;font-size:12px;
+            color:var(--accent-2);background:rgba(122,162,255,.12);
+            border:1px solid rgba(122,162,255,.25)
+        }
+        .subtle{color:var(--muted)}
+        .callout{
+            border-left:3px solid var(--accent);
+            padding:8px 0 8px 12px;color:#d8f7f3
+        }
+        .hover-map{
+            display:inline-block;padding:2px 6px;border-radius:8px;
+            border:1px dashed rgba(255,255,255,.15);cursor:pointer
+        }
+        .controls{
+            display:flex;flex-wrap:wrap;gap:10px;align-items:center
+        }
+        .control-group{
+            display:flex;gap:8px;flex-wrap:wrap;align-items:center
+        }
+        button, select, input[type=range]{
+            appearance:none;border:none;outline:none
+        }
+        button, .button-like{
+            background:#1d2a42;color:var(--text);border:1px solid var(--line);
+            border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer;
+            transition:.18s ease;
+        }
+        button:hover{transform:translateY(-1px);border-color:rgba(73,197,182,.4)}
+        button.accent{
+            background:linear-gradient(180deg,#1a695f,#12554c);border-color:#2a8f81
+        }
+        button.ghost{background:rgba(255,255,255,.03)}
+        .toggle{
+            display:inline-flex;background:#111827;border:1px solid var(--line);padding:4px;border-radius:14px;gap:4px
+        }
+        .toggle button{
+            padding:8px 10px;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--muted)
+        }
+        .toggle button.active{
+            background:#223451;color:#fff;border-color:rgba(122,162,255,.32)
+        }
+        .viewer{
+            background:
+            radial-gradient(circle at 20% 20%, rgba(73,197,182,.08), transparent 35%),
+            radial-gradient(circle at 80% 18%, rgba(122,162,255,.1), transparent 36%),
+            linear-gradient(180deg,#0d131f,#111a29 65%,#0d121d);
+            border-radius:18px;
+            border:1px solid var(--line);
+            overflow:hidden;
+            min-height:420px;
+            position:relative;
+        }
+        #scene{
+            display:block;width:100%;height:420px;background:transparent;cursor:grab;
+            touch-action:none;
+        }
+        #scene.dragging{cursor:grabbing}
+        .viewer-overlay{
+            position:absolute;left:12px;right:12px;bottom:12px;
+            display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end
+        }
+        .legend{
+            display:flex;flex-wrap:wrap;gap:8px;background:rgba(10,15,24,.72);
+            border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);
+            border-radius:14px;padding:10px 12px
+        }
+        .legend span{
+            display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:13px
+        }
+        .swatch{width:12px;height:12px;border-radius:50%}
+        .zoom-box{
+            display:flex;align-items:center;gap:8px;background:rgba(10,15,24,.72);
+            border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);
+            border-radius:14px;padding:10px 12px
+        }
+        .zoom-box input[type=range]{width:140px}
+        input[type=range]{
+            height:6px;border-radius:999px;background:#2b3750
+        }
+        input[type=range]::-webkit-slider-thumb{
+            appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer
+        }
+        .explain-line{
+            display:flex;gap:10px;align-items:flex-start;margin:.55em 0
+        }
+        .badge{
+            min-width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;
+            background:rgba(73,197,182,.14);color:var(--accent);font-weight:800;font-size:13px;
+            border:1px solid rgba(73,197,182,.28)
+        }
+        .reveal-wrap{
+            display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px
+        }
+        .progress{
+            height:8px;background:#172030;border-radius:999px;overflow:hidden;border:1px solid var(--line)
+        }
+        .progress > span{
+            display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%
+        }
+        details{
+            border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.02)
+        }
+        details summary{
+            cursor:pointer;font-weight:700
+        }
+        .task-grid{
+            display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px
+        }
+        .task-card{padding:14px}
+        .task-card h4{margin:0 0 8px}
+        .answer{
+            color:var(--good);font-weight:800
+        }
+        .idea{
+            color:var(--muted);font-size:14px
+        }
+        .quiz-card{padding:16px}
+        .quiz-q{margin-bottom:12px}
+        .quiz-options{display:grid;gap:8px}
+        .quiz-options button{text-align:left}
+        .quiz-result{margin-top:10px;font-weight:700}
+        .selfcheck{
+            display:grid;gap:8px
+        }
+        .self-item{
+            display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)
+        }
+        .footnote{
+            color:var(--muted);font-size:13px
+        }
+        .pill-row{
+            display:flex;flex-wrap:wrap;gap:8px
+        }
+        .pill{
+            padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:var(--muted)
+        }
+        .hidden{display:none !important}
+        .print-note{display:none}
+        .compact-system{
+            display:inline-grid;
+            grid-template-columns:auto auto;
+            column-gap:8px;
+            align-items:center;
+            vertical-align:middle;
+        }
+        .compact-system .brace{
+            font-size:28px;
+            line-height:.88;
+            transform:translateY(-1px);
+            color:var(--muted)
+        }
+        .compact-system .lines{
+            display:grid;gap:2px
+        }
+        .muted{color:var(--muted)}
+        .small{font-size:14px}
+        .mobile-floating{
+            display:none;
+        }
+
+        @media (max-width: 1180px){
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative;top:0;max-height:none;overflow:visible}
+        }
+        @media (max-width: 860px){
+            .hero{grid-template-columns:1fr}
+            .grid-2, .task-grid{grid-template-columns:1fr}
+            #scene{height:360px}
+            .viewer{min-height:360px}
+            .viewer-overlay{grid-template-columns:1fr}
+            .zoom-box{justify-content:space-between}
+            .page{padding:12px 12px 48px}
+            .mobile-floating{
+                display:flex;position:sticky;bottom:10px;z-index:30;justify-content:center;pointer-events:none
+            }
+            .mobile-floating > div{
+                pointer-events:auto;background:rgba(11,16,24,.86);backdrop-filter:blur(8px);border:1px solid var(--line);
+                border-radius:999px;padding:8px;display:flex;gap:8px;box-shadow:var(--shadow)
+            }
+        }
+        @media print{
+            :root{
+                --bg:#ffffff; --panel:#ffffff; --panel-2:#ffffff; --soft:#ffffff;
+                --text:#111111; --muted:#444444; --line:#cccccc; --shadow:none;
+                --accent:#0b6b63; --accent-2:#1e4fa3;
+            }
+            body{background:#fff;color:#111}
+            .page{width:100%;padding:0}
+            .layout,.hero,.grid-2,.task-grid{display:block}
+            .right{margin-top:18px}
+            .sticky{position:relative;max-height:none}
+            .viewer-overlay,.controls .screen-only,.mobile-floating,.print-hide{display:none !important}
+            .viewer{min-height:auto}
+            #scene{height:360px}
+            .print-note{display:block;color:#222;margin-top:8px}
+            button,select,input{display:none !important}
+            .step,.panel,.hero-card,.mini-card,.quiz-card,.task-card{box-shadow:none}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="hero">
+        <div class="hero-card">
+            <div class="eyebrow">Наглядная математика с генерацией</div>
+            <h1>Скалярное произведение векторов по координатам</h1>
+            <p class="subtitle">
+                Страница для подготовки к ЕГЭ: только школьные методы, пошаговое раскрытие,
+                геометрическая идея через координатную модель и интерактивный чертёж, который
+                можно крутить, масштабировать и использовать для похожих задач.
+            </p>
+            <div class="hero-meta">
+                <div class="meta-pill">цель: подготовка к ЕГЭ</div>
+                <div class="meta-pill">уровень: уверенный</div>
+                <div class="meta-pill">фокус: геометрическая идея</div>
+                <div class="meta-pill">визуализация: координатная плоскость + изометрия</div>
+                <div class="meta-pill">режим: пошаговое раскрытие</div>
+            </div>
+        </div>
+        <div class="hero-card">
+            <h2 style="margin:0 0 10px">Исходная задача</h2>
+            <p style="margin:0 0 10px">
+                На рисунке задано два вектора. По смещению по клеткам определите их координаты:
+                <span class="formula">a = (−4; −9), b = (−5; −4)</span>
+            </p>
+            <p style="margin:0 0 10px">
+                Требуется найти скалярное произведение:
+                <span class="formula">a · (2b)</span>
+            </p>
+            <div class="callout">
+                Главная идея: сначала аккуратно снять координаты, потом не забыть, что множитель 2
+                умножает <strong>обе</strong> координаты вектора b, и только после этого применять формулу
+                скалярного произведения.
+            </div>
+            <div class="pill-row" style="margin-top:12px">
+                <span class="pill">без лишней теории</span>
+                <span class="pill">с мини-квизом</span>
+                <span class="pill">с самопроверкой</span>
+                <span class="pill">с печатной версией</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="left">
+            <section class="panel">
+                <h2 class="section-title" style="margin-top:0">Идея решения</h2>
+                <ol class="idea-list">
+                    <li>Сначала считаем координаты векторов по смещению: влево — отрицательный x, вниз — отрицательный y.</li>
+                    <li>Потом отдельно строим вектор 2b: каждая координата вектора b умножается на 2.</li>
+                    <li>После этого используем школьную формулу: a · c = x₁x₂ + y₁y₂.</li>
+                    <li>Проверяем знак и смысл ответа: если оба вектора направлены примерно в одну сторону, произведение должно получиться положительным.</li>
+                </ol>
+            </section>
+
+            <section class="panel">
+                <div class="controls" style="justify-content:space-between;gap:14px">
+                    <div class="control-group">
+                        <strong>Подробность</strong>
+                        <div class="toggle" id="detailToggle">
+                            <button data-detail="brief">кратко</button>
+                            <button data-detail="standard" class="active">стандартно</button>
+                            <button data-detail="full">очень подробно</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <strong>Показ решения</strong>
+                        <div class="toggle" id="modeToggle">
+                            <button data-mode="step" class="active">пошагово</button>
+                            <button data-mode="all">показать всё</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="reveal-wrap">
+                    <button class="accent" id="prevStep">← предыдущий шаг</button>
+                    <button class="accent" id="nextStep">следующий шаг →</button>
+                    <button class="ghost" id="showAll">раскрыть всё</button>
+                    <span class="subtle" id="stepCounter">Шаг 1 из 7</span>
+                </div>
+                <div class="progress"><span id="progressBar"></span></div>
+            </section>
+
+            <section id="stepsContainer">
+                <article class="step" data-step="1" data-focus="given">
+                    <div class="step-header">
+                        <div class="step-title">1) Что дано</div>
+                        <div class="tag">старт</div>
+                    </div>
+                    <div class="step-content detail-standard detail-full">
+                        <p>
+                            Дан вектор <span class="hover-map" data-focus="a">a = (−4; −9)</span> и
+                            вектор <span class="hover-map" data-focus="b">b = (−5; −4)</span>.
+                            Нужно найти <span class="hover-map" data-focus="2b">a · (2b)</span>.
+                        </p>
+                    </div>
+                    <div class="step-content detail-brief">
+                        <p>Известны координаты a и b. Требуется вычислить a · (2b).</p>
+                    </div>
+                    <div class="step-content detail-full">
+                        <div class="explain-line"><span class="badge">A</span><div>Оба вектора заданы в координатной форме, значит задача решается через формулу скалярного произведения в координатах.</div></div>
+                        <div class="explain-line"><span class="badge">B</span><div>Но перед формулой нужно внимательно обработать множитель 2 перед вектором b.</div></div>
+                    </div>
+                </article>
+
+                <article class="step" data-step="2" data-focus="meaning">
+                    <div class="step-header">
+                        <div class="step-title">2) Что означает условие</div>
+                        <div class="tag">смысл координат</div>
+                    </div>
+                    <div class="step-content detail-brief">
+                        <p>Координаты вектора — это смещение по x и по y от начала к концу вектора.</p>
+                    </div>
+                    <div class="step-content detail-standard detail-full">
+                        <p>
+                            Координата <span class="hover-map" data-focus="xcomp">x</span> показывает горизонтальное смещение,
+                            а координата <span class="hover-map" data-focus="ycomp">y</span> — вертикальное.
+                            Здесь оба вектора направлены влево и вниз, поэтому обе координаты у них отрицательны.
+                        </p>
+                    </div>
+                    <div class="step-content detail-full">
+                        <div class="callout">
+                            Это важный геометрический смысл: знак координаты определяется не длиной, а направлением смещения.
+                        </div>
+                    </div>
+                </article>
+
+                <article class="step" data-step="3" data-focus="geom">
+                    <div class="step-header">
+                        <div class="step-title">3) Геометрическая интерпретация</div>
+                        <div class="tag">координатная идея</div>
+                    </div>
+                    <div class="step-content detail-brief">
+                        <p>Скалярное произведение сравнивает направление векторов: если они сонаправлены, результат положителен.</p>
+                    </div>
+                    <div class="step-content detail-standard detail-full">
+                        <p>
+                            На рисунке видно, что <span class="hover-map" data-focus="a">a</span> и
+                            <span class="hover-map" data-focus="2b">2b</span> смотрят примерно в одну сторону:
+                            оба направлены влево и вниз. Поэтому мы ожидаем <strong>положительный</strong> ответ.
+                        </p>
+                    </div>
+                    <div class="step-content detail-full">
+                        <p class="subtle">Это не заменяет вычисление, но помогает заранее проверить здравый смысл результата.</p>
+                    </div>
+                </article>
+
+                <article class="step" data-step="4" data-focus="idea">
+                    <div class="step-header">
+                        <div class="step-title">4) Ключевая идея</div>
+                        <div class="tag">главный ход</div>
+                    </div>
+                    <div class="step-content detail-brief">
+                        <p>Сначала найдём 2b, потом применим формулу произведения координат.</p>
+                    </div>
+                    <div class="step-content detail-standard detail-full">
+                        <p>Нельзя сразу подставлять координаты b в формулу, потому что в условии стоит именно <strong>2b</strong>, а не b.</p>
+                        <span class="formula">2b = 2·(−5; −4) = (−10; −8)</span>
+                    </div>
+                    <div class="step-content detail-full">
+                        <div class="explain-line"><span class="badge">!</span><div>Типичная ошибка: домножить только x-координату и забыть про y-координату.</div></div>
+                    </div>
+                </article>
+
+                <article class="step" data-step="5" data-focus="calc">
+                    <div class="step-header">
+                        <div class="step-title">5) Пошаговое доведение до ответа</div>
+                        <div class="tag">вычисления</div>
+                    </div>
+                    <div class="step-content detail-brief">
+                        <span class="formula">a · (2b) = (−4)(−10) + (−9)(−8) = 40 + 72 = 112</span>
+                    </div>
+                    <div class="step-content detail-standard detail-full">
+                        <p>Используем формулу скалярного произведения:</p>
+                        <span class="formula">a · c = x₁x₂ + y₁y₂</span>
+                        <p>Здесь</p>
+                        <span class="formula">a = (−4; −9), 2b = (−10; −8)</span>
+                        <p>Тогда</p>
+                        <span class="formula">a · (2b) = (−4)(−10) + (−9)(−8)</span>
+                        <span class="formula">a · (2b) = 40 + 72 = 112</span>
+                    </div>
+                    <div class="step-content detail-full">
+                        <div class="explain-line"><span class="badge">1</span><div>Перемножаем x-координаты: (−4)(−10) = 40.</div></div>
+                        <div class="explain-line"><span class="badge">2</span><div>Перемножаем y-координаты: (−9)(−8) = 72.</div></div>
+                        <div class="explain-line"><span class="badge">3</span><div>Складываем результаты: 40 + 72 = 112.</div></div>
+                    </div>
+                </article>
+
+                <article class="step" data-step="6" data-focus="check">
+                    <div class="step-header">
+                        <div class="step-title">6) Финальная проверка</div>
+                        <div class="tag">проверка ответа</div>
+                    </div>
+                    <div class="step-content detail-brief">
+                        <p>Ответ положительный, и это согласуется с рисунком: векторы направлены близко друг к другу.</p>
+                    </div>
+                    <div class="step-content detail-standard detail-full">
+                        <p>
+                            Получили <strong>112</strong>. Проверим знак:
+                            оба вектора направлены влево и вниз, значит их скалярное произведение должно быть положительным.
+                            Это совпадает с вычислением.
+                        </p>
+                        <p>
+                            Других значений быть не может, потому что координаты заданы однозначно, а формула скалярного произведения для них единственна.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="step" data-step="7" data-focus="conclusion">
+                    <div class="step-header">
+                        <div class="step-title">7) Краткий вывод</div>
+                        <div class="tag">итог</div>
+                    </div>
+                    <div class="step-content detail-brief detail-standard detail-full">
+                        <p><strong>Ответ: 112.</strong></p>
+                        <p class="subtle">
+                            Алгоритм для подобных задач: снять координаты → учесть множитель перед вектором →
+                            подставить в формулу → проверить знак ответа по рисунку.
+                        </p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title" style="margin-top:0">Типичные ошибки</h2>
+                <ol class="mistakes-list">
+                    <li>Домножают на 2 только одну координату вектора b.</li>
+                    <li>Путают знак координаты: берут длину в клетках, но игнорируют направление.</li>
+                    <li>Вместо формулы x₁x₂ + y₁y₂ случайно используют модуль или расстояние.</li>
+                    <li>Верно считают произведения, но ошибаются при сложении 40 + 72.</li>
+                    <li>Не делают смысловую проверку: положительный ли должен быть ответ по направлению векторов.</li>
+                </ol>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title" style="margin-top:0">Похожие задачи</h2>
+                <div class="controls" style="margin-bottom:12px">
+                    <button class="accent" id="generateTasks">Сгенерировать 3 задачи</button>
+                    <button class="ghost" id="applyFirstTask">Применить первую к модели</button>
+                </div>
+                <div id="generatedTasks" class="task-grid"></div>
+                <p class="footnote">
+                    Генератор сохраняет тот же метод решения: сначала координаты, затем возможное умножение вектора на число, потом формула скалярного произведения.
+                    Вырожденные случаи не создаются: векторы не нулевые, коэффициент не равен нулю.
+                </p>
+            </section>
+
+            <section class="grid-2">
+                <div class="quiz-card">
+                    <h2 class="section-title" style="margin-top:0;font-size:24px">Мини-квиз</h2>
+                    <div id="quiz"></div>
+                </div>
+                <div class="panel">
+                    <h2 class="section-title" style="margin-top:0;font-size:24px">Самопроверка</h2>
+                    <div class="selfcheck">
+                        <label class="self-item"><input type="checkbox"> <span>Я сначала определяю координаты каждого вектора по смещению.</span></label>
+                        <label class="self-item"><input type="checkbox"> <span>Я помню, что множитель перед вектором умножает обе координаты.</span></label>
+                        <label class="self-item"><input type="checkbox"> <span>Я использую формулу a · b = x₁x₂ + y₁y₂ без лишних преобразований.</span></label>
+                        <label class="self-item"><input type="checkbox"> <span>Я проверяю знак ответа по взаимному направлению векторов.</span></label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title" style="margin-top:0">Короткий справочник</h2>
+                <div class="grid-2">
+                    <div class="mini-card">
+                        <h3>Формула</h3>
+                        <span class="formula">a · b = x₁x₂ + y₁y₂</span>
+                    </div>
+                    <div class="mini-card">
+                        <h3>Умножение вектора на число</h3>
+                        <span class="formula">k(x; y) = (kx; ky)</span>
+                    </div>
+                    <div class="mini-card">
+                        <h3>Смысл знака</h3>
+                        <p class="small muted">В одну сторону → произведение обычно положительное. Почти перпендикулярно → близко к нулю. В разные стороны → отрицательное.</p>
+                    </div>
+                    <div class="mini-card">
+                        <h3>Легенда модели</h3>
+                        <ul class="legend-list small">
+                            <li><span style="color:#49c5b6">зелёный</span> — вектор a</li>
+                            <li><span style="color:#7aa2ff">синий</span> — вектор b</li>
+                            <li><span style="color:#ffd166">жёлтый</span> — вектор 2b</li>
+                            <li>пунктир — линии, уходящие за видимую плоскость или скрытые вспомогательные отрезки</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <aside class="right">
+            <div class="sticky">
+                <section class="panel">
+                    <h2 style="margin:0 0 12px">Интерактивная модель</h2>
+                    <div class="controls" style="margin-bottom:10px">
+                        <div class="control-group">
+                            <button id="zoomOut">−</button>
+                            <button id="zoomIn">+</button>
+                            <button id="zoomReset">сброс</button>
+                        </div>
+                        <div class="control-group">
+                            <label class="small muted">масштаб</label>
+                            <input id="zoomRange" type="range" min="0.65" max="2.3" step="0.01" value="1">
+                        </div>
+                    </div>
+
+                    <div class="controls" style="margin-bottom:10px">
+                        <div class="control-group">
+                            <label><input type="checkbox" id="toggleA" checked> показать a</label>
+                            <label><input type="checkbox" id="toggleB" checked> показать b</label>
+                            <label><input type="checkbox" id="toggle2B" checked> показать 2b</label>
+                        </div>
+                    </div>
+
+                    <div class="controls" style="margin-bottom:10px">
+                        <div class="control-group">
+                            <label><input type="checkbox" id="toggleProj" checked> проекции на оси</label>
+                            <label><input type="checkbox" id="toggleGrid" checked> сетка</label>
+                            <label><input type="checkbox" id="toggleLabels" checked> подписи</label>
+                        </div>
+                    </div>
+
+                    <div class="viewer">
+                        <canvas id="scene" width="900" height="720" aria-label="Интерактивная изометрическая модель векторов"></canvas>
+                        <div class="viewer-overlay">
+                            <div class="legend">
+                                <span><i class="swatch" style="background:#49c5b6"></i>a</span>
+                                <span><i class="swatch" style="background:#7aa2ff"></i>b</span>
+                                <span><i class="swatch" style="background:#ffd166"></i>2b</span>
+                                <span><i class="swatch" style="background:#8aa0be"></i>оси и сетка</span>
+                            </div>
+                            <div class="zoom-box">
+                                <span class="small muted">колесо мыши — зум</span>
+                                <span id="zoomLabel">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="print-note">Для интерактивной версии откройте страницу в браузере локально. В печати сохраняется статичный вид модели.</p>
+                </section>
+
+                <section class="panel">
+                    <h3>Что сейчас выделено</h3>
+                    <p id="focusExplain" class="subtle" style="margin:0">
+                        Ничего специально не выделено. Наведите на шаг решения или на кнопку-подсказку внутри текста.
+                    </p>
+                </section>
+
+                <section class="panel">
+                    <h3>Текущие данные модели</h3>
+                    <div id="modelData" class="small"></div>
+                    <details style="margin-top:10px">
+                        <summary>Как читать рисунок</summary>
+                        <div class="small muted" style="margin-top:8px">
+                            Мы показываем координатную плоскость в изометрическом виде. Векторы лежат в плоскости z = 0, но сама сцена
+                            поворачивается, поэтому легче увидеть направления, проекции и относительное расположение.
+                            Скрытые линии и дальние оси автоматически ослабляются или рисуются пунктиром.
+                        </div>
+                    </details>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <div class="mobile-floating print-hide">
+        <div>
+            <button id="mobilePrev">←</button>
+            <button id="mobileNext">→</button>
+            <button id="mobileTop">к началу</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const state = {
+            detail: 'standard',
+            mode: 'step',
+            currentStep: 1,
+            totalSteps: 7,
+            focus: null,
+            zoom: 1,
+            yaw: -0.62,
+            pitch: 0.98,
+            dragging: false,
+            lastX: 0,
+            lastY: 0,
+            current: {
+                a: {x:-4, y:-9, z:0},
+                b: {x:-5, y:-4, z:0},
+                k: 2
+            }
+        };
+
+        const steps = [...document.querySelectorAll('.step')];
+        const progressBar = document.getElementById('progressBar');
+        const stepCounter = document.getElementById('stepCounter');
+        const focusExplain = document.getElementById('focusExplain');
+        const detailToggle = document.getElementById('detailToggle');
+        const modeToggle = document.getElementById('modeToggle');
+        const modelData = document.getElementById('modelData');
+
+        function get2b(){
+            return {
+                x: state.current.k * state.current.b.x,
+                y: state.current.k * state.current.b.y,
+                z: 0
+            };
+        }
+
+        function updateModelData(){
+            const a = state.current.a, b = state.current.b, twoB = get2b();
+            const dot = a.x*twoB.x + a.y*twoB.y;
+            modelData.innerHTML = `
+      <div class="compact-system">
+        <div class="brace">{</div>
+        <div class="lines">
+          <div>a = (${a.x}; ${a.y})</div>
+          <div>b = (${b.x}; ${b.y})</div>
+          <div>${state.current.k}b = (${twoB.x}; ${twoB.y})</div>
+        </div>
+      </div>
+      <div style="margin-top:10px"><span class="formula">a · (${state.current.k}b) = ${a.x}·(${twoB.x}) + ${a.y}·(${twoB.y}) = ${dot}</span></div>
+    `;
+        }
+
+        function setDetail(detail){
+            state.detail = detail;
+            [...detailToggle.querySelectorAll('button')].forEach(btn => btn.classList.toggle('active', btn.dataset.detail === detail));
+            document.querySelectorAll('.detail-brief,.detail-standard,.detail-full').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.detail-' + detail).forEach(el => el.classList.remove('hidden'));
+        }
+
+        function setMode(mode){
+            state.mode = mode;
+            [...modeToggle.querySelectorAll('button')].forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+            refreshSteps();
+        }
+
+        function refreshSteps(){
+            if(state.mode === 'all'){
+                steps.forEach(s => s.classList.remove('hidden'));
+                state.currentStep = state.totalSteps;
+            } else {
+                steps.forEach(s => {
+                    const num = +s.dataset.step;
+                    s.classList.toggle('hidden', num > state.currentStep);
+                });
+            }
+            steps.forEach(s => s.classList.toggle('active', +s.dataset.step === state.currentStep));
+            const shown = state.mode === 'all' ? state.totalSteps : state.currentStep;
+            stepCounter.textContent = `Шаг ${shown} из ${state.totalSteps}`;
+            progressBar.style.width = ((shown / state.totalSteps) * 100) + '%';
+        }
+
+        function goStep(delta){
+            if(state.mode === 'all'){
+                state.mode = 'step';
+                setMode('step');
+                state.currentStep = state.totalSteps;
+            }
+            state.currentStep = Math.min(state.totalSteps, Math.max(1, state.currentStep + delta));
+            refreshSteps();
+            const el = document.querySelector('.step[data-step="' + state.currentStep + '"]');
+            if(el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+
+        document.getElementById('nextStep').addEventListener('click', () => goStep(1));
+        document.getElementById('prevStep').addEventListener('click', () => goStep(-1));
+        document.getElementById('showAll').addEventListener('click', () => setMode('all'));
+        document.getElementById('mobilePrev').addEventListener('click', () => goStep(-1));
+        document.getElementById('mobileNext').addEventListener('click', () => goStep(1));
+        document.getElementById('mobileTop').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+        detailToggle.addEventListener('click', e => {
+            if(e.target.tagName === 'BUTTON') setDetail(e.target.dataset.detail);
+        });
+        modeToggle.addEventListener('click', e => {
+            if(e.target.tagName === 'BUTTON') setMode(e.target.dataset.mode);
+        });
+
+        const focusDescriptions = {
+            given: 'Исходные данные задачи: векторы a и b заданы по координатам.',
+            a: 'Выделен вектор a. Он направлен влево и вниз.',
+            b: 'Выделен вектор b. Его координаты читаются по смещению по клеткам.',
+            '2b': 'Выделен вектор 2b. Это не новый произвольный вектор, а вектор b, увеличенный в 2 раза по обеим координатам.',
+            xcomp: 'Подсвечены горизонтальные компоненты: они отвечают за x-координаты.',
+            ycomp: 'Подсвечены вертикальные компоненты: они отвечают за y-координаты.',
+            meaning: 'Здесь важен смысл отрицательных координат: влево и вниз.',
+            geom: 'Подсвечивается взаимное направление векторов: оба смотрят примерно в одну сторону.',
+            idea: 'Ключевая идея — сначала построить 2b, затем применять формулу скалярного произведения.',
+            calc: 'Подсвечиваются пары координат, которые перемножаются в формуле.',
+            check: 'Подсветка помогает проверить знак ответа и согласованность с рисунком.',
+            conclusion: 'Финальный режим: видна вся модель целиком.',
+        };
+
+        function setFocus(focus){
+            state.focus = focus;
+            focusExplain.textContent = focusDescriptions[focus] || 'Ничего специально не выделено. Наведите на шаг решения или на кнопку-подсказку внутри текста.';
+            render();
+        }
+
+        steps.forEach(step => {
+            step.addEventListener('mouseenter', () => setFocus(step.dataset.focus));
+            step.addEventListener('mouseleave', () => setFocus(null));
+        });
+
+        document.querySelectorAll('.hover-map').forEach(el => {
+            el.addEventListener('mouseenter', () => setFocus(el.dataset.focus));
+            el.addEventListener('mouseleave', () => setFocus(null));
+        });
+
+        // ===== canvas scene =====
+        const canvas = document.getElementById('scene');
+        const ctx = canvas.getContext('2d');
+        const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+        function resizeCanvas(){
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = Math.round(rect.width * DPR);
+            canvas.height = Math.round(rect.height * DPR);
+            ctx.setTransform(DPR,0,0,DPR,0,0);
+            render();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function rotatePoint(p){
+            // yaw around z, pitch around x, for z=0 plane gives nice isometric rotation
+            let x = p.x, y = p.y, z = p.z;
+            const cy = Math.cos(state.yaw), sy = Math.sin(state.yaw);
+            let x1 = x*cy - y*sy;
+            let y1 = x*sy + y*cy;
+            let z1 = z;
+
+            const cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
+            let x2 = x1;
+            let y2 = y1*cp - z1*sp;
+            let z2 = y1*sp + z1*cp;
+            return {x:x2, y:y2, z:z2};
+        }
+
+        function project(p){
+            const r = rotatePoint(p);
+            const scale = 20 * state.zoom;
+            return {
+                x: canvas.clientWidth/2 + r.x * scale,
+                y: canvas.clientHeight/2 - r.y * scale * 0.72 - r.z * scale * 0.16,
+                depth: r.z + r.y * 0.04
+            };
+        }
+
+        function axisVisibility(dir){
+            const d = rotatePoint(dir).z + rotatePoint(dir).y * 0.04;
+            return d >= 0 ? 1 : .35;
+        }
+
+        function drawArrow(from, to, color, label, width=3, dashed=false, glow=false){
+            const p1 = project(from), p2 = project(to);
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = width;
+            if(dashed) ctx.setLineDash([7,6]);
+            if(glow){
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 12;
+            }
+            ctx.beginPath();
+            ctx.moveTo(p1.x,p1.y);
+            ctx.lineTo(p2.x,p2.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            const ang = Math.atan2(p2.y-p1.y, p2.x-p1.x);
+            const head = 11 + width*1.2;
+            ctx.beginPath();
+            ctx.moveTo(p2.x,p2.y);
+            ctx.lineTo(p2.x - head*Math.cos(ang - Math.PI/7), p2.y - head*Math.sin(ang - Math.PI/7));
+            ctx.lineTo(p2.x - head*Math.cos(ang + Math.PI/7), p2.y - head*Math.sin(ang + Math.PI/7));
+            ctx.closePath();
+            ctx.fill();
+            if(document.getElementById('toggleLabels').checked){
+                ctx.font = 'bold 15px Inter, Arial';
+                ctx.fillStyle = '#f3f7ff';
+                ctx.fillText(label, p2.x + 8, p2.y - 8);
+            }
+            ctx.restore();
+        }
+
+        function drawProjectionLines(v, color){
+            if(!document.getElementById('toggleProj').checked) return;
+            const base = {x:0,y:0,z:0};
+            const px = {x:v.x, y:0, z:0};
+            const pxy = {x:v.x, y:v.y, z:0};
+            drawArrow(base, px, color.replace('1)', '.55)'), '', 1.5, true, false);
+            drawArrow(px, pxy, color.replace('1)', '.55)'), '', 1.5, true, false);
+        }
+
+        function fillRect(){
+            const g = ctx.createLinearGradient(0,0,0,canvas.clientHeight);
+            g.addColorStop(0,'#0f1725');
+            g.addColorStop(1,'#101826');
+            ctx.fillStyle = g;
+            ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight);
+        }
+
+        function drawGrid(){
+            if(!document.getElementById('toggleGrid').checked) return;
+            ctx.save();
+            for(let i=-12;i<=12;i++){
+                let a = project({x:-12,y:i,z:0}), b = project({x:12,y:i,z:0});
+                let c = project({x:i,y:-12,z:0}), d = project({x:i,y:12,z:0});
+                ctx.strokeStyle = i===0 ? 'rgba(138,160,190,.55)' : 'rgba(138,160,190,.12)';
+                ctx.lineWidth = i===0 ? 1.4 : 1;
+                ctx.setLineDash(i===0 ? [] : [3,6]);
+                ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawAxes(){
+            const axes = [
+                {dir:{x:12,y:0,z:0}, label:'x', color:'rgba(138,160,190,' + axisVisibility({x:1,y:0,z:0}) + ')'},
+                {dir:{x:0,y:12,z:0}, label:'y', color:'rgba(138,160,190,' + axisVisibility({x:0,y:1,z:0}) + ')'},
+                {dir:{x:0,y:0,z:8}, label:'z', color:'rgba(138,160,190,' + axisVisibility({x:0,y:0,z:1}) + ')'}
+            ];
+            axes.forEach(ax => {
+                drawArrow({x:0,y:0,z:0}, ax.dir, ax.color, ax.label, 2, rotatePoint(ax.dir).z < 0, false);
+                drawArrow({x:0,y:0,z:0}, {x:-ax.dir.x,y:-ax.dir.y,z:-ax.dir.z}, 'rgba(138,160,190,.16)', '', 1.2, true, false);
+            });
+        }
+
+        function dotValue(){
+            const a = state.current.a, twoB = get2b();
+            return a.x*twoB.x + a.y*twoB.y;
+        }
+
+        function render(){
+            fillRect();
+            drawGrid();
+            drawAxes();
+
+            const a = state.current.a;
+            const b = state.current.b;
+            const twoB = get2b();
+
+            const focus = state.focus;
+            const hiA = focus === 'a' || focus === 'geom' || focus === 'calc';
+            const hiB = focus === 'b';
+            const hi2B = focus === '2b' || focus === 'idea' || focus === 'calc';
+
+            drawProjectionLines(a, 'rgba(73,197,182,1)');
+            drawProjectionLines(twoB, 'rgba(255,209,102,1)');
+
+            if(document.getElementById('toggleA').checked){
+                drawArrow({x:0,y:0,z:0}, a, hiA ? '#7cf4e2' : '#49c5b6', 'a', hiA ? 4.5 : 3, false, hiA);
+            }
+            if(document.getElementById('toggleB').checked){
+                drawArrow({x:0,y:0,z:0}, b, hiB ? '#a5c3ff' : '#7aa2ff', 'b', hiB ? 4.3 : 2.6, false, hiB);
+            }
+            if(document.getElementById('toggle2B').checked){
+                drawArrow({x:0,y:0,z:0}, twoB, hi2B ? '#ffe08a' : '#ffd166', state.current.k + 'b', hi2B ? 4.8 : 3.2, false, hi2B);
+            }
+
+            if(focus === 'xcomp' || focus === 'calc'){
+                const px1 = {x:a.x, y:0, z:0}, px2 = {x:twoB.x, y:0, z:0};
+                drawArrow({x:0,y:0,z:0}, px1, '#5be0d0', 'x₁', 2.2, true, false);
+                drawArrow({x:0,y:0,z:0}, px2, '#ffd166', 'x₂', 2.2, true, false);
+            }
+            if(focus === 'ycomp' || focus === 'calc'){
+                const py1 = {x:0, y:a.y, z:0}, py2 = {x:0, y:twoB.y, z:0};
+                drawArrow({x:0,y:0,z:0}, py1, '#5be0d0', 'y₁', 2.2, true, false);
+                drawArrow({x:0,y:0,z:0}, py2, '#ffd166', 'y₂', 2.2, true, false);
+            }
+
+            ctx.save();
+            ctx.fillStyle = '#dfe8f6';
+            ctx.font = 'bold 18px Inter, Arial';
+            const dot = dotValue();
+            ctx.fillText(`a · (${state.current.k}b) = ${dot}`, 18, 28);
+            ctx.restore();
+
+            document.getElementById('zoomLabel').textContent = Math.round(state.zoom*100) + '%';
+        }
+
+        // zoom
+        const zoomRange = document.getElementById('zoomRange');
+        function setZoom(z){
+            state.zoom = Math.max(.65, Math.min(2.3, z));
+            zoomRange.value = state.zoom;
+            render();
+        }
+        zoomRange.addEventListener('input', e => setZoom(parseFloat(e.target.value)));
+        document.getElementById('zoomIn').addEventListener('click', () => setZoom(state.zoom + .12));
+        document.getElementById('zoomOut').addEventListener('click', () => setZoom(state.zoom - .12));
+        document.getElementById('zoomReset').addEventListener('click', () => {
+            state.zoom = 1; state.yaw = -0.62; state.pitch = 0.98;
+            zoomRange.value = 1; render();
+        });
+
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            setZoom(state.zoom + (e.deltaY < 0 ? .07 : -.07));
+        }, {passive:false});
+
+        canvas.addEventListener('pointerdown', e => {
+            state.dragging = true;
+            canvas.classList.add('dragging');
+            state.lastX = e.clientX; state.lastY = e.clientY;
+            canvas.setPointerCapture(e.pointerId);
+        });
+        canvas.addEventListener('pointermove', e => {
+            if(!state.dragging) return;
+            const dx = e.clientX - state.lastX;
+            const dy = e.clientY - state.lastY;
+            state.lastX = e.clientX; state.lastY = e.clientY;
+            state.yaw += dx * 0.008;
+            state.pitch += dy * 0.006;
+            state.pitch = Math.max(0.4, Math.min(1.4, state.pitch));
+            render();
+        });
+        function endDrag(e){
+            state.dragging = false;
+            canvas.classList.remove('dragging');
+        }
+        canvas.addEventListener('pointerup', endDrag);
+        canvas.addEventListener('pointercancel', endDrag);
+        canvas.addEventListener('pointerleave', endDrag);
+
+        // visibility toggles
+        ['toggleA','toggleB','toggle2B','toggleProj','toggleGrid','toggleLabels'].forEach(id => {
+            document.getElementById(id).addEventListener('change', render);
+        });
+
+        // ===== generator =====
+        function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+        function generateOne(){
+            let ax, ay, bx, by, k;
+            do{
+                ax = randInt(-8,8); ay = randInt(-8,8);
+            } while(ax === 0 && ay === 0);
+            do{
+                bx = randInt(-8,8); by = randInt(-8,8);
+            } while((bx === 0 && by === 0) || (bx === ax && by === ay));
+            do{
+                k = randInt(-3,3);
+            } while(k === 0);
+            const answer = ax*(k*bx) + ay*(k*by);
+            const orientation = answer > 0 ? 'получится положительное число' : answer < 0 ? 'получится отрицательное число' : 'получится нуль';
+            return {ax, ay, bx, by, k, answer, orientation};
+        }
+
+        function renderTasks(){
+            const wrap = document.getElementById('generatedTasks');
+            wrap.innerHTML = '';
+            const tasks = [generateOne(), generateOne(), generateOne()];
+            window.generatedTasksData = tasks;
+            tasks.forEach((t,idx) => {
+                const div = document.createElement('div');
+                div.className = 'task-card';
+                div.innerHTML = `
+        <h4>Задача ${idx+1}</h4>
+        <div class="small">
+          Даны векторы <span class="formula">a = (${t.ax}; ${t.ay}), b = (${t.bx}; ${t.by})</span>
+          Найдите <span class="formula">a · (${t.k}b)</span>
+        </div>
+        <p class="answer">Ответ: ${t.answer}</p>
+        <p class="idea">Идея: сначала построить ${t.k}b = (${t.k*t.bx}; ${t.k*t.by}), затем применить формулу x₁x₂ + y₁y₂. По направлению векторов ожидаем: ${t.orientation}.</p>
+        <button class="ghost applyTaskBtn" data-index="${idx}">показать на модели</button>
+      `;
+                wrap.appendChild(div);
+            });
+            document.querySelectorAll('.applyTaskBtn').forEach(btn => {
+                btn.addEventListener('click', () => applyTask(+btn.dataset.index));
+            });
+        }
+
+        function applyTask(index){
+            const t = window.generatedTasksData && window.generatedTasksData[index];
+            if(!t) return;
+            state.current = {
+                a:{x:t.ax, y:t.ay, z:0},
+                b:{x:t.bx, y:t.by, z:0},
+                k:t.k
+            };
+            updateModelData();
+            render();
+            window.scrollTo({top:0, behavior:'smooth'});
+        }
+
+        document.getElementById('generateTasks').addEventListener('click', renderTasks);
+        document.getElementById('applyFirstTask').addEventListener('click', () => applyTask(0));
+
+        // ===== quiz =====
+        const quizData = [
+            {
+                q:'Что происходит с координатами вектора b при переходе к 2b?',
+                options:['Удваивается только x-координата','Удваиваются обе координаты','Координаты меняются местами'],
+                correct:1,
+                explain:'Верно: умножение вектора на число умножает каждую его координату.'
+            },
+            {
+                q:'По какой формуле считают скалярное произведение в координатах?',
+                options:['x₁+y₁+x₂+y₂','x₁x₂−y₁y₂','x₁x₂+y₁y₂'],
+                correct:2,
+                explain:'Именно x₁x₂ + y₁y₂.'
+            },
+            {
+                q:'Если оба вектора направлены примерно в одну сторону, какой знак обычно у скалярного произведения?',
+                options:['Положительный','Отрицательный','Всегда нуль'],
+                correct:0,
+                explain:'Да: при близких направлениях произведение обычно положительное.'
+            }
+        ];
+
+        function renderQuiz(){
+            const wrap = document.getElementById('quiz');
+            wrap.innerHTML = '';
+            quizData.forEach((item,i) => {
+                const q = document.createElement('div');
+                q.className = 'quiz-q';
+                q.innerHTML = `
+        <div style="font-weight:700;margin-bottom:8px">${i+1}. ${item.q}</div>
+        <div class="quiz-options">
+          ${item.options.map((opt,j) => `<button data-q="${i}" data-o="${j}">${opt}</button>`).join('')}
+        </div>
+        <div class="quiz-result" id="quizResult${i}"></div>
+      `;
+                wrap.appendChild(q);
+            });
+            wrap.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const i = +btn.dataset.q, j = +btn.dataset.o;
+                    const res = document.getElementById('quizResult'+i);
+                    if(j === quizData[i].correct){
+                        res.textContent = 'Верно. ' + quizData[i].explain;
+                        res.style.color = 'var(--good)';
+                    } else {
+                        res.textContent = 'Пока нет. ' + quizData[i].explain;
+                        res.style.color = 'var(--bad)';
+                    }
+                });
+            });
+        }
+
+        // init
+        setDetail('standard');
+        setMode('step');
+        state.currentStep = 1;
+        refreshSteps();
+        updateModelData();
+        resizeCanvas();
+        renderTasks();
+        renderQuiz();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Наглядная математика: Концентрация растворов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0f1a;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            color: #eef2ff;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        /* основной контейнер – две колонки */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* левая колонка – текст решения */
+        .solution-area {
+            flex: 1.2;
+            min-width: 280px;
+            background: rgba(18, 25, 40, 0.7);
+            backdrop-filter: blur(2px);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 128, 128, 0.3);
+        }
+
+        /* правая колонка – интерактивная модель */
+        .model-area {
+            flex: 1;
+            min-width: 320px;
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+            background: #0f1622;
+            border-radius: 28px;
+            padding: 20px;
+            border: 1px solid #2c3e4e;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        }
+
+        /* общие стили */
+        h1, h2, h3 {
+            font-weight: 500;
+            letter-spacing: -0.3px;
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin-bottom: 12px;
+            color: #80deea;
+        }
+        h2 {
+            font-size: 1.4rem;
+            margin: 1.2rem 0 0.8rem 0;
+            border-left: 4px solid #2c9c8c;
+            padding-left: 14px;
+            color: #c3e6f0;
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem;
+            color: #b2dfdb;
+        }
+        .card {
+            background: rgba(0, 20, 30, 0.5);
+            border-radius: 20px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid #2c4c5c;
+        }
+        button, .slider-label {
+            background: #1f2c3c;
+            border: none;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        button:hover {
+            background: #2c9c8c;
+            color: #0a0f1a;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+            background: #2c3e4e;
+            height: 4px;
+            border-radius: 5px;
+            -webkit-appearance: none;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2c9c8c;
+            cursor: pointer;
+        }
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .value-display {
+            font-family: monospace;
+            background: #00000055;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .result-badge {
+            background: #1e2a3a;
+            padding: 12px;
+            border-radius: 28px;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #80deea;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #11181f;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            width: 100%;
+            height: auto;
+            cursor: grab;
+        }
+        .zoom-panel {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .step {
+            margin: 16px 0;
+            padding: 12px;
+            background: rgba(0, 40, 40, 0.4);
+            border-radius: 20px;
+            transition: 0.2s;
+            cursor: default;
+        }
+        .step:hover {
+            background: rgba(44, 156, 140, 0.2);
+            border-left: 3px solid #2c9c8c;
+        }
+        .detail-level {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .detail-btn {
+            background: #2a3848;
+        }
+        .detail-btn.active {
+            background: #2c9c8c;
+            color: black;
+        }
+        .reveal-btn {
+            background: #2c5f6e;
+            margin-right: 10px;
+            margin-bottom: 8px;
+        }
+        .hidden-step {
+            display: none;
+        }
+        .error-box {
+            background: #4a1e2c80;
+            border-left: 4px solid #ff6b6b;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 16px 0;
+        }
+        .quiz {
+            background: #0b1420;
+            border-radius: 24px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .quiz-option {
+            background: #1e2a36;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .quiz-option:hover {
+            background: #2c9c8c;
+        }
+        .footnote {
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+        @media (max-width: 800px) {
+            .container {
+                flex-direction: column;
+            }
+            .model-area {
+                position: relative;
+                top: 0;
+            }
+        }
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .model-area {
+                position: relative;
+                break-inside: avoid;
+            }
+            button, .zoom-panel, .detail-level, .quiz, .generator-panel {
+                display: none;
+            }
+        }
+        .generator-panel {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 10px 0;
+            font-size: 0.75rem;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 4px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Левая колонка: пошаговое решение -->
+    <div class="solution-area">
+        <h1>📐 Концентрация растворов<br><span style="font-size:1rem;">Смеси, сплавы – единый метод</span></h1>
+
+        <!-- переключатель уровня детализации -->
+        <div class="detail-level">
+            <button class="detail-btn" data-detail="short">Кратко</button>
+            <button class="detail-btn active" data-detail="standard">Стандартно</button>
+            <button class="detail-btn" data-detail="full">Очень подробно</button>
+        </div>
+
+        <!-- кнопки пошагового раскрытия -->
+        <div style="margin-bottom: 16px;">
+            <button class="reveal-btn" id="revealAllBtn">Показать всё</button>
+            <button class="reveal-btn" id="step1Btn">Шаг 1: Данные</button>
+            <button class="reveal-btn" id="step2Btn">Шаг 2: Идея</button>
+            <button class="reveal-btn" id="step3Btn">Шаг 3: Уравнение</button>
+            <button class="reveal-btn" id="step4Btn">Шаг 4: Расчёт</button>
+            <button class="reveal-btn" id="step5Btn">Шаг 5: Проверка</button>
+        </div>
+
+        <!-- Блоки решения (каждый шаг) -->
+        <div id="stepData" class="step">
+            <h3>📌 1. Что дано?</h3>
+            <div class="step-content-detail short hidden-step">m₁, c₁, m₂, c₂ — смешивание.</div>
+            <div class="step-content-detail standard">Имеем два раствора одного вещества:<br>
+                Раствор A: масса <span id="m1_val_disp">4</span> кг, концентрация <span id="c1_val_disp">15</span>%<br>
+                Раствор B: масса <span id="m2_val_disp">6</span> кг, концентрация <span id="c2_val_disp">25</span>%<br>
+                Требуется найти концентрацию смеси.
+            </div>
+            <div class="step-content-detail full">По условию: смешали <strong><span id="m1_full">4</span> л</strong> 15%‑го и <strong><span id="m2_full">6</span> л</strong> 25%‑го водного раствора. Плотность ≈1 кг/л → масса численно равна объёму. Концентрация – доля растворённого вещества. Надо найти процентное содержание в новом растворе.</div>
+        </div>
+
+        <div id="stepIdea" class="step">
+            <h3>💡 2. Идея решения</h3>
+            <div class="step-content-detail short">Закон сохранения массы вещества: масса в-ва в смеси = сумма масс в-ва в частях.</div>
+            <div class="step-content-detail standard">Ключевая идея: при смешивании <strong>складываются массы растворов</strong> и <strong>складываются массы чистого вещества</strong>. Концентрации складывать нельзя! Составляем уравнение относительно неизвестной концентрации x.</div>
+            <div class="step-content-detail full">Масса вещества в первом: m₁·c₁ (в долях). Во втором: m₂·c₂. После смешения общая масса = m₁+m₂, масса вещества = m₁·c₁ + m₂·c₂. Итоговая концентрация = (общая масса в-ва) / (общая масса раствора). Затем переводим в проценты.</div>
+        </div>
+
+        <div id="stepEq" class="step">
+            <h3>📐 3. Составление уравнения</h3>
+            <div class="step-content-detail short">m₁·c₁ + m₂·c₂ = (m₁+m₂)·x</div>
+            <div class="step-content-detail standard">Пусть x — искомая концентрация в долях (от 0 до 1). Уравнение:<br>
+                <strong><span id="m1_eq">4</span>·<span id="c1_eq">0.15</span> + <span id="m2_eq">6</span>·<span id="c2_eq">0.25</span> = (<span id="m1_eq2">4</span>+<span id="m2_eq2">6</span>)·x</strong>
+            </div>
+            <div class="step-content-detail full">Переведём проценты в доли: c₁ = 15% = 0.15, c₂ = 25% = 0.25. Подставим:<br>
+                4·0.15 = 0.6 (кг вещества в первом),<br>
+                6·0.25 = 1.5 (кг вещества во втором).<br>
+                Общая масса смеси = 4+6 = 10 кг. Пусть x — доля вещества в смеси, тогда масса вещества в смеси = 10·x.<br>
+                Получаем: 10x = 0.6 + 1.5.
+            </div>
+        </div>
+
+        <div id="stepCalc" class="step">
+            <h3>🧮 4. Вычисление</h3>
+            <div class="step-content-detail short">x = (0.6+1.5)/10 = 0.21 → 21%</div>
+            <div class="step-content-detail standard">0.6 + 1.5 = 2.1 → 10x = 2.1 → x = 0.21 → <strong>21%</strong></div>
+            <div class="step-content-detail full">Суммируем: 0.6+1.5 = 2.1. Делим на 10 → x = 0.21. Умножаем на 100% → <span id="result_percent">21</span>%.</div>
+        </div>
+
+        <div id="stepCheck" class="step">
+            <h3>✅ 5. Проверка и вывод</h3>
+            <div class="step-content-detail short">Проверка: 10·0.21 = 2.1, что равно 0.6+1.5.</div>
+            <div class="step-content-detail standard">Проверяем: масса вещества в смеси по формуле 10·0.21 = 2.1 кг. Сумма исходных масс вещества = 0.6+1.5 = 2.1 кг. Сходится. Значит концентрация <strong>21%</strong>.</div>
+            <div class="step-content-detail full">Подстановка: 4·0.15 + 6·0.25 = 0.6+1.5=2.1; 10·0.21=2.1. Равенство выполнено. Задача решена корректно. Других значений нет, так как линейное уравнение имеет единственный корень.</div>
+        </div>
+
+        <!-- Типичные ошибки -->
+        <div class="error-box">
+            <strong>⚠️ Типичные ошибки</strong><br>
+            1. Сложение процентов напрямую (15%+25% ≠ 40%).<br>
+            2. Забыть перевести проценты в доли (0,15 а не 15).<br>
+            3. Неверно считать общую массу при выпаривании или добавлении воды.<br>
+            4. Путать массу раствора и массу вещества в уравнении.
+        </div>
+
+        <!-- Мини-квиз -->
+        <div class="quiz">
+            <strong>📋 Мини-квиз (проверь себя)</strong><br>
+            <div id="quizQuestion">Какой будет концентрация, если смешать 2 кг 10% и 3 кг 20% раствора?</div>
+            <div class="quiz-option" data-quiz="14%">14%</div>
+            <div class="quiz-option" data-quiz="16%">16%</div>
+            <div class="quiz-option" data-quiz="18%">18%</div>
+            <div class="quiz-option" data-quiz="15%">15%</div>
+            <div id="quizFeedback" style="margin-top:12px; font-style:italic;"></div>
+        </div>
+        <div class="footnote">*Все расчёты обновляются при изменении параметров справа.</div>
+    </div>
+
+    <!-- Правая колонка: интерактивная модель -->
+    <div class="model-area">
+        <h3>🧪 Интерактивная модель</h3>
+        <div class="legend">
+            <span><span class="legend-color" style="background:#1e88e5;"></span> Раствор A</span>
+            <span><span class="legend-color" style="background:#ffb74d;"></span> Раствор B</span>
+            <span><span class="legend-color" style="background:#80deea;"></span> Смесь</span>
+        </div>
+        <canvas id="mixCanvas" width="500" height="280" style="width:100%; height:auto; max-width:500px; aspect-ratio:500/280"></canvas>
+        <!-- зум -->
+        <div class="zoom-panel">
+            <button id="zoomOut">−</button>
+            <button id="zoomReset">⟲</button>
+            <button id="zoomIn">+</button>
+            <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.01" value="1" style="width:120px;">
+        </div>
+
+        <!-- параметры -->
+        <div class="param-row">
+            <span>Раствор A: масса (кг)</span>
+            <input type="range" id="mass1" min="1" max="15" step="0.5" value="4">
+            <span id="mass1Val" class="value-display">4.0</span>
+        </div>
+        <div class="param-row">
+            <span>Конц. A (%)</span>
+            <input type="range" id="conc1" min="0" max="50" step="1" value="15">
+            <span id="conc1Val" class="value-display">15%</span>
+        </div>
+        <div class="param-row">
+            <span>Раствор B: масса (кг)</span>
+            <input type="range" id="mass2" min="1" max="15" step="0.5" value="6">
+            <span id="mass2Val" class="value-display">6.0</span>
+        </div>
+        <div class="param-row">
+            <span>Конц. B (%)</span>
+            <input type="range" id="conc2" min="0" max="50" step="1" value="25">
+            <span id="conc2Val" class="value-display">25%</span>
+        </div>
+        <div class="result-badge" id="resultDisplay">
+            Концентрация смеси: <span id="concMix">21.0</span>%
+        </div>
+
+        <!-- Генератор похожих задач -->
+        <div class="generator-panel">
+            <button id="generateTaskBtn">🎲 Сгенерировать задачу</button>
+            <button id="applyTaskBtn">📌 Применить задачу</button>
+        </div>
+        <div id="genTaskPreview" style="font-size:0.8rem; margin-top:8px; background:#1a2330; padding:6px; border-radius:16px;">
+            Новая задача будет показана здесь.
+        </div>
+        <div class="footnote">*Наведите на шаг решения слева – подсветка на схеме.</div>
+    </div>
+</div>
+
+<script>
+    // DOM элементы
+    const canvas = document.getElementById('mixCanvas');
+    const ctx = canvas.getContext('2d');
+    let zoom = 1;
+    const baseWidth = 500, baseHeight = 280;
+    let scale = 1;
+
+    // текущие параметры
+    let m1 = 4, c1_percent = 15;
+    let m2 = 6, c2_percent = 25;
+
+    // ссылки на элементы интерфейса
+    const mass1Slider = document.getElementById('mass1');
+    const mass2Slider = document.getElementById('mass2');
+    const conc1Slider = document.getElementById('conc1');
+    const conc2Slider = document.getElementById('conc2');
+    const mass1Val = document.getElementById('mass1Val');
+    const mass2Val = document.getElementById('mass2Val');
+    const conc1Val = document.getElementById('conc1Val');
+    const conc2Val = document.getElementById('conc2Val');
+    const resultSpan = document.getElementById('concMix');
+
+    // отображение в тексте решения
+    function updateSolutionText() {
+        // обновляем все динамические поля в левой колонке
+        document.querySelectorAll('#m1_val_disp, #m1_full, #m1_eq, #m1_eq2').forEach(el => el.innerText = m1);
+        document.querySelectorAll('#m2_val_disp, #m2_full, #m2_eq, #m2_eq2').forEach(el => el.innerText = m2);
+        document.querySelectorAll('#c1_val_disp, #c1_eq').forEach(el => el.innerText = c1_percent);
+        document.querySelectorAll('#c2_val_disp, #c2_eq').forEach(el => el.innerText = c2_percent);
+        // доли
+        const c1_frac = (c1_percent / 100).toFixed(3);
+        const c2_frac = (c2_percent / 100).toFixed(3);
+        document.querySelectorAll('.c1_frac_dyn').forEach(el => el.innerText = c1_frac);
+        document.querySelectorAll('.c2_frac_dyn').forEach(el => el.innerText = c2_frac);
+        // дополнительно для текста полного
+        const fullDivs = document.querySelectorAll('.step-content-detail.full');
+        // не переписывать весь текст, но можно обновить цифры, они уже подставлены через span
+    }
+
+    // вычисление итоговой концентрации
+    function computeMixConc() {
+        let m_total = m1 + m2;
+        if (m_total === 0) return 0;
+        let subst_total = (m1 * c1_percent / 100) + (m2 * c2_percent / 100);
+        let conc = (subst_total / m_total) * 100;
+        return Math.round(conc * 10) / 10;
+    }
+
+    function refreshAll() {
+        let conc = computeMixConc();
+        resultSpan.innerText = conc.toFixed(1);
+        // обновить результат в шаге расчёта
+        const resultPercentSpan = document.getElementById('result_percent');
+        if(resultPercentSpan) resultPercentSpan.innerText = conc.toFixed(1);
+        updateSolutionText();
+        drawCanvas();
+        // также обновляем тексты в решении (для долей)
+        let c1_frac = (c1_percent/100).toFixed(3);
+        let c2_frac = (c2_percent/100).toFixed(3);
+        let fullStandard = document.querySelectorAll('.step-content-detail.standard, .step-content-detail.full');
+        // корректировка чисел в уравнениях динамически
+        const eqStandard = document.querySelector('#stepEq .step-content-detail.standard');
+        if(eqStandard) {
+            eqStandard.innerHTML = `Пусть x — искомая концентрация в долях (от 0 до 1). Уравнение:<br>
+                <strong>${m1}·${c1_frac} + ${m2}·${c2_frac} = (${m1}+${m2})·x</strong>`;
+        }
+        const eqFull = document.querySelector('#stepEq .step-content-detail.full');
+        if(eqFull) {
+            eqFull.innerHTML = `Переведём проценты в доли: c₁ = ${c1_percent}% = ${c1_frac}, c₂ = ${c2_percent}% = ${c2_frac}. Подставим:<br>
+                ${m1}·${c1_frac} = ${(m1*c1_percent/100).toFixed(2)} (кг вещества в первом),<br>
+                ${m2}·${c2_frac} = ${(m2*c2_percent/100).toFixed(2)} (кг вещества во втором).<br>
+                Общая масса смеси = ${m1}+${m2} = ${m1+m2} кг. Пусть x — доля вещества в смеси, тогда масса вещества в смеси = ${m1+m2}·x.<br>
+                Получаем: ${m1+m2}x = ${(m1*c1_percent/100 + m2*c2_percent/100).toFixed(2)}.`;
+        }
+    }
+
+    // отрисовка с цветовой концентрацией
+    function drawCanvas() {
+        canvas.width = baseWidth;
+        canvas.height = baseHeight;
+        ctx.clearRect(0, 0, baseWidth, baseHeight);
+        ctx.save();
+        ctx.translate(baseWidth/2, baseHeight/2);
+        ctx.scale(zoom, zoom);
+        ctx.translate(-baseWidth/2, -baseHeight/2);
+
+        // фон
+        ctx.fillStyle = "#11181f";
+        ctx.fillRect(0,0,baseWidth,baseHeight);
+        // пропорции: два прямоугольника-сосуда слева, третий справа
+        const w = 120, h = 140;
+        const startX = 50, startY = 70;
+        // Раствор A
+        let intensityA = Math.min(0.9, c1_percent/50 + 0.2);
+        ctx.fillStyle = `rgba(30, 136, 229, ${intensityA})`;
+        ctx.fillRect(startX, startY, w, h);
+        ctx.strokeStyle = "#80deea";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(startX, startY, w, h);
+        ctx.fillStyle = "#eef2ff";
+        ctx.font = "12px 'Segoe UI'";
+        ctx.fillText(`A: ${m1} кг`, startX+5, startY+15);
+        ctx.fillText(`${c1_percent}%`, startX+5, startY+30);
+
+        // Раствор B
+        let intensityB = Math.min(0.9, c2_percent/50 + 0.2);
+        ctx.fillStyle = `rgba(255, 183, 77, ${intensityB})`;
+        ctx.fillRect(startX+160, startY, w, h);
+        ctx.strokeStyle = "#ffb74d";
+        ctx.strokeRect(startX+160, startY, w, h);
+        ctx.fillStyle = "#eef2ff";
+        ctx.fillText(`B: ${m2} кг`, startX+165, startY+15);
+        ctx.fillText(`${c2_percent}%`, startX+165, startY+30);
+
+        // смесь (итог)
+        let mixConc = computeMixConc();
+        let intensityMix = Math.min(0.9, mixConc/50 + 0.2);
+        ctx.fillStyle = `rgba(128, 222, 234, ${intensityMix})`;
+        ctx.fillRect(startX+320, startY, w, h);
+        ctx.strokeStyle = "#80deea";
+        ctx.strokeRect(startX+320, startY, w, h);
+        ctx.fillStyle = "#eef2ff";
+        ctx.fillText(`Смесь: ${(m1+m2).toFixed(1)} кг`, startX+325, startY+15);
+        ctx.fillText(`${mixConc.toFixed(1)}%`, startX+325, startY+30);
+
+        // стрелки смешивания
+        ctx.beginPath();
+        ctx.moveTo(startX+w+10, startY+h/2);
+        ctx.lineTo(startX+310, startY+h/2);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#88aa88";
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(startX+160-10, startY+h/2);
+        ctx.lineTo(startX+310, startY+h/2);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    // обновление из слайдеров
+    function bindSliders() {
+        mass1Slider.addEventListener('input', () => {
+            m1 = parseFloat(mass1Slider.value);
+            mass1Val.innerText = m1.toFixed(1);
+            refreshAll();
+        });
+        mass2Slider.addEventListener('input', () => {
+            m2 = parseFloat(mass2Slider.value);
+            mass2Val.innerText = m2.toFixed(1);
+            refreshAll();
+        });
+        conc1Slider.addEventListener('input', () => {
+            c1_percent = parseFloat(conc1Slider.value);
+            conc1Val.innerText = c1_percent + "%";
+            refreshAll();
+        });
+        conc2Slider.addEventListener('input', () => {
+            c2_percent = parseFloat(conc2Slider.value);
+            conc2Val.innerText = c2_percent + "%";
+            refreshAll();
+        });
+    }
+
+    // Генератор похожей задачи (корректные числа)
+    function generateRandomTask() {
+        let newM1 = Math.round((Math.random() * 12 + 2) * 2) / 2;
+        let newM2 = Math.round((Math.random() * 12 + 2) * 2) / 2;
+        let newC1 = Math.floor(Math.random() * 35 + 5);
+        let newC2 = Math.floor(Math.random() * 35 + 5);
+        let preview = `Смешали ${newM1} кг ${newC1}% раствора и ${newM2} кг ${newC2}% раствора. Найдите концентрацию.`;
+        document.getElementById('genTaskPreview').innerHTML = preview + `<br><span style="color:#80deea;">⚡ Нажмите "Применить"</span>`;
+        window.pendingTask = { m1: newM1, m2: newM2, c1: newC1, c2: newC2 };
+    }
+
+    function applyPendingTask() {
+        if(window.pendingTask) {
+            m1 = window.pendingTask.m1;
+            m2 = window.pendingTask.m2;
+            c1_percent = window.pendingTask.c1;
+            c2_percent = window.pendingTask.c2;
+            mass1Slider.value = m1;
+            mass2Slider.value = m2;
+            conc1Slider.value = c1_percent;
+            conc2Slider.value = c2_percent;
+            mass1Val.innerText = m1.toFixed(1);
+            mass2Val.innerText = m2.toFixed(1);
+            conc1Val.innerText = c1_percent + "%";
+            conc2Val.innerText = c2_percent + "%";
+            refreshAll();
+            document.getElementById('genTaskPreview').innerHTML = "✅ Задача применена!";
+            window.pendingTask = null;
+        } else {
+            document.getElementById('genTaskPreview').innerHTML = "Сначала сгенерируйте задачу.";
+        }
+    }
+
+    // зум
+    function updateZoom() {
+        zoom = parseFloat(document.getElementById('zoomSlider').value);
+        drawCanvas();
+    }
+    document.getElementById('zoomIn').onclick = () => {
+        let s = parseFloat(document.getElementById('zoomSlider').value);
+        s = Math.min(2.5, s + 0.1);
+        document.getElementById('zoomSlider').value = s;
+        updateZoom();
+    };
+    document.getElementById('zoomOut').onclick = () => {
+        let s = parseFloat(document.getElementById('zoomSlider').value);
+        s = Math.max(0.5, s - 0.1);
+        document.getElementById('zoomSlider').value = s;
+        updateZoom();
+    };
+    document.getElementById('zoomReset').onclick = () => {
+        document.getElementById('zoomSlider').value = 1;
+        updateZoom();
+    };
+    document.getElementById('zoomSlider').addEventListener('input', updateZoom);
+
+    // пошаговое раскрытие (скрываем/показываем детали)
+    function setDetailLevel(level) {
+        const allSteps = document.querySelectorAll('.step-content-detail');
+        allSteps.forEach(step => step.classList.add('hidden-step'));
+        document.querySelectorAll(`.step-content-detail.${level}`).forEach(el => el.classList.remove('hidden-step'));
+        document.querySelectorAll('.detail-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.detail-btn[data-detail="${level}"]`).classList.add('active');
+    }
+    document.querySelectorAll('.detail-btn').forEach(btn => {
+        btn.addEventListener('click', () => setDetailLevel(btn.dataset.detail));
+    });
+    // пошаговое открытие целых блоков (показываем все шаги, но управляем видимостью блоков)
+    function revealStep(stepId) {
+        const step = document.getElementById(stepId);
+        if(step) step.style.display = 'block';
+    }
+    const stepIds = ['stepData','stepIdea','stepEq','stepCalc','stepCheck'];
+    stepIds.forEach(id => {
+        document.getElementById(id).style.display = 'block';
+    });
+    document.getElementById('revealAllBtn').onclick = () => stepIds.forEach(id => document.getElementById(id).style.display = 'block');
+    document.getElementById('step1Btn').onclick = () => { stepIds.forEach(id => document.getElementById(id).style.display = id==='stepData'?'block':'none'); };
+    document.getElementById('step2Btn').onclick = () => { stepIds.forEach(id => document.getElementById(id).style.display = id==='stepIdea'?'block':'none'); };
+    document.getElementById('step3Btn').onclick = () => { stepIds.forEach(id => document.getElementById(id).style.display = id==='stepEq'?'block':'none'); };
+    document.getElementById('step4Btn').onclick = () => { stepIds.forEach(id => document.getElementById(id).style.display = id==='stepCalc'?'block':'none'); };
+    document.getElementById('step5Btn').onclick = () => { stepIds.forEach(id => document.getElementById(id).style.display = id==='stepCheck'?'block':'none'); };
+
+    // связка наведения: подсветка на canvas
+    const stepsElements = document.querySelectorAll('.step');
+    stepsElements.forEach(step => {
+        step.addEventListener('mouseenter', () => {
+            // простая подсветка: обводим соответствующие элементы на схеме
+            drawCanvas();
+            ctx.save();
+            ctx.scale(zoom,zoom);
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#ffaa66";
+            if(step.id === 'stepData' || step.id === 'stepEq' || step.id === 'stepCalc') {
+                // подсветить оба сосуда
+                ctx.strokeRect(50,70,120,140);
+                ctx.strokeRect(210,70,120,140);
+            } else if(step.id === 'stepIdea') {
+                ctx.strokeRect(370,70,120,140);
+            }
+            ctx.restore();
+        });
+        step.addEventListener('mouseleave', () => drawCanvas());
+    });
+
+    // квиз
+    const quizOptions = document.querySelectorAll('.quiz-option');
+    quizOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+            let selected = opt.innerText;
+            let correctAnswer = "16%"; // 2*0.1+3*0.2=0.8, 5кг -> 0.16=16%
+            if(selected === correctAnswer) {
+                document.getElementById('quizFeedback').innerHTML = "✅ Верно! Молодец!";
+            } else {
+                document.getElementById('quizFeedback').innerHTML = "❌ Неверно. Правильный ответ: 16% (2*0.1+3*0.2=0.8, 0.8/5=0.16)";
+            }
+        });
+    });
+
+    // инициализация
+    bindSliders();
+    refreshAll();
+    setDetailLevel('standard');
+    document.getElementById('generateTaskBtn').addEventListener('click', generateRandomTask);
+    document.getElementById('applyTaskBtn').addEventListener('click', applyPendingTask);
+    // корректировка canvas при зуме
+    window.addEventListener('resize', () => drawCanvas());
+</script>
+</body>
+</html>
