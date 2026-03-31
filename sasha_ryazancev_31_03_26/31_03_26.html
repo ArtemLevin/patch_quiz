@@ -1,0 +1,1158 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Наглядная математика с генерацией — площадь боковой поверхности пирамиды</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --panel:#121a31;
+            --panel-2:#18233f;
+            --ink:#edf2ff;
+            --muted:#aeb9d6;
+            --line:#2c3a63;
+            --accent:#7cc4ff;
+            --accent-2:#9df0c8;
+            --warn:#ffd27a;
+            --danger:#ff9b9b;
+            --shadow:0 10px 28px rgba(0,0,0,.35);
+            --radius:18px;
+            --stepA:#6dd3ff;
+            --stepB:#8ef0bf;
+            --stepC:#ffd27a;
+            --stepD:#ffb2b2;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:linear-gradient(180deg,#09101d,#0d1427 22%,#0c1322);color:var(--ink);font:16px/1.55 Inter,Segoe UI,Arial,sans-serif}
+        body{min-width:320px}
+        .page{
+            width:min(1460px,100%);
+            margin:0 auto;
+            padding:18px;
+        }
+        .topbar{
+            display:grid;
+            grid-template-columns:1fr;
+            gap:18px;
+            align-items:start;
+        }
+        .main{
+            display:grid;
+            grid-template-columns:minmax(0,1.08fr) minmax(380px,.92fr);
+            gap:18px;
+            align-items:start;
+        }
+        .card{
+            background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+            border:1px solid var(--line);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+        .card .hd{
+            padding:14px 16px;
+            border-bottom:1px solid var(--line);
+            background:linear-gradient(180deg,rgba(124,196,255,.09),rgba(124,196,255,.03));
+        }
+        .card .bd{padding:16px}
+        h1,h2,h3{margin:0 0 10px}
+        h1{font-size:clamp(24px,3.2vw,38px);line-height:1.08}
+        h2{font-size:clamp(18px,2.2vw,25px)}
+        h3{font-size:18px}
+        p{margin:0 0 10px}
+        .sub{color:var(--muted)}
+        .hero{
+            padding:18px 18px 16px;
+        }
+        .hero .meta{
+            display:flex;flex-wrap:wrap;gap:8px;margin-top:10px
+        }
+        .pill{
+            padding:7px 10px;border-radius:999px;border:1px solid var(--line);
+            background:rgba(255,255,255,.03);color:var(--muted);font-size:13px
+        }
+        .controls{
+            display:grid; gap:12px;
+        }
+        .row{
+            display:flex;flex-wrap:wrap;gap:10px;align-items:center
+        }
+        .row.tight{gap:8px}
+        label.small, .small{font-size:13px;color:var(--muted)}
+        select,button,input[type="range"]{
+            background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+            border-radius:12px;padding:10px 12px;font:inherit
+        }
+        button{
+            cursor:pointer;transition:.18s transform,.18s background,.18s border-color
+        }
+        button:hover{transform:translateY(-1px);border-color:#4e6ca8}
+        button.primary{background:linear-gradient(180deg,#1f5e8e,#19496e);border-color:#2f7eb5}
+        button.ghost{background:rgba(255,255,255,.03)}
+        button.good{background:linear-gradient(180deg,#19624c,#154d3d);border-color:#2b9b74}
+        button.warn{background:linear-gradient(180deg,#6f5522,#5b441a);border-color:#b5892a}
+        .layout-note{
+            margin-top:8px;
+            color:var(--muted);
+            font-size:14px;
+        }
+        .leftcol{min-width:0}
+        .sticky{
+            position:sticky; top:14px;
+        }
+        .grid2{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px
+        }
+        .section-list{
+            display:grid;gap:14px
+        }
+        .step{
+            position:relative;
+            background:rgba(255,255,255,.02);
+            border:1px solid var(--line);
+            border-radius:16px;
+            padding:14px 14px 14px 18px;
+            transition:.2s border-color,.2s transform,.2s box-shadow,.2s background
+        }
+        .step::before{
+            content:"";
+            position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:14px 0 0 14px;
+            background:var(--accent);
+        }
+        .step:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.22)}
+        .step.active{border-color:#5c8bcb;background:rgba(124,196,255,.08)}
+        .step.done{opacity:1}
+        .step.hidden-by-progress{display:none}
+        .step[data-color="a"]::before{background:var(--stepA)}
+        .step[data-color="b"]::before{background:var(--stepB)}
+        .step[data-color="c"]::before{background:var(--stepC)}
+        .step[data-color="d"]::before{background:var(--stepD)}
+        .step-title{
+            display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px
+        }
+        .num{
+            display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;
+            background:rgba(255,255,255,.05);border:1px solid var(--line);font-weight:700
+        }
+        .formula, .calc, .answer-line{
+            background:#0f1730;border:1px solid #233359;border-radius:14px;
+            padding:10px 12px;margin:8px 0;overflow:auto
+        }
+        .formula{font-family:"Segoe UI",Arial,sans-serif}
+        .leadbox, .mistakes, .legend, .quiz, .checklist, .generated{
+            border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.02)
+        }
+        .leadbox ul, .mistakes ul, .checklist ul{margin:10px 0 0 18px;padding:0}
+        .mistakes li{margin:6px 0}
+        .kpi{
+            display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px
+        }
+        .k{
+            padding:12px;border-radius:16px;background:#0f1730;border:1px solid #233359
+        }
+        .k .big{font-size:24px;font-weight:800}
+        .svg-wrap{
+            background:radial-gradient(circle at 50% 20%,rgba(124,196,255,.10),transparent 42%), #0b1329;
+            border-top:1px solid var(--line);
+            border-bottom:1px solid var(--line);
+            position:relative;
+            overflow:hidden;
+            min-height:520px;
+        }
+        .canvas-toolbar{
+            display:flex;flex-wrap:wrap;gap:8px;padding:12px 12px 0;align-items:center
+        }
+        .canvas-toolbar .group{
+            display:flex;gap:8px;align-items:center;flex-wrap:wrap
+        }
+        .canvas-toolbar .group label{font-size:13px;color:var(--muted)}
+        .svg-holder{
+            height:560px;position:relative
+        }
+        svg{width:100%;height:100%;display:block;touch-action:none}
+        .note{
+            color:var(--muted);font-size:13px;padding:10px 14px 14px
+        }
+        .legend-grid{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px
+        }
+        .lg{
+            display:flex;align-items:center;gap:10px;font-size:14px
+        }
+        .sw{
+            width:16px;height:16px;border-radius:5px;border:1px solid rgba(255,255,255,.22)
+        }
+        .mono{font-variant-numeric:tabular-nums}
+        .tiny{font-size:12px;color:var(--muted)}
+        .split{
+            display:grid;grid-template-columns:1fr 1fr;gap:12px
+        }
+        .task-card{
+            background:#0f1730;border:1px solid #22345c;border-radius:14px;padding:12px
+        }
+        .task-card h4{margin:0 0 8px}
+        .badge{
+            padding:4px 8px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted)
+        }
+        .quiz-option{
+            display:block;width:100%;text-align:left;margin:8px 0;padding:10px 12px;border-radius:12px;
+            border:1px solid var(--line);background:#0e1730;color:var(--ink)
+        }
+        .quiz-option.correct{border-color:#3cab7a;background:rgba(61,165,122,.12)}
+        .quiz-option.wrong{border-color:#c56a6a;background:rgba(197,106,106,.12)}
+        .footer-space{height:30px}
+        .print-only{display:none}
+        .hint{
+            padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px dashed #395084
+        }
+        .dim{color:var(--muted)}
+        .chk{
+            display:flex;gap:8px;align-items:flex-start;margin:8px 0
+        }
+        .chk input{margin-top:3px}
+        .step [data-verbosity="brief"], .step [data-verbosity="full"]{display:none}
+        .v-brief .step [data-verbosity="brief"]{display:block}
+        .v-standard .step [data-verbosity="standard"]{display:block}
+        .v-full .step [data-verbosity="full"]{display:block}
+        .v-standard .brief-inline{display:none}
+        .v-brief .standard-inline,.v-brief .full-inline{display:none}
+        .v-standard .full-inline{display:none}
+        .emph{
+            color:var(--accent-2);font-weight:700
+        }
+        .tbl{
+            width:100%;border-collapse:collapse;font-size:14px
+        }
+        .tbl th,.tbl td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+        .tbl th{background:rgba(255,255,255,.04)}
+        .math-inline{white-space:nowrap}
+        .hoverlink{cursor:pointer}
+        .sticky h2{margin-bottom:6px}
+        .mob-only{display:none}
+        .print-block{display:none}
+        .mini-divider{height:1px;background:var(--line);margin:12px 0}
+        .step-toggle{
+            display:flex;gap:8px;flex-wrap:wrap
+        }
+
+        @media (max-width: 1120px){
+            .topbar{grid-template-columns:1fr}
+            .main{grid-template-columns:1fr}
+            .sticky{position:relative;top:0}
+            .svg-holder{height:500px}
+        }
+        @media (max-width: 720px){
+            .page{padding:12px}
+            .grid2,.split,.kpi,.legend-grid{grid-template-columns:1fr}
+            .svg-holder{height:430px}
+            .mob-only{display:block}
+        }
+
+        @media print{
+            :root{
+                --bg:#ffffff;--panel:#ffffff;--panel-2:#ffffff;--ink:#111;--muted:#555;--line:#bfc8d8;
+                --accent:#355e9a;--accent-2:#1d6b52;
+                --shadow:none
+            }
+            html,body{background:#fff;color:#111}
+            .page{width:100%;padding:0}
+            .main,.topbar{display:block}
+            .card,.step,.leadbox,.mistakes,.legend,.quiz,.checklist,.generated,.task-card,.k,.formula,.calc,.answer-line{
+                background:#fff !important;color:#111 !important;box-shadow:none;border-color:#b7bfd0
+            }
+            .sticky{position:static}
+            .canvas-toolbar, .controls .layout-note, .footer-space, .quiz button, .task-actions, .mob-only, .no-print{display:none !important}
+            .svg-wrap{min-height:380px}
+            .svg-holder{height:430px}
+            .print-only, .print-block{display:block}
+            a{color:#111;text-decoration:none}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="topbar">
+        <article class="card hero">
+            <h1>Площадь боковой поверхности пирамиды</h1>
+            <p class="sub">
+                Основание — правильный треугольник площадью 16√3 см². Ребро SB перпендикулярно основанию и равно 5 см.
+                Нужно найти площадь боковой поверхности.
+            </p>
+            <div class="meta">
+                <span class="pill">подготовка к ЕГЭ</span>
+                <span class="pill">уровень: уверенный</span>
+                <span class="pill">наглядно</span>
+                <span class="pill">познавательно</span>
+                <span class="pill">информативно</span>
+                <span class="pill">эффективно</span>
+            </div>
+        </article>
+
+    </section>
+
+    <div class="main">
+        <section class="leftcol">
+            <article class="card">
+                <div class="hd"><h2>Идея решения</h2></div>
+                <div class="bd">
+                    <div class="leadbox">
+                        <ul>
+                            <li>Сначала по площади правильного треугольника восстанавливаем сторону основания.</li>
+                            <li>Потом используем факт: если SB перпендикулярно основанию, то грани SAB и SBC — прямоугольные треугольники.</li>
+                            <li>Третью грань SAC считаем отдельно: находим SA и SC по теореме Пифагора, затем её площадь через высоту равнобедренного треугольника.</li>
+                            <li>В конце складываем площади трёх боковых граней и обязательно проверяем, что все найденные длины согласуются с условием.</li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card" style="margin-top:18px">
+                <div class="hd"><h2>Подробное решение</h2></div>
+                <div class="bd section-list" id="solutionRoot">
+
+                    <section class="step hoverlink" data-step="1" data-target="base" data-color="a">
+                        <div class="step-title">
+                            <div><span class="num">1</span> Что дано</div>
+                            <span class="badge">старт</span>
+                        </div>
+                        <div data-verbosity="brief">
+                            В основании — правильный треугольник ABC с площадью 16√3. Ребро SB перпендикулярно основанию, SB = 5.
+                        </div>
+                        <div data-verbosity="standard">
+                            <p>Основание пирамиды — правильный треугольник ABC.</p>
+                            <p>Его площадь равна 16√3 см². Боковое ребро SB перпендикулярно плоскости основания, причём SB = 5 см.</p>
+                            <div class="formula">Дано: S(ABC) = 16√3, &nbsp; SB ⟂ (ABC), &nbsp; SB = 5.</div>
+                        </div>
+                        <div data-verbosity="full">
+                            <p>Мы рассматриваем пирамиду SABC. Нижняя грань ABC — правильный треугольник, то есть AB = BC = CA.</p>
+                            <p>Число 16√3 относится именно к площади основания, а число 5 — к длине бокового ребра SB.</p>
+                            <p>Факт SB ⟂ (ABC) означает, что ребро SB образует прямой угол с любой прямой основания, проходящей через точку B.</p>
+                            <div class="formula">Это сразу пригодится для граней SAB и SBC: они окажутся прямоугольными треугольниками.</div>
+                        </div>
+                    </section>
+
+                    <section class="step hoverlink" data-step="2" data-target="sideAB" data-color="b">
+                        <div class="step-title">
+                            <div><span class="num">2</span> Что означает условие</div>
+                            <span class="badge">геометрия</span>
+                        </div>
+                        <div data-verbosity="brief">
+                            Из SB ⟂ (ABC) следует: SB ⟂ AB и SB ⟂ BC.
+                        </div>
+                        <div data-verbosity="standard">
+                            <p>Если прямая перпендикулярна плоскости, то она перпендикулярна любой прямой этой плоскости, проходящей через точку пересечения.</p>
+                            <div class="formula">Значит: SB ⟂ AB и SB ⟂ BC.</div>
+                            <p>Следовательно, треугольники SAB и SBC прямоугольные.</p>
+                        </div>
+                        <div data-verbosity="full">
+                            <p>Точка B принадлежит основанию. Ребро SB выходит из этой точки вверх и перпендикулярно всей плоскости основания.</p>
+                            <p>Поэтому в треугольнике SAB угол при B прямой, и в треугольнике SBC угол при B тоже прямой.</p>
+                            <div class="calc">Это очень выгодно: площади граней SAB и SBC можно будет считать как 1/2 × катет × катет.</div>
+                        </div>
+                    </section>
+
+                    <section class="step hoverlink" data-step="3" data-target="base" data-color="c">
+                        <div class="step-title">
+                            <div><span class="num">3</span> Интерпретация основания</div>
+                            <span class="badge">основание</span>
+                        </div>
+                        <div data-verbosity="brief">
+                            По формуле площади правильного треугольника находим сторону основания: a = 8.
+                        </div>
+                        <div data-verbosity="standard">
+                            <p>Для правильного треугольника со стороной a:</p>
+                            <div class="formula">S = a²√3 / 4.</div>
+                            <p>Подставляем площадь основания:</p>
+                            <div class="calc">a²√3 / 4 = 16√3 &nbsp;⇒&nbsp; a² / 4 = 16 &nbsp;⇒&nbsp; a² = 64 &nbsp;⇒&nbsp; a = 8.</div>
+                            <p>Значит, AB = BC = CA = 8 см.</p>
+                        </div>
+                        <div data-verbosity="full">
+                            <p>Здесь важный момент: из площади правильного треугольника мы восстанавливаем длину его стороны.</p>
+                            <p>Поскольку площадь положительна, берём положительное значение стороны.</p>
+                            <div class="calc">
+                                a²√3 / 4 = 16√3<br>
+                                a² / 4 = 16<br>
+                                a² = 64<br>
+                                a = 8
+                            </div>
+                            <p>Теперь весь треугольник основания полностью определён: каждая его сторона равна 8 см.</p>
+                        </div>
+                    </section>
+
+                    <section class="step hoverlink" data-step="4" data-target="sideAB sideBC" data-color="a">
+                        <div class="step-title">
+                            <div><span class="num">4</span> Ключевая идея</div>
+                            <span class="badge">две грани сразу</span>
+                        </div>
+                        <div data-verbosity="brief">
+                            Грани SAB и SBC — прямоугольные, поэтому их площади сразу равны 20 и 20.
+                        </div>
+                        <div data-verbosity="standard">
+                            <p>В треугольнике SAB катеты — SB и AB.</p>
+                            <div class="calc">S(SAB) = 1/2 · 5 · 8 = 20.</div>
+                            <p>Аналогично для треугольника SBC:</p>
+                            <div class="calc">S(SBC) = 1/2 · 5 · 8 = 20.</div>
+                        </div>
+                        <div data-verbosity="full">
+                            <p>Мы уже знаем, что SB ⟂ AB и SB ⟂ BC. Значит, в двух боковых гранях высота уже дана самим ребром SB.</p>
+                            <p>Поэтому:</p>
+                            <div class="calc">
+                                S(SAB) = 1/2 · SB · AB = 1/2 · 5 · 8 = 20,<br>
+                                S(SBC) = 1/2 · SB · BC = 1/2 · 5 · 8 = 20.
+                            </div>
+                            <p>Две грани нашли очень быстро. Осталась только грань SAC.</p>
+                        </div>
+                    </section>
+
+                    <section class="step hoverlink" data-step="5" data-target="edgeSA edgeSC faceSAC" data-color="b">
+                        <div class="step-title">
+                            <div><span class="num">5</span> Пошаговое доведение: длины SA и SC</div>
+                            <span class="badge">Пифагор</span>
+                        </div>
+                        <div data-verbosity="brief">
+                            В прямоугольных треугольниках SBA и SBC получаем SA = SC = √89.
+                        </div>
+                        <div data-verbosity="standard">
+                            <p>В треугольнике SBA:</p>
+                            <div class="calc">SA² = SB² + BA² = 5² + 8² = 25 + 64 = 89, значит SA = √89.</div>
+                            <p>Точно так же:</p>
+                            <div class="calc">SC² = SB² + BC² = 5² + 8² = 89, значит SC = √89.</div>
+                            <p>Следовательно, треугольник SAC равнобедренный.</p>
+                        </div>
+                        <div data-verbosity="full">
+                            <p>Чтобы найти площадь грани SAC, нужно знать её размеры. Одна сторона уже известна: AC = 8.</p>
+                            <p>Ещё две стороны найдём по теореме Пифагора в прямоугольных треугольниках SBA и SBC.</p>
+                            <div class="calc">
+                                SA² = 5² + 8² = 25 + 64 = 89, значит SA = √89.<br>
+                                SC² = 5² + 8² = 89, значит SC = √89.
+                            </div>
+                            <p>Итак, у треугольника SAC стороны √89, √89 и 8. Это равнобедренный треугольник.</p>
+                        </div>
+                    </section>
+
+                    <section class="step hoverlink" data-step="6" data-target="heightSM faceSAC" data-color="c">
+                        <div class="step-title">
+                            <div><span class="num">6</span> Пошаговое доведение: площадь грани SAC</div>
+                            <span class="badge">высота</span>
+                        </div>
+                        <div data-verbosity="brief">
+                            Высота к AC равна √73, поэтому S(SAC) = 4√73.
+                        </div>
+                        <div data-verbosity="standard">
+                            <p>Пусть M — середина AC. Тогда в равнобедренном треугольнике SAC высота SM делит основание пополам:</p>
+                            <div class="formula">AM = MC = 4.</div>
+                            <p>В прямоугольном треугольнике SMA:</p>
+                            <div class="calc">SM² = SA² − AM² = 89 − 16 = 73, значит SM = √73.</div>
+                            <p>Тогда площадь:</p>
+                            <div class="calc">S(SAC) = 1/2 · AC · SM = 1/2 · 8 · √73 = 4√73.</div>
+                        </div>
+                        <div data-verbosity="full">
+                            <p>Это центральный шаг. Мы не пользуемся координатами и не используем сложные формулы.</p>
+                            <p>В равнобедренном треугольнике SAC высота, проведённая из вершины S к основанию AC, одновременно является медианой.</p>
+                            <div class="calc">
+                                AM = MC = AC / 2 = 8 / 2 = 4.
+                            </div>
+                            <p>Теперь в прямоугольном треугольнике SMA:</p>
+                            <div class="calc">
+                                SM² = SA² − AM² = 89 − 16 = 73,<br>
+                                SM = √73.
+                            </div>
+                            <p>Следовательно, площадь третьей грани:</p>
+                            <div class="calc">
+                                S(SAC) = 1/2 · AC · SM = 1/2 · 8 · √73 = 4√73.
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="step hoverlink" data-step="7" data-target="all" data-color="d">
+                        <div class="step-title">
+                            <div><span class="num">7</span> Проверка и вывод</div>
+                            <span class="badge">финал</span>
+                        </div>
+                        <div data-verbosity="brief">
+                            Складываем площади трёх граней: 20 + 20 + 4√73 = 40 + 4√73.
+                        </div>
+                        <div data-verbosity="standard">
+                            <div class="calc">Sбок = S(SAB) + S(SBC) + S(SAC) = 20 + 20 + 4√73 = 40 + 4√73.</div>
+                            <p>Проверка: все длины положительны, равнобедренная грань SAC существует, условие SB ⟂ основанию использовано корректно.</p>
+                            <div class="answer-line"><strong>Ответ:</strong> 40 + 4√73 см².</div>
+                        </div>
+                        <div data-verbosity="full">
+                            <p>Собираем всю боковую поверхность из трёх боковых граней:</p>
+                            <div class="calc">
+                                Sбок = 20 + 20 + 4√73 = 40 + 4√73.
+                            </div>
+                            <p>Проверка по условию:</p>
+                            <ul>
+                                <li>сторона основания действительно равна 8, потому что площадь правильного треугольника получилась 16√3;</li>
+                                <li>грани SAB и SBC действительно прямоугольные, так как SB перпендикулярно основанию;</li>
+                                <li>третья грань SAC существует, потому что 2√89 &gt; 8;</li>
+                                <li>других значений площади нет, потому что все вычисляемые величины определяются однозначно.</li>
+                            </ul>
+                            <div class="answer-line"><strong>Краткий вывод:</strong> площадь боковой поверхности пирамиды равна <span class="emph">40 + 4√73 см²</span>.</div>
+                        </div>
+                    </section>
+
+                </div>
+            </article>
+
+            <article class="card" style="margin-top:18px">
+                <div class="hd"><h2>Типичные ошибки</h2></div>
+                <div class="bd">
+                    <div class="mistakes">
+                        <ul>
+                            <li>Считать пирамиду правильной целиком, хотя по условию правильным является только основание.</li>
+                            <li>Ошибочно брать площадь основания за сумму площадей боковых граней.</li>
+                            <li>В третьей грани SAC пытаться использовать ребро SB как высоту к AC. Это неверно: SB не лежит в плоскости треугольника SAC.</li>
+                            <li>Забыть, что в равнобедренном треугольнике высота к основанию делит основание пополам.</li>
+                            <li>Потерять корень при вычислении длины или площади и записать 4·73 вместо 4√73.</li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card" style="margin-top:18px">
+                <div class="hd"><h2>Мини-квиз</h2></div>
+                <div class="bd">
+                    <div class="quiz">
+                        <p><strong>Вопрос.</strong> Почему грань SAC нельзя посчитать по формуле 1/2 · AC · SB?</p>
+                        <button class="quiz-option" data-correct="0">Потому что AC не является стороной основания</button>
+                        <button class="quiz-option" data-correct="1">Потому что SB не является высотой в плоскости треугольника SAC</button>
+                        <button class="quiz-option" data-correct="0">Потому что AC = 8, а не 5</button>
+                        <div id="quizFeedback" class="hint" style="margin-top:10px;display:none"></div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card" style="margin-top:18px">
+                <div class="hd"><h2>Самопроверка</h2></div>
+                <div class="bd">
+                    <div class="checklist">
+                        <div class="chk"><input type="checkbox" id="c1"><label for="c1">Я умею восстанавливать сторону правильного треугольника по его площади.</label></div>
+                        <div class="chk"><input type="checkbox" id="c2"><label for="c2">Я понимаю, почему из SB ⟂ основанию следуют два прямоугольных треугольника.</label></div>
+                        <div class="chk"><input type="checkbox" id="c3"><label for="c3">Я могу отдельно найти площадь третьей боковой грани через высоту равнобедренного треугольника.</label></div>
+                        <div class="chk"><input type="checkbox" id="c4"><label for="c4">Я могу объяснить, почему ответ единственный.</label></div>
+                        <div class="mini-divider"></div>
+                        <div class="row">
+                            <button id="checkProgress" class="good">оценить готовность</button>
+                            <span id="checkResult" class="small"></span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card" style="margin-top:18px">
+                <div class="hd"><h2>Похожие задачи</h2></div>
+                <div class="bd">
+                    <div class="row task-actions">
+                        <button id="generate3" class="primary">сгенерировать 3 задачи</button>
+                        <button id="applyFirst" class="ghost">применить первую к модели</button>
+                    </div>
+                    <p class="tiny" style="margin-top:8px">Генератор сохраняет тот же метод: правильный треугольник в основании и ребро SB, перпендикулярное основанию.</p>
+                    <div id="generatedTasks" class="generated" style="margin-top:12px">
+                        Нажмите «сгенерировать 3 задачи».
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <aside class="sticky">
+            <article class="card">
+                <div class="hd"><h2>Управление разбором</h2></div>
+                <div class="bd controls">
+                    <div class="row">
+                        <label class="small" for="verbosity">Подробность</label>
+                        <select id="verbosity">
+                            <option value="brief">кратко</option>
+                            <option value="standard" selected>стандартно</option>
+                            <option value="full">очень подробно</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <label class="small" for="revealMode">Показ решения</label>
+                        <select id="revealMode">
+                            <option value="step" selected>пошаговое раскрытие</option>
+                            <option value="all">сразу полное</option>
+                        </select>
+                        <button id="prevStep" class="ghost">назад</button>
+                        <button id="nextStep" class="primary">следующий шаг</button>
+                    </div>
+
+                    <div class="row tight">
+                        <span class="small">Шаг</span>
+                        <span id="progressLabel" class="badge">1 / 7</span>
+                    </div>
+
+                    <div class="row tight">
+                        <label class="small"><input type="checkbox" id="toggleLabels" checked> подписи</label>
+                        <label class="small"><input type="checkbox" id="toggleHeights" checked> высоты</label>
+                        <label class="small"><input type="checkbox" id="toggleRightMarks" checked> прямые углы</label>
+                        <label class="small"><input type="checkbox" id="toggleFaceFill" checked> подсветка граней</label>
+                    </div>
+
+                    <div class="layout-note">
+                        Наводите на шаги решения или на элементы рисунка: текст и схема связаны двусторонней подсветкой.
+                    </div>
+                </div>
+            </article>
+
+
+            <article class="card" style="margin-top:18px">
+                <div class="hd">
+                    <h2>Интерактивная модель</h2>
+                    <p class="sub">Справа — та же пирамида. Подсветка меняется по шагам решения.</p>
+                </div>
+
+                <div class="canvas-toolbar no-print">
+                    <div class="group">
+                        <label for="zoomRange">Масштаб</label>
+                        <button id="zoomOut">−</button>
+                        <input type="range" id="zoomRange" min="70" max="190" step="1" value="100" />
+                        <button id="zoomIn">+</button>
+                        <button id="zoomReset">сброс</button>
+                    </div>
+                </div>
+
+
+                <div class="svg-wrap">
+                    <div class="canvas-toolbar no-print">
+                        <div class="group">
+                            <label for="zoomRange">Масштаб</label>
+                            <button id="zoomOut">−</button>
+                            <input type="range" id="zoomRange" min="70" max="190" step="1" value="100" />
+                            <button id="zoomIn">+</button>
+                            <button id="zoomReset">сброс</button>
+                        </div>
+                        <div class="group">
+                            <label class="small">Вращение</label>
+                            <span class="badge">тяните мышью</span>
+                            <button id="isoReset" class="ghost">изометрия</button>
+                        </div>
+                    </div>
+
+                    <div class="svg-holder" style="height:580px">
+                        <canvas id="isoCanvas" width="760" height="580" aria-label="Изометрическая модель пирамиды"
+                                style="width:100%;height:100%;display:block;touch-action:none"></canvas>
+                    </div>
+                    <div class="note">Пирамида показана в наглядной изометрии. Её можно вращать мышью или пальцем, а также масштабировать колесом мыши.</div>
+                </div>
+            </article>
+        </aside>
+    </div>
+
+    <div class="footer-space"></div>
+</div>
+
+
+<script>
+    (function(){
+        const body = document.body;
+        const solutionRoot = document.getElementById('solutionRoot');
+        const steps = [...solutionRoot.querySelectorAll('.step')];
+        const totalSteps = steps.length;
+        const progressLabel = document.getElementById('progressLabel');
+        const verbosity = document.getElementById('verbosity');
+        const revealMode = document.getElementById('revealMode');
+        const prevStep = document.getElementById('prevStep');
+        const nextStep = document.getElementById('nextStep');
+
+        let currentStep = 1;
+
+        function setVerbosity(v){
+            body.classList.remove('v-brief','v-standard','v-full');
+            body.classList.add(v === 'brief' ? 'v-brief' : v === 'full' ? 'v-full' : 'v-standard');
+        }
+        setVerbosity('standard');
+
+        function updateProgress(){
+            progressLabel.textContent = `${currentStep} / ${totalSteps}`;
+            steps.forEach((step, idx) => {
+                const n = idx + 1;
+                step.classList.toggle('active', n === currentStep);
+                step.classList.toggle('done', n < currentStep);
+                if(revealMode.value === 'step'){
+                    step.classList.toggle('hidden-by-progress', n > currentStep);
+                }else{
+                    step.classList.remove('hidden-by-progress');
+                }
+            });
+            renderer.applySceneByStep(currentStep);
+            renderer.draw();
+        }
+
+        verbosity.addEventListener('change', e => setVerbosity(e.target.value));
+        revealMode.addEventListener('change', updateProgress);
+        prevStep.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); updateProgress(); });
+        nextStep.addEventListener('click', () => { currentStep = Math.min(totalSteps, currentStep + 1); updateProgress(); });
+
+        steps.forEach(step => {
+            step.addEventListener('mouseenter', () => {
+                currentStep = Number(step.dataset.step);
+                updateProgress();
+                renderer.highlightTarget(step.dataset.target);
+                renderer.draw();
+            });
+            step.addEventListener('mouseleave', () => {
+                renderer.applySceneByStep(currentStep);
+                renderer.draw();
+            });
+            step.addEventListener('click', () => {
+                currentStep = Number(step.dataset.step);
+                updateProgress();
+                step.scrollIntoView({behavior:'smooth', block:'center'});
+            });
+        });
+
+        document.querySelectorAll('.quiz-option').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+                document.querySelectorAll('.quiz-option').forEach(x=>x.classList.remove('correct','wrong'));
+                const ok = btn.dataset.correct === '1';
+                btn.classList.add(ok ? 'correct' : 'wrong');
+                const f = document.getElementById('quizFeedback');
+                f.style.display = 'block';
+                f.textContent = ok
+                ? 'Верно. Для площади треугольника нужна высота, лежащая в плоскости этого треугольника. Ребро SB не лежит в плоскости грани SAC.'
+                : 'Не совсем. Главная причина в том, что SB не является высотой внутри плоскости треугольника SAC.';
+            });
+        });
+
+        document.getElementById('checkProgress').addEventListener('click', ()=>{
+            const count = ['c1','c2','c3','c4'].filter(id=>document.getElementById(id).checked).length;
+            const out = document.getElementById('checkResult');
+            const msg = count <= 1 ? 'Пока рано: лучше ещё раз пройти шаги 3–6.'
+            : count <= 3 ? 'Хорошо. База уже есть, но стоит ещё потренировать грань SAC.'
+            : 'Отлично. Метод решения этой группы задач уже в руках.';
+            out.textContent = `${count}/4. ${msg}`;
+        });
+
+        function triAreaStr(a){
+            const c = a*a/4;
+            return `${Number.isInteger(c) ? c : c.toFixed(2)}√3`;
+        }
+        function squareFactor(n){
+            let factor=1, rest=n;
+            for(let k=2;k*k<=rest;k++){
+                while(rest%(k*k)===0){rest/=k*k;factor*=k;}
+            }
+            return {factor, rest};
+        }
+        function simplifySAC(a,h){
+            const outer = a/4;
+            const rad = 4*h*h + 3*a*a;
+            const sf = squareFactor(rad);
+            const coeff = outer * sf.factor;
+            const coeffStr = (Math.abs(coeff-1)<1e-9) ? '' : (Number.isInteger(coeff) ? String(coeff) : coeff.toFixed(2).replace(/\.00$/,''));
+            return {coeff, rad, rest:sf.rest, str:`${coeffStr}√${sf.rest}`.replace(/^√/,'√').replace('1√','√')};
+        }
+        function taskFromAH(a,h){
+            const areaBase = triAreaStr(a);
+            const areaRight = 0.5*a*h;
+            const sa2 = h*h + a*a;
+            const saStr = `√${sa2}`;
+            const smRad = h*h + 3*a*a/4;
+            const sac = simplifySAC(a,h);
+            const totalConst = 2*areaRight;
+            const totalStr = `${Number.isInteger(totalConst)?totalConst:totalConst.toFixed(2)} + ${sac.str}`.replace(' + 1√',' + √');
+            return {
+                a,h, areaBase,
+                aStr:String(a), sbStr:String(h), saStr,
+                smStr:`√${smRad}`,
+                sacStr:sac.str, totalStr,
+                statement:`Основание пирамиды — правильный треугольник с площадью ${areaBase} см². Боковое ребро SB перпендикулярно основанию и равно ${h} см. Найдите площадь боковой поверхности.`,
+                idea:`Сначала восстановить сторону основания a = ${a}. Затем найти две прямоугольные боковые грани по формуле 1/2·a·SB. Третью грань SAC посчитать через высоту равнобедренного треугольника.`,
+                answer:`${totalStr} см²`
+            };
+        }
+
+        const baseTask = taskFromAH(8,5);
+        let currentTask = baseTask;
+
+        function applyTask(task){
+            currentTask = task;
+            document.querySelector('.hero .sub').textContent =
+            `Основание — правильный треугольник площадью ${task.areaBase} см². Ребро SB перпендикулярно основанию и равно ${task.h} см. Нужно найти площадь боковой поверхности.`;
+            document.getElementById('kA').textContent = task.aStr;
+            document.getElementById('kSAC').textContent = task.sacStr;
+            document.getElementById('kAns').textContent = task.totalStr;
+            renderer.setTask(task);
+            updateProgress();
+        }
+
+        function generateTasks(){
+            const presets = [taskFromAH(6,4), taskFromAH(10,6), taskFromAH(12,5)];
+            const wrap = document.getElementById('generatedTasks');
+            wrap.innerHTML = '';
+            presets.forEach((t, i)=>{
+                const div = document.createElement('div');
+                div.className = 'task-card';
+                div.style.marginBottom = '10px';
+                div.innerHTML = `
+        <h4>Задача ${i+1}</h4>
+        <p>${t.statement}</p>
+        <div class="formula"><strong>Краткая идея:</strong> ${t.idea}</div>
+        <div class="answer-line"><strong>Ответ:</strong> ${t.answer}</div>
+        <div class="row"><button class="ghost use-task" data-index="${i}">показать на модели</button></div>
+      `;
+                wrap.appendChild(div);
+            });
+            wrap.dataset.tasks = JSON.stringify(presets);
+            wrap.querySelectorAll('.use-task').forEach(btn=>{
+                btn.addEventListener('click', ()=>{
+                    const arr = JSON.parse(wrap.dataset.tasks);
+                    applyTask(arr[Number(btn.dataset.index)]);
+                });
+            });
+        }
+        document.getElementById('generate3').addEventListener('click', generateTasks);
+        document.getElementById('applyFirst').addEventListener('click', ()=>{
+            const wrap = document.getElementById('generatedTasks');
+            if(!wrap.dataset.tasks) generateTasks();
+            const arr = JSON.parse(wrap.dataset.tasks);
+            applyTask(arr[0]);
+        });
+
+        class IsoRenderer{
+            constructor(canvas){
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.dpr = Math.max(1, window.devicePixelRatio || 1);
+                this.zoom = 1;
+                this.yaw = -0.82;
+                this.pitch = -0.58;
+                this.dragging = false;
+                this.last = null;
+                this.hoverTarget = null;
+                this.visible = {
+                    labels: true,
+                    heights: true,
+                    rightMarks: true,
+                    fills: true
+                };
+                this.sceneIds = {};
+                this.targetGroups = {
+                    base: ['edgeAB','edgeBC','edgeCA','baseFill'],
+                    sideAB: ['edgeSA','edgeSB','edgeAB','fillSAB'],
+                    sideBC: ['edgeSC','edgeSB','edgeBC','fillSBC'],
+                    faceSAC: ['edgeSA','edgeSC','edgeCA','fillSAC','heightSM'],
+                    edgeSA: ['edgeSA'],
+                    edgeSC: ['edgeSC'],
+                    heightSM: ['heightSM','rmM'],
+                    all: ['edgeAB','edgeBC','edgeCA','edgeSB','edgeSA','edgeSC','fillSAB','fillSBC','fillSAC','heightSM','baseFill']
+                };
+                this.task = baseTask;
+                this.setTask(this.task);
+                this.install();
+                this.resize();
+            }
+            setTask(task){
+                this.task = task;
+                const a = task.a;
+                const h = task.h;
+                const rt3 = Math.sqrt(3);
+                this.points3 = {
+                    A: {x:-a/2, y:0, z:-a*rt3/6},
+                    B: {x:a/2,  y:0, z:-a*rt3/6},
+                    C: {x:0,    y:0, z:a*rt3/3},
+                    S: {x:a/2,  y:h, z:-a*rt3/6},
+                };
+                this.points3.M = {
+                    x:(this.points3.A.x + this.points3.C.x)/2,
+                    y:(this.points3.A.y + this.points3.C.y)/2,
+                    z:(this.points3.A.z + this.points3.C.z)/2
+                };
+            }
+            install(){
+                const c = this.canvas;
+                c.addEventListener('pointerdown', e=>{
+                    this.dragging = true;
+                    this.last = {x:e.clientX, y:e.clientY};
+                    c.setPointerCapture(e.pointerId);
+                });
+                c.addEventListener('pointermove', e=>{
+                    if(this.dragging && this.last){
+                        const dx = e.clientX - this.last.x;
+                        const dy = e.clientY - this.last.y;
+                        this.yaw += dx * 0.01;
+                        this.pitch += dy * 0.008;
+                        this.pitch = Math.max(-1.35, Math.min(0.15, this.pitch));
+                        this.last = {x:e.clientX, y:e.clientY};
+                        this.draw();
+                    }
+                });
+                c.addEventListener('pointerup', ()=>{ this.dragging = false; this.last = null; });
+                c.addEventListener('pointerleave', ()=>{ this.dragging = false; this.last = null; });
+                c.addEventListener('wheel', e=>{
+                    e.preventDefault();
+                    this.zoom += (e.deltaY < 0 ? 0.08 : -0.08);
+                    this.zoom = Math.max(0.7, Math.min(1.9, this.zoom));
+                    this.syncZoomUI();
+                    this.draw();
+                }, {passive:false});
+
+                window.addEventListener('resize', ()=>this.resize());
+
+                document.getElementById('zoomRange').addEventListener('input', e=>{
+                    this.zoom = Number(e.target.value)/100;
+                    this.draw();
+                });
+                document.getElementById('zoomIn').addEventListener('click', ()=>{
+                    this.zoom = Math.min(1.9, this.zoom + 0.1); this.syncZoomUI(); this.draw();
+                });
+                document.getElementById('zoomOut').addEventListener('click', ()=>{
+                    this.zoom = Math.max(0.7, this.zoom - 0.1); this.syncZoomUI(); this.draw();
+                });
+                document.getElementById('zoomReset').addEventListener('click', ()=>{
+                    this.zoom = 1; this.syncZoomUI(); this.draw();
+                });
+                document.getElementById('isoReset').addEventListener('click', ()=>{
+                    this.yaw = -0.82; this.pitch = -0.58; this.draw();
+                });
+
+                const bind = (id, key) => {
+                    document.getElementById(id).addEventListener('change', e=>{
+                        this.visible[key] = e.target.checked;
+                        this.draw();
+                    });
+                };
+                bind('toggleLabels','labels');
+                bind('toggleHeights','heights');
+                bind('toggleRightMarks','rightMarks');
+                bind('toggleFaceFill','fills');
+            }
+            resize(){
+                const rect = this.canvas.getBoundingClientRect();
+                this.canvas.width = Math.round(rect.width * this.dpr);
+                this.canvas.height = Math.round(rect.height * this.dpr);
+                this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+                this.draw();
+            }
+            syncZoomUI(){
+                document.getElementById('zoomRange').value = Math.round(this.zoom * 100);
+            }
+            rotate(p){
+                const cy = Math.cos(this.yaw), sy = Math.sin(this.yaw);
+                const cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
+                let x = p.x * cy + p.z * sy;
+                let z = -p.x * sy + p.z * cy;
+                let y = p.y;
+                const y2 = y * cp - z * sp;
+                const z2 = y * sp + z * cp;
+                return {x, y:y2, z:z2};
+            }
+            project(p){
+                const r = this.rotate(p);
+                const rect = this.canvas.getBoundingClientRect();
+                const s = 24 * this.zoom;
+                return {
+                    x: rect.width/2 + r.x * s,
+                    y: rect.height/2 - r.y * s + r.z * 10,
+                    z:r.z
+                };
+            }
+            edge(id, a, b, color, width){
+                return {type:'edge', id, a,b,color,width};
+            }
+            face(id, pts, color){
+                return {type:'face', id, pts, color};
+            }
+            label(id, p, text, color, dx=0, dy=0){
+                return {type:'label', id, p, text, color, dx, dy};
+            }
+            highlightTarget(targetStr){
+                this.hoverTarget = targetStr || null;
+            }
+            applySceneByStep(step){
+                const byStep = {
+                    1:'base',
+                    2:'sideAB sideBC',
+                    3:'base',
+                    4:'sideAB sideBC',
+                    5:'edgeSA edgeSC sideAB sideBC',
+                    6:'faceSAC heightSM',
+                    7:'all'
+                };
+                this.hoverTarget = byStep[step] || null;
+            }
+            activeIds(){
+                if(!this.hoverTarget) return new Set();
+                const ids = new Set();
+                this.hoverTarget.split(/\s+/).forEach(k=>{
+                    (this.targetGroups[k] || []).forEach(v=>ids.add(v));
+                });
+                return ids;
+            }
+            drawRightMark(p, u, v){
+                const ctx = this.ctx;
+                const len = 10;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + u.x*len, p.y + u.y*len);
+                ctx.lineTo(p.x + u.x*len + v.x*len, p.y + u.y*len + v.y*len);
+                ctx.lineTo(p.x + v.x*len, p.y + v.y*len);
+                ctx.stroke();
+            }
+            unit2(a,b){
+                const dx=b.x-a.x, dy=b.y-a.y;
+                const d=Math.hypot(dx,dy)||1;
+                return {x:dx/d,y:dy/d};
+            }
+            pointInTri2D(p, a, b, c){
+                const s = (p1, p2, p3) => (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+                const d1 = s(p, a, b), d2 = s(p, b, c), d3 = s(p, c, a);
+                const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+                const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+                return !(hasNeg && hasPos);
+            }
+            signedArea2D(a,b,c){
+                return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+            }
+            edgeHiddenByFaces(edge, pts, faceDefs){
+                const pa = pts[edge.a], pb = pts[edge.b];
+                const mid = {x:(pa.x+pb.x)/2, y:(pa.y+pb.y)/2, z:(pa.z+pb.z)/2};
+                for(const f of faceDefs){
+                    if(f.pts.includes(edge.a) && f.pts.includes(edge.b)) continue;
+                    const p0 = pts[f.pts[0]], p1 = pts[f.pts[1]], p2 = pts[f.pts[2]];
+                    if(!this.pointInTri2D(mid, p0, p1, p2)) continue;
+                    const area = this.signedArea2D(p0, p1, p2);
+                    if(Math.abs(area) < 1e-6) continue;
+                    const w0 = this.signedArea2D(mid, p1, p2) / area;
+                    const w1 = this.signedArea2D(mid, p2, p0) / area;
+                    const w2 = this.signedArea2D(mid, p0, p1) / area;
+                    const faceZ = w0*p0.z + w1*p1.z + w2*p2.z;
+                    if(faceZ > mid.z + 0.5) return true;
+                }
+                return false;
+            }
+            draw(){
+                const ctx = this.ctx;
+                const rect = this.canvas.getBoundingClientRect();
+                ctx.clearRect(0,0,rect.width,rect.height);
+
+                const pts = {};
+                for(const [k,v] of Object.entries(this.points3)) pts[k] = this.project(v);
+                const active = this.activeIds();
+
+                ctx.fillStyle = '#0b1329';
+                ctx.fillRect(0,0,rect.width,rect.height);
+
+                const faceDefs = [
+                    this.face('baseFill',['A','B','C'],'rgba(109,211,255,0.10)'),
+                    this.face('fillSAB',['S','A','B'],'rgba(142,240,191,0.16)'),
+                    this.face('fillSBC',['S','B','C'],'rgba(255,210,122,0.16)'),
+                    this.face('fillSAC',['S','A','C'],'rgba(255,178,178,0.15)')
+                ];
+
+                const faces = faceDefs.map(f=>{
+                    const avgz = f.pts.reduce((s,n)=>s+pts[n].z,0)/f.pts.length;
+                    return {...f, avgz};
+                }).sort((a,b)=>a.avgz-b.avgz);
+
+                if(this.visible.fills){
+                    for(const f of faces){
+                        const boost = active.has(f.id) ? 0.34 : 0.14;
+                        ctx.beginPath();
+                        ctx.moveTo(pts[f.pts[0]].x, pts[f.pts[0]].y);
+                        for(let i=1;i<f.pts.length;i++) ctx.lineTo(pts[f.pts[i]].x, pts[f.pts[i]].y);
+                        ctx.closePath();
+                        ctx.fillStyle = f.color.replace(/0\.\d+\)/, `${boost})`);
+                        ctx.fill();
+                        ctx.strokeStyle = active.has(f.id) ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.12)';
+                        ctx.lineWidth = active.has(f.id) ? 2.1 : 1;
+                        ctx.stroke();
+                    }
+                }
+
+                const edges = [
+                    this.edge('edgeAB','A','B','#7aa3ff',3),
+                    this.edge('edgeBC','B','C','#7aa3ff',3),
+                    this.edge('edgeCA','C','A','#7aa3ff',3),
+                    this.edge('edgeSB','S','B','#9df0c8',4),
+                    this.edge('edgeSA','S','A','#ffd27a',3),
+                    this.edge('edgeSC','S','C','#ffb2b2',3)
+                ].map(e=>{
+                    const avgz = (pts[e.a].z + pts[e.b].z)/2;
+                    const hidden = this.edgeHiddenByFaces(e, pts, faceDefs);
+                    return {...e, avgz, hidden};
+                }).sort((a,b)=>a.avgz-b.avgz);
+
+                for(const e of edges){
+                    ctx.beginPath();
+                    ctx.moveTo(pts[e.a].x, pts[e.a].y);
+                    ctx.lineTo(pts[e.b].x, pts[e.b].y);
+                    ctx.strokeStyle = e.color;
+                    const faded = active.size ? (active.has(e.id) ? 1 : 0.24) : 1;
+                    ctx.globalAlpha = e.hidden ? Math.min(faded, 0.78) : faded;
+                    ctx.lineWidth = active.has(e.id) ? e.width + 1.2 : e.width;
+                    ctx.setLineDash(e.hidden ? [8,8] : []);
+                    ctx.shadowBlur = active.has(e.id) && !e.hidden ? 16 : 0;
+                    ctx.shadowColor = e.color;
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
+                }
+
+                if(this.visible.heights){
+                    ctx.beginPath();
+                    ctx.moveTo(pts.S.x, pts.S.y);
+                    ctx.lineTo(pts.M.x, pts.M.y);
+                    ctx.setLineDash([8,6]);
+                    ctx.strokeStyle = active.has('heightSM') ? '#ffffff' : 'rgba(255,255,255,.75)';
+                    ctx.lineWidth = active.has('heightSM') ? 3 : 2.2;
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.beginPath();
+                    ctx.arc(pts.M.x, pts.M.y, 4.8, 0, Math.PI*2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                }
+
+                if(this.visible.rightMarks){
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    const u1 = this.unit2(pts.B, pts.S);
+                    const v1 = this.unit2(pts.B, pts.C);
+                    this.drawRightMark({x:pts.B.x + u1.x*8 + v1.x*8, y:pts.B.y + u1.y*8 + v1.y*8}, {x:-u1.x,y:-u1.y}, {x:-v1.x,y:-v1.y});
+
+                    const u2 = this.unit2(pts.M, pts.S);
+                    const v2 = this.unit2(pts.M, pts.C);
+                    this.drawRightMark({x:pts.M.x + u2.x*7 + v2.x*7, y:pts.M.y + u2.y*7 + v2.y*7}, {x:-u2.x,y:-u2.y}, {x:-v2.x,y:-v2.y});
+                }
+
+                if(this.visible.labels){
+                    ctx.font = '700 20px Inter, Segoe UI, Arial, sans-serif';
+                    ctx.textBaseline = 'middle';
+                    const drawText = (text, x, y, color) => {
+                        ctx.lineWidth = 4;
+                        ctx.strokeStyle = 'rgba(11,16,32,.85)';
+                        ctx.strokeText(text, x, y);
+                        ctx.fillStyle = color;
+                        ctx.fillText(text, x, y);
+                    };
+                    drawText('A', pts.A.x - 16, pts.A.y + 18, '#edf2ff');
+                    drawText('B', pts.B.x + 8, pts.B.y + 18, '#edf2ff');
+                    drawText('C', pts.C.x + 8, pts.C.y - 10, '#edf2ff');
+                    drawText('S', pts.S.x + 8, pts.S.y - 12, '#edf2ff');
+
+                    ctx.font = '700 18px Inter, Segoe UI, Arial, sans-serif';
+                    drawText(`AB = ${this.task.a}`, (pts.A.x+pts.B.x)/2 - 18, (pts.A.y+pts.B.y)/2 + 22, '#7cc4ff');
+                    drawText(`SB = ${this.task.h}`, (pts.S.x+pts.B.x)/2 + 16, (pts.S.y+pts.B.y)/2 - 4, '#9df0c8');
+                    drawText(`SA = ${this.task.saStr}`, (pts.S.x+pts.A.x)/2 - 64, (pts.S.y+pts.A.y)/2 - 8, '#ffd27a');
+                    drawText(`SC = ${this.task.saStr}`, (pts.S.x+pts.C.x)/2 + 12, (pts.S.y+pts.C.y)/2 - 6, '#ffb2b2');
+                    drawText(`SM = ${this.task.smStr}`, (pts.S.x+pts.M.x)/2 - 52, (pts.S.y+pts.M.y)/2 + 16, '#ffffff');
+                    drawText('M', pts.M.x + 10, pts.M.y + 14, '#ffffff');
+                }
+            }
+        }
+
+        const renderer = new IsoRenderer(document.getElementById('isoCanvas'));
+        applyTask(baseTask);
+
+    })();
+</script>
+
+</body>
+</html>

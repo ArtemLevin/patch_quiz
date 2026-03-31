@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Генератор блока задач — Банк задач</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --bg2:#101933;
+            --panel:#121b35cc;
+            --panel-solid:#111a31;
+            --card:#162344;
+            --muted:#95a3c7;
+            --text:#eef3ff;
+            --accent:#7c9cff;
+            --accent-2:#67e8f9;
+            --accent-3:#c084fc;
+            --good:#4ade80;
+            --warn:#fbbf24;
+            --danger:#fb7185;
+            --line:rgba(255,255,255,.08);
+            --shadow:0 20px 60px rgba(0,0,0,.35);
+            --radius:24px;
+            --radius-sm:16px;
+            --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+            --sans:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+        }
+
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:
+        radial-gradient(circle at top left, rgba(124,156,255,.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(103,232,249,.12), transparent 25%),
+        linear-gradient(180deg, #0a0f1d 0%, #0c1224 100%);
+            color:var(--text);font-family:var(--sans);scroll-behavior:smooth}
+        body{min-height:100vh}
+
+        .shell{
+            width:min(1600px, calc(100vw - 32px));
+            margin:18px auto 40px;
+            display:grid;
+            grid-template-columns: 430px minmax(0,1fr);
+            gap:20px;
+            align-items:start;
+        }
+
+        .panel{
+            position:sticky;
+            top:16px;
+            max-height:calc(100vh - 32px);
+            overflow:auto;
+            padding:18px;
+            border:1px solid var(--line);
+            background:linear-gradient(180deg, rgba(18,27,53,.92), rgba(10,16,33,.92));
+            backdrop-filter: blur(18px);
+            border-radius:28px;
+            box-shadow:var(--shadow);
+        }
+
+        .hero{
+            padding:18px 18px 14px;
+            border:1px solid var(--line);
+            border-radius:22px;
+            background:linear-gradient(135deg, rgba(124,156,255,.18), rgba(103,232,249,.07) 50%, rgba(192,132,252,.10));
+            overflow:hidden;
+            position:relative;
+        }
+        .hero::after{
+            content:"";
+            position:absolute;
+            inset:auto -40px -40px auto;
+            width:180px;height:180px;border-radius:50%;
+            background:radial-gradient(circle, rgba(255,255,255,.16), transparent 65%);
+            pointer-events:none;
+        }
+        .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2);font-weight:700}
+        h1{margin:8px 0 8px;font-size:31px;line-height:1.06}
+        .sub{color:var(--muted);font-size:14px;line-height:1.45}
+
+        .grid-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+        .meta{
+            padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--line);
+        }
+        .meta .k{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+        .meta .v{margin-top:5px;font-size:18px;font-weight:800}
+
+        .section{margin-top:16px;padding:15px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.03)}
+        .section h2{margin:0 0 12px;font-size:16px}
+        .row{display:flex;gap:10px;align-items:center}
+        .row + .row{margin-top:10px}
+        .col{display:grid;gap:10px}
+        .cols-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+        label.small{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+        input[type="text"],input[type="number"],select,textarea{
+            width:100%;border:1px solid rgba(255,255,255,.10);background:#0d152d;color:var(--text);
+            border-radius:14px;padding:11px 12px;outline:none;font:inherit;
+            transition:.2s border-color,.2s transform,.2s box-shadow;
+        }
+        input:focus,select:focus,textarea:focus{
+            border-color:rgba(124,156,255,.7);
+            box-shadow:0 0 0 4px rgba(124,156,255,.12);
+        }
+        textarea{min-height:84px;resize:vertical}
+
+        .toggle{
+            display:flex;align-items:center;justify-content:space-between;gap:12px;
+            padding:10px 12px;border-radius:14px;background:#0d152d;border:1px solid rgba(255,255,255,.08)
+        }
+        .toggle span{font-size:14px}
+
+        .switch{position:relative;width:52px;height:30px;display:inline-block}
+        .switch input{display:none}
+        .slider{position:absolute;inset:0;border-radius:999px;background:#243155;cursor:pointer;transition:.25s}
+        .slider::before{content:"";position:absolute;width:22px;height:22px;left:4px;top:4px;border-radius:50%;background:#fff;transition:.25s}
+        .switch input:checked + .slider{background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+        .switch input:checked + .slider::before{transform:translateX(22px)}
+
+        .chips{display:flex;flex-wrap:wrap;gap:8px}
+        .chip{
+            user-select:none;padding:10px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.09);
+            background:#0d152d;color:var(--text);cursor:pointer;font-size:13px;transition:.18s ease;
+        }
+        .chip.active{background:linear-gradient(135deg, rgba(124,156,255,.24), rgba(103,232,249,.20));border-color:rgba(124,156,255,.55);transform:translateY(-1px)}
+        .chip small{color:var(--muted)}
+
+        .category-list{display:grid;gap:10px}
+        .category-card{
+            border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+        }
+        .category-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}
+        .category-title{font-weight:800;font-size:14px}
+        .pill{padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.06);font-size:12px;color:var(--muted);border:1px solid var(--line)}
+
+        input[type="range"]{width:100%}
+        .range-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+
+        .btns{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+        button{
+            border:0;cursor:pointer;border-radius:16px;padding:13px 14px;font:inherit;font-weight:800;color:var(--text);
+            background:#1b2950;transition:.18s transform,.18s opacity,.18s box-shadow;
+            box-shadow:0 8px 20px rgba(0,0,0,.22);
+        }
+        button:hover{transform:translateY(-1px)}
+        button:active{transform:translateY(1px)}
+        .primary{background:linear-gradient(135deg, var(--accent), #5dd3ff);color:#081120}
+        .ghost{background:#101a34;border:1px solid var(--line)}
+        .danger{background:linear-gradient(135deg, #9f1239, #fb7185)}
+        .good{background:linear-gradient(135deg, #16a34a, #4ade80);color:#05170d}
+
+        .workspace{display:grid;gap:20px}
+        .topbar{
+            display:flex;justify-content:space-between;gap:14px;align-items:center;
+            border:1px solid var(--line);border-radius:28px;padding:16px 18px;
+            background:linear-gradient(180deg, rgba(18,27,53,.85), rgba(11,17,35,.85));backdrop-filter: blur(12px);box-shadow:var(--shadow)
+        }
+        .title-wrap h3{margin:0;font-size:24px}
+        .title-wrap p{margin:4px 0 0;color:var(--muted)}
+
+        .badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+        .badge{padding:8px 11px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted)}
+
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+        .stat{
+            padding:14px 16px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+            border:1px solid var(--line);box-shadow:var(--shadow)
+        }
+        .stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+        .stat .v{margin-top:8px;font-size:29px;font-weight:900}
+
+        .paper{
+            border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg, rgba(14,21,43,.95), rgba(9,14,30,.96));
+            box-shadow:var(--shadow);overflow:hidden
+        }
+        .paper-head{
+            padding:20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+            background:linear-gradient(180deg, rgba(124,156,255,.08), rgba(255,255,255,.01));
+        }
+        .paper-title{font-size:28px;font-weight:900;margin:0 0 8px}
+        .paper-sub{margin:0;color:var(--muted);line-height:1.45}
+        .paper-tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+        .tiny{padding:9px 11px;border-radius:12px;font-size:13px;font-weight:700}
+
+        .task-groups{padding:20px;display:grid;gap:18px}
+        .task-group{
+            border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);border-radius:24px;overflow:hidden
+        }
+        .task-group-head{
+            display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);
+            background:linear-gradient(90deg, rgba(124,156,255,.12), rgba(103,232,249,.04));
+        }
+        .task-group-head h4{margin:0;font-size:18px}
+        .task-count{font-size:12px;color:var(--muted)}
+        .task-list{padding:10px 14px 16px;display:grid;gap:10px}
+        .task-card{
+            display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:14px;border-radius:18px;background:#0c1430;border:1px solid rgba(255,255,255,.06)
+        }
+        .task-number{
+            width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-weight:900;background:linear-gradient(135deg, rgba(124,156,255,.28), rgba(103,232,249,.22));
+            border:1px solid rgba(124,156,255,.35)
+        }
+        .task-body{min-width:0}
+        .task-text{font-size:17px;line-height:1.55;white-space:normal}
+        .task-text math, .answer math{font-size:1.02em}
+        .task-text math[display="block"], .answer math[display="block"]{display:block;margin:8px 0;overflow-x:auto;overflow-y:hidden}
+        .task-text mtext, .answer mtext{font-family:var(--sans)}
+        .task-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+        .mini{font-size:11px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted)}
+        .answer{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.18);display:none}
+        .task-card.show-answer .answer{display:block}
+        .task-actions{display:grid;gap:8px}
+        .icon-btn{
+            width:38px;height:38px;border-radius:12px;padding:0;display:grid;place-items:center;background:#122044;border:1px solid var(--line);font-size:16px
+        }
+
+        .empty{
+            padding:34px 18px;text-align:center;color:var(--muted)
+        }
+        .footer-note{padding:0 20px 20px;color:var(--muted);font-size:13px;line-height:1.5}
+
+        .legend{
+            display:grid;grid-template-columns:repeat(2,1fr);gap:10px
+        }
+        .legend .item{padding:11px 12px;border-radius:14px;background:#0d152d;border:1px solid rgba(255,255,255,.07);font-size:13px;color:var(--muted)}
+
+        .hidden{display:none !important}
+
+        @media (max-width: 1200px){
+            .shell{grid-template-columns:1fr}
+            .panel{position:relative;top:0;max-height:none}
+            .stats{grid-template-columns:repeat(2,1fr)}
+        }
+        @media (max-width: 760px){
+            .shell{width:min(100vw - 18px, 1600px);margin:9px auto 24px;gap:14px}
+            .panel,.paper,.topbar{border-radius:22px}
+            .stats{grid-template-columns:1fr}
+            .paper-head,.topbar{flex-direction:column;align-items:flex-start}
+            .task-card{grid-template-columns:auto 1fr}
+            .task-actions{grid-column:1 / -1;grid-template-columns:repeat(3,auto);justify-content:flex-end}
+            .cols-2,.cols-3,.legend,.grid-meta,.btns{grid-template-columns:1fr}
+            h1{font-size:26px}
+            .paper-title{font-size:23px}
+        }
+
+        @media print{
+            body{background:#fff;color:#000}
+            .panel,.topbar,.paper-tools,.task-actions,.footer-note,.stats{display:none !important}
+            .shell{display:block;width:100%;margin:0}
+            .paper,.task-group,.task-card{box-shadow:none;border:1px solid #d8d8d8;background:#fff;color:#000}
+            .paper-head,.task-group-head{background:#fff;color:#000}
+            .task-text,.paper-title,h4{color:#000}
+            .answer{display:none !important}
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="panel">
+        <div class="hero">
+            <div class="eyebrow">Интерактивный генератор</div>
+            <h1>Блок задач из банка</h1>
+            <div class="sub">
+                Современная автономная страница для сборки вариантов по шести форматам: уравнения, неравенства,
+                задачи с параметром, финансовые задачи, планиметрия и стереометрия.
+            </div>
+            <div class="grid-meta">
+                <div class="meta"><div class="k">Категорий</div><div class="v">6</div></div>
+                <div class="meta"><div class="k">Режимов</div><div class="v">12+</div></div>
+                <div class="meta"><div class="k">Хранение</div><div class="v">Local</div></div>
+            </div>
+        </div>
+
+        <section class="section">
+            <h2>Шапка варианта</h2>
+            <div class="row">
+                <div style="flex:1">
+                    <label class="small" for="variantTitle">Название</label>
+                    <input id="variantTitle" type="text" value="Тренировочный блок задач" />
+                </div>
+            </div>
+            <div class="cols-2">
+                <div>
+                    <label class="small" for="variantLevel">Уровень</label>
+                    <select id="variantLevel">
+                        <option value="любой">Любой</option>
+                        <option value="база">База</option>
+                        <option value="стандарт">Стандарт</option>
+                        <option value="профиль">Профиль</option>
+                        <option value="олимпиадный">Олимпиадный</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="small" for="variantDifficulty">Сложность</label>
+                    <select id="variantDifficulty">
+                        <option value="любая">Любая</option>
+                        <option value="1">1 — простая</option>
+                        <option value="2">2 — средняя</option>
+                        <option value="3">3 — выше средней</option>
+                        <option value="4">4 — сложная</option>
+                        <option value="5">5 — очень сложная</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div style="flex:1">
+                    <label class="small" for="teacherNote">Подпись / комментарий</label>
+                    <textarea id="teacherNote" placeholder="Например: вариант для домашней тренировки, акцент на параметры и геометрию"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Режим генерации</h2>
+            <div class="chips" id="modeChips"></div>
+            <div class="row" style="margin-top:10px">
+                <div style="flex:1">
+                    <label class="small" for="taskCount">Общее число задач</label>
+                    <input id="taskCount" type="range" min="3" max="18" step="1" value="8" />
+                    <div class="range-meta"><span>3</span><strong id="taskCountValue">8</strong><span>18</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Категории и веса</h2>
+            <div class="category-list" id="categoryList"></div>
+        </section>
+
+        <section class="section">
+            <h2>Отбор и оформление</h2>
+            <div class="toggle"><span>Показывать ответы</span><label class="switch"><input id="showAnswers" type="checkbox" /><span class="slider"></span></label></div>
+            <div class="row"></div>
+            <div class="toggle"><span>Показывать теги сложности</span><label class="switch"><input id="showMeta" type="checkbox" checked /><span class="slider"></span></label></div>
+            <div class="row"></div>
+            <div class="toggle"><span>Перемешивать внутри категорий</span><label class="switch"><input id="shuffleWithin" type="checkbox" checked /><span class="slider"></span></label></div>
+            <div class="row"></div>
+            <div class="toggle"><span>Избегать повторов последних 5 генераций</span><label class="switch"><input id="avoidRecent" type="checkbox" checked /><span class="slider"></span></label></div>
+            <div class="row"></div>
+            <div class="toggle"><span>Группировать по темам</span><label class="switch"><input id="groupByCategory" type="checkbox" checked /><span class="slider"></span></label></div>
+        </section>
+
+        <section class="section">
+            <h2>Фильтры по тегам</h2>
+            <div class="chips" id="tagFilters"></div>
+        </section>
+
+        <section class="section">
+            <h2>Быстрые действия</h2>
+            <div class="btns">
+                <button class="primary" id="generateBtn">Сгенерировать</button>
+                <button class="ghost" id="rerollBtn">Перегенерировать</button>
+                <button class="good" id="savePresetBtn">Сохранить пресет</button>
+                <button class="ghost" id="loadPresetBtn">Загрузить пресет</button>
+                <button class="ghost" id="exportBtn">Экспорт JSON</button>
+                <button class="ghost" id="copyBtn">Копировать текст</button>
+                <button class="ghost" id="printBtn">Печать / PDF</button>
+                <button class="danger" id="resetBtn">Сбросить</button>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Подсказка по кастомизации</h2>
+            <div class="legend">
+                <div class="item">Можно задать вес каждой категории и её собственное число задач.</div>
+                <div class="item">Есть режимы: сбалансированный, геометрический, алгебраический, профильный и пользовательский.</div>
+                <div class="item">Настройки и история генераций сохраняются локально в браузере.</div>
+                <div class="item">Банк стартовый, но структуру легко расширить прямо в константе <span style="font-family:var(--mono)">TASK_BANK</span>.</div>
+            </div>
+        </section>
+    </aside>
+
+    <main class="workspace">
+        <section class="topbar">
+            <div class="title-wrap">
+                <h3>Конструктор вариантов</h3>
+                <p>Собирайте блоки задач, мгновенно меняйте профиль варианта, фильтруйте темы и печатайте чистый лист заданий.</p>
+            </div>
+            <div class="badges" id="activeBadges"></div>
+        </section>
+
+        <section class="stats">
+            <div class="stat"><div class="k">В банке задач</div><div class="v" id="statBank">0</div></div>
+            <div class="stat"><div class="k">Выбрано задач</div><div class="v" id="statSelected">0</div></div>
+            <div class="stat"><div class="k">Активно категорий</div><div class="v" id="statActiveCats">0</div></div>
+            <div class="stat"><div class="k">Активно тегов</div><div class="v" id="statTags">0</div></div>
+        </section>
+
+        <section class="paper" id="paper">
+            <div class="paper-head">
+                <div>
+                    <h2 class="paper-title" id="paperTitle">Тренировочный блок задач</h2>
+                    <p class="paper-sub" id="paperSub">Настройте параметры слева и нажмите «Сгенерировать».</p>
+                </div>
+                <div class="paper-tools">
+                    <button class="tiny ghost" id="toggleAnswersBtn">Ответы</button>
+                    <button class="tiny ghost" id="toggleMetaBtn">Теги</button>
+                    <button class="tiny ghost" id="collapseBtn">Свернуть/раскрыть</button>
+                </div>
+            </div>
+
+            <div class="task-groups" id="taskGroups">
+                <div class="empty">Пока задач нет. Слева можно выбрать режим, категории, сложность и нужный объём блока.</div>
+            </div>
+            <div class="footer-note">
+                Страница автономная: без внешних библиотек и зависимостей. Её можно адаптировать под расширенный банк,
+                собственные формулировки, темы ЕГЭ и авторские наборы задач.
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // ------------------------------------------------------------
+    // СТАРТОВЫЙ БАНК ЗАДАЧ
+    // ------------------------------------------------------------
+    // Это встроенный демонстрационный банк в духе ранее собранных тематических блоков:
+    // уравнения, неравенства, параметры, финансы, планиметрия, стереометрия.
+    // Его легко расширять: каждый объект — отдельная задача.
+
+    const SOURCE_BANK = {
+        "уравнения": {
+            "Вычисление_значений_тригонометрических_выражений": [
+                {"qid":"2D494A","text":"Найдите значение выражения 2 sin 136° / (sin 68° · sin 22°)."},
+                {"qid":"133372","text":"Найдите значение выражения 2√3 cos²(13π/12) − √3."},
+                {"qid":"23C8BB","text":"Найдите значение выражения 4√2 − 8√2 sin²(7π/8)."},
+                {"qid":"9302BE","text":"Найдите значение выражения 6√3 cos²(11π/12) − 3√3."},
+                {"qid":"818625","text":"Найдите значение выражения 4√3 cos²(23π/12) − 4√3 sin²(23π/12)."},
+                {"qid":"0444D9","text":"Найдите значение выражения 5√2 sin(3π/8) · cos(3π/8)."},
+                {"qid":"24F9AF","text":"Найдите значение выражения 8 sin 64° · cos 64° / sin 128°."},
+                {"qid":"7E8850","text":"Найдите значение выражения 3√3 − 6√3 sin²(13π/12)."},
+                {"qid":"F6A6E0","text":"Найдите значение выражения 3 sin(13π/12) · cos(13π/12)."},
+                {"qid":"A7C3EB","text":"Найдите значение выражения 5√2 cos²(7π/8) − 5√2 sin²(7π/8)."},
+                {"qid":"042F86","text":"Найдите значение выражения 3 sin 68° / (cos 34° · cos 56°)."},
+                {"qid":"F6158A","text":"Найдите значение выражения 3 cos² α, если sin α = 0,2."},
+                {"qid":"E74193","text":"Найдите значение выражения 6 cos² α, если sin α = −0,8."},
+                {"qid":"75591A","text":"Найдите значение выражения 3 cos² α, если cos α = −0,8."},
+                {"qid":"5CBA9F","text":"Найдите значение выражения 3 cos² α, если sin α = 0,6."},
+                {"qid":"A68E99","text":"Найдите значение выражения 3√2 cos²(9π/8) − 3√2 sin²(9π/8)."},
+                {"qid":"967F93","text":"Найдите tg α, если cos α = −√26/26 и α ∈ (π/2; π)."},
+                {"qid":"DC6B69","text":"Найдите значение выражения 18√2 tg(π/4) sin(π/4)."},
+                {"qid":"0DC0A0","text":"Найдите значение выражения √2 − 2√2 sin²(15π/8)."}
+            ],
+            "Простейшие_и_приводимые_тригонометрические_уравнения": [
+                {"qid":"0448F1","text":"а) Решите уравнение cos 2x + cos(−x) = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−7π/2; −2π]."},
+                {"qid":"8413F6","text":"а) Решите уравнение cos 2x + √3 sin(π/2 + x) + 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−3π; −3π/2]."},
+                {"qid":"3BB500","text":"а) Решите уравнение 2 sin²(π/2 − x) + sin 2x = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [3π; 9π/2]."},
+                {"qid":"1D3525","text":"а) Решите уравнение sin 2x + 2 sin(−x) + cos(−x) − 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."},
+                {"qid":"9BA813","text":"а) Решите уравнение sin x + 2 sin(2x + π/6) = √3 sin 2x + 1. б) Укажите корни этого уравнения, принадлежащие отрезку [−7π/2; −2π]."},
+                {"qid":"E6F116","text":"а) Решите уравнение 2 cos³ x − cos² x + 2 cos x − 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."},
+                {"qid":"685C13","text":"а) Решите уравнение cos 2x − √2 sin(x + π) − 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−7π/2; −2π]."},
+                {"qid":"B8F61F","text":"а) Решите уравнение 2 sin(2x + π/6) − cos x = √3 sin 2x − 1. б) Укажите корни этого уравнения, принадлежащие отрезку [5π/2; 4π]."},
+                {"qid":"2D54B0","text":"а) Решите уравнение cos 2x − 3 sin(−x) − 2 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [3π; 9π/2]."},
+                {"qid":"2247B7","text":"а) Решите уравнение 2 sin(x + π/3) + cos 2x = √3 cos x + 1. б) Укажите корни этого уравнения, принадлежащие отрезку [−3π; −3π/2]."},
+                {"qid":"DCD2BC","text":"а) Решите уравнение 2 cos x − √3 sin 2x = 2 cos 3x. б) Укажите корни этого уравнения, принадлежащие отрезку [−7π/2; −2π]."},
+                {"qid":"78516C","text":"а) Решите уравнение 1 − cos 2x + √2 sin x = √2 − 2 sin(x + π). б) Найдите все корни этого уравнения, принадлежащие отрезку [−3π; −3π/2]."},
+                {"qid":"4EFD3D","text":"а) Решите уравнение sin 2x + √2 sin(x + π) = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−4π; −5π/2]."},
+                {"qid":"716236","text":"а) Решите уравнение 1 − cos 2x + √3 sin x = √3 − 2 sin(x − π). б) Найдите все корни этого уравнения, принадлежащие отрезку [−5π; −7π/2]."},
+                {"qid":"D7FC6F","text":"а) Решите уравнение 2 sin(x + π/3) − √3 cos 2x = sin x + √3. б) Укажите корни этого уравнения, принадлежащие отрезку [−2π; −π/2]."},
+                {"qid":"8A88E1","text":"а) Решите уравнение 2 sin 2x + √2 sin(x + π/4) = cos x. б) Укажите корни этого уравнения, принадлежащие отрезку [−2π; −π/2]."},
+                {"qid":"E0B0CA","text":"а) Решите уравнение 2 cos 2x + 3 sin(x + π) − 3 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."},
+                {"qid":"34CAC3","text":"а) Решите уравнение 2 sin 2x + cos(−x) − 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−9π/2; −3π]."},
+                {"qid":"46249A","text":"а) Решите уравнение 2 cos 2x + 3 sin(−x) − 3 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."},
+                {"qid":"71B1D1","text":"а) Решите уравнение 2 sin 2x + 2√3 sin(π/2 + x) + 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−4π; −5π/2]."},
+                {"qid":"24AAD1","text":"а) Решите уравнение cos 2x + √2 cos(x + π) + 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−4π; −5π/2]."},
+                {"qid":"74C1A9","text":"а) Решите уравнение 2 cos³ x + √3 cos² x + 2 cos x + √3 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−2π; −π/2]."},
+                {"qid":"9D14AA","text":"а) Решите уравнение sin 2x − sin(−x) + 2 cos(−x) + 1 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [3π/2; 3π]."},
+                {"qid":"30EEA9","text":"а) Решите уравнение 2√3 sin²(x + 3π/2) + sin 2x = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−4π; −5π/2]."},
+                {"qid":"A67297","text":"а) Решите уравнение 2 sin x + 2√3 sin(−x) − 4 cos 2x = √3 − 4. б) Найдите все корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."}
+            ],
+            "Уравнения_сводимые_к_квадратным_или_показательным_заменой": [
+                {"qid":"617B18","text":"а) Решите уравнение 8 · 16^(sin²x) − 2 · 4^(cos²x) = 63. б) Найдите все корни этого уравнения, принадлежащие отрезку [7π/2; 5π]."},
+                {"qid":"AD8FD9","text":"а) Решите уравнение 4 · 16^(sin²x) − 6 · 4^(cos²x) = 29. б) Найдите все корни этого уравнения, принадлежащие отрезку [3π/2; 3π]."},
+                {"qid":"1CAE46","text":"а) Решите уравнение √(16^sin x) + 16^sin(x+π) = 17/4. б) Укажите корни этого уравнения, принадлежащие отрезку [3π/2; 3π]."},
+                {"qid":"54D407","text":"а) Решите уравнение √(16^sin x) − 6 · √(4^sin x) + 8 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [−5π; −7π/2]."},
+                {"qid":"53A21E","text":"а) Решите уравнение (1/49)^√(sin(x+π)) = 7^(2√3 sin(π/2−x)). б) Укажите корни этого уравнения, принадлежащие отрезку [3π; 9π/2]."},
+                {"qid":"4FF160","text":"а) Решите уравнение 49^sin x = (1/7)^(-2√(sin 2x)). б) Укажите корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."},
+                {"qid":"0C47ED","text":"а) Решите уравнение 9 · 81^√(cos x) − 28 · 9^√(cos x) + 3 = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [5π/2; 4π]."}
+            ],
+            "Логарифмические_тригонометрические_уравнения": [
+                {"qid":"638272","text":"а) Решите уравнение log₂²(sin x) + log₂(sin x) / (2 cos x + √3) = 0. б) Найдите все корни этого уравнения, принадлежащие отрезку [0; 3π/2]."},
+                {"qid":"B2FAAF","text":"а) Решите уравнение log₂²(sin x) + log₂(sin x) / (2 cos x − √3) = 0. б) Найдите все корни этого уравнения, принадлежащие отрезку [π/2; 2π]."}
+            ],
+            "Уравнения_с_радикалами_и_тригонометрическими_выражениями": [
+                {"qid":"FDA042","text":"а) Решите уравнение 9 sin² x − 3√2 sin x √(11 sin x) = 0. б) Найдите все корни этого уравнения, принадлежащие отрезку [7π/2; 5π].","note":"запись радикалов восстановлена по наиболее естественному прочтению"},
+                {"qid":"A6BC58","text":"а) Решите уравнение 4 sin² x − 2√6 sin x √(7 sin x) = 0. б) Найдите все его корни, принадлежащие отрезку [−13π/2; −5π].","note":"запись радикалов восстановлена по наиболее естественному прочтению"}
+            ],
+            "Прикладные_и_исследовательские": [
+                {"qid":"0C4928","text":"Два тела, массой m = 6 кг каждое, движутся с одинаковой скоростью v = 9 м/с под углом 2α друг к другу. Энергия (в Дж), выделяющаяся при их абсолютно неупругом соударении, вычисляется по формуле Q = mv² sin² α, где m — масса (в кг), v — скорость (в м/с). Найдите, под каким углом 2α должны двигаться тела, чтобы в результате соударения выделилась энергия, равная 243 Дж. Ответ дайте в градусах."},
+                {"qid":"277247","text":"Найдите наименьшее значение функции y = 10 cos x − 14x + 5 на отрезке [−3π/2; 0]."}
+            ],
+            "Смешанные_типы": [
+                {"qid":"A1A34D","text":"а) Решите уравнение sin 2x + √2 cos(x + π) = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [3π; 9π/2]."},
+                {"qid":"6671FD","text":"а) Решите уравнение 2 sin(x + π/6) − 2√3 cos 2x = cos x − 2√3. б) Укажите корни этого уравнения, принадлежащие отрезку [−5π/2; −π]."},
+                {"qid":"712A7B","text":"а) Решите уравнение √2 sin(x + π/4) + 2 sin 2x = sin x + 2. б) Укажите корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."},
+                {"qid":"209E7E","text":"а) Решите уравнение 2 cos x − 2√3 cos(−x) − 4 sin 2x = √3 − 4. б) Найдите все корни этого уравнения, принадлежащие отрезку [2π; 7π/2]."},
+                {"qid":"2CCC19","text":"а) Решите уравнение 2 sin 2x + √2 sin(2π − x) + √3 sin 2x = √6 cos x. б) Найдите все корни этого уравнения, принадлежащие отрезку [−π; π/2]."},
+                {"qid":"34BB16","text":"а) Решите уравнение 2 + 2 cos(π − 2x) + √8 sin x = √6 + √12 sin x. б) Найдите все корни этого уравнения, принадлежащие отрезку [3π; 9π/2]."},
+                {"qid":"72BEEC","text":"а) Решите уравнение 2 − 2 cos(π − 2x) + √8 cos x = √6 + √12 cos x. б) Найдите все корни этого уравнения, принадлежащие отрезку [3π; 9π/2]."}
+            ],
+            "Не_по_теме_тригонометрии": [
+                {"qid":"0BD320","text":"а) Решите уравнение 27^x − 28 · 3^(x+1) + 3^(5−x) = 0. б) Укажите корни этого уравнения, принадлежащие отрезку [√3; log₂ 5]."}
+            ],
+            "Исключено_как_поврежденное": [
+                {"qid":"A3FD10","text":"Найдите, если и."}
+            ]
+        },
+        "неравенства": {
+            "Показательные_неравенства": [
+                {"id":1,"text":"15^x - 3^{x+1} - 5^{x+1} + 15^{-x^2+2x} ≥ 0."},
+                {"id":5,"text":"2^{3x} - 2 · 4^{x+1} + 5 · 2^{x+2} - 16^{x-1} ≥ 0."},
+                {"id":13,"text":"(8^{x+1} - 40)/(2 · 64^x - 32) ≤ 1."},
+                {"id":14,"text":"(3 · 27^x - 9^{x+1} + 3^{x+2} - 3)/(50x^2 - 30x + 4,5) ≥ 0."},
+                {"id":17,"text":"13/(3^x - 81) ≤ 1/(3^x - 9)."},
+                {"id":23,"text":"4/(3^x - 27) ≥ 1/(3^x - 9)."},
+                {"id":30,"text":"1/(3^x + 21) + 1/(3^x - 27) ≥ 0."},
+                {"id":34,"text":"(3^x + 243)/(3^x - 36) ≥ 0."}
+            ],
+            "Показательные_с_рациональной_заменой": [
+                {"id":6,"text":"(4^x - 3 · 2^{x+1} + 4)/(2^x - 5) + (3 · 2^{x+1} - 46)/(2^x - 8) ≤ 2^{x+5}."},
+                {"id":9,"text":"(10^x - 25 · 2^x - 2 · 5^x + 50)/(5^x - x^2 - 4) ≥ 0."},
+                {"id":21,"text":"(8^{x+2/3} - 9 · 4^{x+1/2} + 13 · 2^x - 13)/(4^{x+1/2} - 9 · 2^x + 4) ≤ (2^{x+1} - 1)/(2^x - 2) + 3/(2^{x+1} - 1)."},
+                {"id":32,"text":"(3^x + 9)/(3^x - 9) + (3^x - 9)/(3^x + 9) ≥ (4 · 3^{x+1} + 144)/(9^x - 81)."}
+            ],
+            "Логарифмические_неравенства": [
+                {"id":3,"text":"log_{16}(x+5) + log_{x^2+10x+25} 2 ≥ 3/4."},
+                {"id":4,"text":"log_5(3x+1) + log_5(1/(72x^2+1)) ≥ log_5(1/(24x+1))."},
+                {"id":7,"text":"log_5(2x+2) - log_5(x+3) ≤ log_5((x+6)/x^2)."},
+                {"id":11,"text":"2log_2(√(x^5)) - log_2(x^{1-x}) ≤ log_2((5x^2+1)/(x-2))."},
+                {"id":12,"text":"log_2(4x^2 - 1) - log_2(x) ≤ log_2((5x+9)/(x-11))."},
+                {"id":19,"text":"log_5((3-x)(x^2+2)) ≥ log_5(x^2-7x+12) + log_5(5-x)."},
+                {"id":20,"text":"2log_3(9x) - 13log_3^2 x - log_3(x^4) ≤ 1."},
+                {"id":22,"text":"log_4((x-5)(x^2-2x-15)) + 1 ≥ 0,5log_2((x-5)^2)."},
+                {"id":24,"text":"log_{11}(2x^2+1) + log_{11}(1/(32x+1)) ≥ log_{11}(x/16 + 1)."},
+                {"id":26,"text":"log_3(1/(x+2)) - log_3(x+5) ≥ log_3((x+4)/x^2)."},
+                {"id":29,"text":"log_{0,5}(x^3 - 3x^2 - 9x + 27) ≤ log_{0,25}((x-3)^4)."},
+                {"id":35,"text":"log_4(16x^4) + 11log_4^2 x - 9 ≥ -1."},
+                {"id":36,"text":"log_7(2x^2+12) - log_7(x^2-x+12) ≥ log_7(2 - 1/x)."},
+                {"id":37,"text":"log_8(x^3 - 3x^2 + 3x - 1) ≥ log_2(x^2 - 1) - 5."}
+            ],
+            "Логарифмические_дробно_рационального_типа": [
+                {"id":15,"text":"log_8 x / log_8(x^{64}) ≥ (2log_8 x + 3)/(log_2^2(8x) - log_8(x^2))."},
+                {"id":31,"text":"log_5(25x)/(log_5 x - 2) + (log_5 x - 2)/log_5(25x) ≥ (6 - log_5(x^4))/(log_5^2 x - 4)."},
+                {"id":33,"text":"log_2(32x)/(log_2 x - 5) + (log_2 x - 5)/log_2(32x) ≥ (log_2(x/16) + 18)/(log_2^2 x - 25)."},
+                {"id":38,"text":"log_4(64x)/(log_4 x - 3) + (log_4 x - 3)/log_4(64x) ≥ (log_4(x^4) + 16)/(log_4^2 x - 9)."}
+            ],
+            "Со_знаком_логарифма_в_числителе_или_знаменателе": [
+                {"id":2,"text":"(log_3(9^x) · log_4(64^x)) / 5^{x^2 - |x|} ≤ 0."},
+                {"id":8,"text":"(log_2(x^2) - log_3(x^2)) / (log_2^6(2x^2 - 10x + 12,5) + 1) ≥ 0."},
+                {"id":18,"text":"(log_2(2-x) - log_2(x+1)) / (log_2^2(x^2) + log_2(x^4) + 1) ≥ 0."}
+            ],
+            "Смешанные_с_корнями_степенями_и_ОДЗ": [
+                {"id":27,"text":"(8x^3 - 4x^2 - 2x + 1)/(16^{x^2} - 4 · 4^{x^2} + 4) ≤ 0."},
+                {"id":16,"text":"(2·8^{x-1})/(2·8^{x-1}-1) ≥ 3/(8^x-1) + 8/(64^x - 5·8^x + 4)."},
+                {"id":28,"text":"((11^{√x}-6)/(11^{√x}-24)) · 1/(121^{√x}-16·11^{√x}+60) ≤ 1/(11^{√x}-10)."}
+            ]
+        },
+        "параметр": {
+            "Уравнения_с_логарифмами_корнями_и_условиями_на_отрезке": [
+                {"qid":"8D6C09","text":"Найдите все значения a, при которых уравнение (x + ln(x + a))² = (x − ln(x + a))² имеет единственное решение на отрезке [0; 1]."},
+                {"qid":"211B61","text":"Найдите все значения a, при которых уравнение (2x + a + 1 + tan x)² = (2x + a − 1 − tan x)² имеет единственное решение на отрезке [−π/2; π/2]."},
+                {"qid":"3DD135","text":"Найдите все значения a, при которых уравнение (2x + ln(x + 2a))² = (2x − ln(x + 2a))² имеет единственный корень на отрезке [0; 1]."},
+                {"qid":"A22E40","text":"Найдите все значения a, при каждом из которых уравнение √(2 − 3x) · ln(16x² − a²) = √(2 − 3x) · ln(4x + a) имеет ровно один корень."},
+                {"qid":"9F53F5","text":"Найдите все значения a, при каждом из которых уравнение √(4x − 1) · ln(x² − 2x + 2 − a²) = 0 имеет ровно один корень на отрезке [0; 1]."},
+                {"qid":"9437D5","text":"Найдите все значения a, при каждом из которых уравнение (5x − 2) · ln(x + a) = (5x − 2) · ln(2x − a) имеет ровно один корень на отрезке [0; 1]."},
+                {"qid":"93CF53","text":"Найдите все значения a, при каждом из которых уравнение √(x² − a²) = √(4x² − (4a + 2)x + 2a) на отрезке [0; 1] имеет ровно один корень."},
+                {"qid":"7F7EC4","text":"Найдите все значения a, при каждом из которых уравнение √(7x − 4) · ln(x² − 8x + 17 − a²) = 0 имеет на отрезке [0; 4] ровно один корень."},
+                {"qid":"3E3293","text":"Найдите все значения a, при каждом из которых уравнение ln(4x − 1) · √(x² − 6x + 6a − a²) = 0 имеет ровно один корень на отрезке [0; 3]."},
+                {"qid":"C7C26F","text":"Найдите все значения a, при каждом из которых уравнение √(x + 2a) · ln(x − a) = (x − 1) · ln(x − a) имеет ровно один корень на отрезке [0; 1]."},
+                {"qid":"997C65","text":"Найдите все значения a, при каждом из которых уравнение √(2x − 1) · ln(4x − a) = √(2x − 1) · ln(5x + a) имеет ровно один корень на отрезке [0; 1]."}
+            ],
+            "Показательные_уравнения_с_параметром": [
+                {"qid":"617476","text":"Найдите все значения a, для каждого из которых уравнение 4^x + (a − 6) · 2^x = (2 + 3|a|) · 2^x + (a − 6)(3|a| + 2) имеет единственное решение."},
+                {"qid":"B384BC","text":"Найдите все значения a, для каждого из которых уравнение 25^x − (a + 6) · 5^x = (5 + 3|a|) · 5^x − (a + 6)(3|a| + 5) имеет единственное решение."}
+            ],
+            "Алгебраические_уравнения_с_модулем_и_числом_корней": [
+                {"qid":"11D603","text":"Найдите все значения a, при каждом из которых уравнение a(x + 4/x)² + 2(x + 4/x) − 25a + 10 = 0 имеет ровно два различных корня."},
+                {"qid":"44907E","text":"Найдите все значения a, при каждом из которых уравнение x² + a² − x − 7a = |7x − a| имеет ровно два различных корня."},
+                {"qid":"1CCE7C","text":"Найдите все значения a, при каждом из которых уравнение (4x + |x − a| − |3x + 1|)² − (a + 1)(4x + |x − a| − |3x + 1|) + 1 = 0 имеет ровно два различных корня."},
+                {"qid":"831474","text":"Найдите все значения a, при каждом из которых уравнение 9x² − a²x² + 8x + 16 − a² = 0 имеет ровно два различных корня."},
+                {"qid":"093D22","text":"Найдите все значения a, при каждом из которых уравнение |x² + a² − 6x + 4a| = 2x − 2a имеет ровно два различных корня."},
+                {"qid":"0106DC","text":"Найдите все значения a, при каждом из которых уравнение √(x⁴) + (a − 3)² = |x − a + 3| + |x + a − 3| либо имеет единственное решение, либо не имеет решений."},
+                {"qid":"EDB7D3","text":"Найдите все значения a, при каждом из которых уравнение x² + a² + x − 7a = |7x + a| имеет больше двух различных корней."},
+                {"qid":"C06958","text":"Найдите все значения a, при каждом из которых уравнение (|x − a − 1| + |x − a + 1|)² + a(|x − a − 1| + |x − a + 1|) + a² − 16 = 0 имеет ровно два различных корня."},
+                {"qid":"073F98","text":"Найдите все значения a, при каждом из которых уравнение a² − ax − 2x² − 6a + 3x + 9|x| = 0 имеет четыре различных корня."},
+                {"qid":"ACF79C","text":"Найдите все значения a, при каждом из которых уравнение (3x + |x − a| + |2x + a + 1|)² − a(3x + |x − a| + |2x + a + 1|) + a² − 16 = 0 имеет ровно один корень."},
+                {"qid":"421A63","text":"Найдите все значения a, при каждом из которых уравнение |x² + a² − 6x − 4a| = 2x + 2a имеет четыре различных корня."},
+                {"qid":"162563","text":"Найдите все значения a, при каждом из которых уравнение 4x² − a²x² + 6x + 9 − a² = 0 имеет ровно два различных корня."},
+                {"qid":"BC0636","text":"Найдите все значения a, при каждом из которых уравнение (|x − a/2| + |x + 1|)² − 7(|x − a/2| + |x + 1|) + 4a² + 4 = 0 имеет ровно два различных корня."},
+                {"qid":"E9FA32","text":"Найдите все значения a, при каждом из которых уравнение (4x − 3|x + a/2| + |x − 1| + 3a²)² − (a + 1)(4x − 3|x + a/2| + |x − 1| + 3a²) + 4 = 0 имеет ровно два различных корня."}
+            ],
+            "Системы_уравнений_с_прямой_и_кривой": [
+                {"qid":"56C747","text":"Найдите все значения a, при каждом из которых система уравнений { (xy² − 3xy − 3y + 9)√(3 − x) = 0, y = ax } имеет ровно три различных решения."},
+                {"qid":"ABE248","text":"Найдите все значения a, при каждом из которых система уравнений { x + ay + a − 2 = 0, x|y| + x − 2 = 0 } имеет единственное решение."},
+                {"qid":"DA9BFE","text":"Найдите все значения a, при каждом из которых система уравнений { y = |x − a| − 4, 4|y| + x² + 8x = 0 } имеет ровно четыре различных решения."},
+                {"qid":"7B510F","text":"Найдите все значения a, при каждом из которых система уравнений { x + y = a, |y| = |x² − 2x| } имеет ровно два различных решения."},
+                {"qid":"45927B","text":"Найдите все значения a, при каждом из которых система уравнений { ax² + ay² − (2a − 5)x + 2ay + 1 = 0, x² + y = xy + x } имеет ровно четыре различных решения."},
+                {"qid":"04FEB6","text":"Найдите все значения a, при каждом из которых система уравнений { (x² − 5x − y + 3)√(x − y + 3) = 0, y = 3x + a } имеет ровно два различных решения."},
+                {"qid":"07CC1C","text":"Найдите все значения a, при каждом из которых система уравнений { y = (a + 2)x² + 2ax + a − 2, y² = x² } имеет ровно четыре различных решения."},
+                {"qid":"37FD10","text":"Найдите все значения a, при каждом из которых система уравнений { (x² − 5x − y + 3)√(x − y + 3) = 0, y = ax + a } имеет ровно два различных решения."},
+                {"qid":"4A8E2F","text":"Найдите все значения a, при каждом из которых система уравнений { (x² + y² + 4x)√(2x + y + 6) = 0, y = ax − 2a } имеет ровно два различных решения."},
+                {"qid":"F3A6D5","text":"Найдите все значения a, при каждом из которых система уравнений { (x² + y² + 4x)√(2x + y + 6) = 0, y = x + a } имеет ровно два различных решения."},
+                {"qid":"F605A0","text":"Найдите все значения a, при каждом из которых система уравнений { 4x − y + a = 0, 2|y| − x² + 4x = 0 } имеет ровно два различных решения."},
+                {"qid":"752FA4","text":"Найдите все значения a, при каждом из которых система уравнений { (xy − 2x + 12)√(y − 2x + 12) = 0, y = ax − 10 } имеет ровно два различных решения."},
+                {"qid":"6854C0","text":"Найдите все значения a, при каждом из которых система уравнений { (xy − 2x + 12)√(y − 2x + 12) = 0, y = 3x + a } имеет ровно два различных решения."},
+                {"qid":"7CC260","text":"Найдите все положительные значения a, при каждом из которых система уравнений { |x| + |y| = a, y = √(x + 4) } имеет ровно два различных решения."}
+            ],
+            "Системы_уравнений_специального_вида": [
+                {"qid":"EE054F","text":"Найдите все значения a, при каждом из которых система уравнений { x⁴ + y² = a², x² + y = |2a − 4| } имеет ровно четыре различных решения."},
+                {"qid":"D5CA79","text":"Найдите все значения a, при каждом из которых система уравнений { (x + ay − 5)(x + ay − 5a) = 0, x² + y² = 16 } имеет ровно четыре различных решения."},
+                {"qid":"D5A8E6","text":"Найдите все значения a, при каждом из которых система уравнений { ax² + ay² + 2ax + (a + 2)y + 1 = 0, xy + 1 = x + y } имеет ровно четыре различных решения."},
+                {"qid":"E156E1","text":"Найдите все значения a, при каждом из которых система уравнений { x⁴ − y⁴ = 12a − 28, x² + y² = a } имеет ровно четыре различных решения."}
+            ],
+            "Системы_неравенств_с_параметром": [
+                {"qid":"BB4A02","text":"Найдите все значения a, при каждом из которых система неравенств { 2a ≤ x, 6x > x² + a², x + a ≤ 6 } имеет хотя бы одно решение на отрезке [4; 5]."},
+                {"qid":"AD93BF","text":"Найдите все значения a, при каждом из которых система неравенств { a(x − 1) ≥ 4, √(2x − 2) ≥ a, 3x < a + 14 } имеет хотя бы одно решение на отрезке [4; 5]."},
+                {"qid":"8257C0","text":"Найдите все значения a, при каждом из которых система неравенств { ax ≥ 2, √(x − 1) > a, 3x ≤ 2a + 11 } имеет хотя бы одно решение на отрезке [3; 4]."},
+                {"qid":"456B95","text":"Найдите все значения a, при каждом из которых система неравенств { x ≤ 2a + 6, 6x ≥ x² + a², x + a > 0 } имеет хотя бы одно решение на отрезке [1; 2]."}
+            ],
+            "Исключено_как_поврежденное": [
+                {"qid":"CF1240","text":"Найдите все значения, при каждом из которых система уравнений имеет ровно два различных решения."}
+            ]
+        },
+        "стереометрия": {
+            "Тела_вращения_цилиндр_конус_шар": [
+                {"qid":"37164B","text":"Цилиндр и конус имеют общее основание и общую высоту. Высота цилиндра равна радиусу основания. Площадь боковой поверхности цилиндра равна 5√2. Найдите площадь боковой поверхности конуса."},
+                {"qid":"6D5AF2","text":"Шар объёма 18 вписан в цилиндр. Найдите объём цилиндра."},
+                {"qid":"DC980A","text":"Около конуса описана сфера (то есть сфера содержит окружность основания конуса и его вершину). Центр сферы находится в центре основания конуса. Радиус сферы равен 84√2. Найдите длину образующей конуса."},
+                {"qid":"D5AC0C","text":"Цилиндр вписан в прямоугольный параллелепипед. Радиус основания цилиндра и его высота равны 2. Найдите объём параллелепипеда."},
+                {"qid":"26B211","text":"Цилиндр и конус имеют общее основание и общую высоту. Объём цилиндра равен 30. Найдите объём конуса."},
+                {"qid":"80631B","text":"Конус вписан в шар. Радиус основания конуса равен радиусу шара. Объём шара равен 60. Найдите объём конуса."},
+                {"qid":"135723","text":"Цилиндр и конус имеют общее основание и общую высоту. Высота цилиндра равна радиусу основания. Площадь боковой поверхности конуса равна 3√2. Найдите площадь боковой поверхности цилиндра."},
+                {"qid":"E71725","text":"Во сколько раз уменьшится объём конуса, если его высота уменьшится в 9 раз, а радиус основания останется прежним?"},
+                {"qid":"F4F51D","text":"Даны два цилиндра. Объём первого цилиндра равен 15. У второго цилиндра высота в 3 раза меньше, а радиус основания в 2 раза больше, чем у первого. Найдите объём второго цилиндра."},
+                {"qid":"1E28D8","text":"Шар вписан в цилиндр. Площадь полной поверхности цилиндра равна 30. Найдите площадь поверхности шара."},
+                {"qid":"41E054","text":"Цилиндр и конус имеют общее основание и общую высоту. Объём цилиндра равен 6. Найдите объём конуса."},
+                {"qid":"1D9551","text":"Конус вписан в шар. Радиус основания конуса равен радиусу шара. Объём конуса равен 12. Найдите объём шара."},
+                {"qid":"DFC057","text":"Цилиндр и конус имеют общее основание и общую высоту. Объём конуса равен 6. Найдите объём цилиндра."},
+                {"qid":"48EB9B","text":"Шар объёма 24 вписан в цилиндр. Найдите объём цилиндра."},
+                {"qid":"FCFB97","text":"Площадь сечения шара плоскостью, проходящей через центр шара, равна 12. Найдите площадь поверхности шара."},
+                {"qid":"61D99A","text":"Даны два цилиндра. Объём первого цилиндра равен 18. У второго цилиндра высота в 3 раза меньше, а радиус основания в 2 раза больше, чем у первого. Найдите объём второго цилиндра."},
+                {"qid":"DB4AE5","text":"Около конуса описана сфера (то есть сфера содержит окружность основания конуса и его вершину). Центр сферы находится в центре основания конуса. Образующая конуса равна 9√2. Найдите радиус сферы."},
+                {"qid":"CD7468","text":"Цилиндр и конус имеют общее основание и общую высоту. Высота цилиндра равна радиусу основания. Площадь боковой поверхности цилиндра равна 3√2. Найдите площадь боковой поверхности конуса."},
+                {"qid":"936F6F","text":"Шар вписан в цилиндр. Площадь полной поверхности цилиндра равна 21. Найдите площадь поверхности шара."},
+                {"qid":"B4FF85","text":"Цилиндр объёма 18 описан около шара. Найдите объём шара."},
+                {"qid":"D8F984","text":"Цилиндр и конус имеют общее основание и общую высоту. Объём цилиндра равен 18. Найдите объём конуса."},
+                {"qid":"C59282","text":"Цилиндр и конус имеют общее основание и общую высоту. Объём конуса равен 9. Найдите объём цилиндра."},
+                {"qid":"33B18F","text":"Во сколько раз увеличится объём конуса, если радиус его основания увеличится в 11 раз, а высота останется прежней?"}
+            ],
+            "Призмы_параллелепипеды_куб_объемы_и_простые_сечения": [
+                {"qid":"BE03FA","text":"Найдите объём многогранника, вершинами которого являются точки A, B, C, C1 правильной треугольной призмы ABCA1B1C1, если площадь её основания равна 6, а боковое ребро равно 9."},
+                {"qid":"ADF4FE","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что AB = 8, BC = 7, AA1 = 6. Найдите объём многогранника, вершинами которого являются точки A, B, C, A1, B1, C1."},
+                {"qid":"29FE0E","text":"Найдите объём многогранника, вершинами которого являются точки A, B, C, D, B1 прямоугольного параллелепипеда ABCDA1B1C1D1, у которого AB = 9, BC = 3, BB1 = 8."},
+                {"qid":"5C9973","text":"Через среднюю линию основания треугольной призмы объёма 52 проведена плоскость, параллельная боковому ребру. Найдите объём отсечённой треугольной призмы."},
+                {"qid":"817F71","text":"Через среднюю линию основания треугольной призмы проведена плоскость, параллельная боковому ребру. Найдите объём этой призмы, если объём отсечённой треугольной призмы равен 15."},
+                {"qid":"F277BE","text":"Дана правильная треугольная призма ABCA1B1C1, площадь основания которой равна 8, а боковое ребро равно 6. Найдите объём многогранника, вершинами которого являются точки A, C, A1, B1, C1."},
+                {"qid":"B28DB5","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что AB = 6, BC = 5, AA1 = 4. Найдите объём многогранника, вершинами которого являются точки A, B, C, B1."},
+                {"qid":"6F27B9","text":"Через среднюю линию основания правильной треугольной призмы объёма 84 проведена плоскость, параллельная боковому ребру. Найдите объём отсечённой треугольной призмы."},
+                {"qid":"68281C","text":"Найдите объём многогранника, вершинами которого являются точки A, B, C, D, A1 прямоугольного параллелепипеда ABCDA1B1C1D1, у которого AB = 3, AD = 9, AA1 = 4."},
+                {"qid":"06E32C","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что AB = 7, BC = 6, AA1 = 5. Найдите объём многогранника, вершинами которого являются точки A, B, C, B1."},
+                {"qid":"2D6929","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что BC = 9, CD = 3, CC1 = 7. Найдите объём многогранника, вершинами которого являются точки A, B, C, D, C1."},
+                {"qid":"32AF22","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что AB = 5, BC = 4, AA1 = 3. Найдите объём многогранника, вершинами которого являются точки A, B, C, D, A1, B1."},
+                {"qid":"E1E5D0","text":"Найдите объём многогранника, вершинами которого являются точки A, B, C, B1 правильной треугольной призмы ABCA1B1C1, если площадь её основания равна 3, а боковое ребро равно 8."},
+                {"qid":"1F4550","text":"Площадь боковой поверхности треугольной призмы равна 24. Через среднюю линию основания призмы проведена плоскость, параллельная боковому ребру. Найдите площадь боковой поверхности отсечённой треугольной призмы."},
+                {"qid":"F51D9A","text":"Объём куба равен 80. Найдите объём треугольной призмы, отсекаемой от куба плоскостью, проходящей через середины двух рёбер, выходящих из одной вершины, и параллельной третьему ребру, выходящему из той же вершины."},
+                {"qid":"370392","text":"Дана правильная треугольная призма ABCA1B1C1, площадь основания которой равна 4, а боковое ребро равно 6. Найдите объём многогранника, вершинами которого являются точки B, C, A1, B1, C1."},
+                {"qid":"0989E5","text":"Через среднюю линию основания треугольной призмы проведена плоскость, параллельная боковому ребру. Найдите объём этой призмы, если объём отсечённой треугольной призмы равен 5."},
+                {"qid":"B1EBED","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что AB = 7, BC = 6, AA1 = 5. Найдите объём многогранника, вершинами которого являются точки A, B, C, A1, B1, C1."},
+                {"qid":"2359E0","text":"Найдите объём многогранника, вершинами которого являются точки A, B, C, C1 правильной треугольной призмы ABCA1B1C1, если площадь её основания равна 7, а боковое ребро равно 9."},
+                {"qid":"5C56EC","text":"Через среднюю линию основания треугольной призмы проведена плоскость, параллельная боковому ребру. Площадь боковой поверхности отсечённой треугольной призмы равна 36. Найдите площадь боковой поверхности исходной призмы."},
+                {"qid":"793F38","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что AB = 6, BC = 5, AA1 = 4. Найдите объём многогранника, вершинами которого являются точки A, B, C, D, A1, B1."},
+                {"qid":"E5413A","text":"В прямоугольном параллелепипеде ABCDA1B1C1D1 известно, что AB = 9, BC = 6, AA1 = 5. Найдите объём многогранника, вершинами которого являются точки A, B, C, B1."},
+                {"qid":"843F31","text":"Через среднюю линию основания треугольной призмы проведена плоскость, параллельная боковому ребру. Найдите объём этой призмы, если объём отсечённой треугольной призмы равен 7."}
+            ],
+            "Сложные_задачи_второй_части": [
+                {"qid":"30ED04","text":"В основании правильной треугольной пирамиды ABCD лежит треугольник ABC со стороной 6. Боковое ребро пирамиды равно 5. На ребре AD отмечена точка T так, что AT:TD = 2:1. Через точку T проведена плоскость, параллельная прямым AC и BD. а) Докажите, что сечение пирамиды этой плоскостью является прямоугольником. б) Найдите площадь сечения."},
+                {"qid":"149319","text":"В основании правильной треугольной пирамиды ABCD лежит треугольник ABC со стороной 5. Боковое ребро пирамиды равно 9. На ребре AD отмечена точка T так, что AT:TD = 1:2. Через точку T проведена плоскость, параллельная прямым AC и BD. а) Докажите, что сечение пирамиды этой плоскостью является прямоугольником. б) Найдите площадь сечения."},
+                {"qid":"04294C","text":"В правильной четырёхугольной пирамиде SABCD с основанием ABCD точка O — центр основания, точка M — середина ребра SC, точка K делит ребро BC в отношении BK:KC = 3:1, причём AB = 2 и SO = √14. а) Докажите, что плоскость OMK параллельна прямой SA. б) Найдите длину отрезка, по которому плоскость OMK пересекает грань SAD."},
+                {"qid":"EA6B32","text":"В основании пирамиды SABCD лежит прямоугольник ABCD со стороной AB = 5 и диагональю BD = 9. Все боковые рёбра пирамиды равны 5. На диагонали BD основания отмечена точка E, а на ребре AS — точка F так, что SF = BE = 4. а) Докажите, что плоскость CEF параллельна ребру SB. б) Плоскость CEF пересекает ребро SD в точке Q. Найдите расстояние от точки Q до плоскости ABC."}
+            ],
+            "Исключено_как_не_стереометрия_или_повреждено": [
+                {"qid":"813416","text":"Окружность проходит через вершины A, B и D параллелограмма ABCD, пересекает сторону BC в точках B и E и пересекает продолжение стороны CD за точку D в точке K. а) Докажите, что AE = AK. б) Найдите отношение KE:BD, если ∠BAD = 60°."},
+                {"qid":"86B99A","text":"В квадрате ABCD точки M и N — середины сторон AB и BC соответственно. Отрезки CM и DN пересекаются в точке K. а) Докажите, что ∠BKM = 45°. б) Найдите радиус окружности, описанной около треугольника ABK, если сторона AB = 2√10."},
+                {"qid":"E80769","text":"Прямая, перпендикулярная стороне BC ромба ABCD, пересекает его диагональ AC в точке M, а диагональ BD в точке N, причём AM:MC = 1:2, BN:ND = 1:3. а) Докажите, что прямая MN делит сторону ромба BC в отношении 1:4. б) Найдите сторону ромба, если MN = √6."}
+            ]
+        },
+        "финансовые_задачи": {
+            "Кредиты_ежегодные_равные_платежи": [
+                {"qid":"D334F2","text":"В июле 2026 года планируется взять кредит в банке на сумму 177120 рублей. Условия его возврата таковы: каждый январь долг увеличивается на 25% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей составит общая сумма платежей, если известно, что кредит будет полностью погашен четырьмя равными платежами (то есть за четыре года)?"},
+                {"qid":"F4D70D","text":"В июле 2026 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей будет выплачено банку, если известно, что кредит будет полностью погашен тремя равными платежами (то есть за три года) и общая сумма платежей после полного погашения кредита должна быть на 48250 рублей больше суммы, взятой в кредит?"},
+                {"qid":"53A300","text":"В июле 2020 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на 10% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей планируется взять в банке, если известно, что кредит будет полностью погашен четырьмя равными платежами (то есть за четыре года) и банку будет выплачено 292820 рублей?"},
+                {"qid":"686E6E","text":"В июле 2020 года планируется взять кредит в банке на сумму 200000 рублей. Условия его возврата таковы: каждый январь долг увеличивается на r% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Найдите r, если известно, что кредит будет полностью погашен за два года, причём в первый год будет выплачено 130000 рублей, а во второй год — 150000 рублей."},
+                {"qid":"6D2E6D","text":"В июле 2026 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей планируется взять в банке, если известно, что кредит будет полностью погашен четырьмя равными платежами (то есть за четыре года) и общая сумма платежей составит 311040 рублей?"},
+                {"qid":"E8199D","text":"В июле 2025 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на 25% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо оплатить одним платежом часть долга. Сколько рублей планируется взять в банке, если известно, что кредит будет полностью погашен четырьмя равными платежами (то есть за четыре года) и банку будет выплачено 375000 рублей?"},
+                {"qid":"EA6D9D","text":"В июле 2020 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на 10% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей будет выплачено банку, если известно, что кредит будет полностью погашен тремя равными платежами (то есть за три года) и общая сумма выплат после полного погашения кредита на 34150 рублей больше суммы, взятой в кредит?"},
+                {"qid":"65F0E4","text":"В июле 2020 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на r% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Если ежегодно выплачивать по 58564 рубля, то кредит будет полностью погашен за 4 года, а если ежегодно выплачивать по 106964 рубля, то кредит будет полностью погашен за 2 года. Найдите r."},
+                {"qid":"6066EB","text":"В июле 2026 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей планируется взять в банке, если известно, что кредит будет полностью погашен тремя равными платежами (то есть за три года) и общая сумма платежей после полного погашения кредита должна быть на 77200 рублей больше суммы, взятой в кредит?"},
+                {"qid":"FE9D85","text":"В июле 2020 года планируется взять кредит в банке на сумму 419375 рублей. Условия его возврата таковы: каждый январь долг увеличивается на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей будет выплачено банку, если известно, что кредит будет полностью погашен четырьмя равными платежами (то есть за четыре года)?"},
+                {"qid":"F6F358","text":"В июле 2020 года планируется взять кредит в банке на некоторую сумму. Условия его возврата таковы: каждый январь долг увеличивается на 25% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга. Сколько рублей будет выплачено банку, если известно, что кредит будет полностью погашен тремя равными платежами (то есть за три года) и общая сумма выплат после полного погашения кредита на 104800 рублей больше суммы, взятой в кредит?"}
+            ],
+            "Кредиты_ежегодные_остаток_долга_по_схеме": [
+                {"qid":"D9AF4A","text":"В июле 2016 года планируется взять кредит в банке на три года в размере S млн рублей, где S — целое число. Условия его возврата таковы: каждый январь долг увеличивается на 30% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; в июле каждого года долг должен составлять часть кредита по схеме: июль 2016 — S, июль 2017 — 0,6S, июль 2018 — 0,25S, июль 2019 — 0. Найдите наибольшее значение S, при котором каждая из выплат будет меньше 5 млн рублей."},
+                {"qid":"5FCD16","text":"В июле 2016 года планируется взять кредит в банке на три года в размере S млн рублей, где S — целое число. Условия его возврата таковы: каждый январь долг увеличивается на 15% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; в июле каждого года долг должен составлять часть кредита по схеме: июль 2016 — S, июль 2017 — 0,8S, июль 2018 — 0,5S, июль 2019 — 0. Найдите наибольшее значение S, при котором каждая из выплат будет меньше 4 млн рублей."},
+                {"qid":"1F03D1","text":"Планируется выдать льготный кредит на целое число миллионов рублей на пять лет. В середине каждого года действия кредита долг заёмщика возрастает на 20% по сравнению с началом года. В конце 1-го, 2-го и 3-го годов заёмщик выплачивает только проценты по кредиту, оставляя долг неизменно равным первоначальному. В конце 4-го и 5-го годов заёмщик выплачивает одинаковые суммы, погашая весь долг полностью. Найдите наибольший размер кредита, при котором общая сумма выплат заёмщика будет меньше 7 млн рублей."},
+                {"qid":"1187D1","text":"Планируется выдать льготный кредит на целое число миллионов рублей на пять лет. В середине каждого года действия кредита долг заёмщика возрастает на 10% по сравнению с началом года. В конце 1-го, 2-го и 3-го годов заёмщик выплачивает только проценты по кредиту, оставляя долг неизменно равным первоначальному. В конце 4-го и 5-го годов заёмщик выплачивает одинаковые суммы, погашая весь долг полностью. Найдите наибольший размер кредита, при котором общая сумма выплат заёмщика будет меньше 6 млн рублей."},
+                {"qid":"CD6602","text":"В июле 2026 года планируется взять кредит на три года в размере 800 тыс. рублей. Условия его возврата таковы: каждый январь долг будет возрастать на 10% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; платежи в 2027 и 2028 годах должны быть равными; к июлю 2029 года долг должен быть выплачен полностью. Известно, что платёж в 2029 году составит 833,8 тыс. рублей. Сколько рублей составит платёж 2027 года?"},
+                {"qid":"29E10A","text":"В июле планируется взять кредит в банке на сумму 10 млн рублей на некоторый срок (целое число лет). Условия его возврата таковы: каждый январь долг возрастает на 10% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить часть долга; в июле каждого года долг должен быть на одну и ту же сумму меньше долга на июль предыдущего года. На сколько лет планируется взять кредит, если известно, что общая сумма выплат после его полного погашения составит 15 млн рублей?"},
+                {"qid":"7A1CB0","text":"В июле планируется взять кредит в банке на сумму 5 млн рублей на некоторый срок (целое число лет). Условия его возврата таковы: каждый январь долг возрастает на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить часть долга; в июле каждого года долг должен быть на одну и ту же сумму меньше долга на июль предыдущего года. На сколько лет планируется взять кредит, если известно, что общая сумма выплат после его полного погашения составит 7,5 млн рублей?"},
+                {"qid":"BFFA71","text":"В июле 2025 года планируется взять кредит на десять лет. Условия его возврата таковы: каждый январь долг будет возрастать на 30% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо оплатить одним платежом часть долга; в июле 2026, 2027, 2028, 2029 и 2030 годов долг должен быть на одну и ту же величину меньше долга на июль предыдущего года; в июле 2030 года долг должен составить 500 тыс. рублей; в июле 2031, 2032, 2033, 2034 и 2035 годов долг должен быть на другую одну и ту же величину меньше долга на июль предыдущего года; к июлю 2035 года долг должен быть выплачен полностью. Известно, что сумма всех платежей после полного погашения кредита будет равна 2080 тыс. рублей. Сколько рублей составит платёж в 2026 году?"},
+                {"qid":"257120","text":"В июле 2025 года планируется взять кредит на десять лет в размере 1400 тыс. рублей. Условия его возврата таковы: каждый январь долг будет возрастать на 10% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо оплатить одним платежом часть долга; в июле 2026, 2027, 2028, 2029 и 2030 годов долг должен быть на одну и ту же величину меньше долга на июль предыдущего года; в июле 2031, 2032, 2033, 2034 и 2035 годов долг должен быть на другую одну и ту же величину меньше долга на июль предыдущего года; к июлю 2035 года долг должен быть выплачен полностью. Известно, что сумма всех платежей после полного погашения кредита будет равна 2120 тыс. рублей. Сколько рублей составит платёж в 2026 году?"},
+                {"qid":"FB11A1","text":"В июле 2025 года планируется взять кредит на десять лет в размере 800 тыс. рублей. Условия его возврата таковы: каждый январь долг будет возрастать на r% по сравнению с концом предыдущего года (r — целое число); с февраля по июнь каждого года необходимо оплатить одним платежом часть долга; в июле 2026, 2027, 2028, 2029 и 2030 годов долг должен быть на одну и ту же величину меньше долга на июль предыдущего года; в июле 2030 года долг должен составить 200 тыс. рублей; в июле 2031, 2032, 2033, 2034 и 2035 годов долг должен быть на другую одну и ту же величину меньше долга на июль предыдущего года; к июлю 2035 года долг должен быть выплачен полностью. Известно, что сумма всех платежей после полного погашения кредита будет равна 1480 тыс. рублей. Найдите r."},
+                {"qid":"C17CAC","text":"В июле 2025 года планируется взять кредит на десять лет в размере 1300 тыс. рублей. Условия его возврата таковы: каждый январь долг будет возрастать на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо оплатить одним платежом часть долга; в июле 2026, 2027, 2028, 2029 и 2030 годов долг должен быть на одну и ту же величину меньше долга на июль предыдущего года; в июле 2031, 2032, 2033, 2034 и 2035 годов долг должен быть на другую одну и ту же величину меньше долга на июль предыдущего года; к июлю 2035 года долг должен быть выплачен полностью. Известно, что сумма всех платежей после полного погашения кредита будет равна 2580 тыс. рублей. Сколько рублей составит долг в июле 2030 года?"},
+                {"qid":"BA898B","text":"В июле 2025 года планируется взять кредит на десять лет в размере 500 тыс. рублей. Условия его возврата таковы: каждый январь долг будет возрастать на 30% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо оплатить одним платежом часть долга; в июле 2026, 2027, 2028, 2029 и 2030 годов долг должен быть на одну и ту же величину меньше долга на июль предыдущего года; в июле 2031, 2032, 2033, 2034 и 2035 годов долг должен быть на другую одну и ту же величину меньше долга на июль предыдущего года; к июлю 2035 года долг должен быть выплачен полностью. Известно, что сумма всех платежей после полного погашения кредита будет равна 1250 тыс. рублей. Сколько рублей составит платёж в 2035 году?"},
+                {"qid":"A06889","text":"В июле 2026 года планируется взять кредит на три года в размере 800 тыс. рублей. Условия его возврата таковы: каждый январь долг будет возрастать на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; платежи в 2027 и 2028 годах должны быть равными; к июлю 2029 года долг должен быть выплачен полностью. Известно, что сумма всех платежей после полного погашения кредита будет равна 1254,4 тыс. рублей. Сколько рублей составит платёж 2027 года?"},
+                {"qid":"E7FA88","text":"В июле 2026 года планируется взять кредит на пять лет в размере 825 тыс. рублей. Условия его возврата таковы: каждый январь долг возрастает на 20% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; в июле 2027, 2028 и 2029 годов долг остаётся равным 825 тыс. рублей; выплаты в 2030 и 2031 годах равны; к июлю 2031 года долг будет выплачен полностью. Найдите общую сумму выплат за пять лет."},
+                {"qid":"71B1D1","text":"В июле 2026 года планируется взять кредит на пять лет в размере 1050 тыс. рублей. Условия его возврата таковы: каждый январь долг возрастает на 10% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; в июле 2027, 2028 и 2029 годов долг остаётся равным 1050 тыс. рублей; выплаты в 2030 и 2031 годах равны; к июлю 2031 года долг будет выплачен полностью. На сколько рублей последняя выплата будет больше первой?"},
+                {"qid":"A3CDCA","text":"В июле 2026 года планируется взять кредит на пять лет в размере 1260 тыс. рублей. Условия его возврата таковы: каждый январь долг возрастает на 10% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; в июле 2027, 2028 и 2029 годов долг остаётся равным 1260 тыс. рублей; выплаты в 2030 и 2031 годах равны; к июлю 2031 года долг будет выплачен полностью. Найдите общую сумму платежей за пять лет."},
+                {"qid":"7A0F52","text":"В июле 2026 года планируется взять кредит на три года в размере 900 тыс. рублей. Условия его возврата таковы: каждый январь долг будет возрастать на 30% по сравнению с концом предыдущего года; с февраля по июнь каждого года необходимо выплатить одним платежом часть долга; платежи в 2027 и 2028 годах должны быть равными; к июлю 2029 года долг должен быть выплачен полностью. Известно, что сумма всех платежей после полного погашения кредита будет равна 1482,3 тыс. рублей. Сколько рублей составит платёж 2029 года?"}
+            ],
+            "Кредиты_помесячные_равномерное_снижение_долга": [
+                {"qid":"60FD4D","text":"15 декабря планируется взять кредит в банке на сумму 1000000 рублей на (n+1) месяц. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на r% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо выплатить часть долга; 15-го числа каждого месяца с 1-го по n-й долг должен быть на 40 тысяч рублей меньше долга на 15-е число предыдущего месяца; 15-го числа n-го месяца долг составит 200 тысяч рублей; к 15-му числу (n+1)-го месяца кредит должен быть полностью погашен. Найдите r, если известно, что общая сумма выплат после полного погашения кредита составит 1378 тысяч рублей."},
+                {"qid":"3eFF42","text":"15 декабря 2026 года планируется взять кредит в банке на сумму 27 млн рублей на 36 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на 3% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо одним платежом оплатить часть долга; 15-го числа каждого месяца долг должен быть на одну и ту же величину меньше долга на 15-е число предыдущего месяца; к 15 декабря 2029 года кредит должен быть полностью погашен. Чему равна общая сумма платежей в 2029 году?"},
+                {"qid":"36614C","text":"15 декабря планируется взять кредит в банке на 11 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на 1% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо выплатить часть долга; 15-го числа каждого месяца с 1-го по 10-й долг должен быть на одну и ту же сумму меньше долга на 15-е число предыдущего месяца; 15-го числа 10-го месяца долг составит 300 тысяч рублей; к 15-му числу 11-го месяца кредит должен быть полностью погашен. Какую сумму планируется взять в кредит, если общая сумма выплат после полного его погашения составит 1388 тысяч рублей?"},
+                {"qid":"78cB01","text":"15 декабря 2026 года планируется взять кредит в банке на сумму 12 млн рублей на 48 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на r процентов по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо выплатить часть долга; 15-го числа каждого месяца долг должен быть на одну и ту же величину меньше долга на 15-е число предыдущего месяца; к 15 декабря 2030 года кредит должен быть полностью погашен. Чему равно r, если общая сумма платежей в 2030 году составит 3195 тыс. рублей?"},
+                {"qid":"FE4FB7","text":"15 декабря планируется взять кредит в банке на сумму 900 тысяч рублей на 11 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на r% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо выплатить часть долга; 15-го числа каждого месяца с 1-го по 10-й долг должен быть на одну и ту же сумму меньше долга на 15-е число предыдущего месяца; 15-го числа 10-го месяца долг составит 200 тысяч рублей; к 15-му числу 11-го месяца кредит должен быть полностью погашен. Найдите r, если известно, что общая сумма выплат после полного погашения кредита составит 1021 тысячу рублей."},
+                {"qid":"423D7F","text":"15 декабря 2026 года планируется взять кредит в банке на сумму 9 млн рублей на 36 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на r процентов по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо одним платежом оплатить часть долга; 15-го числа каждого месяца долг должен быть на одну и ту же величину меньше долга на 15-е число предыдущего месяца; к 15 декабря 2029 года кредит должен быть полностью погашен. Чему равно r, если общая сумма платежей в 2027 году составит 4830 тыс. рублей?"},
+                {"qid":"81455c","text":"15 декабря 2026 года планируется взять кредит в банке на сумму 18 млн рублей на 72 месяца. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на 1% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо одним платежом оплатить часть долга; 15-го числа каждого месяца долг должен быть на одну и ту же величину меньше долга на 15-е число предыдущего месяца; к 15 декабря 2032 года кредит должен быть полностью погашен. Чему равна общая сумма платежей в 2027 году?"},
+                {"qid":"45786c","text":"15 декабря 2026 года планируется взять кредит в банке на сумму A млн рублей на 60 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на 2% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо одним платежом оплатить часть долга; 15-го числа каждого месяца долг должен быть на одну и ту же величину меньше долга на 15-е число предыдущего месяца; к 15 декабря 2031 года кредит должен быть полностью погашен. Чему равно A, если общая сумма платежей в 2027 году составит 2508 тыс. рублей?"},
+                {"qid":"B4B56D","text":"15 декабря планируется взять кредит в банке на сумму 1100 тысяч рублей на 31 месяц. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на 2% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо выплатить часть долга; 15-го числа каждого месяца с 1-го по 30-й долг должен быть на одну и ту же сумму меньше долга на 15-е число предыдущего месяца; к 15-му числу 31-го месяца кредит должен быть полностью погашен. Какой долг будет 15-го числа 30-го месяца, если общая сумма выплат после полного погашения кредита составит 1503 тысячи рублей?"},
+                {"qid":"DB5D8C","text":"15 декабря планируется взять кредит в банке на 11 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг возрастает на 3% по сравнению с концом предыдущего месяца; со 2-го по 14-е число каждого месяца необходимо выплатить часть долга; 15-го числа каждого месяца с 1-го по 10-й долг должен быть на 80 тысяч рублей меньше долга на 15-е число предыдущего месяца; к 15-му числу 11-го месяца кредит должен быть полностью погашен. Какой долг будет 15-го числа 10-го месяца, если общая сумма выплат после полного погашения кредита составит 1198 тысяч рублей?"},
+                {"qid":"4C1D36","text":"15 декабря планируется взять кредит в банке на сумму 1100 тысяч рублей на 16 месяцев. Условия его возврата таковы: 1-го числа каждого месяца долг будет возрастать на r% по сравнению с концом предыдущего месяца (r — целое число); со 2-го по 14-е число каждого месяца необходимо выплатить одним платежом часть долга; 15-го числа каждого месяца с 1-го по 15-й долг должен быть на одну и ту же сумму меньше долга на 15-е число предыдущего месяца; 15-го числа 15-го месяца долг должен быть равен 500 тысяч рублей; к 15-му числу 16-го месяца кредит должен быть полностью погашен. Найдите r, если известно, что сумма всех платежей после полного погашения кредита будет составлять 1228 тысяч рублей."}
+            ],
+            "Вклады_ценные_бумаги_выбор_момента_продажи": [
+                {"qid":"552BFD","text":"Пенсионный фонд владеет ценными бумагами, которые стоят t^2 тыс. рублей в конце года t (t = 1, 2, ...). В конце любого года пенсионный фонд может продать ценные бумаги и положить деньги на счёт в банке, при этом в конце каждого следующего года сумма на счёте будет увеличиваться на 10%. В конце какого года пенсионному фонду следует продать ценные бумаги, чтобы в конце двадцать пятого года сумма на его счёте была наибольшей?"},
+                {"qid":"4221BE","text":"Вклад планируется открыть на четыре года. Первоначальный вклад составляет целое число миллионов рублей. В конце каждого года вклад увеличивается на 10% по сравнению с его размером в начале года. Кроме этого, в начале третьего и четвёртого годов вклад ежегодно пополняется на 3 млн рублей. Найдите наименьший размер первоначального вклада, при котором через четыре года вклад будет больше 20 млн рублей."},
+                {"qid":"DBAF65","text":"Пенсионный фонд владеет ценными бумагами, которые стоят t^2 тыс. рублей в конце года t (t = 1, 2, ...). В конце любого года пенсионный фонд может продать ценные бумаги и положить деньги на счёт в банке, при этом в конце каждого следующего года сумма на счёте будет увеличиваться в 1 + r раз. Пенсионный фонд хочет продать ценные бумаги в конце такого года, чтобы в конце двадцатого года сумма на его счёте была наибольшей. Расчёты показали, что для этого ценные бумаги нужно продавать строго в конце девятого года. При каких положительных значениях r это возможно?"},
+                {"qid":"DFEFEE","text":"Пенсионный фонд владеет ценными бумагами, которые стоят t^2 тыс. рублей в конце года t (t = 1, 2, ...). В конце любого года пенсионный фонд может продать ценные бумаги и положить деньги на счёт в банке, при этом в конце каждого следующего года сумма на счёте будет увеличиваться на 25%. В конце какого года пенсионному фонду следует продать ценные бумаги, чтобы в конце двадцатого года сумма на его счёте была наибольшей?"},
+                {"qid":"89F37B","text":"Пенсионный фонд владеет ценными бумагами, которые стоят t^2 тыс. рублей в конце года t (t = 1, 2, ...). В конце любого года пенсионный фонд может продать ценные бумаги и положить деньги на счёт в банке, при этом в конце каждого следующего года сумма на счёте будет увеличиваться в 1 + r раз. Пенсионный фонд хочет продать ценные бумаги в конце такого года, чтобы в конце двадцать пятого года сумма на его счёте была наибольшей. Расчёты показали, что для этого ценные бумаги нужно продавать строго в конце двадцать первого года. При каких положительных значениях r это возможно?"}
+            ],
+            "Оптимизация_производства_и_окупаемость": [
+                {"qid":"E1812B","text":"Строительство нового завода стоит 78 млн рублей. Затраты на производство x тыс. единиц продукции на таком заводе равны (0,5x^2 + 2x + 6) млн рублей в год. Если продукцию завода продавать по цене p тыс. рублей за единицу, то прибыль фирмы (в млн рублей) за один год составит px − (0,5x^2 + 2x + 6). Когда завод будет построен, каждый год фирма будет выпускать продукцию в таком количестве, чтобы прибыль была наибольшей. При каком наименьшем значении p строительство завода окупится не больше чем за 3 года?"},
+                {"qid":"262AEA","text":"Вадим является владельцем двух заводов в разных городах. На заводах производятся абсолютно одинаковые товары при использовании одинаковых технологий. Если рабочие на одном из заводов трудятся суммарно t^2 часов в неделю, то за эту неделю они производят t единиц товара. За каждый час работы на заводе, расположенном в первом городе, Вадим платит рабочему 200 рублей, а на заводе, расположенном во втором городе, — 300 рублей. Вадим готов выделять 1200000 рублей в неделю на оплату труда рабочих. Какое наибольшее количество единиц товара можно произвести за неделю на этих двух заводах?"}
+            ]
+        },
+        "планиметрия": {
+            "Планиметрия_задание_17": [
+                {"id":1,"text":"Окружность проходит через вершины B и C треугольника ABC и пересекает AB и AC в точках C1 и B1 соответственно. а) Докажите, что треугольник ABC подобен треугольнику AB1C1. б) Вычислите длину стороны BC, если ∠A = 30°, B1C1 = 5 и площадь треугольника AB1C1 в пять раз меньше площади четырёхугольника BCB1C1.","answer":"5√6"},
+                {"id":2,"text":"Диагонали равнобедренной трапеции ABCD с основаниями BC и AD перпендикулярны. Окружность с диаметром AD пересекает боковую сторону CD в точке M, а окружность с диаметром CD пересекает основание AD в точке N. Отрезки AM и CN пересекаются в точке P. а) Докажите, что в четырёхугольник ABCP можно вписать окружность. б) Найдите радиус этой окружности, если BC = 7, AD = 23.","answer":"35/8"},
+                {"id":3,"text":"Дана трапеция ABCD с основаниями AD и BC. Диагональ BD разбивает её на два равнобедренных треугольника с основаниями AD и CD. а) Докажите, что луч AC — биссектриса угла BAD. б) Найдите CD, если AC = 12 и BD = 6,5.","answer":"5"},
+                {"id":4,"text":"Окружность проходит через вершины B и C треугольника ABC и пересекает AB и AC в точках C1 и B1 соответственно. а) Докажите, что треугольник ABC подобен треугольнику AB1C1. б) Вычислите длину стороны BC, если ∠A = 45°, B1C1 = 6 и площадь треугольника AB1C1 в восемь раз меньше площади четырёхугольника BCB1C1.","answer":"18"},
+                {"id":5,"text":"Диагонали равнобедренной трапеции ABCD с основаниями BC и AD перпендикулярны. Окружность с диаметром AD пересекает боковую сторону CD в точке M, а окружность с диаметром CD пересекает основание AD в точке N. Отрезки AM и CN пересекаются в точке P. а) Докажите, что в четырёхугольник ABCP можно вписать окружность. б) Найдите радиус этой окружности, если BC = 7, AD = 17.","answer":"21/5"},
+                {"id":6,"text":"Точки P, Q, W делят стороны выпуклого четырёхугольника ABCD в отношении AP:PB = CQ:QB = CW:WD = 3:4, радиус окружности, описанной около треугольника PQW, равен 10, PQ = 16, QW = 12, угол PWQ — острый. а) Докажите, что треугольник PQW — прямоугольный. б) Найдите площадь четырёхугольника ABCD.","answer":"392"},
+                {"id":7,"text":"Окружность проходит через вершины B и C треугольника ABC и пересекает AB и AC в точках C1 и B1 соответственно. а) Докажите, что треугольник ABC подобен треугольнику AB1C1. б) Вычислите длину стороны BC, если ∠A = 135°, B1C1 = 10 и площадь треугольника AB1C1 в семь раз меньше площади четырёхугольника BCB1C1.","answer":"20√2"},
+                {"id":8,"text":"Прямая, проходящая через середину M гипотенузы AB прямоугольного треугольника ABC, перпендикулярна CM и пересекает катет AC в точке K. При этом AK:KC = 1:2. а) Докажите, что ∠BAC = 30°. б) Пусть прямые MK и BC пересекаются в точке P, а прямые AP и BK — в точке Q. Найдите KQ, если BC = √21.","answer":"14"},
+                {"id":9,"text":"Окружность проходит через вершины B и C треугольника ABC и пересекает AB и AC в точках C1 и B1 соответственно. а) Докажите, что треугольник ABC подобен треугольнику AB1C1. б) Вычислите длину стороны B1C1, если ∠A = 150°, BC = 5√5 и площадь треугольника AB1C1 в четыре раза меньше площади четырёхугольника BCB1C1.","answer":"5"},
+                {"id":10,"text":"В прямоугольном треугольнике ABC с гипотенузой AB проведена медиана CM. а) Докажите, что MA = MB = MC. б) Найдите радиус описанной окружности треугольника ABC, если AB = 10.","answer":"5"},
+                {"id":11,"text":"Прямая, проходящая через вершину B прямоугольника ABCD перпендикулярно диагонали AC, пересекает сторону AD в точке M, равноудалённой от вершин B и D. а) Докажите, что ∠ABM = ∠DBC = 30°. б) Найдите расстояние от центра прямоугольника до прямой CM, если BC = 9.","answer":"8"},
+                {"id":12,"text":"В треугольнике ABC точки D и E — середины сторон AB и AC соответственно. а) Докажите, что DE ∥ BC. б) Найдите DE, если BC = 14.","answer":"7"},
+                {"id":13,"text":"В треугольнике ABC точки A1, B1 и C1 — середины сторон BC, AC и AB соответственно, AH — высота, ∠BAC = 60°, ∠BCA = 45°. а) Докажите, что точки A1, B1, C1 и H лежат на одной окружности. б) Найдите A1H, если BC = 2√3.","answer":"1"},
+                {"id":14,"text":"Четырёхугольник ABCD вписан в окружность радиуса R = 8. Известно, что AB = BC = CD = 12. а) Докажите, что прямые BC и AD параллельны. б) Найдите AD.","answer":"9"},
+                {"id":15,"text":"Окружность с центром в точке O касается сторон угла с вершиной N в точках A и B. Отрезок BC — диаметр этой окружности. а) Докажите, что прямая AC параллельна биссектрисе угла ANB. б) Найдите длину отрезка NO, если известно, что AC = 10 и AB = 24.","answer":"169/5"},
+                {"id":16,"text":"В треугольнике ABC угол A равен 120°. Прямые, содержащие высоты BM и CN треугольника ABC, пересекаются в точке H. Точка O — центр окружности, описанной около треугольника ABC. а) Докажите, что AH = AO. б) Найдите площадь треугольника AHO, если BC = √15, ∠ABC = 45°.","answer":"5/4"},
+                {"id":17,"text":"Окружность проходит через вершины A, B и C параллелограмма ABCD, пересекает продолжение стороны AD за точку D в точке E и пересекает продолжение стороны CD за точку D в точке K. а) Докажите, что BK = BE. б) Найдите отношение KE:AC, если ∠BAD = 30°.","answer":"√3:1"},
+                {"id":18,"text":"Биссектрисы углов BAD и BCD равнобедренной трапеции ABCD пересекаются в точке O. На боковых сторонах AB и CD отмечены точки M и N соответственно так, что AM = MO, CN = NO. а) Докажите, что точки M, O и N лежат на одной прямой. б) Найдите отношение AM:MB, если AO = CO и BC:AD = 17:31.","answer":"31:45"},
+                {"id":19,"text":"На стороне BC параллелограмма ABCD выбрана точка M такая, что AM = MC. а) Докажите, что центр вписанной в треугольник AMD окружности лежит на диагонали AC. б) Найдите радиус вписанной в треугольник AMD окружности, если AB = 5, BC = 10, ∠BAD = 60°.","answer":"√3(17−√39)/10"},
+                {"id":20,"text":"В трапеции ABCD угол BAD прямой. Окружность, построенная на большем основании AD как на диаметре, пересекает меньшее основание BC в точках C и M. а) Докажите, что ∠BAM = ∠CAD. б) Диагонали трапеции ABCD пересекаются в точке O. Найдите площадь треугольника AOB, если AB = √10, а BC = 2BM.","answer":"3√2"},
+                {"id":21,"text":"В равнобедренном треугольнике ABC с основанием BC проведена биссектриса AD. а) Докажите, что AD является одновременно медианой и высотой. б) Найдите AD, если AB = 13 и BC = 10.","answer":"12"},
+                {"id":22,"text":"В прямоугольном треугольнике ABC с прямым углом при C медиана CM проведена к гипотенузе AB. а) Докажите, что точка M равноудалена от вершин A, B и C. б) Найдите CM, если AB = 26.","answer":"13"},
+                {"id":23,"text":"В трапеции ABCD с основаниями AD и BC диагонали пересекаются в точке O. а) Докажите, что AO/OC = DO/OB = AD/BC. б) Найдите отношение AO:OC, если AD:BC = 3:2.","answer":"3:2"},
+                {"id":24,"text":"В ромбе ABCD диагонали пересекаются в точке O. а) Докажите, что диагонали ромба взаимно перпендикулярны. б) Найдите сторону ромба, если AC = 16 и BD = 12.","answer":"10"},
+                {"id":25,"text":"Сумма оснований трапеции равна 10, а её диагонали равны 6 и 8. а) Докажите, что диагонали трапеции перпендикулярны. б) Найдите высоту трапеции.","answer":"24/5"},
+                {"id":26,"text":"Две окружности радиусов 3 и 4 касаются внешним образом. а) Докажите, что расстояние между их центрами равно сумме радиусов. б) Найдите расстояние между центрами окружностей.","answer":"7"},
+                {"id":27,"text":"В треугольнике ABC точки A1, B1 и C1 — середины сторон BC, AC и AB соответственно, AH — высота, ∠BAC = 30°, ∠BCA = 45°. а) Докажите, что точки A1, B1, C1 и H лежат на одной окружности. б) Найдите A1H, если BC = 4√3.","answer":"6"},
+                {"id":28,"text":"В равнобедренной трапеции ABCD основания AD и BC равны 18 и 8, а боковая сторона равна 13. а) Докажите, что высота, опущенная из вершины C на основание AD, делит основание AD на отрезки 5 и 13. б) Найдите высоту трапеции.","answer":"12"},
+                {"id":29,"text":"Окружность с центром в точке O касается сторон угла с вершиной N в точках A и B. а) Докажите, что NO является биссектрисой угла ANB. б) Найдите ∠ANB, если ∠AOB = 120°.","answer":"60°"},
+                {"id":30,"text":"Прямая, перпендикулярная стороне BC ромба ABCD, пересекает его диагональ AC в точке M, а диагональ BD в точке N, причём AM:MC = 1:2, BN:ND = 1:3. а) Докажите, что cos∠BAD = 1/5. б) Найдите площадь ромба, если MN = 5.","answer":"60√6"},
+                {"id":31,"text":"На стороне AC равностороннего треугольника ABC отмечена точка M. Серединный перпендикуляр к отрезку BM пересекает стороны AB и BC в точках E и K соответственно. а) Докажите, что треугольники AEM и CMK подобны. б) Найдите отношение AM:MC, если площади треугольников AEM и CMK равны 4 и 9 соответственно.","answer":"2:3"},
+                {"id":32,"text":"В прямоугольнике ABCD диагонали пересекаются в точке O. а) Докажите, что OA = OB = OC = OD. б) Найдите диагональ AC, если AB = 9 и BC = 12.","answer":"15"},
+                {"id":33,"text":"В окружности хорда AB = 12, а расстояние от центра окружности до хорды равно 5. а) Докажите, что перпендикуляр, опущенный из центра на хорду, делит её пополам. б) Найдите радиус окружности.","answer":"√61"},
+                {"id":34,"text":"Пятиугольник ABCDE вписан в окружность. Диагонали AD и BE пересекаются в точке M, причём BCDM — параллелограмм. а) Докажите, что BC = DE. б) Найдите длину стороны AB, если известно, что DE = 4, AD = 7, BE = 8 и AB > BC.","answer":"6"},
+                {"id":35,"text":"На стороне AC равностороннего треугольника ABC отмечена точка M. Серединный перпендикуляр к отрезку BM пересекает стороны AB и BC в точках E и K соответственно. а) Докажите, что ∠AEM = ∠CMK. б) Найдите отношение площадей треугольников AEM и CMK, если AM:MC = 1:4.","answer":"1:16"},
+                {"id":36,"text":"В треугольнике ABC медианы AA1 и BB1 пересекаются в точке G. а) Докажите, что AG:GA1 = 2:1. б) Найдите AG, если AA1 = 15.","answer":"10"},
+                {"id":37,"text":"В правильном шестиугольнике ABCDEF диагонали AD и BE пересекаются в точке O. а) Докажите, что O является центром описанной окружности. б) Найдите радиус описанной окружности, если сторона шестиугольника равна 8.","answer":"8"},
+                {"id":38,"text":"В квадрате ABCD точки M и N — середины сторон AB и BC соответственно. Отрезки CM и DN пересекаются в точке K. а) Докажите, что ∠BKM = 45°. б) Найдите радиус окружности, описанной около треугольника ABK, если сторона AB = 2√10.","answer":"10/3"},
+                {"id":39,"text":"На стороне BC треугольника ABC отмечена точка D так, что BD:DC = 2:3. а) Докажите, что площади треугольников ABD и ACD относятся как 2:3. б) Найдите площадь треугольника ABD, если площадь треугольника ABC равна 25.","answer":"10"},
+                {"id":40,"text":"Окружность с центром O1 касается оснований BC и AD и боковой стороны AB трапеции ABCD. Окружность с центром O2 касается сторон BC, CD и AD. Известно, что AB = 10, BC = 9, CD = 30, AD = 39. а) Докажите, что прямая O1O2 параллельна основаниям трапеции ABCD. б) Найдите O1O2.","answer":"4"},
+                {"id":41,"text":"Точка E — середина боковой стороны CD трапеции ABCD. На стороне AB взяли точку K так, что прямые CK и AE параллельны. Отрезки CK и BE пересекаются в точке O. а) Докажите, что CO = KO. б) Найдите отношение оснований трапеции BC и AD, если площадь треугольника BCK составляет 9/100 площади трапеции ABCD.","answer":"3:7"},
+                {"id":42,"text":"Окружность проходит через вершины A, B и D параллелограмма ABCD, пересекает сторону BC в точках B и M и пересекает продолжение стороны CD за точку D в точке N. а) Докажите, что AM = AN. б) Найдите отношение CD:DN, если AB:BC = 1:2, а cos∠BAD = 2/3.","answer":"3:5"},
+                {"id":43,"text":"В равнобедренной трапеции ABCD основание AD в два раза больше основания BC. а) Докажите, что высота CH трапеции разбивает основание AD на отрезки, один из которых втрое больше другого. б) Пусть O — точка пересечения диагоналей трапеции ABCD. Найдите расстояние от вершины C до середины отрезка OD, если BC = 16 и AB = 10.","answer":"4"},
+                {"id":44,"text":"В равнобедренной трапеции ABCD основания AD и BC равны 20 и 8, боковая сторона равна 10. а) Докажите, что диагонали трапеции равны. б) Найдите высоту трапеции.","answer":"8"},
+                {"id":45,"text":"В треугольнике ABC угол A равен 120°. Прямые, содержащие высоты BM и CN треугольника ABC, пересекаются в точке H. Точка O — центр окружности, описанной около треугольника ABC. а) Докажите, что AH = AO. б) Найдите площадь треугольника AHO, если BC = 3, ∠ABC = 15°.","answer":"3/4"},
+                {"id":46,"text":"Биссектрисы углов A и C параллелограмма ABCD пересекаются в точке O. а) Докажите, что O является центром вписанной окружности тогда и только тогда, когда параллелограмм является ромбом. б) Найдите радиус вписанной окружности ромба со стороной 10 и острым углом 60°.","answer":"5√3/2"},
+                {"id":47,"text":"На сторонах AB, BC и AC треугольника ABC отмечены точки C1, A1 и B1 соответственно, причём C1 — середина AB, A1 — середина BC, B1 — середина AC. а) Докажите, что треугольник A1B1C1 подобен треугольнику ABC. б) Найдите периметр треугольника A1B1C1, если периметр треугольника ABC равен 48.","answer":"24"},
+                {"id":48,"text":"В треугольнике ABC точки A1, B1 и C1 — середины сторон BC, AC и AB соответственно, AH — высота, ∠BAC = 120°, ∠BCA = 45°. а) Докажите, что точки A1, B1, C1 и H лежат на одной окружности. б) Найдите A1H, если BC = 6√3.","answer":"3"},
+                {"id":49,"text":"В треугольнике ABC точки A1, B1 и C1 — середины сторон BC, AC и AB соответственно, AH — высота, ∠BAC = 120°, ∠BCA = 15°. а) Докажите, что точки A1, B1, C1 и H лежат на одной окружности. б) Найдите A1H, если BC = 4√3.","answer":"2"},
+                {"id":50,"text":"Периметр треугольника ABC равен 36. Точки E и F — середины сторон AB и BC соответственно. Отрезок EF касается окружности, вписанной в треугольник ABC. а) Докажите, что AC = 9. б) Найдите площадь треугольника ABC, если ∠ACB = 90°.","answer":"54"},
+                {"id":51,"text":"Высоты BB1 и CC1 остроугольного треугольника ABC пересекаются в точке H. а) Докажите, что ∠BB1C1 = ∠BAH. б) Найдите расстояние от центра окружности, описанной около треугольника ABC, до стороны BC, если B1C1 = 18 и ∠BAC = 30°.","answer":"18"},
+                {"id":52,"text":"В остроугольном треугольнике ABC угол BAC в два раза больше угла ABC. Точка O — центр окружности, описанной около треугольника ABC. Окружность, описанная около треугольника AOC, пересекает отрезок BC в точках C и P. а) Докажите, что треугольники PAC и ABC подобны. б) Найдите длину стороны AB, если AC = 2, BC = √10.","answer":"3"},
+                {"id":53,"text":"В остроугольном треугольнике ABC угол BAC в два раза больше угла ABC. Точка O — центр окружности, описанной около треугольника ABC. Окружность, описанная около треугольника AOC, пересекает отрезок BC в точках C и P. а) Докажите, что AP = BP. б) Найдите длину стороны BC, если AB = 7, AC = 4.","answer":"√11"},
+                {"id":54,"text":"В треугольнике ABC высоты BB1 и CC1 пересекаются в точке H. а) Докажите, что ∠BHC = 180° − ∠A. б) Найдите ∠BHC, если ∠A = 47°.","answer":"133°"},
+                {"id":55,"text":"В квадрате ABCD точка M — середина стороны AB. а) Докажите, что CM = (√5/2)AB. б) Найдите CM, если AB = 8.","answer":"4√5"}
+            ]
+        }
+    };
+
+    let TASK_BANK = normalizeSourceBank(SOURCE_BANK);
+
+    const CATEGORY_META = {
+        equation: { name:'Уравнение', short:'Ур.', color:'var(--accent)' },
+        inequality: { name:'Неравенство', short:'Нер.', color:'var(--accent-2)' },
+        parameter: { name:'Параметр', short:'Парам.', color:'var(--accent-3)' },
+        finance: { name:'Финансовая задача', short:'Фин.', color:'var(--good)' },
+        planimetry: { name:'Планиметрия', short:'План.', color:'var(--warn)' },
+        stereometry: { name:'Стереометрия', short:'Стер.', color:'var(--danger)' }
+    };
+
+    const MODES = {
+        balanced: {
+            label:'Сбалансированный',
+            description:'Равномерно по всем активным категориям',
+            weights:{equation:1, inequality:1, parameter:1, finance:1, planimetry:1, stereometry:1}
+        },
+        algebra: {
+            label:'Алгебраический',
+            description:'Акцент на уравнения, неравенства и параметры',
+            weights:{equation:3, inequality:3, parameter:2, finance:1, planimetry:0.5, stereometry:0.5}
+        },
+        geometry: {
+            label:'Геометрический',
+            description:'Преобладают планиметрия и стереометрия',
+            weights:{equation:0.6, inequality:0.6, parameter:0.8, finance:0.6, planimetry:3, stereometry:3}
+        },
+        profile: {
+            label:'Профильный',
+            description:'Больше сложных и профильных задач',
+            weights:{equation:1.4, inequality:1.4, parameter:1.3, finance:1.1, planimetry:1.1, stereometry:1.1}
+        },
+        custom: {
+            label:'Пользовательский',
+            description:'Ручная настройка весов',
+            weights:{equation:1, inequality:1, parameter:1, finance:1, planimetry:1, stereometry:1}
+        }
+    };
+
+    const STORAGE_KEYS = {
+        state:'task-generator-state-v2',
+        history:'task-generator-history-v2',
+        presets:'task-generator-presets-v2'
+    };
+
+    const state = {
+        mode:'balanced',
+        title:'Тренировочный блок задач',
+        level:'любой',
+        difficulty:'любая',
+        note:'',
+        count:8,
+        categories:{},
+        activeTags:new Set(),
+        showAnswers:false,
+        showMeta:true,
+        shuffleWithin:true,
+        avoidRecent:true,
+        groupByCategory:true,
+        generated:[]
+    };
+
+    const els = {};
+
+    function qs(id){ return document.getElementById(id); }
+
+    function init(){
+        TASK_BANK = normalizeSourceBank(SOURCE_BANK);
+        bindEls();
+        buildCategoryControls();
+        buildModeChips();
+        buildTagFilters();
+        attachEvents();
+        loadState();
+        syncUIFromState();
+        updateStats();
+        renderBadges();
+        generateTasks();
+    }
+
+    function bindEls(){
+        ['variantTitle','variantLevel','variantDifficulty','teacherNote','taskCount','taskCountValue','categoryList','modeChips','tagFilters','showAnswers','showMeta','shuffleWithin','avoidRecent','groupByCategory','generateBtn','rerollBtn','savePresetBtn','loadPresetBtn','exportBtn','copyBtn','printBtn','resetBtn','paperTitle','paperSub','taskGroups','statBank','statSelected','statActiveCats','statTags','activeBadges','toggleAnswersBtn','toggleMetaBtn','collapseBtn']
+            .forEach(id=>els[id]=qs(id));
+    }
+
+    function getAllTasks(){ return Object.values(TASK_BANK || {}).flat().filter(Boolean); }
+    function getAllTags(){ return [...new Set(getAllTasks().flatMap(t=>t.tags))].sort((a,b)=>a.localeCompare(b,'ru')); }
+
+    function normalizeSourceBank(source){
+        const out = { equation:[], inequality:[], parameter:[], finance:[], planimetry:[], stereometry:[] };
+        const map = {'уравнения':'equation','неравенства':'inequality','параметр':'parameter','финансовые_задачи':'finance','планиметрия':'planimetry','стереометрия':'stereometry'};
+        try {
+            Object.entries(source || {}).forEach(([top, groups])=>{
+                const target = map[top];
+                if(!target) return;
+                Object.entries(groups || {}).forEach(([groupName, arr])=>{
+                    (arr || []).forEach((item, idx)=>{
+                        out[target].push({
+                            id: String(item.qid || item.id || `${target}_${idx}`),
+                            level: inferLevel(target, groupName, item.text || ''),
+                            difficulty: inferDifficulty(target, groupName, item.text || ''),
+                            tags: deriveTags(groupName, item.text || ''),
+                            category: CATEGORY_META[target].name,
+                            sourceGroup: groupName,
+                            html: toMathHTML(item.text || ''),
+                            answerHtml: item.answer ? toMathHTML(`Ответ: ${item.answer}`) : (item.note ? escapeHtml(item.note) : 'Ответ не указан в банке.')
+                        });
+                    });
+                });
+            });
+        } catch (e) {
+            console.error('Ошибка нормализации банка', e);
+        }
+        return out;
+    }
+
+    function deriveTags(groupName, text){
+        const parts = groupName.split('_').slice(0,4).map(s=>s.toLowerCase());
+        if(/лог/i.test(text)) parts.push('логарифмы');
+        if(/sin|cos|tg|π|α/i.test(text)) parts.push('тригонометрия');
+        if(/кредит|банк|вклад|плат[её]ж/i.test(text)) parts.push('финансы');
+        if(/призма|пирами|шар|конус|цилиндр|куб|параллелепипед/i.test(text)) parts.push('пространство');
+        return [...new Set(parts)].slice(0,8);
+    }
+
+    function inferLevel(target, groupName, text){
+        if(target === 'finance' || target === 'parameter') return 'профиль';
+        if(target === 'planimetry' || target === 'stereometry') return /а\)|б\)|Докажите|докажите/.test(text) ? 'профиль' : 'стандарт';
+        return /а\)|б\)|Найдите все корни|единственное решение/.test(text) ? 'профиль' : 'стандарт';
+    }
+
+    function inferDifficulty(target, groupName, text){
+        if(target === 'finance' || target === 'parameter') return 5;
+        if(target === 'planimetry' || target === 'stereometry') return /а\)|б\)|Докажите|докажите/.test(text) ? 5 : 3;
+        if(/Вычисление_значений/.test(groupName)) return 2;
+        return /а\)|б\)/.test(text) ? 4 : 3;
+    }
+
+    function toMathHTML(text){
+        return escapeHtml(text)
+            .replace(/
+        /g,'<br>')
+            .replace(/√([0-9a-zA-Zα-ωΑ-Ω]+)/g,'<math><msqrt><mi>$1</mi></msqrt></math>')
+            .replace(/([0-9a-zA-Zα-ωΑ-Ω]+)²/g,'<math><msup><mi>$1</mi><mn>2</mn></msup></math>')
+            .replace(/([0-9a-zA-Zα-ωΑ-Ω]+)³/g,'<math><msup><mi>$1</mi><mn>3</mn></msup></math>')
+            .replace(/π/g,'<math><mi>π</mi></math>')
+            .replace(/α/g,'<math><mi>α</mi></math>');
+    }
+
+    function buildModeChips(){
+        els.modeChips.innerHTML = '';
+        Object.entries(MODES).forEach(([key,mode])=>{
+            const chip = document.createElement('button');
+            chip.className = 'chip';
+            chip.type = 'button';
+            chip.dataset.mode = key;
+            chip.innerHTML = `<strong>${mode.label}</strong>`;
+            els.modeChips.appendChild(chip);
+        });
+    }
+
+    function buildCategoryControls(){
+        els.categoryList.innerHTML = '';
+        Object.keys(CATEGORY_META).forEach(key=>{
+            const tasks = TASK_BANK[key] || [];
+            state.categories[key] = state.categories[key] || { enabled:true, weight:1, count:'' };
+            const wrap = document.createElement('div');
+            wrap.className = 'category-card';
+            wrap.innerHTML = `
+          <div class="category-head">
+            <div class="category-title">${CATEGORY_META[key].name}</div>
+            <div class="pill">${tasks.length} задач</div>
+          </div>
+          <div class="toggle" style="margin-bottom:10px">
+            <span>Активна в генерации</span>
+            <label class="switch"><input type="checkbox" data-cat-enable="${key}" checked><span class="slider"></span></label>
+          </div>
+          <div class="cols-2">
+            <div>
+              <label class="small">Вес категории</label>
+              <input type="number" data-cat-weight="${key}" min="0" step="0.5" value="1" />
+            </div>
+            <div>
+              <label class="small">Фикс. число задач</label>
+              <input type="number" data-cat-count="${key}" min="" step="1" placeholder="авто" />
+            </div>
+          </div>
+        `;
+            els.categoryList.appendChild(wrap);
+        });
+    }
+
+    function buildTagFilters(){
+        els.tagFilters.innerHTML = '';
+        getAllTags().forEach(tag=>{
+            const chip = document.createElement('button');
+            chip.className = 'chip';
+            chip.type = 'button';
+            chip.dataset.tag = tag;
+            chip.textContent = tag;
+            els.tagFilters.appendChild(chip);
+        });
+    }
+
+    function attachEvents(){
+        els.variantTitle.addEventListener('input',()=>{state.title=els.variantTitle.value; persistState(); renderPaperHeader();});
+        els.variantLevel.addEventListener('change',()=>{state.level=els.variantLevel.value; persistState(); renderBadges(); updateStats();});
+        els.variantDifficulty.addEventListener('change',()=>{state.difficulty=els.variantDifficulty.value; persistState(); renderBadges(); updateStats();});
+        els.teacherNote.addEventListener('input',()=>{state.note=els.teacherNote.value; persistState(); renderPaperHeader();});
+        els.taskCount.addEventListener('input',()=>{state.count=Number(els.taskCount.value); els.taskCountValue.textContent=state.count; persistState(); updateStats();});
+
+        ['showAnswers','showMeta','shuffleWithin','avoidRecent','groupByCategory'].forEach(key=>{
+            els[key].addEventListener('change',()=>{
+                state[key] = els[key].checked;
+                persistState();
+                if(key === 'showAnswers' || key === 'showMeta' || key === 'groupByCategory') renderGenerated();
+                renderBadges();
+            });
+        });
+
+        els.modeChips.addEventListener('click',e=>{
+            const btn = e.target.closest('[data-mode]');
+            if(!btn) return;
+            setMode(btn.dataset.mode);
+        });
+
+        els.categoryList.addEventListener('input',e=>{
+            const en = e.target.dataset.catEnable;
+            const wt = e.target.dataset.catWeight;
+            const ct = e.target.dataset.catCount;
+            if(en){ state.categories[en].enabled = e.target.checked; }
+            if(wt){ state.categories[wt].weight = Math.max(0, Number(e.target.value || 0)); if(state.mode !== 'custom') state.mode = 'custom'; }
+            if(ct){ state.categories[ct].count = e.target.value === '' ? '' : Math.max(0, Number(e.target.value)); }
+            syncModeUI();
+            persistState();
+            updateStats();
+            renderBadges();
+        });
+        els.categoryList.addEventListener('change',e=>{
+            const en = e.target.dataset.catEnable;
+            if(en){ state.categories[en].enabled = e.target.checked; persistState(); updateStats(); renderBadges(); }
+        });
+
+        els.tagFilters.addEventListener('click',e=>{
+            const btn = e.target.closest('[data-tag]');
+            if(!btn) return;
+            const tag = btn.dataset.tag;
+            if(state.activeTags.has(tag)) state.activeTags.delete(tag); else state.activeTags.add(tag);
+            persistState();
+            syncTagUI();
+            updateStats();
+            renderBadges();
+        });
+
+        els.generateBtn.addEventListener('click',generateTasks);
+        els.rerollBtn.addEventListener('click',generateTasks);
+        els.savePresetBtn.addEventListener('click',savePreset);
+        els.loadPresetBtn.addEventListener('click',loadPreset);
+        els.exportBtn.addEventListener('click',exportJSON);
+        els.copyBtn.addEventListener('click',copyTextVersion);
+        els.printBtn.addEventListener('click',()=>window.print());
+        els.resetBtn.addEventListener('click',resetState);
+
+        els.toggleAnswersBtn.addEventListener('click',()=>{
+            state.showAnswers = !state.showAnswers;
+            els.showAnswers.checked = state.showAnswers;
+            persistState();
+            renderGenerated();
+            renderBadges();
+        });
+        els.toggleMetaBtn.addEventListener('click',()=>{
+            state.showMeta = !state.showMeta;
+            els.showMeta.checked = state.showMeta;
+            persistState();
+            renderGenerated();
+            renderBadges();
+        });
+        els.collapseBtn.addEventListener('click',()=>{
+            document.querySelectorAll('.task-group').forEach(g=>{
+                const list = g.querySelector('.task-list');
+                list.classList.toggle('hidden');
+            });
+        });
+    }
+
+    function setMode(modeKey){
+        state.mode = modeKey;
+        if(modeKey !== 'custom'){
+            const weights = MODES[modeKey].weights;
+            Object.keys(CATEGORY_META).forEach(key=>{
+                state.categories[key].weight = weights[key] ?? 1;
+                state.categories[key].enabled = (weights[key] ?? 0) > 0;
+            });
+        }
+        syncUIFromState();
+        persistState();
+        renderBadges();
+        updateStats();
+    }
+
+    function syncUIFromState(){
+        els.variantTitle.value = state.title;
+        els.variantLevel.value = state.level;
+        els.variantDifficulty.value = state.difficulty;
+        els.teacherNote.value = state.note;
+        els.taskCount.value = state.count;
+        els.taskCountValue.textContent = state.count;
+        ['showAnswers','showMeta','shuffleWithin','avoidRecent','groupByCategory'].forEach(key=>els[key].checked = !!state[key]);
+        syncModeUI();
+        syncCategoryUI();
+        syncTagUI();
+        renderPaperHeader();
+        renderBadges();
+        updateStats();
+    }
+
+    function syncModeUI(){
+        [...els.modeChips.children].forEach(chip=>chip.classList.toggle('active', chip.dataset.mode === state.mode));
+    }
+
+    function syncCategoryUI(){
+        Object.keys(CATEGORY_META).forEach(key=>{
+            const en = document.querySelector(`[data-cat-enable="${key}"]`);
+            const wt = document.querySelector(`[data-cat-weight="${key}"]`);
+            const ct = document.querySelector(`[data-cat-count="${key}"]`);
+            if(en) en.checked = !!state.categories[key].enabled;
+            if(wt) wt.value = state.categories[key].weight;
+            if(ct) ct.value = state.categories[key].count;
+        });
+    }
+
+    function syncTagUI(){
+        [...els.tagFilters.children].forEach(chip=>chip.classList.toggle('active', state.activeTags.has(chip.dataset.tag)));
+    }
+
+    function renderBadges(){
+        const items = [];
+        items.push(`режим: ${MODES[state.mode].label}`);
+        items.push(`уровень: ${state.level}`);
+        items.push(`сложность: ${state.difficulty}`);
+        if(state.activeTags.size) items.push(`теги: ${state.activeTags.size}`);
+        if(state.showAnswers) items.push('с ответами');
+        if(state.groupByCategory) items.push('группировка по темам');
+        els.activeBadges.innerHTML = items.map(t=>`<span class="badge">${t}</span>`).join('');
+    }
+
+    function renderPaperHeader(){
+        els.paperTitle.textContent = state.title || 'Тренировочный блок задач';
+        const bits = [];
+        bits.push(`Режим: ${MODES[state.mode].label}`);
+        if(state.level !== 'любой') bits.push(`уровень: ${state.level}`);
+        if(state.difficulty !== 'любая') bits.push(`сложность: ${state.difficulty}`);
+        bits.push(`объём: ${state.count} задач`);
+        if(state.note.trim()) bits.push(state.note.trim());
+        els.paperSub.textContent = bits.join(' · ');
+    }
+
+    function updateStats(){
+        const all = getAllTasks();
+        els.statBank.textContent = all.length;
+        els.statSelected.textContent = state.generated.length;
+        els.statActiveCats.textContent = Object.values(state.categories).filter(v=>v.enabled).length;
+        els.statTags.textContent = state.activeTags.size;
+        if(!all.length){
+            els.paperSub.textContent = 'Банк не собран: проверьте SOURCE_BANK и нормализацию.';
+        }
+    }
+
+    function taskMatchesFilters(task){
+        if(state.level !== 'любой' && task.level !== state.level) return false;
+        if(state.difficulty !== 'любая' && Number(task.difficulty) !== Number(state.difficulty)) return false;
+        if(state.activeTags.size){
+            const ok = [...state.activeTags].every(tag => task.tags.includes(tag));
+            if(!ok) return false;
+        }
+        return true;
+    }
+
+    function getRecentHistory(){
+        try{ return JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]'); }catch{return []}
+    }
+
+    function pushHistory(ids){
+        const current = getRecentHistory();
+        current.unshift(ids);
+        localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(current.slice(0,5)));
+    }
+
+    function weightedAllocation(total, cats){
+        const fixed = {};
+        let remaining = total;
+        let weightedCats = [];
+        cats.forEach(key=>{
+            const cfg = state.categories[key];
+            if(cfg.count !== '' && cfg.count !== null && cfg.count !== undefined){
+                fixed[key] = Number(cfg.count);
+                remaining -= Number(cfg.count);
+            } else {
+                weightedCats.push(key);
+            }
+        });
+        if(remaining < 0) remaining = 0;
+
+        const sumWeight = weightedCats.reduce((s,key)=>s + Number(state.categories[key].weight || 0), 0) || 1;
+        const out = {...fixed};
+        let allocated = 0;
+        weightedCats.forEach((key,idx)=>{
+            if(idx === weightedCats.length - 1){
+                out[key] = Math.max(0, remaining - allocated);
+            } else {
+                const raw = remaining * Number(state.categories[key].weight || 0) / sumWeight;
+                const value = Math.floor(raw);
+                out[key] = value;
+                allocated += value;
+            }
+        });
+
+        const currentTotal = Object.values(out).reduce((a,b)=>a+b,0);
+        if(currentTotal < total && weightedCats.length){
+            let i = 0;
+            while(Object.values(out).reduce((a,b)=>a+b,0) < total){
+                const key = weightedCats[i % weightedCats.length];
+                out[key] += 1;
+                i++;
+            }
+        }
+        return out;
+    }
+
+    function shuffle(arr){
+        const a = [...arr];
+        for(let i=a.length-1;i>0;i--){
+            const j = Math.floor(Math.random()*(i+1));
+            [a[i],a[j]]=[a[j],a[i]];
+        }
+        return a;
+    }
+
+    function generateTasks(){
+        renderPaperHeader();
+        const activeCats = Object.keys(CATEGORY_META).filter(key => state.categories[key].enabled);
+        if(!activeCats.length){
+            state.generated = [];
+            renderGenerated('Нет активных категорий. Включите хотя бы одну.');
+            updateStats();
+            persistState();
+            return;
+        }
+
+        const allocation = weightedAllocation(state.count, activeCats);
+        const recentFlat = new Set(getRecentHistory().flat());
+        const generated = [];
+
+        activeCats.forEach(cat=>{
+            let pool = (TASK_BANK[cat] || []).filter(taskMatchesFilters);
+            if(state.avoidRecent){
+                const fresh = pool.filter(t=>!recentFlat.has(t.id));
+                if(fresh.length) pool = fresh;
+            }
+            if(state.shuffleWithin) pool = shuffle(pool);
+            const take = Math.min(allocation[cat] || 0, pool.length);
+            generated.push(...pool.slice(0, take));
+        });
+
+        if(generated.length < state.count){
+            const existing = new Set(generated.map(t=>t.id));
+            let spare = getAllTasks().filter(task=>!existing.has(task.id) && taskMatchesFilters(task));
+            if(state.avoidRecent){
+                const fresh = spare.filter(t=>!recentFlat.has(t.id));
+                if(fresh.length) spare = fresh;
+            }
+            generated.push(...shuffle(spare).slice(0, state.count - generated.length));
+        }
+
+        state.generated = state.shuffleWithin ? shuffle(generated).slice(0,state.count) : generated.slice(0,state.count);
+        pushHistory(state.generated.map(t=>t.id));
+        persistState();
+        renderGenerated();
+        updateStats();
+    }
+
+    function renderGenerated(message=''){
+        const tasks = state.generated;
+        if(!tasks.length){
+            els.taskGroups.innerHTML = `<div class="empty">${message || 'По текущим фильтрам задачи не найдены. Попробуйте ослабить ограничения.'}</div>`;
+            return;
+        }
+
+        let groups = {};
+        if(state.groupByCategory){
+            tasks.forEach(task=>{
+                if(!groups[task.category]) groups[task.category] = [];
+                groups[task.category].push(task);
+            });
+        } else {
+            groups['Смешанный набор'] = tasks;
+        }
+
+        let globalIndex = 1;
+        els.taskGroups.innerHTML = Object.entries(groups).map(([groupName,list])=>{
+            const body = list.map(task=>{
+                const idx = globalIndex++;
+                const meta = [
+                    `уровень: ${task.level}`,
+                    `сложность: ${task.difficulty}`,
+                    ...task.tags
+                ];
+                return `
+            <article class="task-card ${state.showAnswers ? 'show-answer' : ''}" data-task-id="${task.id}">
+              <div class="task-number">${idx}</div>
+              <div class="task-body">
+                <div class="task-text">${task.html ?? escapeHtml(task.text ?? '')}</div>
+                ${state.showMeta ? `<div class="task-meta">${meta.map(m=>`<span class="mini">${escapeHtml(m)}</span>`).join('')}</div>` : ''}
+                <div class="answer"><strong>Ответ:</strong> ${task.answerHtml ?? escapeHtml(task.answer ?? '')}</div>
+              </div>
+              <div class="task-actions">
+                <button class="icon-btn" title="Показать/скрыть ответ" onclick="toggleTaskAnswer('${task.id}')">✓</button>
+                <button class="icon-btn" title="Заменить задачу" onclick="replaceTask('${task.id}')">↻</button>
+                <button class="icon-btn" title="Скопировать задачу" onclick="copySingleTask('${task.id}')">⧉</button>
+              </div>
+            </article>
+          `;
+            }).join('');
+            return `
+          <section class="task-group">
+            <div class="task-group-head">
+              <h4>${escapeHtml(groupName)}</h4>
+              <div class="task-count">${list.length} шт.</div>
+            </div>
+            <div class="task-list">${body}</div>
+          </section>
+        `;
+        }).join('');
+    }
+
+    function replaceTask(taskId){
+        const index = state.generated.findIndex(t=>t.id === taskId);
+        if(index === -1) return;
+        const current = state.generated[index];
+        const categoryKey = Object.keys(CATEGORY_META).find(key => CATEGORY_META[key].name === current.category);
+        let pool = (TASK_BANK[categoryKey] || []).filter(task=>taskMatchesFilters(task) && task.id !== taskId && !state.generated.some(t=>t.id === task.id));
+        if(!pool.length) pool = getAllTasks().filter(task=>taskMatchesFilters(task) && task.id !== taskId && !state.generated.some(t=>t.id === task.id));
+        if(!pool.length) return;
+        const next = shuffle(pool)[0];
+        state.generated[index] = next;
+        persistState();
+        renderGenerated();
+        updateStats();
+    }
+
+    function toggleTaskAnswer(taskId){
+        const card = document.querySelector(`[data-task-id="${taskId}"]`);
+        if(card) card.classList.toggle('show-answer');
+    }
+
+    function copySingleTask(taskId){
+        const task = state.generated.find(t=>t.id === taskId);
+        if(!task) return;
+        const plainQuestion = htmlToText(task.html ?? task.text ?? '');
+        const plainAnswer = htmlToText(task.answerHtml ?? task.answer ?? '');
+        navigator.clipboard.writeText(`${task.category}
+${plainQuestion}
+Ответ: ${plainAnswer}`);
+    }
+
+    function copyTextVersion(){
+        if(!state.generated.length) return;
+        const lines = [state.title || 'Тренировочный блок задач', ''];
+        state.generated.forEach((task,i)=>{
+            const plainQuestion = htmlToText(task.html ?? task.text ?? '');
+            const plainAnswer = htmlToText(task.answerHtml ?? task.answer ?? '');
+            lines.push(`${i+1}. [${task.category}] ${plainQuestion}`);
+            if(state.showAnswers) lines.push(`Ответ: ${plainAnswer}`);
+            lines.push('');
+        });
+        navigator.clipboard.writeText(lines.join('\n'));
+        flashButton(els.copyBtn, 'Скопировано');
+    }
+
+    function exportJSON(){
+        const payload = {
+            meta:{
+                title:state.title,
+                mode:state.mode,
+                level:state.level,
+                difficulty:state.difficulty,
+                note:state.note,
+                generatedAt:new Date().toISOString()
+            },
+            tasks:state.generated
+        };
+        const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'task-block.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function savePreset(){
+        const name = prompt('Название пресета:', `Пресет ${new Date().toLocaleDateString('ru-RU')}`);
+        if(!name) return;
+        const presets = readPresets();
+        presets[name] = serializeState();
+        localStorage.setItem(STORAGE_KEYS.presets, JSON.stringify(presets));
+        flashButton(els.savePresetBtn, 'Сохранено');
+    }
+
+    function loadPreset(){
+        const presets = readPresets();
+        const names = Object.keys(presets);
+        if(!names.length){
+            alert('Сохранённых пресетов пока нет.');
+            return;
+        }
+        const choice = prompt(`Доступные пресеты:\n- ${names.join('\n- ')}\n\nВведите точное название:`);
+        if(!choice || !presets[choice]) return;
+        applySerializedState(presets[choice]);
+        syncUIFromState();
+        generateTasks();
+        flashButton(els.loadPresetBtn, 'Загружено');
+    }
+
+    function readPresets(){
+        try{return JSON.parse(localStorage.getItem(STORAGE_KEYS.presets)||'{}')}catch{return {}}
+    }
+
+    function flashButton(btn,text){
+        const old = btn.textContent;
+        btn.textContent = text;
+        setTimeout(()=>btn.textContent = old, 900);
+    }
+
+    function resetState(){
+        localStorage.removeItem(STORAGE_KEYS.state);
+        localStorage.removeItem(STORAGE_KEYS.history);
+        location.reload();
+    }
+
+    function serializeState(){
+        return {
+            ...state,
+            activeTags:[...state.activeTags]
+        };
+    }
+
+    function applySerializedState(raw){
+        state.mode = raw.mode || 'balanced';
+        state.title = raw.title || 'Тренировочный блок задач';
+        state.level = raw.level || 'любой';
+        state.difficulty = raw.difficulty || 'любая';
+        state.note = raw.note || '';
+        state.count = raw.count || 8;
+        state.categories = raw.categories || state.categories;
+        state.activeTags = new Set(raw.activeTags || []);
+        state.showAnswers = !!raw.showAnswers;
+        state.showMeta = raw.showMeta !== false;
+        state.shuffleWithin = raw.shuffleWithin !== false;
+        state.avoidRecent = raw.avoidRecent !== false;
+        state.groupByCategory = raw.groupByCategory !== false;
+        state.generated = Array.isArray(raw.generated) ? raw.generated : [];
+    }
+
+    function persistState(){
+        localStorage.setItem(STORAGE_KEYS.state, JSON.stringify(serializeState()));
+    }
+
+    function loadState(){
+        Object.keys(CATEGORY_META).forEach(key=>{
+            if(!state.categories[key]) state.categories[key] = { enabled:true, weight:1, count:'' };
+        });
+        try{
+            const raw = JSON.parse(localStorage.getItem(STORAGE_KEYS.state) || 'null');
+            if(raw) applySerializedState(raw);
+        }catch{}
+    }
+
+    function escapeHtml(s){
+        return String(s)
+            .replaceAll('&','&amp;')
+            .replaceAll('<','&lt;')
+            .replaceAll('>','&gt;')
+            .replaceAll('"','&quot;');
+    }
+
+    window.toggleTaskAnswer = toggleTaskAnswer;
+    window.replaceTask = replaceTask;
+    window.copySingleTask = copySingleTask;
+
+    init();
+</script>
+</body>
+</html>

@@ -1,716 +1,604 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Супер‑математика: вписанный четырёхугольник | CAP = CBP</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Наглядная химия — Полина Крылова</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root{
+            --bg:#071014;
+            --panel:#0d1b22;
+            --panel-2:#10242d;
+            --text:#e8f1f4;
+            --muted:#9cb2bb;
+            --accent:#58d0c2;
+            --accent-2:#88e7dc;
+            --line:#1d3740;
+            --warn:#ffd37a;
+            --good:#8ae6a1;
+            --bad:#ff9e9e;
+            --shadow:0 12px 30px rgba(0,0,0,.28);
+            --radius:20px;
         }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:linear-gradient(180deg,#061015,#08161d 45%,#071014 100%);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+        body{line-height:1.55}
+        .wrap{max-width:1440px;margin:0 auto;padding:24px}
+        .hero{padding:28px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,rgba(16,36,45,.96),rgba(11,25,31,.96));box-shadow:var(--shadow);position:relative;overflow:hidden}
+        .hero:after{content:"";position:absolute;inset:auto -80px -80px auto;width:260px;height:260px;background:radial-gradient(circle,var(--accent) 0%,rgba(88,208,194,.08) 35%,transparent 65%);filter:blur(8px)}
+        h1,h2,h3{margin:0 0 12px 0;line-height:1.2}
+        h1{font-size:clamp(30px,4vw,48px)}
+        h2{font-size:clamp(24px,2.8vw,34px);margin-top:28px}
+        h3{font-size:clamp(18px,2vw,24px);margin-top:20px}
+        p{margin:10px 0}
+        .lead{max-width:980px;color:#d8e8ee;font-size:1.05rem}
+        .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+        .tag{padding:8px 12px;border-radius:999px;background:#0b2027;border:1px solid var(--line);color:var(--accent-2);font-size:.93rem}
 
-        body {
-            background: #0a0f1a;
-            font-family: 'Segoe UI', 'Roboto', 'Georgia', 'Times New Roman', serif;
-            color: #eef2ff;
-            padding: 24px 20px;
-            line-height: 1.45;
-        }
+        .grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:24px;margin-top:24px;align-items:start}
+        .leftcol{min-width:0}
+        .rightcol{position:sticky;top:18px;align-self:start}
 
-        .app-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 28px;
-            align-items: start;
-        }
+        .card{background:linear-gradient(180deg,rgba(13,27,34,.98),rgba(10,22,28,.98));border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+        .card + .card{margin-top:18px}
+        .section-label{font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2);margin-bottom:10px}
+        .idea-list,.check-list,.mistakes-list,.plain-list{margin:10px 0 0 0;padding-left:20px}
+        .plain-list li,.idea-list li,.check-list li,.mistakes-list li{margin:8px 0}
 
-        @media (max-width: 880px) {
-            .app-container {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-            .visual-panel {
-                position: relative;
-                top: 0;
-            }
-        }
+        .steps{display:grid;gap:14px}
+        .step{border:1px solid var(--line);border-radius:18px;background:rgba(14,31,39,.72);overflow:hidden}
+        .step button{width:100%;background:none;border:0;color:var(--text);padding:16px 18px;text-align:left;display:flex;justify-content:space-between;align-items:center;font:inherit;cursor:pointer}
+        .step button:hover{background:rgba(88,208,194,.05)}
+        .step .content{padding:0 18px 18px 18px;display:block}
+        .step.collapsed .content{display:none}
+        .num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(88,208,194,.12);color:var(--accent-2);font-weight:700;margin-right:10px;flex:none}
+        .titleline{display:flex;align-items:center;font-weight:700}
+        .chev{opacity:.8;font-size:1.2rem}
 
-        .solution-panel {
-            background: #10161f;
-            border-radius: 28px;
-            padding: 24px 28px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid #2a3440;
-        }
+        .formula{display:block;margin:12px 0;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:#0a1a20;font-family:"Segoe UI",Arial,sans-serif;font-size:1.08rem;overflow:auto}
+        .formula.inline{display:inline-block;padding:3px 8px;margin:0 3px;vertical-align:middle;font-size:.98rem;border-radius:10px}
+        .sub{vertical-align:sub;font-size:.78em}
+        .sup{vertical-align:super;font-size:.72em}
+        .rx{font-family:inherit;white-space:nowrap}
+        .kv{display:grid;grid-template-columns:220px 1fr;gap:10px 14px;margin-top:10px}
+        .kv div{padding:8px 0;border-bottom:1px dashed rgba(156,178,187,.18)}
+        .kv .k{color:var(--accent-2);font-weight:600}
 
-        .visual-panel {
-            position: sticky;
-            top: 20px;
-            background: #0c1119;
-            border-radius: 28px;
-            padding: 20px 20px 24px 20px;
-            border: 1px solid #2a3440;
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
-        }
+        .controls{display:grid;gap:12px}
+        .control-row{display:flex;gap:10px;flex-wrap:wrap}
+        .btn,.toggle,.ghost{appearance:none;border:1px solid var(--line);background:#10242d;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;font:inherit}
+        .btn.active,.toggle.active{background:rgba(88,208,194,.12);border-color:rgba(88,208,194,.45);color:var(--accent-2)}
+        .ghost{background:transparent}
+        .btn:hover,.toggle:hover,.ghost:hover{border-color:#2f5a67}
 
-        h1, h2, h3 {
-            font-weight: 500;
-            letter-spacing: -0.2px;
-        }
+        .sticky-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:16px}
+        .legend{display:grid;gap:8px;margin-top:14px}
+        .legend-item{display:flex;align-items:center;gap:10px;color:var(--muted)}
+        .sw{width:16px;height:16px;border-radius:6px;border:1px solid rgba(255,255,255,.16)}
 
-        h1 {
-            font-size: 1.7rem;
-            margin-bottom: 12px;
-            color: #d9e6ff;
-            border-left: 4px solid #3b82f6;
-            padding-left: 18px;
-        }
+        .viz-wrap{border:1px solid var(--line);border-radius:18px;padding:12px;background:#09161b;overflow:hidden}
+        svg{width:100%;height:auto;display:block}
+        .node{transition:transform .18s ease, filter .18s ease, opacity .18s ease}
+        .hl .node[data-key], .hl [data-key].hl-target{filter:drop-shadow(0 0 10px rgba(88,208,194,.35))}
+        .muted-text{color:var(--muted)}
+        .box-note{padding:14px 16px;border-radius:16px;border:1px solid rgba(255,211,122,.22);background:rgba(255,211,122,.06);color:#ffe6a7}
+        .good{color:var(--good)}
+        .bad{color:var(--bad)}
 
-        .idea-block, .given-block {
-            background: #0e1722;
-            border-left: 5px solid #f59e0b;
-            padding: 16px 20px;
-            margin: 20px 0;
-            border-radius: 20px;
-            font-weight: 450;
-        }
+        .quiz{display:grid;gap:12px}
+        .quiz .q{padding:14px;border:1px solid var(--line);border-radius:16px;background:#0b1920}
+        .quiz label{display:block;margin:7px 0;cursor:pointer}
+        .result{margin-top:8px;font-weight:700}
 
-        .given-block {
-            border-left-color: #3b82f6;
-        }
+        .tasks{display:grid;gap:12px}
+        .task{padding:14px;border:1px solid var(--line);border-radius:16px;background:#0b1920}
+        .answer{margin-top:10px;color:var(--accent-2)}
 
-        .step {
-            background: #0f1722;
-            margin: 16px 0;
-            padding: 12px 20px;
-            border-radius: 18px;
-            border: 1px solid #232e3c;
-        }
+        .small{font-size:.94rem}
+        .tiny{font-size:.86rem;color:var(--muted)}
+        .hidden{display:none !important}
 
-        .badge {
-            font-weight: bold;
-            background: #1e2a3a;
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            margin-right: 12px;
-            color: #94a3b8;
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        @media (max-width:1100px){
+            .grid{grid-template-columns:1fr}
+            .rightcol{position:relative;top:0}
         }
-
-        button {
-            background: #1f2a3c;
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.1s linear;
-            font-size: 0.8rem;
-            margin: 5px 4px;
-            border: 1px solid #3a485c;
+        @media (max-width:760px){
+            .wrap{padding:14px}
+            .card,.hero{padding:16px}
+            .kv{grid-template-columns:1fr}
+            .two-col{grid-template-columns:1fr}
+            .control-row{display:grid;grid-template-columns:1fr 1fr}
         }
-
-        button:hover {
-            background: #2f3e56;
-            transform: scale(0.97);
-        }
-
-        .zoom-controls {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin: 16px 0 12px 0;
-            justify-content: center;
-        }
-
-        input[type="range"] {
-            width: 160px;
-            background: #1f2a3c;
-            height: 4px;
-            border-radius: 10px;
-        }
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 18px;
-            margin: 15px 0 10px;
-            font-size: 0.75rem;
-            justify-content: center;
-        }
-
-        .legend span {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .quiz-area, .self-check {
-            background: #0b1119;
-            border-radius: 20px;
-            padding: 16px;
-            margin-top: 24px;
-        }
-
-        .generated-task {
-            background: #0f1822;
-            border-radius: 18px;
-            padding: 16px;
-            margin-top: 20px;
-        }
-
-        .error-list {
-            background: #1a101a;
-            border-left: 4px solid #dc2626;
-            padding: 12px 18px;
-            margin: 20px 0;
-            border-radius: 16px;
-        }
-
-        footer {
-            font-size: 0.7rem;
-            text-align: center;
-            margin-top: 40px;
-            opacity: 0.6;
-        }
-
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background: #0b0f15;
-            border-radius: 24px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-            cursor: grab;
-            width: 100%;
-            height: auto;
-        }
-        canvas:active {
-            cursor: grabbing;
-        }
-
-        .info-angle {
-            text-align: center;
-            background: #00000055;
-            border-radius: 28px;
-            padding: 10px;
-            margin-top: 12px;
-            font-weight: bold;
-        }
-
-        @media print {
-            body { background: white; color: black; }
-            .visual-panel { position: relative; break-inside: avoid; }
-            button, .zoom-controls, .generated-task, .quiz-area { display: none; }
+        @media print{
+            :root{--bg:#fff;--panel:#fff;--panel-2:#fff;--text:#111;--muted:#444;--line:#bbb;--accent:#0b6e6e;--accent-2:#174444}
+            body{background:#fff;color:#111}
+            .wrap{max-width:none;padding:0}
+            .grid{grid-template-columns:1fr}
+            .rightcol{position:static}
+            .controls,.quiz-controls,.gen-controls,.ghost.print-hide,.btn.print-hide,.toggle.print-hide{display:none !important}
+            .hero,.card,.step,.viz-wrap{box-shadow:none;background:#fff}
+            a{color:#000;text-decoration:none}
         }
     </style>
 </head>
 <body>
-<div class="app-container">
-    <div class="solution-panel">
-        <h1>📐 Задача 13.7</h1>
-        <div class="given-block">
-            <strong>📌 Что дано</strong><br>
-            Острый угол с вершиной A. Из точки P внутри угла опущены перпендикуляры PB и PC на стороны угла.<br>
-            <strong id="conditionValue">∠CBP = 25°</strong>. Найти ∠CAP.
+<div class="wrap">
+    <section class="hero">
+        <div class="section-label">Наглядная химия</div>
+        <h1>Разбор ключевых химических задач по материалам занятия</h1>
+        <p class="lead">
+            Это интерактивная страница по материалу пособия, собранного для Полины Крыловой. Здесь объединены органические превращения,
+            ОВР, электролиз водных растворов, pH, скорость реакции, химическое равновесие и табличные расчётные задачи. Цель страницы —
+            не просто дать ответ, а показать <strong>как распознавать тип задачи</strong>, <strong>какое правило применять</strong> и <strong>как проверять себя</strong>.
+        </p>
+        <div class="meta">
+            <span class="tag">Подготовка к ЕГЭ</span>
+            <span class="tag">Уровень: уверенный</span>
+            <span class="tag">Только школьные методы</span>
+            <span class="tag">Пошаговое раскрытие</span>
+            <span class="tag">Печать и мобильная версия</span>
         </div>
+    </section>
 
-        <div class="idea-block">
-            <strong>✨ Идея решения</strong><br>
-            1. Перпендикуляры → ∠ABP = 90°, ∠ACP = 90°.<br>
-            2. Четырёхугольник ABPC вписан в окружность (сумма противоположных углов 180°), AP — диаметр.<br>
-            3. Вписанные углы ∠CAP и ∠CBP опираются на дугу CP ⇒ ∠CAP = ∠CBP.<br>
-            4. Ответ: ∠CAP = 25°.
-        </div>
+    <div class="grid">
+        <main class="leftcol">
+            <section class="card" id="idea-card">
+                <div class="section-label">Идея решения</div>
+                <h2>Главная стратегия</h2>
+                <ul class="idea-list" data-detail="short standard detailed">
+                    <li>Сначала распознаём <strong>тип задачи</strong>: органика, электролиз, ОВР, pH, равновесие или расчёт.</li>
+                    <li>Потом выделяем <strong>ключевую химическую идею</strong>: замещение или отщепление, кто окислитель, кто разряжается на электродах, куда смещается равновесие.</li>
+                    <li>Далее записываем <strong>корректные уравнения</strong> и только после этого делаем вывод о продукте, среде, коэффициентах или численном ответе.</li>
+                    <li>В конце обязательно выполняем <strong>проверку</strong>: уравнивание, химическая правдоподобность, знак среды, соответствие коэффициентам и условию.</li>
+                </ul>
+            </section>
 
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 10px 0;">
-            <div><span class="badge">📖 Детальность:</span>
-                <select id="detailSelect">
-                    <option value="short">Кратко</option>
-                    <option value="standard" selected>Стандартно</option>
-                    <option value="very">Очень подробно</option>
-                </select>
-            </div>
-            <div><span class="badge">🎬 Пошагово:</span>
-                <button id="stepModeBtn">Включить пошагово</button>
-                <button id="resetStepsBtn">Показать всё</button>
-            </div>
-        </div>
+            <section class="card">
+                <div class="section-label">Что дано</div>
+                <h2>Содержание разбора</h2>
+                <div class="kv">
+                    <div class="k">Основные темы</div><div>Органические превращения, окисление спиртов, хлорирование аренов, электролиз, pH, влияние давления, химическое равновесие, расчётные схемы.</div>
+                    <div class="k">Что нужно уметь</div><div>Распознавать тип реакции, выбирать продукт, писать уравнение, определять среду, использовать коэффициенты и проверять ответ.</div>
+                    <div class="k">Формат</div><div>Пошаговый разбор + визуальная модель + похожие задачи + самопроверка.</div>
+                </div>
+            </section>
 
-        <div id="dynamicSolution"></div>
+            <section class="card">
+                <div class="section-label">Пошаговое решение</div>
+                <h2>Ключевые разделы</h2>
+                <div class="steps" id="steps">
+                    <article class="step" data-step="1">
+                        <button type="button"><span class="titleline"><span class="num">1</span>Распознавание органических превращений</span><span class="chev">▾</span></button>
+                        <div class="content">
+                            <p data-detail="standard detailed">В органике первым делом определяем не ответ, а <strong>тип превращения</strong>. Именно он подсказывает продукт.</p>
+                            <div class="formula" data-key="org-main">
+                                CH<span class="sub">3</span>–CHCl–CH<span class="sub">3</span> + KOH(спирт), t → CH<span class="sub">3</span>–CH=CH<span class="sub">2</span> + KCl + H<span class="sub">2</span>O
+                            </div>
+                            <ul class="plain-list">
+                                <li data-key="org-elim"><strong>Спиртовой раствор щёлочи</strong> и нагревание обычно означают <strong>отщепление HX</strong>, то есть образование алкена.</li>
+                                <li data-key="org-sub">Водный раствор щёлочи чаще ведёт к <strong>замещению</strong>, а не к элиминированию.</li>
+                                <li data-key="org-ox">Вторичный спирт при окислении даёт <strong>кетон</strong>: пропанол-2 → пропанон.</li>
+                                <li data-key="org-ester">Спирт + карбоновая кислота или ангидрид → <strong>сложный эфир</strong>.</li>
+                                <li data-key="org-arene">Для аренов обязательно смотреть на <strong>условия</strong>: Cl<span class="sub">2</span>/FeCl<span class="sub">3</span> — замещение в кольце; Cl<span class="sub">2</span>, hν — замещение в боковой цепи.</li>
+                            </ul>
+                            <div class="box-note" data-detail="detailed">
+                                Школьный алгоритм: сначала класс вещества → затем реагент и условия → затем тип превращения → затем проверка, не зависит ли продукт от среды, света или катализатора.
+                            </div>
+                        </div>
+                    </article>
 
-        <div id="verificationBlock" style="margin-top: 20px; background: #0f1822; border-radius: 20px; padding: 12px 16px;">
-            <strong>✅ Проверка & вывод</strong><br>
-            <span id="verificationText">На модели видно: ∠CAP = ∠CBP. Подстановка условия даёт ответ.</span>
-        </div>
+                    <article class="step" data-step="2">
+                        <button type="button"><span class="titleline"><span class="num">2</span>ОВР и степени окисления</span><span class="chev">▾</span></button>
+                        <div class="content">
+                            <p>ОВР распознаётся по изменению степеней окисления.</p>
+                            <div class="formula" data-key="ovr-main">
+                                2CO + O<span class="sub">2</span> → 2CO<span class="sub">2</span>
+                            </div>
+                            <ul class="plain-list">
+                                <li data-key="ovr-c">В CO углерод имеет степень окисления +2, а в CO<span class="sub">2</span> уже +4. Значит, углерод <strong>окисляется</strong>.</li>
+                                <li data-key="ovr-o">Кислород в O<span class="sub">2</span> имеет 0, а в оксиде −2. Значит, кислород <strong>восстанавливается</strong>.</li>
+                                <li data-key="ovr-per">В пероксидах кислород имеет необычную степень окисления −1, например в Na<span class="sub">2</span>O<span class="sub">2</span>.</li>
+                                <li data-key="ovr-of2">В OF<span class="sub">2</span> кислород имеет +2, потому что фтор почти всегда −1. Поэтому OF<span class="sub">2</span> — не оксид, а дифторид кислорода.</li>
+                            </ul>
+                            <div class="formula" data-detail="detailed">
+                                x + 2·(−1) = 0 → x = +2
+                            </div>
+                        </div>
+                    </article>
 
-        <div class="error-list">
-            <strong>⚠️ Типичные ошибки</strong>
-            <ul style="margin-left: 20px; margin-top: 8px;">
-                <li>❌ Считать, что равенство углов зависит от положения P — неверно, оно всегда выполняется.</li>
-                <li>❌ Не заметить прямые углы и пропустить вписанность.</li>
-                <li>❌ Перепутать дуги, на которые опираются углы.</li>
-                <li>❌ Не проверить, что точка P внутри острого угла.</li>
-            </ul>
-        </div>
+                    <article class="step" data-step="3">
+                        <button type="button"><span class="titleline"><span class="num">3</span>Электролиз водных растворов</span><span class="chev">▾</span></button>
+                        <div class="content">
+                            <p>Для электролиза сначала записываем ионы раствора, затем решаем, кто разряжается на катоде и аноде.</p>
+                            <div class="formula" data-key="el-main">
+                                LiBr → Li<span class="sup">+</span> + Br<span class="sup">−</span>
+                            </div>
+                            <ul class="plain-list">
+                                <li data-key="el-cath"><strong>Катод отрицательный</strong>, на нём идёт восстановление.</li>
+                                <li data-key="el-an"><strong>Анод положительный</strong>, на нём идёт окисление.</li>
+                                <li data-key="el-active">Катионы активных металлов обычно не восстанавливаются в водном растворе; вместо них восстанавливается вода и выделяется H<span class="sub">2</span>.</li>
+                                <li data-key="el-hal">Бескислородные анионы, например Cl<span class="sup">−</span> и Br<span class="sup">−</span>, часто окисляются сами.</li>
+                                <li data-key="el-oxo">Кислородсодержащие анионы, например SO<span class="sub">4</span><span class="sup">2−</span>, обычно не разряжаются; тогда на аноде выделяется O<span class="sub">2</span>.</li>
+                            </ul>
+                            <div class="two-col" data-detail="standard detailed">
+                                <div class="formula">Катод: 2H<span class="sub">2</span>O + 2e<span class="sup">−</span> → H<span class="sub">2</span>↑ + 2OH<span class="sup">−</span></div>
+                                <div class="formula">Анод: 2Br<span class="sup">−</span> → Br<span class="sub">2</span> + 2e<span class="sup">−</span></div>
+                            </div>
+                        </div>
+                    </article>
 
-        <div class="generated-task">
-            <strong>🌀 Генератор похожих задач</strong>
-            <button id="generateTaskBtn">🎲 Сгенерировать новую задачу</button>
-            <div id="generatedTaskContent" style="margin-top: 12px; font-size: 0.9rem;"></div>
-        </div>
+                    <article class="step" data-step="4">
+                        <button type="button"><span class="titleline"><span class="num">4</span>pH и среда раствора</span><span class="chev">▾</span></button>
+                        <div class="content">
+                            <p>Для pH в школьных задачах важно сначала определить: кислота, щёлочь, слабое основание или соль.</p>
+                            <ul class="plain-list">
+                                <li data-key="ph-acid">pH &lt; 7 — кислая среда.</li>
+                                <li data-key="ph-neu">pH = 7 — нейтральная среда.</li>
+                                <li data-key="ph-base">pH &gt; 7 — щелочная среда.</li>
+                                <li data-key="ph-csoh">CsOH — сильная щёлочь, значит pH заметно больше 7.</li>
+                                <li data-key="ph-nh3">NH<span class="sub">3</span>·H<span class="sub">2</span>O — слабое основание: pH тоже больше 7, но обычно меньше, чем у сильной щёлочи.</li>
+                            </ul>
+                            <div class="box-note" data-detail="detailed">Нельзя автоматически считать любую соль нейтральной: нужно смотреть, какой кислотой и каким основанием она образована.</div>
+                        </div>
+                    </article>
 
-        <div class="quiz-area">
-            <strong>📌 Мини-квиз</strong>
-            <p style="margin: 8px 0;">Если ∠CBP = 40°, то ∠CAP = ?</p>
-            <div>
-                <button id="quizAns1">40°</button>
-                <button id="quizAns2">50°</button>
-                <button id="quizAns3">20°</button>
-                <button id="quizAns4">80°</button>
-                <span id="quizFeedback" style="margin-left: 12px;"></span>
-            </div>
-        </div>
-        <div class="self-check">
-            <strong>✍️ Самопроверка</strong>
-            <p>Введите ∠CAP: <input type="number" id="userAnswer" placeholder="градусы" style="width:80px; background:#1f2a3c; border:none; color:white; padding:5px; border-radius:20px;">
-                <button id="checkAnswerBtn">Проверить</button> <span id="checkFeedback"></span></p>
-        </div>
-        <footer>Наглядная геометрия • Вписанный четырёхугольник • Динамическая модель</footer>
-    </div>
+                    <article class="step" data-step="5">
+                        <button type="button"><span class="titleline"><span class="num">5</span>Давление, скорость и равновесие</span><span class="chev">▾</span></button>
+                        <div class="content">
+                            <p>Здесь нужно не смешивать два разных вопроса: <strong>скорость реакции</strong> и <strong>смещение равновесия</strong>.</p>
+                            <ul class="plain-list">
+                                <li data-key="eq-speed">Скорость зависит от давления, если в реагентах есть газы.</li>
+                                <li data-key="eq-shift">Равновесие при повышении давления смещается в сторону меньшего числа молей газа.</li>
+                            </ul>
+                            <div class="formula" data-key="eq-main">
+                                2SO<span class="sub">2</span> + O<span class="sub">2</span> ⇄ 2SO<span class="sub">3</span>
+                            </div>
+                            <ul class="plain-list">
+                                <li data-key="eq-left">Слева 3 моль газа, справа 2 моль газа.</li>
+                                <li data-key="eq-right">При увеличении давления равновесие сместится вправо.</li>
+                                <li data-key="eq-back">При уменьшении давления равновесие сместится влево.</li>
+                            </ul>
+                        </div>
+                    </article>
 
-    <div class="visual-panel">
-        <h3 style="margin-top: 0;">⚡ Интерактивная модель</h3>
-        <div style="text-align: center; font-size:0.85rem;">
-            🖱️ Перетащите точку <span style="color:#facc15;">P</span> мышью<br>
-            <span style="font-size:0.75rem;">⇨ Для перемещения вида (панорамирование) тяните фон холста</span>
-        </div>
-        <canvas id="mainCanvas" width="500" height="500" style="width:100%; height:auto; max-width:500px; aspect-ratio:1/1"></canvas>
+                    <article class="step" data-step="6">
+                        <button type="button"><span class="titleline"><span class="num">6</span>Табличная расчётная задача на равновесие</span><span class="chev">▾</span></button>
+                        <div class="content">
+                            <p>Сначала уравнение, затем таблица «начальное → изменение → равновесное» и только потом вычисления.</p>
+                            <div class="formula" data-key="calc-main">
+                                CO + 2H<span class="sub">2</span> ⇄ CH<span class="sub">3</span>OH
+                            </div>
+                            <ul class="plain-list">
+                                <li data-key="calc-h2">Если H<span class="sub">2</span> было 0,60 моль, а стало 0,40 моль, значит израсходовалось 0,20 моль.</li>
+                                <li data-key="calc-ratio">По коэффициентам 2 моль H<span class="sub">2</span> дают 1 моль CH<span class="sub">3</span>OH.</li>
+                                <li data-key="calc-meoh">Значит, метанола образовалось 0,10 моль.</li>
+                                <li data-key="calc-co">CO израсходовалось тоже 0,10 моль, потому что коэффициент перед ним равен 1.</li>
+                            </ul>
+                            <div class="box-note" data-detail="detailed">Самая частая ошибка — забыть коэффициенты и принять изменение всех веществ за одинаковое.</div>
+                        </div>
+                    </article>
 
-        <div class="zoom-controls">
-            <button id="zoomOutBtn">➖ Зум</button>
-            <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.02" value="1">
-            <button id="zoomInBtn">➕ Зум</button>
-            <button id="resetZoomBtn">⟳ Сброс</button>
-        </div>
-        <div class="legend">
-            <span style="color:#facc15;">●</span> P <span style="color:#6ee7b7;">●</span> A <span style="color:#60a5fa;">●</span> B, C
-            <span style="border-bottom:2px solid #f97316;">∠CBP</span>
-            <span style="border-bottom:2px solid #3b82f6;">∠CAP</span>
-            <span style="border-bottom:2px solid #a78bfa;">◌ окружность (AP — диаметр)</span>
-            <span style="border-bottom:2px solid #ffd966;">— AP, BC</span>
-        </div>
-        <div class="info-angle" id="liveAngles">
-            📐 ∠CBP = --° &nbsp;&nbsp;|&nbsp;&nbsp; ∠CAP = --°
-        </div>
-        <div style="font-size:0.75rem; text-align:center; margin-top:6px;">✔ Равенство углов подтверждает вписанность → ∠CAP = ∠CBP</div>
-        <div style="margin-top: 12px; display: flex; gap: 10px; justify-content: center;">
-            <button id="setConditionBtn" style="background:#ea580c;">🎯 Вернуть исходное: ∠CBP=25°</button>
-            <button id="resetToDemoBtn" style="background:#2c3e66;">⟳ Сброс позиции P</button>
-        </div>
+                    <article class="step" data-step="7">
+                        <button type="button"><span class="titleline"><span class="num">7</span>Проверка ответа</span><span class="chev">▾</span></button>
+                        <div class="content">
+                            <ul class="check-list">
+                                <li>Уравнение реакции уравнено по атомам и по заряду, если заряд есть.</li>
+                                <li>Продукт химически правдоподобен именно в указанных условиях.</li>
+                                <li>Для ОВР согласованы изменения степеней окисления.</li>
+                                <li>Для электролиза верно выбраны процессы на катоде и аноде.</li>
+                                <li>Для расчёта учтены коэффициенты и разумность численного ответа.</li>
+                            </ul>
+                            <p class="good"><strong>Вывод:</strong> правильное решение в химии — это не только ответ, но и корректное объяснение, почему именно он.</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="section-label">Типичные ошибки</div>
+                <h2>На что чаще всего «ловятся»</h2>
+                <ul class="mistakes-list">
+                    <li>Путают водный и спиртовой раствор щёлочи и получают не тот продукт в органике.</li>
+                    <li>Считают любую соль нейтральной, не анализируя состав и происхождение ионов.</li>
+                    <li>В электролизе пытаются выделить активный металл из водного раствора вместо воды.</li>
+                    <li>При равновесии путают влияние давления на скорость с влиянием давления на смещение равновесия.</li>
+                    <li>В расчётных задачах забывают коэффициенты в уравнении реакции.</li>
+                </ul>
+            </section>
+
+            <section class="card" id="quiz-card">
+                <div class="section-label">Мини-квиз</div>
+                <h2>Быстрая самопроверка</h2>
+                <div class="quiz" id="quiz">
+                    <div class="q">
+                        <div><strong>1.</strong> Что чаще происходит при действии спиртового раствора KOH на галогеналкан?</div>
+                        <label><input type="radio" name="q1" value="0"> Замещение</label>
+                        <label><input type="radio" name="q1" value="1"> Отщепление HX и образование алкена</label>
+                        <label><input type="radio" name="q1" value="0"> Нейтрализация</label>
+                        <div class="result" data-for="q1"></div>
+                    </div>
+                    <div class="q">
+                        <div><strong>2.</strong> Что выделяется на аноде при электролизе водного раствора K<span class="sub">2</span>SO<span class="sub">4</span>?</div>
+                        <label><input type="radio" name="q2" value="0"> K</label>
+                        <label><input type="radio" name="q2" value="1"> O<span class="sub">2</span></label>
+                        <label><input type="radio" name="q2" value="0"> H<span class="sub">2</span></label>
+                        <div class="result" data-for="q2"></div>
+                    </div>
+                    <div class="q">
+                        <div><strong>3.</strong> Куда сместится равновесие 2SO<span class="sub">2</span> + O<span class="sub">2</span> ⇄ 2SO<span class="sub">3</span> при повышении давления?</div>
+                        <label><input type="radio" name="q3" value="1"> Вправо</label>
+                        <label><input type="radio" name="q3" value="0"> Влево</label>
+                        <label><input type="radio" name="q3" value="0"> Не сместится</label>
+                        <div class="result" data-for="q3"></div>
+                    </div>
+                </div>
+                <div class="control-row" style="margin-top:14px">
+                    <button class="btn" id="checkQuiz">Проверить квиз</button>
+                    <button class="ghost" id="resetQuiz">Сбросить</button>
+                </div>
+            </section>
+
+            <section class="card" id="generator-card">
+                <div class="section-label">Похожие задачи</div>
+                <h2>Генератор по той же логике</h2>
+                <p class="muted-text">Ниже задачи сохраняют тот же школьный метод: распознать тип, выбрать правило, решить и проверить.</p>
+                <div class="control-row gen-controls">
+                    <button class="btn active gen-btn" data-mode="org">Органика</button>
+                    <button class="btn gen-btn" data-mode="electro">Электролиз</button>
+                    <button class="btn gen-btn" data-mode="eq">Равновесие</button>
+                </div>
+                <div class="control-row" style="margin-top:10px">
+                    <button class="btn" id="generateTasks">Сгенерировать 3 задачи</button>
+                </div>
+                <div class="tasks" id="tasks" style="margin-top:14px"></div>
+            </section>
+        </main>
+
+        <aside class="rightcol">
+            <section class="card">
+                <div class="sticky-title">
+                    <div>
+                        <div class="section-label">Интерактивная модель</div>
+                        <h2 style="margin:0">Карта химических идей</h2>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div>
+                        <div class="tiny">Уровень подробности</div>
+                        <div class="control-row" id="detailControls">
+                            <button class="toggle" data-detail-set="short">Кратко</button>
+                            <button class="toggle active" data-detail-set="standard">Стандартно</button>
+                            <button class="toggle" data-detail-set="detailed">Очень подробно</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="tiny">Пошаговое раскрытие</div>
+                        <div class="control-row">
+                            <button class="toggle active" id="expandAll">Открыть всё</button>
+                            <button class="toggle" id="collapseAll">Свернуть шаги</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="tiny">Отобразить на схеме</div>
+                        <div class="control-row" id="vizToggles">
+                            <button class="btn active" data-node="organic">Органика</button>
+                            <button class="btn active" data-node="ovr">ОВР</button>
+                            <button class="btn active" data-node="electro">Электролиз</button>
+                            <button class="btn active" data-node="ph">pH</button>
+                            <button class="btn active" data-node="equilibrium">Равновесие</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="viz-wrap" style="margin-top:16px">
+                    <svg id="chemMap" viewBox="0 0 700 760" aria-label="Карта химических идей">
+                        <defs>
+                            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#13313a"/>
+                                <stop offset="100%" stop-color="#0b1d24"/>
+                            </linearGradient>
+                        </defs>
+                        <g id="mapRoot">
+                            <path d="M350 120 C 460 160, 530 245, 545 340" fill="none" stroke="#25525d" stroke-width="5" opacity="0.85" data-key="organic" class="node node-organic"/>
+                            <path d="M350 120 C 240 165, 175 250, 160 340" fill="none" stroke="#25525d" stroke-width="5" opacity="0.85" data-key="ovr" class="node node-ovr"/>
+                            <path d="M350 120 C 470 370, 465 520, 350 625" fill="none" stroke="#25525d" stroke-width="5" opacity="0.85" data-key="equilibrium" class="node node-equilibrium"/>
+                            <path d="M160 340 C 230 455, 255 530, 350 625" fill="none" stroke="#25525d" stroke-width="5" opacity="0.85" data-key="electro" class="node node-electro"/>
+                            <path d="M545 340 C 470 455, 445 525, 350 625" fill="none" stroke="#25525d" stroke-width="5" opacity="0.85" data-key="ph" class="node node-ph"/>
+
+                            <g data-node-name="center" class="node">
+                                <circle cx="350" cy="120" r="82" fill="url(#g1)" stroke="#58d0c2" stroke-width="3"></circle>
+                                <text x="350" y="108" text-anchor="middle" fill="#e8f1f4" font-size="24" font-weight="700">Ключевой</text>
+                                <text x="350" y="140" text-anchor="middle" fill="#88e7dc" font-size="22" font-weight="700">алгоритм</text>
+                                <text x="350" y="168" text-anchor="middle" fill="#9cb2bb" font-size="15">Распознать → решить → проверить</text>
+                            </g>
+
+                            <g class="node node-organic" data-node-name="organic" data-key="org-main">
+                                <rect x="466" y="275" rx="26" ry="26" width="178" height="132" fill="#11262e" stroke="#58d0c2" stroke-width="2.5"></rect>
+                                <text x="555" y="312" text-anchor="middle" fill="#e8f1f4" font-size="24" font-weight="700">Органика</text>
+                                <text x="555" y="345" text-anchor="middle" fill="#88e7dc" font-size="16">условия → тип</text>
+                                <text x="555" y="372" text-anchor="middle" fill="#9cb2bb" font-size="14">замещение /</text>
+                                <text x="555" y="392" text-anchor="middle" fill="#9cb2bb" font-size="14">отщепление / окисление</text>
+                            </g>
+
+                            <g class="node node-ovr" data-node-name="ovr" data-key="ovr-main">
+                                <rect x="56" y="275" rx="26" ry="26" width="196" height="132" fill="#11262e" stroke="#58d0c2" stroke-width="2.5"></rect>
+                                <text x="154" y="312" text-anchor="middle" fill="#e8f1f4" font-size="24" font-weight="700">ОВР</text>
+                                <text x="154" y="345" text-anchor="middle" fill="#88e7dc" font-size="16">степени окисления</text>
+                                <text x="154" y="372" text-anchor="middle" fill="#9cb2bb" font-size="14">кто отдаёт</text>
+                                <text x="154" y="392" text-anchor="middle" fill="#9cb2bb" font-size="14">и кто принимает e⁻</text>
+                            </g>
+
+                            <g class="node node-electro" data-node-name="electro" data-key="el-main">
+                                <rect x="70" y="560" rx="26" ry="26" width="196" height="132" fill="#11262e" stroke="#58d0c2" stroke-width="2.5"></rect>
+                                <text x="168" y="597" text-anchor="middle" fill="#e8f1f4" font-size="24" font-weight="700">Электролиз</text>
+                                <text x="168" y="630" text-anchor="middle" fill="#88e7dc" font-size="16">катод / анод</text>
+                                <text x="168" y="657" text-anchor="middle" fill="#9cb2bb" font-size="14">кто разряжается</text>
+                            </g>
+
+                            <g class="node node-ph" data-node-name="ph" data-key="ph-base">
+                                <rect x="434" y="560" rx="26" ry="26" width="196" height="132" fill="#11262e" stroke="#58d0c2" stroke-width="2.5"></rect>
+                                <text x="532" y="597" text-anchor="middle" fill="#e8f1f4" font-size="24" font-weight="700">pH</text>
+                                <text x="532" y="630" text-anchor="middle" fill="#88e7dc" font-size="16">кислота / щёлочь</text>
+                                <text x="532" y="657" text-anchor="middle" fill="#9cb2bb" font-size="14">среда раствора</text>
+                            </g>
+
+                            <g class="node node-equilibrium" data-node-name="equilibrium" data-key="eq-main">
+                                <rect x="252" y="615" rx="26" ry="26" width="196" height="116" fill="#11262e" stroke="#58d0c2" stroke-width="2.5"></rect>
+                                <text x="350" y="650" text-anchor="middle" fill="#e8f1f4" font-size="24" font-weight="700">Равновесие</text>
+                                <text x="350" y="681" text-anchor="middle" fill="#88e7dc" font-size="16">моли газа и коэффициенты</text>
+                                <text x="350" y="705" text-anchor="middle" fill="#9cb2bb" font-size="14">смещение и расчёт</text>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="sw" style="background:#11313a"></span> Центр: общий алгоритм решения</div>
+                    <div class="legend-item"><span class="sw" style="background:#11262e;border-color:#58d0c2"></span> Узлы: тематические блоки</div>
+                    <div class="legend-item"><span class="sw" style="background:#58d0c2"></span> Подсветка: активный шаг или объект</div>
+                </div>
+            </section>
+        </aside>
     </div>
 </div>
 
 <script>
-    (function() {
-        const canvas = document.getElementById('mainCanvas');
-        const ctx = canvas.getContext('2d');
-        let width = 500, height = 500;
-        canvas.width = width; canvas.height = height;
+    const detailButtons = document.querySelectorAll('[data-detail-set]');
+    let currentDetail = 'standard';
 
-        const angleA_deg = 68;
-        const angleA_rad = angleA_deg * Math.PI / 180;
-        const A = { x: 220, y: 400 };
-        const dirAB = { x: 1, y: 0 };
-        const dirAC = { x: Math.cos(angleA_rad), y: -Math.sin(angleA_rad) };
-
-        let P = { x: 315, y: 345 };
-        let scale = 1.0;
-        let offsetX = 0, offsetY = 0;
-        let dragMode = null; // 'pan' or 'point'
-        let dragStart = { x: 0, y: 0 };
-        let highlightElem = null;
-
-        function projectOnRay(point, origin, dir) {
-            const dx = point.x - origin.x, dy = point.y - origin.y;
-            const dot = dx * dir.x + dy * dir.y;
-            if (dot <= 0) return { x: origin.x, y: origin.y };
-            return { x: origin.x + dir.x * dot, y: origin.y + dir.y * dot };
-        }
-
-        function getBC() {
-            const B = projectOnRay(P, A, dirAB);
-            const C = projectOnRay(P, A, dirAC);
-            return { B, C };
-        }
-
-        function angleBetween(v1, v2) {
-            const dot = v1.x * v2.x + v1.y * v2.y;
-            const m1 = Math.hypot(v1.x, v1.y);
-            const m2 = Math.hypot(v2.x, v2.y);
-            if (m1 < 1e-6 || m2 < 1e-6) return 0;
-            const rad = Math.acos(Math.min(1, Math.max(-1, dot / (m1 * m2))));
-            return rad * 180 / Math.PI;
-        }
-
-        function computeAngles() {
-            const { B, C } = getBC();
-            const ACvec = { x: C.x - A.x, y: C.y - A.y };
-            const APvec = { x: P.x - A.x, y: P.y - A.y };
-            const angleCAP = angleBetween(ACvec, APvec);
-            const BCvec = { x: C.x - B.x, y: C.y - B.y };
-            const BPvec = { x: P.x - B.x, y: P.y - B.y };
-            const angleCBP = angleBetween(BCvec, BPvec);
-            return { angleCAP, angleCBP };
-        }
-
-        function updateAngleDisplay() {
-            const { angleCAP, angleCBP } = computeAngles();
-            document.getElementById('liveAngles').innerHTML = `📐 ∠CBP = ${angleCBP.toFixed(1)}° &nbsp;&nbsp;|&nbsp;&nbsp; ∠CAP = ${angleCAP.toFixed(1)}°`;
-            return { angleCAP, angleCBP };
-        }
-
-        function isInsideAngle(pt) {
-            const toPt = { x: pt.x - A.x, y: pt.y - A.y };
-            const cross1 = dirAB.x * toPt.y - dirAB.y * toPt.x;
-            const cross2 = dirAC.x * toPt.y - dirAC.y * toPt.x;
-            return (cross1 <= 0 && cross2 >= 0);
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
-            ctx.save();
-            ctx.translate(offsetX, offsetY);
-            ctx.scale(scale, scale);
-
-            // окружность
-            const centerX = (A.x + P.x) / 2;
-            const centerY = (A.y + P.y) / 2;
-            const radius = Math.hypot(A.x - P.x, A.y - P.y) / 2;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            ctx.setLineDash([6/scale, 8/scale]);
-            ctx.strokeStyle = highlightElem === 'circle' ? '#c084fc' : '#6b7280';
-            ctx.lineWidth = 1.8/scale;
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // стороны угла
-            ctx.beginPath();
-            ctx.moveTo(A.x, A.y);
-            const farAB = { x: A.x + dirAB.x * 280, y: A.y + dirAB.y * 280 };
-            const farAC = { x: A.x + dirAC.x * 280, y: A.y + dirAC.y * 280 };
-            ctx.lineTo(farAB.x, farAB.y);
-            ctx.strokeStyle = '#aaa9c0';
-            ctx.lineWidth = 2.5/scale;
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(A.x, A.y);
-            ctx.lineTo(farAC.x, farAC.y);
-            ctx.stroke();
-
-            const { B, C } = getBC();
-
-            // ЛИНИИ AP и BC (добавлены)
-            ctx.beginPath();
-            ctx.moveTo(A.x, A.y);
-            ctx.lineTo(P.x, P.y);
-            ctx.strokeStyle = '#ffd966';
-            ctx.lineWidth = 2.2/scale;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(B.x, B.y);
-            ctx.lineTo(C.x, C.y);
-            ctx.strokeStyle = '#ffb347';
-            ctx.lineWidth = 2.2/scale;
-            ctx.stroke();
-
-            // перпендикуляры
-            ctx.beginPath();
-            ctx.setLineDash([6/scale, 8/scale]);
-            ctx.moveTo(P.x, P.y);
-            ctx.lineTo(B.x, B.y);
-            ctx.strokeStyle = '#9ca3af';
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(P.x, P.y);
-            ctx.lineTo(C.x, C.y);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // точки
-            const drawPoint = (pt, color, label) => {
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 5/scale, 0, 2*Math.PI);
-                ctx.fillStyle = color;
-                ctx.fill();
-                ctx.fillStyle = '#eef2ff';
-                ctx.font = `${14/scale}px "Segoe UI"`;
-                ctx.fillText(label, pt.x+6/scale, pt.y-4/scale);
-            };
-            drawPoint(A, '#6ee7b7', 'A');
-            drawPoint(P, highlightElem === 'P' ? '#ffb347' : '#facc15', 'P');
-            drawPoint(B, '#60a5fa', 'B');
-            drawPoint(C, '#60a5fa', 'C');
-
-            // дуги углов
-            const { angleCAP, angleCBP } = computeAngles();
-            const ACnorm = { x: dirAC.x, y: dirAC.y };
-            const APdir = { x: P.x - A.x, y: P.y - A.y };
-            if (Math.hypot(APdir.x, APdir.y) > 1e-4) {
-                let start = Math.atan2(ACnorm.y, ACnorm.x);
-                let end = Math.atan2(APdir.y, APdir.x);
-                let sweep = end - start;
-                if (sweep < 0) sweep += 2*Math.PI;
-                if (sweep > Math.PI) sweep = 2*Math.PI - sweep;
-                ctx.beginPath();
-                ctx.arc(A.x, A.y, 38/scale, start, start + (end > start ? sweep : -sweep));
-                ctx.strokeStyle = highlightElem === 'angleCAP' ? '#f97316' : '#3b82f6';
-                ctx.lineWidth = 2.2/scale;
-                ctx.stroke();
-            }
-            const BCvec = { x: C.x - B.x, y: C.y - B.y };
-            const BPvec = { x: P.x - B.x, y: P.y - B.y };
-            if (Math.hypot(BCvec.x, BCvec.y) > 1e-4 && Math.hypot(BPvec.x, BPvec.y) > 1e-4) {
-                let start = Math.atan2(BCvec.y, BCvec.x);
-                let end = Math.atan2(BPvec.y, BPvec.x);
-                let sweep = end - start;
-                if (sweep < 0) sweep += 2*Math.PI;
-                if (sweep > Math.PI) sweep = 2*Math.PI - sweep;
-                ctx.beginPath();
-                ctx.arc(B.x, B.y, 32/scale, start, start + (end > start ? sweep : -sweep));
-                ctx.strokeStyle = highlightElem === 'angleCBP' ? '#fb923c' : '#f97316';
-                ctx.stroke();
-            }
-
-            ctx.restore();
-        }
-
-        function refresh() {
-            updateAngleDisplay();
-            draw();
-        }
-
-        // ----- мышь: перемещение P или панорамирование -----
-        function getScreenCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            const sx = (e.clientX - rect.left) * (canvas.width / rect.width);
-            const sy = (e.clientY - rect.top) * (canvas.height / rect.height);
-            return { sx, sy };
-        }
-
-        function getWorldCoords(sx, sy) {
-            return { x: (sx - offsetX) / scale, y: (sy - offsetY) / scale };
-        }
-
-        function isNearP(world, threshold = 12) {
-            const screenDist = Math.hypot((world.x * scale + offsetX) - (P.x * scale + offsetX),
-                (world.y * scale + offsetY) - (P.y * scale + offsetY));
-            return screenDist < threshold;
-        }
-
-        let isDragging = false;
-        let dragStartWorld = null;
-
-        canvas.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            const { sx, sy } = getScreenCoords(e);
-            const world = getWorldCoords(sx, sy);
-            if (isNearP(world, 12)) {
-                dragMode = 'point';
-                dragStartWorld = { x: P.x, y: P.y };
-            } else {
-                dragMode = 'pan';
-                dragStart = { x: sx, y: sy };
-            }
-            isDragging = true;
-            canvas.style.cursor = dragMode === 'pan' ? 'grabbing' : 'grabbing';
+    function applyDetail(level){
+        currentDetail = level;
+        detailButtons.forEach(b => b.classList.toggle('active', b.dataset.detailSet === level));
+        document.querySelectorAll('[data-detail]').forEach(el => {
+            const modes = el.dataset.detail.split(/\s+/);
+            el.classList.toggle('hidden', !modes.includes(level));
         });
+    }
+    detailButtons.forEach(btn => btn.addEventListener('click', () => applyDetail(btn.dataset.detailSet)));
+    applyDetail('standard');
 
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const { sx, sy } = getScreenCoords(e);
-            if (dragMode === 'pan') {
-                const dx = sx - dragStart.x;
-                const dy = sy - dragStart.y;
-                offsetX += dx;
-                offsetY += dy;
-                dragStart = { x: sx, y: sy };
-                refresh();
-            } else if (dragMode === 'point') {
-                const world = getWorldCoords(sx, sy);
-                if (isInsideAngle(world)) {
-                    P = { x: world.x, y: world.y };
-                    refresh();
-                    renderSolutionText();
-                }
-            }
+    document.querySelectorAll('.step > button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const step = btn.parentElement;
+            step.classList.toggle('collapsed');
+            btn.querySelector('.chev').textContent = step.classList.contains('collapsed') ? '▸' : '▾';
         });
-
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-            dragMode = null;
-            canvas.style.cursor = 'grab';
+    });
+    document.getElementById('collapseAll').addEventListener('click', () => {
+        document.querySelectorAll('.step').forEach(step => {
+            step.classList.add('collapsed');
+            step.querySelector('.chev').textContent = '▸';
         });
+        document.getElementById('collapseAll').classList.add('active');
+        document.getElementById('expandAll').classList.remove('active');
+    });
+    document.getElementById('expandAll').addEventListener('click', () => {
+        document.querySelectorAll('.step').forEach(step => {
+            step.classList.remove('collapsed');
+            step.querySelector('.chev').textContent = '▾';
+        });
+        document.getElementById('expandAll').classList.add('active');
+        document.getElementById('collapseAll').classList.remove('active');
+    });
 
-        // зум и кнопки
-        function initControls() {
-            document.getElementById('zoomInBtn').onclick = () => { scale = Math.min(2.5, scale + 0.1); document.getElementById('zoomSlider').value = scale; refresh(); };
-            document.getElementById('zoomOutBtn').onclick = () => { scale = Math.max(0.5, scale - 0.1); document.getElementById('zoomSlider').value = scale; refresh(); };
-            document.getElementById('resetZoomBtn').onclick = () => { scale = 1; offsetX = 0; offsetY = 0; refresh(); };
-            document.getElementById('zoomSlider').oninput = (e) => { scale = parseFloat(e.target.value); refresh(); };
-            canvas.addEventListener('wheel', (e) => { e.preventDefault(); scale = Math.min(2.5, Math.max(0.5, scale + (e.deltaY > 0 ? -0.08 : 0.08))); document.getElementById('zoomSlider').value = scale; refresh(); });
-        }
-
-        function setAngleCBPto(targetDeg) {
-            let bestP = { ...P };
-            let bestDiff = Infinity;
-            for (let iter = 0; iter < 200; iter++) {
-                const angleParam = Math.random() * angleA_rad;
-                const dist = 50 + Math.random() * 180;
-                const testX = A.x + Math.cos(angleParam) * dist;
-                const testY = A.y - Math.sin(angleParam) * dist;
-                const testP = { x: testX, y: testY };
-                if (isInsideAngle(testP)) {
-                    const oldP = P;
-                    P = testP;
-                    const { angleCBP } = computeAngles();
-                    const diff = Math.abs(angleCBP - targetDeg);
-                    if (diff < bestDiff) {
-                        bestDiff = diff;
-                        bestP = { ...testP };
-                    }
-                    P = oldP;
-                }
-            }
-            P = bestP;
-            for (let fine = 0; fine < 60; fine++) {
-                let { angleCBP } = computeAngles();
-                let delta = targetDeg - angleCBP;
-                if (Math.abs(delta) < 0.2) break;
-                let step = 3 * Math.sign(delta);
-                let newX = P.x + (Math.random() - 0.5) * step;
-                let newY = P.y + (Math.random() - 0.5) * step;
-                let testP = { x: newX, y: newY };
-                if (isInsideAngle(testP)) {
-                    let oldP = P;
-                    P = testP;
-                    let newAng = computeAngles().angleCBP;
-                    if (Math.abs(newAng - targetDeg) >= Math.abs(angleCBP - targetDeg)) P = oldP;
-                }
-            }
-            refresh();
-            return computeAngles().angleCBP;
-        }
-
-        let currentConditionAngle = 25;
-        function updateConditionUI(angle) {
-            document.getElementById('conditionValue').innerHTML = `∠CBP = ${angle}°`;
-            currentConditionAngle = angle;
-            document.getElementById('verificationText').innerHTML = `По свойству вписанного четырёхугольника ∠CAP = ∠CBP = ${angle}°. Перетащите P на модели — равенство сохраняется. Ответ: ${angle}°.`;
-            renderSolutionText();
-        }
-
-        let stepModeActive = false;
-        let currentStep = 0;
-        const stepsData = [
-            { title: "Шаг 1. Анализ условия", text: "Дано: PB ⟂ AB, PC ⟂ AC → ∠ABP = 90°, ∠ACP = 90°. Точка P внутри острого угла A." },
-            { title: "Шаг 2. Вписанный четырёхугольник", text: "В четырёхугольнике ABPC сумма противоположных углов ∠ABP+∠ACP = 180° ⇒ точки A, B, P, C лежат на одной окружности. AP — диаметр." },
-            { title: "Шаг 3. Равенство вписанных углов", text: "∠CAP и ∠CBP опираются на одну дугу CP ⇒ ∠CAP = ∠CBP." },
-            { title: "Шаг 4. Вычисление", text: `По условию ∠CBP = ${currentConditionAngle}°, следовательно ∠CAP = ${currentConditionAngle}°.` },
-            { title: "Шаг 5. Проверка и вывод", text: `На интерактивной модели видно: углы равны. Любое положение P сохраняет равенство. Ответ: ${currentConditionAngle}°.` }
-        ];
-
-        function renderSolutionText() {
-            const detail = document.getElementById('detailSelect').value;
-            if (stepModeActive) {
-                let stepHtml = `<div style="margin-bottom:12px;"><button id="prevStepBtn" style="margin-right:8px;">◀ Назад</button><button id="nextStepBtn">Далее ▶</button></div>`;
-                stepHtml += `<div class="step" style="background:#16212e;"><strong>${stepsData[currentStep].title}</strong><br>${stepsData[currentStep].text}</div>`;
-                stepHtml += `<div style="margin-top:8px;">Шаг ${currentStep+1} из ${stepsData.length}</div>`;
-                document.getElementById('dynamicSolution').innerHTML = stepHtml;
-                document.getElementById('prevStepBtn')?.addEventListener('click', () => { if(currentStep>0){currentStep--; renderSolutionText();} });
-                document.getElementById('nextStepBtn')?.addEventListener('click', () => { if(currentStep<stepsData.length-1){currentStep++; renderSolutionText();} });
-                return;
-            }
-            let mainText = "";
-            if (detail === 'short') {
-                mainText = `<p><strong>Решение:</strong> Из перпендикуляров → ABPC вписан. Вписанные углы ∠CAP и ∠CBP равны. Поэтому ∠CAP = ${currentConditionAngle}°.</p>`;
-            } else if (detail === 'standard') {
-                mainText = `<div class="step"><strong>1. Прямые углы:</strong> ∠ABP = ∠ACP = 90°.</div>
-                            <div class="step"><strong>2. Вписанность:</strong> Сумма противоположных углов 180° ⇒ A,B,P,C на окружности.</div>
-                            <div class="step"><strong>3. Равенство:</strong> ∠CAP и ∠CBP опираются на дугу CP → ∠CAP = ∠CBP.</div>
-                            <div class="step"><strong>4. Ответ:</strong> ∠CAP = ${currentConditionAngle}°.</div>`;
-            } else {
-                mainText = `<div class="step"><strong>Подробное обоснование:</strong> PB⟂AB ⇒ ∠ABP=90°, PC⟂AC ⇒ ∠ACP=90°. Четырёхугольник ABPC имеет сумму углов при B и C = 180°, значит он вписанный, причём AP — диаметр. В окружности вписанный угол ∠CAP опирается на хорду CP. Угол ∠CBP также опирается на ту же хорду CP. Следовательно, ∠CAP = ∠CBP. По условию ∠CBP = ${currentConditionAngle}°, поэтому ∠CAP = ${currentConditionAngle}°.</div>
-                            <div class="step"><strong>Проверка:</strong> При любом перемещении точки P на чертеже углы остаются равными, что подтверждает теорему. Других значений нет.</div>`;
-            }
-            document.getElementById('dynamicSolution').innerHTML = mainText;
-        }
-
-        function generateNewTask() {
-            let newAngle = Math.floor(Math.random() * (70 - 15 + 1) + 15);
-            if (newAngle === currentConditionAngle) newAngle = (newAngle % 40) + 20;
-            setAngleCBPto(newAngle);
-            const finalAng = computeAngles().angleCBP;
-            const rounded = Math.round(finalAng);
-            updateConditionUI(rounded);
-            document.getElementById('generatedTaskContent').innerHTML = `
-                <strong>📌 Новая задача:</strong> ∠CBP = ${rounded}°. Найдите ∠CAP.<br>
-                ✅ <strong>Ответ:</strong> ${rounded}°. <em>Идея: вписанные углы, опирающиеся на одну дугу, равны.</em><br>
-                <span style="font-size:0.8rem;">Модель автоматически подстроена под этот угол.</span>
-            `;
-            refresh();
-        }
-
-        function initEventListeners() {
-            document.getElementById('setConditionBtn').onclick = () => {
-                setAngleCBPto(25);
-                updateConditionUI(25);
-                refresh();
-            };
-            document.getElementById('resetToDemoBtn').onclick = () => { P = { x: 315, y: 345 }; refresh(); updateConditionUI(currentConditionAngle); renderSolutionText(); };
-            document.getElementById('generateTaskBtn').onclick = () => generateNewTask();
-            document.getElementById('detailSelect').onchange = () => renderSolutionText();
-            document.getElementById('stepModeBtn').onclick = () => { stepModeActive = true; currentStep = 0; renderSolutionText(); };
-            document.getElementById('resetStepsBtn').onclick = () => { stepModeActive = false; renderSolutionText(); };
-            document.getElementById('checkAnswerBtn').onclick = () => {
-                let val = parseFloat(document.getElementById('userAnswer').value);
-                if (Math.abs(val - currentConditionAngle) < 0.5) document.getElementById('checkFeedback').innerHTML = '✓ Верно!';
-                else document.getElementById('checkFeedback').innerHTML = `✘ Неверно. ∠CAP = ∠CBP = ${currentConditionAngle}°`;
-            };
-            document.getElementById('quizAns1').onclick = () => document.getElementById('quizFeedback').innerHTML = '✅ Верно! 40° = ∠CAP.';
-            document.getElementById('quizAns2').onclick = () => document.getElementById('quizFeedback').innerHTML = '❌ Нет, используйте равенство углов.';
-            document.getElementById('quizAns3').onclick = () => document.getElementById('quizFeedback').innerHTML = '❌ Неверно.';
-            document.getElementById('quizAns4').onclick = () => document.getElementById('quizFeedback').innerHTML = '❌ Ошибка.';
-        }
-
-        function highlightFromText() {
-            document.body.addEventListener('mouseover', (e) => {
-                let txt = e.target.innerText || '';
-                if (txt.includes('∠CBP')) highlightElem = 'angleCBP';
-                else if (txt.includes('∠CAP')) highlightElem = 'angleCAP';
-                else if (txt.includes('P') && !txt.includes('∠')) highlightElem = 'P';
-                else if (txt.includes('окружност')) highlightElem = 'circle';
-                else highlightElem = null;
-                refresh();
+    const toggleButtons = document.querySelectorAll('#vizToggles [data-node]');
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            const node = btn.dataset.node;
+            document.querySelectorAll('.node-' + node).forEach(el => {
+                el.style.opacity = btn.classList.contains('active') ? '1' : '0.12';
             });
-        }
+        });
+    });
 
-        setAngleCBPto(25);
-        updateConditionUI(25);
-        initControls();
-        initEventListeners();
-        highlightFromText();
-        renderSolutionText();
-        refresh();
-    })();
+    function clearHighlights(){
+        document.querySelectorAll('.hl-target').forEach(el => el.classList.remove('hl-target'));
+    }
+
+    document.querySelectorAll('[data-key]').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            clearHighlights();
+            const key = el.dataset.key;
+            document.querySelectorAll('[data-key="' + key + '"]').forEach(t => t.classList.add('hl-target'));
+        });
+        el.addEventListener('mouseleave', clearHighlights);
+    });
+
+    document.querySelectorAll('#chemMap [data-node-name]').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            const name = el.dataset.nodeName;
+            const map = {
+                organic:['org-main','org-elim','org-sub','org-ox','org-ester','org-arene'],
+                ovr:['ovr-main','ovr-c','ovr-o','ovr-per','ovr-of2'],
+                electro:['el-main','el-cath','el-an','el-active','el-hal','el-oxo'],
+                ph:['ph-acid','ph-neu','ph-base','ph-csoh','ph-nh3'],
+                equilibrium:['eq-main','eq-speed','eq-shift','eq-left','eq-right','eq-back','calc-main','calc-h2','calc-ratio','calc-meoh','calc-co']
+            };
+            clearHighlights();
+            (map[name] || []).forEach(k => document.querySelectorAll('[data-key="'+k+'"]').forEach(t => t.classList.add('hl-target')));
+        });
+        el.addEventListener('mouseleave', clearHighlights);
+    });
+
+    document.getElementById('checkQuiz').addEventListener('click', () => {
+        ['q1','q2','q3'].forEach(name => {
+            const chosen = document.querySelector('input[name="'+name+'"]:checked');
+            const res = document.querySelector('.result[data-for="'+name+'"]');
+            if(!chosen){ res.textContent = 'Выберите вариант.'; res.className = 'result bad'; return; }
+            if(chosen.value === '1'){ res.textContent = 'Верно.'; res.className = 'result good'; }
+            else { res.textContent = 'Неверно. Подумайте ещё о ключевом правиле.'; res.className = 'result bad'; }
+        });
+    });
+    document.getElementById('resetQuiz').addEventListener('click', () => {
+        document.querySelectorAll('#quiz input[type="radio"]').forEach(i => i.checked = false);
+        document.querySelectorAll('.result').forEach(r => { r.textContent = ''; r.className = 'result'; });
+    });
+
+    const banks = {
+        org:[
+            {q:'Какой продукт получится при действии спиртового раствора KOH на CH3–CH2–CH2Cl при нагревании?', a:'CH2=CH–CH3', idea:'Спиртовой раствор щёлочи и нагревание дают отщепление HCl и образование алкена.'},
+            {q:'Во что окисляется бутанол-2 в школьной задаче?', a:'В бутанон-2', idea:'Вторичный спирт окисляется до кетона.'},
+            {q:'Что образуется при взаимодействии этановой кислоты с пропанолом-1?', a:'Пропилэтаноат и вода', idea:'Кислота + спирт → сложный эфир + вода.'},
+            {q:'Что происходит с толуолом при действии Cl2 на свету?', a:'Замещение по боковой цепи', idea:'Свет указывает на радикальный механизм.'}
+        ],
+        electro:[
+            {q:'Что выделяется на аноде при электролизе водного раствора NaCl?', a:'Cl2', idea:'Хлорид-ион — бескислородный анион, он окисляется на аноде.'},
+            {q:'Что выделяется на катоде при электролизе водного раствора KNO3?', a:'H2', idea:'Катион активного металла не восстанавливается, восстанавливается вода.'},
+            {q:'Что выделяется на аноде при электролизе водного раствора Na2SO4?', a:'O2', idea:'Сульфат-ион не разряжается, на аноде окисляется вода.'},
+            {q:'Что выделяется на катоде при электролизе водного раствора AlBr3?', a:'H2', idea:'Алюминий из водного раствора не выделяется; на катоде идёт восстановление воды.'}
+        ],
+        eq:[
+            {q:'Куда сместится равновесие N2 + 3H2 ⇄ 2NH3 при повышении давления?', a:'Вправо', idea:'Система смещается в сторону меньшего числа молей газа.'},
+            {q:'Если в реакции CO + 2H2 ⇄ CH3OH израсходовалось 0,40 моль H2, сколько образовалось CH3OH?', a:'0,20 моль', idea:'По коэффициентам 2:1 количество метанола вдвое меньше расхода водорода.'},
+            {q:'Куда сместится равновесие CaCO3(т) ⇄ CaO(т) + CO2(г) при уменьшении давления?', a:'Вправо', idea:'Система смещается в сторону большего числа молей газа.'},
+            {q:'В реакции 2SO2 + O2 ⇄ 2SO3 куда сместится равновесие при уменьшении давления?', a:'Влево', idea:'Слева больше молей газа, значит при понижении давления равновесие смещается влево.'}
+        ]
+    };
+
+    let mode = 'org';
+    document.querySelectorAll('.gen-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.gen-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        mode = btn.dataset.mode;
+    }));
+
+    function shuffle(arr){ return [...arr].sort(() => Math.random() - 0.5); }
+    document.getElementById('generateTasks').addEventListener('click', () => {
+        const out = document.getElementById('tasks');
+        out.innerHTML = '';
+        shuffle(banks[mode]).slice(0,3).forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'task';
+            div.innerHTML = '<div><strong>Задача ' + (idx+1) + '.</strong> ' + item.q + '</div>' +
+            '<div class="answer"><strong>Ответ:</strong> ' + item.a + '</div>' +
+            '<div class="tiny" style="margin-top:8px"><strong>Идея:</strong> ' + item.idea + '</div>';
+            out.appendChild(div);
+        });
+    });
+    document.getElementById('generateTasks').click();
 </script>
 </body>
 </html>
