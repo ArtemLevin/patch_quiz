@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A22E40 — задача с параметром</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --bg2:#121933;
+            --panel:#121a30;
+            --panel2:#17213f;
+            --line:#2a3969;
+            --text:#e9eefc;
+            --muted:#aeb9dc;
+            --soft:#8aa0d8;
+            --accent:#7cc6ff;
+            --accent2:#8cf0c9;
+            --warn:#ffd166;
+            --bad:#ff8a8a;
+            --good:#8cf0c9;
+            --shadow:0 18px 50px rgba(0,0,0,.32);
+            --radius:20px;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:linear-gradient(180deg,var(--bg),#0d1326 30%,#0a0f1f);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.55}
+        body{min-width:320px}
+        .wrap{max-width:1500px;margin:0 auto;padding:24px}
+        .hero{padding:18px 20px 10px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(124,198,255,.08),rgba(124,198,255,.02));border-radius:24px;box-shadow:var(--shadow)}
+        .eyebrow{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(124,198,255,.1);color:var(--accent);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+        h1{margin:14px 0 10px;font-size:clamp(28px,4vw,42px);line-height:1.15}
+        .taskbox{margin-top:14px;padding:18px;border-radius:18px;border:1px solid var(--line);background:rgba(9,14,27,.55);overflow:auto}
+        .formula{font-size:clamp(20px,2.4vw,30px);font-weight:700;letter-spacing:.01em}
+        .meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+        .chip{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);font-size:14px;color:var(--muted)}
+        .layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(360px,.85fr);gap:24px;align-items:start;margin-top:24px}
+        .leftcol{min-width:0}
+        .rightcol{min-width:0}
+        .sticky{position:sticky;top:16px;display:flex;flex-direction:column;gap:16px}
+        .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+        h2{margin:0 0 10px;font-size:24px}
+        h3{margin:0 0 10px;font-size:19px}
+        p{margin:10px 0}
+        .muted{color:var(--muted)}
+        .idea-list,.mistakes,.checklist,.bullet{padding-left:20px;margin:8px 0}
+        .idea-list li,.mistakes li,.checklist li,.bullet li{margin:8px 0}
+        .stage{margin-top:16px;scroll-margin-top:90px}
+        .stage-head{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+        .num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:linear-gradient(180deg,var(--accent),#4c86ff);color:#06101f;box-shadow:0 8px 24px rgba(76,134,255,.3)}
+        .stage[data-step]{display:none}
+        .stage.visible{display:block}
+        .tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(140,240,201,.1);color:var(--accent2);border:1px solid rgba(140,240,201,.22)}
+        .box{padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);margin:12px 0}
+        .box.accent{background:linear-gradient(180deg,rgba(124,198,255,.12),rgba(124,198,255,.04));border-color:rgba(124,198,255,.25)}
+        .box.good{background:linear-gradient(180deg,rgba(140,240,201,.12),rgba(140,240,201,.04));border-color:rgba(140,240,201,.25)}
+        .box.warn{background:linear-gradient(180deg,rgba(255,209,102,.12),rgba(255,209,102,.04));border-color:rgba(255,209,102,.24)}
+        .math{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:1.08em}
+        .inline-link{border-bottom:1px dashed rgba(124,198,255,.7);cursor:pointer;color:var(--accent)}
+        .inline-link.active{background:rgba(124,198,255,.12);border-radius:8px;padding:0 4px}
+        .controls{display:grid;gap:12px}
+        .control-row{display:grid;gap:8px}
+        .control-row.inline{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+        label{font-size:14px;color:var(--muted)}
+        select,input[type="range"],button{width:100%}
+        select,input[type="range"]{background:#0e1730;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+        button{border:1px solid var(--line);background:linear-gradient(180deg,#1c2a50,#152140);color:var(--text);border-radius:14px;padding:12px 14px;font-weight:700;cursor:pointer;transition:transform .15s ease,border-color .15s ease,background .15s ease}
+        button:hover{transform:translateY(-1px);border-color:#4764b5}
+        button.secondary{background:linear-gradient(180deg,#11223c,#0e1b31)}
+        button.ghost{background:rgba(255,255,255,.03)}
+        .btns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+        .btns.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .answer{font-size:clamp(20px,2.2vw,28px);font-weight:800;color:var(--good)}
+        .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+        .legend div{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+        .sw{width:14px;height:14px;border-radius:50%}
+        svg{width:100%;height:auto;display:block;border-radius:18px;background:radial-gradient(circle at top,rgba(124,198,255,.08),rgba(124,198,255,.02) 35%,rgba(0,0,0,.08));border:1px solid rgba(255,255,255,.06)}
+        .small{font-size:13px}
+        .status{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .status strong{color:#fff}
+        .highlighted{outline:2px solid rgba(124,198,255,.55);outline-offset:4px}
+        .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .quiz-options{display:grid;gap:10px;margin-top:10px}
+        .option{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);cursor:pointer}
+        .option.selected{border-color:var(--accent);background:rgba(124,198,255,.09)}
+        .option.correct{border-color:var(--good);background:rgba(140,240,201,.10)}
+        .option.wrong{border-color:var(--bad);background:rgba(255,138,138,.08)}
+        .selfcheck label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .selfcheck input{margin-top:4px}
+        .print-note{font-size:12px;color:var(--muted)}
+        .footer{margin:22px 0 10px;color:var(--muted);font-size:13px;text-align:center}
+        .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+        .hr{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:16px 0}
+        .hidden{display:none!important}
+        @media (max-width:1150px){
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative;top:0}
+        }
+        @media (max-width:760px){
+            .wrap{padding:14px}
+            .meta,.grid2,.legend,.btns,.btns.two,.control-row.inline{grid-template-columns:1fr}
+            .card{padding:14px}
+            .formula{font-size:22px}
+        }
+        @media print{
+            :root{--bg:#fff;--bg2:#fff;--panel:#fff;--panel2:#fff;--text:#111;--muted:#444;--line:#bbb;--accent:#0b57d0;--accent2:#0b7c55;--good:#0b7c55}
+            body{background:#fff}
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative}
+            button,select,input[type="range"],.print-note{display:none!important}
+            .card,.hero,.taskbox{box-shadow:none;background:#fff}
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="hero">
+        <span class="eyebrow">A22E40 · Наглядная математика с генерацией</span>
+        <h1>Решение задачи с параметром</h1>
+        <div class="taskbox">
+            <div class="formula math">√(2 − 3x) · ln(16x² − a²) = √(2 − 3x) · ln(4x + a)</div>
+            <p class="muted">Найти все значения параметра <span class="math">a</span>, при которых уравнение имеет ровно один корень.</p>
+        </div>
+        <div class="meta">
+            <div class="chip"><strong>Цель:</strong> подготовка к ЕГЭ</div>
+            <div class="chip"><strong>Уровень:</strong> уверенный</div>
+            <div class="chip"><strong>Фокус:</strong> геометрическая идея</div>
+            <div class="chip"><strong>Метод:</strong> только школьные методы</div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="leftcol">
+            <section class="card">
+                <h2>Идея решения</h2>
+                <ul class="idea-list">
+                    <li>Сначала выписываем область допустимых значений: нужны <span class="math">x ≤ 2/3</span>, <span class="math">16x² − a² &gt; 0</span> и <span class="math">4x + a &gt; 0</span>.</li>
+                    <li>Множитель <span class="math">√(2 − 3x)</span> может сам обращаться в ноль. Это даёт отдельный кандидат: <span class="math">x = 2/3</span>.</li>
+                    <li>Если <span class="math">x &lt; 2/3</span>, то корень не нулевой, поэтому можно приравнять логарифмы. Тогда задача сводится к простому квадратному уравнению, которое красиво раскладывается на множители.</li>
+                    <li>В результате появляются ровно <strong>два возможных источника корней</strong>: горизонтальная линия <span class="math">x = 2/3</span> и наклонная линия <span class="math">x = (a + 1)/4</span> на плоскости <span class="math">(a, x)</span>.</li>
+                    <li>Остаётся посмотреть, при каких <span class="math">a</span> есть один источник, два источника или оба источника совпадают.</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <div class="stage-head">
+                    <h2 style="margin:0">Пошаговый разбор</h2>
+                    <span class="tag">пошаговое раскрытие</span>
+                </div>
+                <div class="box accent small">Можно раскрывать решение постепенно кнопками в правой панели. При наведении на выделенные фразы подсвечиваются соответствующие объекты на схеме.</div>
+
+                <article class="stage visible" id="stage-1" data-step="1">
+                    <div class="stage-head"><div class="num">1</div><h3>Что дано</h3></div>
+                    <div class="detail detail-standard detail-long">
+                        <p>Решаем уравнение</p>
+                        <div class="box math">√(2 − 3x) · ln(16x² − a²) = √(2 − 3x) · ln(4x + a).</div>
+                        <p>Нужно найти все значения параметра <span class="math">a</span>, при которых уравнение имеет <strong>ровно один</strong> корень.</p>
+                    </div>
+                    <div class="detail detail-short hidden">
+                        <p>Нужно посчитать число корней уравнения в зависимости от параметра <span class="math">a</span>.</p>
+                    </div>
+                </article>
+
+                <article class="stage" id="stage-2" data-step="2">
+                    <div class="stage-head"><div class="num">2</div><h3>Что означает каждое условие</h3></div>
+                    <div class="detail detail-standard">
+                        <p>Из корня получаем <span class="math inline-link" data-target="sqrtBand">x ≤ 2/3</span>.</p>
+                        <p>Из логарифмов получаем две неравенства:</p>
+                        <ul class="bullet">
+                            <li><span class="math inline-link" data-target="lineRoot">16x² − a² &gt; 0</span>;</li>
+                            <li><span class="math inline-link" data-target="domainRay">4x + a &gt; 0</span>.</li>
+                        </ul>
+                        <div class="box warn">
+                            <strong>Важно.</strong> Нельзя сразу сокращать на <span class="math">√(2 − 3x)</span>, потому что этот множитель может равняться нулю при <span class="math">x = 2/3</span>.
+                        </div>
+                    </div>
+                    <div class="detail detail-long hidden">
+                        <p>Здесь скрыта главная ловушка задачи: если бездумно поделить обе части на <span class="math">√(2 − 3x)</span>, то можно потерять корень <span class="math">x = 2/3</span>. Поэтому разбираем уравнение по случаям.</p>
+                    </div>
+                    <div class="detail detail-short hidden">
+                        <p>ОДЗ: <span class="math">x ≤ 2/3</span>, <span class="math">16x² − a² &gt; 0</span>, <span class="math">4x + a &gt; 0</span>.</p>
+                    </div>
+                </article>
+
+                <article class="stage" id="stage-3" data-step="3">
+                    <div class="stage-head"><div class="num">3</div><h3>Алгебраическая и графическая интерпретация</h3></div>
+                    <div class="detail detail-standard">
+                        <p>Уравнение распадается на два возможных механизма появления корня:</p>
+                        <ul class="bullet">
+                            <li>либо <span class="math inline-link" data-target="hRoot">√(2 − 3x) = 0</span>, то есть <span class="math">x = 2/3</span>;</li>
+                            <li>либо <span class="math inline-link" data-target="diagRoot">ln(16x² − a²) = ln(4x + a)</span>, то есть при положительных аргументах <span class="math">16x² − a² = 4x + a</span>.</li>
+                        </ul>
+                        <p>На координатной плоскости <span class="math">(a, x)</span> это превратится в <strong>горизонтальную прямую</strong> <span class="math">x = 2/3</span> и <strong>наклонную прямую</strong> <span class="math">x = (a + 1)/4</span>.</p>
+                    </div>
+                    <div class="detail detail-long hidden">
+                        <p>Такой взгляд очень удобен: вместо сложного уравнения мы следим только за тем, сколько допустимых пересечений даёт вертикаль <span class="math">a = const</span> с двумя кривыми-кандидатами на корни.</p>
+                    </div>
+                    <div class="detail detail-short hidden">
+                        <p>Два источника корней: <span class="math">x = 2/3</span> и <span class="math">x = (a + 1)/4</span>.</p>
+                    </div>
+                </article>
+
+                <article class="stage" id="stage-4" data-step="4">
+                    <div class="stage-head"><div class="num">4</div><h3>Ключевая идея</h3></div>
+                    <div class="detail detail-standard">
+                        <p>При <span class="math">x &lt; 2/3</span> множитель <span class="math">√(2 − 3x)</span> положителен, значит можно приравнять логарифмы:</p>
+                        <div class="box math">16x² − a² = 4x + a.</div>
+                        <p>Переносим всё влево и раскладываем:</p>
+                        <div class="box math">16x² − a² − 4x − a = 0,</div>
+                        <div class="box math inline-link" data-target="factorEq">(4x + a)(4x − a − 1) = 0.</div>
+                        <p>Но на ОДЗ обязательно <span class="math">4x + a &gt; 0</span>, значит множитель <span class="math">4x + a</span> не может равняться нулю.</p>
+                        <p>Остаётся только <span class="math">4x − a − 1 = 0</span>, то есть <span class="math">x = (a + 1)/4</span>.</p>
+                    </div>
+                    <div class="detail detail-long hidden">
+                        <p>Это и есть красивый момент задачи: один из множителей автоматически отбрасывается ОДЗ, поэтому из квадратного уравнения реально остаётся только одна ветвь.</p>
+                    </div>
+                    <div class="detail detail-short hidden">
+                        <p>После factorization: <span class="math">(4x + a)(4x − a − 1)=0</span>, но первый множитель запрещён ОДЗ. Значит <span class="math">x=(a+1)/4</span>.</p>
+                    </div>
+                </article>
+
+                <article class="stage" id="stage-5" data-step="5">
+                    <div class="stage-head"><div class="num">5</div><h3>Пошаговое доведение до ответа</h3></div>
+                    <div class="detail detail-standard">
+                        <p><strong>Первый кандидат:</strong> <span class="math inline-link" data-target="hRoot">x = 2/3</span>.</p>
+                        <p>Он подходит, если логарифмы определены:</p>
+                        <div class="box math">4·(2/3) + a &gt; 0  ⇔  a &gt; −8/3,</div>
+                        <div class="box math">16·(2/3)² − a² &gt; 0  ⇔  64/9 − a² &gt; 0  ⇔  |a| &lt; 8/3.</div>
+                        <p>Итак, <span class="math">x = 2/3</span> существует при <span class="math inline-link" data-target="hSeg">−8/3 &lt; a &lt; 8/3</span>.</p>
+                        <div class="hr"></div>
+                        <p><strong>Второй кандидат:</strong> <span class="math inline-link" data-target="diagRoot">x = (a + 1)/4</span>.</p>
+                        <p>Для него нужны условия:</p>
+                        <ul class="bullet">
+                            <li><span class="math">4x + a = 2a + 1 &gt; 0  ⇔  a &gt; −1/2</span>;</li>
+                            <li><span class="math">x ≤ 2/3  ⇔  (a + 1)/4 ≤ 2/3  ⇔  a ≤ 5/3</span>.</li>
+                        </ul>
+                        <p>Значит второй корень существует при <span class="math inline-link" data-target="diagSeg">−1/2 &lt; a ≤ 5/3</span>.</p>
+                        <div class="hr"></div>
+                        <p>Теперь считаем число корней:</p>
+                        <ul class="bullet">
+                            <li>при <span class="math">−8/3 &lt; a ≤ −1/2</span> есть только горизонтальный корень <span class="math">x = 2/3</span>;</li>
+                            <li>при <span class="math">−1/2 &lt; a &lt; 5/3</span> есть два разных корня;</li>
+                            <li>при <span class="math">a = 5/3</span> оба кандидата совпадают: <span class="math">(a + 1)/4 = 2/3</span>;</li>
+                            <li>при <span class="math">5/3 &lt; a &lt; 8/3</span> снова остаётся только <span class="math">x = 2/3</span>.</li>
+                        </ul>
+                    </div>
+                    <div class="detail detail-long hidden">
+                        <div class="box good">
+                            Совпадение корней в точке <span class="math">a = 5/3</span> — обязательный отдельный случай. Здесь корней не два, а один, потому что обе формулы дают одно и то же значение <span class="math">x = 2/3</span>.
+                        </div>
+                    </div>
+                    <div class="detail detail-short hidden">
+                        <p>Первый корень существует при <span class="math">−8/3 &lt; a &lt; 8/3</span>, второй — при <span class="math">−1/2 &lt; a ≤ 5/3</span>. Один корень получается на нужных кусках пересечения и вне пересечения.</p>
+                    </div>
+                </article>
+
+                <article class="stage" id="stage-6" data-step="6">
+                    <div class="stage-head"><div class="num">6</div><h3>Финальная проверка</h3></div>
+                    <div class="detail detail-standard">
+                        <p>Проверяем найденные промежутки:</p>
+                        <ul class="checklist">
+                            <li>Если <span class="math">a ∈ (−8/3, −1/2]</span>, второй кандидат не существует, а первый существует. Значит корень ровно один.</li>
+                            <li>Если <span class="math">a ∈ [5/3, 8/3)</span>, то либо два кандидата совпадают в точке <span class="math">a = 5/3</span>, либо остаётся только первый кандидат. Снова ровно один корень.</li>
+                            <li>Внутри интервала <span class="math">(−1/2, 5/3)</span> корней два.</li>
+                            <li>Вне интервала <span class="math">(−8/3, 8/3)</span> корней нет.</li>
+                        </ul>
+                    </div>
+                    <div class="detail detail-short hidden"><p>Ровно один корень только на двух кусках: слева до <span class="math">−1/2</span> и справа от <span class="math">5/3</span>, с учётом концов.</p></div>
+                </article>
+
+                <article class="stage" id="stage-7" data-step="7">
+                    <div class="stage-head"><div class="num">7</div><h3>Краткий вывод</h3></div>
+                    <div class="box good">
+                        <div class="answer math">a ∈ (−8/3, −1/2] ∪ [5/3, 8/3)</div>
+                    </div>
+                    <p class="muted">Это и есть все значения параметра, при которых исходное уравнение имеет ровно один корень.</p>
+                </article>
+            </section>
+
+            <section class="card">
+                <h2>Типичные ошибки</h2>
+                <ul class="mistakes">
+                    <li>Сразу сократить обе части на <span class="math">√(2 − 3x)</span> и потерять случай <span class="math">x = 2/3</span>.</li>
+                    <li>После разложения на множители принять и случай <span class="math">4x + a = 0</span>, забыв, что тогда логарифм <span class="math">ln(4x + a)</span> не определён.</li>
+                    <li>Проверить только уравнение, но не проверить ОДЗ для найденных кандидатов.</li>
+                    <li>В точке <span class="math">a = 5/3</span> посчитать два корня, хотя обе формулы дают одно и то же значение <span class="math">x = 2/3</span>.</li>
+                    <li>Забыть, что для логарифма нужен строгий знак <span class="math">&gt; 0</span>, а не <span class="math">≥ 0</span>.</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>Мини-квиз</h2>
+                <p>Какой из шагов является главным источником появления дополнительного корня, который легко потерять?</p>
+                <div class="quiz-options" id="quiz">
+                    <div class="option" data-correct="0">Разложение на множители выражения <span class="math">16x² − a² − 4x − a</span>.</div>
+                    <div class="option" data-correct="1">Случай <span class="math">√(2 − 3x) = 0</span>, то есть <span class="math">x = 2/3</span>.</div>
+                    <div class="option" data-correct="0">Переход от <span class="math">16x² − a² &gt; 0</span> к <span class="math">|4x| &gt; |a|</span>.</div>
+                    <div class="option" data-correct="0">Проверка совпадения корней в точке <span class="math">a = 5/3</span>.</div>
+                </div>
+                <div class="status" id="quizResult">Выберите вариант и нажмите «Проверить».</div>
+                <div class="btns two" style="margin-top:10px">
+                    <button id="checkQuiz">Проверить</button>
+                    <button class="secondary" id="resetQuiz">Сбросить</button>
+                </div>
+            </section>
+
+            <section class="card selfcheck">
+                <h2>Самопроверка</h2>
+                <label><input type="checkbox" /> Я отдельно проверил случай <span class="math">x = 2/3</span> и не потерял его.</label>
+                <label><input type="checkbox" /> Я проверил ОДЗ для логарифмов, а не только решил алгебраическое уравнение.</label>
+                <label><input type="checkbox" /> Я понял, почему ветвь <span class="math">4x + a = 0</span> отбрасывается.</label>
+                <label><input type="checkbox" /> Я отдельно разобрал точку <span class="math">a = 5/3</span>, где два кандидата совпадают.</label>
+            </section>
+
+            <section class="card" id="generatorCard">
+                <h2>Генератор похожих задач</h2>
+                <p class="muted">Генератор сохраняет тот же метод: отдельный корень от нулевого множителя и второй корень от равенства логарифмов.</p>
+                <div class="btns two">
+                    <button id="generate3">Сгенерировать 3 задачи</button>
+                    <button class="secondary" id="applyFirst">Применить первую к модели</button>
+                </div>
+                <div id="generatedTasks" style="margin-top:14px;display:grid;gap:12px"></div>
+            </section>
+        </main>
+
+        <aside class="rightcol">
+            <div class="sticky">
+                <section class="card">
+                    <h2>Интерактивная модель</h2>
+                    <p class="muted">Схема показывает два возможных источника корней на плоскости <span class="math">(a, x)</span>: горизонталь <span class="math">x = 2/3</span> и диагональ <span class="math">x = (a + 1)/4</span>. Вертикаль <span class="math">a = const</span> показывает число допустимых пересечений.</p>
+                    <div class="controls">
+                        <div class="control-row">
+                            <label for="aSlider">Параметр a: <strong id="aValue" class="math">0</strong></label>
+                            <input id="aSlider" type="range" min="-3.2" max="3.2" step="0.01" value="0" />
+                        </div>
+                        <div class="control-row inline">
+                            <div>
+                                <label for="detailMode">Подробность</label>
+                                <select id="detailMode">
+                                    <option value="standard">стандартно</option>
+                                    <option value="short">кратко</option>
+                                    <option value="long">очень подробно</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="showMode">Показ решения</label>
+                                <select id="showMode">
+                                    <option value="step">по шагам</option>
+                                    <option value="all">сразу всё</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="btns">
+                            <button id="prevStep">← шаг</button>
+                            <button id="nextStep">шаг →</button>
+                            <button class="secondary" id="showAll">все этапы</button>
+                            <button class="ghost" id="collapseToCurrent">свернуть</button>
+                        </div>
+                        <div class="control-row">
+                            <label>Переключатели схемы</label>
+                            <div class="btns two">
+                                <button class="secondary" id="toggleHoriz">горизонталь: вкл</button>
+                                <button class="secondary" id="toggleDiag">диагональ: вкл</button>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <label>Зум чертежа: <strong id="zoomLabel">100%</strong></label>
+                            <input id="zoomSlider" type="range" min="0.7" max="2.1" step="0.01" value="1" />
+                            <div class="btns">
+                                <button id="zoomOut">−</button>
+                                <button id="zoomIn">+</button>
+                                <button class="secondary" id="zoomReset">сброс</button>
+                                <button class="ghost" id="snapGood">показать ответ</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;overflow:auto">
+                        <svg id="plane" viewBox="0 0 680 520" aria-label="Координатная плоскость (a,x)">
+                            <g id="zoomGroup">
+                                <rect x="52" y="26" width="580" height="430" rx="18" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.06)" />
+                                <g id="grid"></g>
+                                <g id="answerBands"></g>
+                                <g id="axes"></g>
+                                <g id="domainBandSvg"></g>
+                                <g id="hSegSvg"></g>
+                                <g id="diagSegSvg"></g>
+                                <g id="verticalA"></g>
+                                <g id="markers"></g>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="legend">
+                        <div><span class="sw" style="background:#8cf0c9"></span> допустимый корень x = 2/3</div>
+                        <div><span class="sw" style="background:#7cc6ff"></span> допустимый корень x = (a + 1)/4</div>
+                        <div><span class="sw" style="background:#ffd166"></span> вертикаль a = const</div>
+                        <div><span class="sw" style="background:#ff9f9f"></span> промежутки ответа</div>
+                    </div>
+                    <div class="status" id="rootStatus" style="margin-top:12px"></div>
+                    <p class="small muted">Колесо мыши над чертежом тоже меняет масштаб. На узком экране панель остаётся сверху и не перекрывает текст.</p>
+                </section>
+
+                <section class="card">
+                    <h3>Легенда обозначений</h3>
+                    <ul class="bullet small">
+                        <li><span class="math">x = 2/3</span> — корень из-за нулевого множителя <span class="math">√(2 − 3x)</span>.</li>
+                        <li><span class="math">x = (a + 1)/4</span> — корень из равенства аргументов логарифмов.</li>
+                        <li>Красные полосы на оси <span class="math">a</span> — те значения параметра, где корень ровно один.</li>
+                    </ul>
+                </section>
+
+                <section class="card">
+                    <h3>Проверка ответа без вычислительной рутины</h3>
+                    <div class="box good">
+                        На графике нужно просто следить, сколько допустимых пересечений имеет вертикаль <span class="math">a = const</span>:
+                        <ul class="bullet small">
+                            <li>одно пересечение → ровно один корень;</li>
+                            <li>два пересечения → два корня;</li>
+                            <li>совпадение двух пересечений → снова один корень.</li>
+                        </ul>
+                    </div>
+                    <p class="print-note">Для печати страница автоматически перестраивается в один столбец.</p>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <div class="footer">Автор страницы: Лёвин Артём Александрович · автономный файл HTML без внешних зависимостей</div>
+</div>
+
+<script>
+    (() => {
+        const state = {
+            a: 0,
+            step: 1,
+            stepMode: 'step',
+            detail: 'standard',
+            showHoriz: true,
+            showDiag: true,
+            zoom: 1,
+            generated: [],
+            activeGenerated: null,
+            selectedQuiz: null,
+        };
+
+        const $ = sel => document.querySelector(sel);
+        const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+        const els = {
+            aSlider: $('#aSlider'), aValue: $('#aValue'), rootStatus: $('#rootStatus'),
+            detailMode: $('#detailMode'), showMode: $('#showMode'),
+            prevStep: $('#prevStep'), nextStep: $('#nextStep'), showAll: $('#showAll'), collapseToCurrent: $('#collapseToCurrent'),
+            toggleHoriz: $('#toggleHoriz'), toggleDiag: $('#toggleDiag'), zoomSlider: $('#zoomSlider'), zoomLabel: $('#zoomLabel'),
+            zoomIn: $('#zoomIn'), zoomOut: $('#zoomOut'), zoomReset: $('#zoomReset'), snapGood: $('#snapGood'),
+            plane: $('#plane'), quiz: $('#quiz'), quizResult: $('#quizResult'), checkQuiz: $('#checkQuiz'), resetQuiz: $('#resetQuiz'),
+            generate3: $('#generate3'), generatedTasks: $('#generatedTasks'), applyFirst: $('#applyFirst'), zoomGroup: $('#zoomGroup')
+        };
+
+        const view = { left: -3.2, right: 3.2, bottom: -0.3, top: 2.2, x0: 82, y0: 456, w: 520, h: 390 };
+        function X(a){ return view.x0 + (a - view.left) / (view.right - view.left) * view.w; }
+        function Y(x){ return view.y0 - (x - view.bottom) / (view.top - view.bottom) * view.h; }
+        function fmt(n){
+            if (Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
+            return n.toFixed(2).replace(/\.00$/,'').replace(/(\.[0-9])0$/,'$1');
+        }
+        function fracHTML(n){
+            const map = {
+                '-2.6666666667':'−8/3','-0.5':'−1/2','1.6666666667':'5/3','2.6666666667':'8/3','0.6666666667':'2/3'
+            };
+            const k = Number(n).toFixed(10);
+            return map[k] || fmt(Number(n));
+        }
+        function candidateRoots(a){
+            const roots = [];
+            const eps = 1e-9;
+            const hasH = a > -8/3 + eps && a < 8/3 - eps;
+            if (hasH) roots.push({type:'h', x:2/3});
+            const hasD = a > -1/2 + eps && a < 5/3 - eps || Math.abs(a - 5/3) <= eps;
+            if (hasD) roots.push({type:'d', x:(a+1)/4});
+            // merge same root if equal
+            roots.sort((p,q)=>p.x-q.x);
+            const merged=[];
+            for(const r of roots){
+                const last=merged[merged.length-1];
+                if(last && Math.abs(last.x-r.x)<1e-8){ last.type='both'; }
+                else merged.push({...r});
+            }
+            return merged;
+        }
+        function inAnswer(a){
+            return (a > -8/3 && a <= -1/2) || (a >= 5/3 && a < 8/3);
+        }
+
+        function updateDetail(){
+            $$('.detail-short,.detail-standard,.detail-long').forEach(el=>el.classList.add('hidden'));
+            $$('.detail-' + state.detail).forEach(el=>el.classList.remove('hidden'));
+            if(state.detail === 'long') $$('.detail-standard').forEach(el=>el.classList.remove('hidden'));
+        }
+
+        function updateSteps(){
+            const allStages = $$('.stage');
+            allStages.forEach(st => st.classList.remove('visible'));
+            if(state.stepMode === 'all') allStages.forEach(st => st.classList.add('visible'));
+            else allStages.forEach(st => { if(Number(st.dataset.step) <= state.step) st.classList.add('visible'); });
+        }
+
+        function axisLine(x1,y1,x2,y2, color, width=1){
+            return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}" />`;
+        }
+
+        function drawPlane(){
+            const grid = $('#grid'), axes = $('#axes'), hSeg = $('#hSegSvg'), dSeg = $('#diagSegSvg'), vA = $('#verticalA'), m = $('#markers'), ans = $('#answerBands'), dom=$('#domainBandSvg');
+
+            let gridHtml='';
+            for(let a=-3; a<=3; a+=0.5){
+                gridHtml += axisLine(X(a), Y(view.bottom), X(a), Y(view.top), a===0?'rgba(255,255,255,.18)':'rgba(255,255,255,.06)', a===0?1.4:1);
+            }
+            for(let x=0; x<=2; x+=1/3){
+                gridHtml += axisLine(X(view.left), Y(x), X(view.right), Y(x), Math.abs(x)<1e-9?'rgba(255,255,255,.18)':'rgba(255,255,255,.06)', Math.abs(x)<1e-9?1.4:1);
+            }
+            grid.innerHTML = gridHtml;
+
+            axes.innerHTML = `
+      ${axisLine(X(view.left), Y(0), X(view.right)+12, Y(0), 'rgba(255,255,255,.5)', 1.7)}
+      ${axisLine(X(0), Y(view.bottom)-12, X(0), Y(view.top), 'rgba(255,255,255,.5)', 1.7)}
+      <polygon points="${X(view.right)+12},${Y(0)} ${X(view.right)+1},${Y(0)-4} ${X(view.right)+1},${Y(0)+4}" fill="rgba(255,255,255,.5)" />
+      <polygon points="${X(0)},${Y(view.top)} ${X(0)-4},${Y(view.top)+10} ${X(0)+4},${Y(view.top)+10}" fill="rgba(255,255,255,.5)" />
+      <text x="${X(view.right)+18}" y="${Y(0)+5}" fill="#dfe7ff" font-size="14" font-weight="700">a</text>
+      <text x="${X(0)+7}" y="${Y(view.top)-8}" fill="#dfe7ff" font-size="14" font-weight="700">x</text>
+      ${[-8/3,-1/2,5/3,8/3].map(v=>`<text x="${X(v)}" y="${Y(0)+22}" text-anchor="middle" fill="#c8d3f2" font-size="12">${fracHTML(v)}</text>`).join('')}
+      ${[0,2/3,1,5/3,2].map(v=>`<text x="${X(0)-10}" y="${Y(v)+4}" text-anchor="end" fill="#c8d3f2" font-size="12">${fracHTML(v)}</text>`).join('')}
+    `;
+
+            ans.innerHTML = `
+      <rect x="${X(-8/3)}" y="${Y(0)-7}" width="${X(-1/2)-X(-8/3)}" height="14" rx="7" fill="rgba(255,159,159,.55)" />
+      <rect x="${X(5/3)}" y="${Y(0)-7}" width="${X(8/3)-X(5/3)}" height="14" rx="7" fill="rgba(255,159,159,.55)" />
+      <text x="${(X(-8/3)+X(-1/2))/2}" y="${Y(0)-12}" text-anchor="middle" fill="#ffc7c7" font-size="12">ответ</text>
+      <text x="${(X(5/3)+X(8/3))/2}" y="${Y(0)-12}" text-anchor="middle" fill="#ffc7c7" font-size="12">ответ</text>
+    `;
+
+            dom.innerHTML = `
+      <rect id="sqrtBand" x="${X(view.left)}" y="${Y(2/3)}" width="${X(view.right)-X(view.left)}" height="${Y(view.bottom)-Y(2/3)}" fill="rgba(255,255,255,.025)" stroke="rgba(255,255,255,.06)" stroke-dasharray="5 5" />
+      <text x="${X(view.left)+12}" y="${Y(2/3)+16}" fill="#d7e0fb" font-size="12">полоса x ≤ 2/3</text>
+      <path id="domainRay" d="M ${X(view.left)} ${Y((view.left+1)/4)} L ${X(view.right)} ${Y((view.right+1)/4)}" stroke="rgba(255,255,255,.18)" stroke-width="1.2" stroke-dasharray="6 6" />
+      <text x="${X(1.95)}" y="${Y((1.95+1)/4)-10}" fill="#d7e0fb" font-size="12">граница x = −a/4</text>
+    `;
+
+            hSeg.innerHTML = state.showHoriz ? `
+      <line id="hRoot" x1="${X(-8/3)}" y1="${Y(2/3)}" x2="${X(8/3)}" y2="${Y(2/3)}" stroke="#8cf0c9" stroke-width="4" stroke-linecap="round" />
+      <circle cx="${X(-8/3)}" cy="${Y(2/3)}" r="5" fill="#0f1830" stroke="#8cf0c9" stroke-width="2" />
+      <circle cx="${X(8/3)}" cy="${Y(2/3)}" r="5" fill="#0f1830" stroke="#8cf0c9" stroke-width="2" />
+      <text x="${X(1.8)}" y="${Y(2/3)-10}" fill="#8cf0c9" font-size="13" font-weight="700">x = 2/3</text>
+      <line id="hSeg" x1="${X(-8/3)}" y1="${Y(2/3)}" x2="${X(8/3)}" y2="${Y(2/3)}" stroke="transparent" stroke-width="16" />
+    ` : '';
+
+            dSeg.innerHTML = state.showDiag ? `
+      <line id="diagRoot" x1="${X(-1/2)}" y1="${Y(1/8)}" x2="${X(5/3)}" y2="${Y(2/3)}" stroke="#7cc6ff" stroke-width="4" stroke-linecap="round" />
+      <circle cx="${X(-1/2)}" cy="${Y(1/8)}" r="5" fill="#0f1830" stroke="#7cc6ff" stroke-width="2" />
+      <circle cx="${X(5/3)}" cy="${Y(2/3)}" r="5" fill="#7cc6ff" stroke="#7cc6ff" stroke-width="2" />
+      <text x="${X(1.3)}" y="${Y(.6)-16}" fill="#7cc6ff" font-size="13" font-weight="700">x = (a + 1)/4</text>
+      <line id="diagSeg" x1="${X(-1/2)}" y1="${Y(1/8)}" x2="${X(5/3)}" y2="${Y(2/3)}" stroke="transparent" stroke-width="16" />
+    ` : '';
+
+            const roots = candidateRoots(state.a);
+            const dots = roots.map((r,i)=>`<circle cx="${X(state.a)}" cy="${Y(r.x)}" r="${r.type==='both'?8:7}" fill="${r.type==='h'?'#8cf0c9':r.type==='d'?'#7cc6ff':'#ffd166'}" stroke="#091223" stroke-width="3" />
+      <text x="${X(state.a)+10}" y="${Y(r.x)-10 - i*16}" fill="#f8fbff" font-size="12">x = ${fmt(r.x)}</text>`).join('');
+            vA.innerHTML = `<line x1="${X(state.a)}" y1="${Y(view.bottom)}" x2="${X(state.a)}" y2="${Y(view.top)}" stroke="#ffd166" stroke-width="3" stroke-dasharray="7 6" />
+      <text x="${X(state.a)}" y="${Y(view.top)-10}" text-anchor="middle" fill="#ffd166" font-size="13" font-weight="700">a = ${fmt(state.a)}</text>`;
+            m.innerHTML = dots;
+
+            $('#zoomGroup').setAttribute('transform', `translate(${340*(1-state.zoom)} ${240*(1-state.zoom)}) scale(${state.zoom})`);
+        }
+
+        function updateStatus(){
+            const roots = candidateRoots(state.a);
+            const prettyA = fmt(state.a);
+            let text = `<strong>a = ${prettyA}</strong>. `;
+            if(roots.length===0) text += 'Сейчас допустимых корней нет.';
+            else if(roots.length===1){
+                if(roots[0].type==='both') text += `Сейчас ровно один корень: обе ветви совпали в точке x = ${fmt(roots[0].x)}.`;
+                else text += `Сейчас ровно один корень: x = ${fmt(roots[0].x)}.`;
+            } else text += `Сейчас два корня: x = ${fmt(roots[0].x)} и x = ${fmt(roots[1].x)}.`;
+            text += inAnswer(state.a) ? ' Это значение параметра входит в ответ.' : ' Это значение параметра не входит в ответ.';
+            els.rootStatus.innerHTML = text;
+        }
+
+        function updateButtons(){
+            els.toggleHoriz.textContent = `горизонталь: ${state.showHoriz?'вкл':'выкл'}`;
+            els.toggleDiag.textContent = `диагональ: ${state.showDiag?'вкл':'выкл'}`;
+            els.zoomLabel.textContent = Math.round(state.zoom*100)+'%';
+        }
+
+        function setA(v){ state.a = Number(v); els.aSlider.value = state.a; els.aValue.textContent = fmt(state.a); drawPlane(); updateStatus(); }
+        function setZoom(v){ state.zoom = Math.max(0.7, Math.min(2.1, Number(v))); els.zoomSlider.value = state.zoom; updateButtons(); drawPlane(); }
+
+        function setupHoverLinks(){
+            $$('.inline-link').forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    link.classList.add('active');
+                    const t = document.getElementById(link.dataset.target);
+                    if(t) t.classList.add('highlighted');
+                });
+                link.addEventListener('mouseleave', () => {
+                    link.classList.remove('active');
+                    const t = document.getElementById(link.dataset.target);
+                    if(t) t.classList.remove('highlighted');
+                });
+                link.addEventListener('click', () => {
+                    const t = document.getElementById(link.dataset.target);
+                    if(t) t.classList.toggle('highlighted');
+                });
+            });
+        }
+
+        function generateTasks(){
+            const presets = [
+                {m:3, end:1, rad:'3 − 3x', k:3},
+                {m:5, end:'4/5', rad:'8 − 10x', k:10},
+                {m:4, end:'3/4', rad:'3 − 4x', k:4},
+                {m:6, end:'2/3', rad:'4 − 6x', k:6},
+                {m:2, end:'3/2', rad:'3 − 2x', k:2}
+            ];
+            const shuffled = presets.sort(() => Math.random() - 0.5).slice(0,3);
+            state.generated = shuffled.map((p,idx) => {
+                const t = p.m * eval(String(p.end).replace('/','/')); // safe fixed presets only
+                const left1 = -t, right1 = -0.5, left2 = t-1, right2 = t;
+                const ans = `a ∈ (${fmt(left1)}, −1/2] ∪ [${fmt(left2)}, ${fmt(right2)})`;
+                const task = `√(${p.rad}) · ln(${p.m*p.m}x² − a²) = √(${p.rad}) · ln(${p.m}x + a)`;
+                return {task, ans, idea:`Корни-кандидаты: x = ${p.end} и x = (a + 1)/${p.m}.`};
+            });
+            renderGenerated();
+        }
+
+        function renderGenerated(){
+            els.generatedTasks.innerHTML = state.generated.map((g,i)=>`
+      <div class="box ${i===0?'accent':''}">
+        <div><strong>Задача ${i+1}.</strong> <span class="math">${g.task}</span></div>
+        <div class="small muted" style="margin-top:6px">Идея: ${g.idea}</div>
+        <div class="small" style="margin-top:6px"><strong>Ответ:</strong> <span class="math">${g.ans}</span></div>
+      </div>
+    `).join('');
+        }
+
+        function setupQuiz(){
+            $$('#quiz .option').forEach((op,idx) => {
+                op.addEventListener('click', () => {
+                    state.selectedQuiz = idx;
+                    $$('#quiz .option').forEach(o => o.classList.remove('selected'));
+                    op.classList.add('selected');
+                });
+            });
+            els.checkQuiz.addEventListener('click', () => {
+                if(state.selectedQuiz == null){ els.quizResult.textContent = 'Сначала выберите вариант.'; return; }
+                const opts = $$('#quiz .option');
+                opts.forEach(o => o.classList.remove('correct','wrong'));
+                const chosen = opts[state.selectedQuiz];
+                if(chosen.dataset.correct === '1'){
+                    chosen.classList.add('correct');
+                    els.quizResult.innerHTML = 'Верно. Главная ловушка — случай <strong>x = 2/3</strong>, когда нулём становится множитель √(2 − 3x).';
+                } else {
+                    chosen.classList.add('wrong');
+                    opts.find(o => o.dataset.correct === '1').classList.add('correct');
+                    els.quizResult.innerHTML = 'Не совсем. Ключевой дополнительный корень появляется из случая <strong>√(2 − 3x) = 0</strong>.';
+                }
+            });
+            els.resetQuiz.addEventListener('click', () => {
+                state.selectedQuiz = null;
+                $$('#quiz .option').forEach(o => o.classList.remove('selected','correct','wrong'));
+                els.quizResult.textContent = 'Выберите вариант и нажмите «Проверить».';
+            });
+        }
+
+        function bind(){
+            els.aSlider.addEventListener('input', e => setA(e.target.value));
+            els.detailMode.addEventListener('change', e => { state.detail = e.target.value; updateDetail(); });
+            els.showMode.addEventListener('change', e => { state.stepMode = e.target.value; updateSteps(); });
+            els.prevStep.addEventListener('click', () => { state.stepMode='step'; els.showMode.value='step'; state.step=Math.max(1,state.step-1); updateSteps(); });
+            els.nextStep.addEventListener('click', () => { state.stepMode='step'; els.showMode.value='step'; state.step=Math.min(7,state.step+1); updateSteps(); document.getElementById('stage-'+state.step).scrollIntoView({behavior:'smooth',block:'start'}); });
+            els.showAll.addEventListener('click', () => { state.stepMode='all'; els.showMode.value='all'; updateSteps(); });
+            els.collapseToCurrent.addEventListener('click', () => { state.stepMode='step'; els.showMode.value='step'; updateSteps(); });
+            els.toggleHoriz.addEventListener('click', () => { state.showHoriz=!state.showHoriz; updateButtons(); drawPlane(); });
+            els.toggleDiag.addEventListener('click', () => { state.showDiag=!state.showDiag; updateButtons(); drawPlane(); });
+            els.zoomSlider.addEventListener('input', e => setZoom(e.target.value));
+            els.zoomIn.addEventListener('click', () => setZoom(state.zoom+0.1));
+            els.zoomOut.addEventListener('click', () => setZoom(state.zoom-0.1));
+            els.zoomReset.addEventListener('click', () => setZoom(1));
+            els.snapGood.addEventListener('click', () => setA(-1));
+            els.generate3.addEventListener('click', generateTasks);
+            els.applyFirst.addEventListener('click', () => {
+                if(!state.generated.length) generateTasks();
+                setA(-1);
+                document.getElementById('generatorCard').scrollIntoView({behavior:'smooth',block:'start'});
+            });
+            els.plane.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                setZoom(state.zoom + (e.deltaY < 0 ? 0.07 : -0.07));
+            }, {passive:false});
+        }
+
+        function init(){
+            updateDetail();
+            updateSteps();
+            updateButtons();
+            drawPlane();
+            updateStatus();
+            setupHoverLinks();
+            setupQuiz();
+            bind();
+            generateTasks();
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>

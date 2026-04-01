@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3DD135 — задача с параметром</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --bg2:#111831;
+            --panel:#121a34;
+            --panel2:#172143;
+            --text:#e9eefc;
+            --muted:#a9b7df;
+            --accent:#7cc4ff;
+            --accent2:#9effc5;
+            --warn:#ffd36e;
+            --danger:#ff8c8c;
+            --good:#8cf5b0;
+            --line:#2d3a68;
+            --shadow:0 10px 28px rgba(0,0,0,.35);
+            --radius:20px;
+            --stickyTop:16px;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:linear-gradient(180deg,var(--bg),#0a0f1d 45%, #0c1222);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55}
+        body{min-height:100vh}
+        .page{max-width:1500px;margin:0 auto;padding:18px}
+        .hero{background:linear-gradient(180deg,rgba(124,196,255,.10),rgba(124,196,255,.03));border:1px solid var(--line);border-radius:24px;padding:22px 22px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+        .hero::after{content:"";position:absolute;right:-80px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(124,196,255,.18),transparent 68%)}
+        h1,h2,h3{margin:0 0 12px}
+        h1{font-size:clamp(1.45rem,3vw,2.3rem);line-height:1.2}
+        h2{font-size:clamp(1.12rem,2vw,1.45rem)}
+        h3{font-size:1.02rem;color:var(--accent2)}
+        .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+        .chip{background:rgba(255,255,255,.04);border:1px solid var(--line);padding:8px 11px;border-radius:999px;color:var(--muted);font-size:.93rem}
+        .equation{font-size:clamp(1.15rem,2.5vw,1.6rem);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:14px;overflow:auto}
+        .layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:18px;margin-top:18px;align-items:start}
+        .left,.right{min-width:0}
+        .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+        .section{padding:18px 18px 16px;margin-bottom:16px}
+        .sticky{position:sticky;top:var(--stickyTop)}
+        .lead{color:var(--muted)}
+        .idea-list,.mistake-list,.check-list,.quiz-list,.legend-list{margin:0;padding-left:20px}
+        .idea-list li,.mistake-list li,.check-list li,.quiz-list li,.legend-list li{margin:8px 0}
+        .step{padding:14px 14px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025);margin:12px 0;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+        .step:hover,.step.active{transform:translateY(-1px);border-color:var(--accent);background:rgba(124,196,255,.07)}
+        .step-head{display:flex;justify-content:space-between;gap:12px;align-items:center;cursor:pointer}
+        .step-title{font-weight:700}
+        .step-body{margin-top:12px}
+        .muted{color:var(--muted)}
+        .small{font-size:.93rem}
+        .formula{display:block;background:#0b1330;border:1px solid #33447e;padding:10px 12px;border-radius:14px;margin:10px 0;overflow:auto}
+        .mark{color:var(--accent2);font-weight:700}
+        .warn{color:var(--warn)}
+        .bad{color:var(--danger)}
+        .good{color:var(--good)}
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .controls{display:grid;gap:12px}
+        .control-card{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:12px}
+        .control-card h3{margin-bottom:8px}
+        .btn-row,.toggle-row{display:flex;flex-wrap:wrap;gap:8px}
+        button,.seg button,.chip-btn{
+            appearance:none;border:none;background:#1d2a56;color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;
+            transition:transform .15s ease, background .15s ease, opacity .15s ease; font:inherit; border:1px solid #3a4d8e;
+        }
+        button:hover,.seg button:hover,.chip-btn:hover{transform:translateY(-1px);background:#27366d}
+        button.active,.seg button.active,.chip-btn.active{background:#3656b3;border-color:#87b6ff}
+        .seg{display:flex;flex-wrap:wrap;gap:8px}
+        label{display:block;margin-bottom:6px;color:var(--muted);font-size:.95rem}
+        input[type="range"]{width:100%}
+        .range-line{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+        .value-box{padding:8px 10px;background:#0b1330;border:1px solid #32457e;border-radius:12px;min-width:96px;text-align:center;font-variant-numeric:tabular-nums}
+        .canvas-wrap{background:#0a1128;border:1px solid var(--line);border-radius:18px;padding:10px;overflow:hidden}
+        svg{display:block;width:100%;height:auto;touch-action:none;background:radial-gradient(circle at 50% 30%, rgba(124,196,255,.06), transparent 55%), linear-gradient(180deg,#0b1330,#091022)}
+        .legend{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+        .legend-item{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:10px}
+        .legend-swatch{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:8px;vertical-align:middle}
+        .summary-box{display:grid;gap:10px;margin-top:12px}
+        .summary-item{padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+        .callout{border-left:4px solid var(--accent);padding:10px 12px;background:rgba(124,196,255,.06);border-radius:0 14px 14px 0;margin:12px 0}
+        .answer-box{padding:14px 16px;border-radius:16px;background:linear-gradient(180deg,rgba(140,245,176,.12),rgba(140,245,176,.06));border:1px solid rgba(140,245,176,.35)}
+        .task-box{padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+        details{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.025)}
+        details+details{margin-top:10px}
+        summary{cursor:pointer;font-weight:700}
+        .quiz-q{padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin:10px 0}
+        .quiz-q.correct{border-color:rgba(140,245,176,.6);background:rgba(140,245,176,.08)}
+        .quiz-q.wrong{border-color:rgba(255,140,140,.6);background:rgba(255,140,140,.08)}
+        .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#0b1330;border:1px solid var(--line);font-size:.86rem;color:var(--muted)}
+        .footer-note{padding:14px 16px;color:var(--muted);font-size:.93rem}
+        .hidden{display:none !important}
+        .hr{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:16px 0}
+        .two-col-list{columns:2;column-gap:18px}
+        .step-tag{font-size:.84rem;color:var(--accent);border:1px solid rgba(124,196,255,.35);padding:5px 8px;border-radius:999px;background:rgba(124,196,255,.05)}
+        .kbd{display:inline-block;padding:1px 6px;border-radius:6px;border:1px solid var(--line);background:#0c1432;font-size:.9em}
+        @media (max-width: 1100px){
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative;top:auto}
+        }
+        @media (max-width: 760px){
+            .grid2,.legend{grid-template-columns:1fr}
+            .page{padding:10px}
+            .section{padding:14px}
+            .two-col-list{columns:1}
+        }
+        @media print{
+            :root{--bg:#fff;--bg2:#fff;--panel:#fff;--panel2:#fff;--text:#111;--muted:#444;--line:#bbb;--accent:#124fa3;--accent2:#0d7a46;--warn:#8a5b00;--danger:#8a1d1d;--good:#0d7a46;--shadow:none}
+            html,body{background:#fff;color:#111}
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative;top:auto}
+            button,input,.control-card .small{display:none !important}
+            .canvas-wrap{break-inside:avoid}
+            .hero,.panel,.step,details{box-shadow:none}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header class="hero">
+        <h1>3DD135. Единственный корень на отрезке [0; 1]</h1>
+        <div class="lead">Нужно найти все значения параметра <span class="mark">a</span>, при которых уравнение имеет ровно один корень на отрезке.</div>
+        <div class="equation">
+            (2x + ln(x + 2a))² = (2x − ln(x + 2a))², &nbsp; x ∈ [0; 1]
+        </div>
+        <div class="meta">
+            <div class="chip">Цель: подготовка к ЕГЭ</div>
+            <div class="chip">Уровень: уверенный</div>
+            <div class="chip">Стиль: как репетитор</div>
+            <div class="chip">Метод: только школьные методы</div>
+            <div class="chip">Автор: Лёвин Артём Александрович</div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <main class="left">
+            <section class="panel section">
+                <h2>Идея решения</h2>
+                <ol class="idea-list">
+                    <li>Заметим, что равенство квадратов означает: либо выражения равны, либо они противоположны.</li>
+                    <li>Из этого сразу появляются <span class="mark">два кандидата</span> на корни: <span class="mark">x = 0</span> и <span class="mark">x = 1 − 2a</span>.</li>
+                    <li>Дальше остаётся проверить только две вещи: <span class="mark">область определения</span> логарифма и попадание в отрезок <span class="mark">[0;1]</span>.</li>
+                    <li>Потом смотрим, когда допустим ровно один корень, а не два.</li>
+                </ol>
+                <div class="callout small">Это очень типичная идея для задач вида <span class="mark">U² = V²</span>: перейти к случаям <span class="mark">U = V</span> или <span class="mark">U = −V</span>.</div>
+            </section>
+
+            <section class="panel section">
+                <h2>Подробное решение</h2>
+                <div class="small muted">Можно раскрывать шаги по очереди. При наведении на шаг подсвечивается связанный элемент на модели справа.</div>
+                <div id="steps"></div>
+                <div class="answer-box">
+                    <h3>Ответ</h3>
+                    <div style="font-size:1.15rem"><span class="mark">a = 0</span> или <span class="mark">a ≥ 1/2</span>.</div>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <h2>Финальная проверка ответа</h2>
+                <ul class="check-list">
+                    <li>При <span class="mark">a = 0</span> корень <span class="mark">x = 0</span> не подходит, потому что ln(0) не определён. Но корень <span class="mark">x = 1</span> подходит. Значит, корень на отрезке ровно один.</li>
+                    <li>При <span class="mark">0 &lt; a &lt; 1/2</span> подходят оба корня: <span class="mark">x = 0</span> и <span class="mark">x = 1 − 2a ∈ (0;1)</span>. Значит, корней два — это не подходит.</li>
+                    <li>При <span class="mark">a = 1/2</span> оба случая дают один и тот же корень <span class="mark">x = 0</span>. Значит, корень единственный.</li>
+                    <li>При <span class="mark">a &gt; 1/2</span> корень <span class="mark">x = 1 − 2a</span> уходит левее нуля, а <span class="mark">x = 0</span> остаётся допустимым. Значит, снова ровно один корень.</li>
+                    <li>При <span class="mark">a &lt; 0</span> корень <span class="mark">x = 0</span> недопустим, а <span class="mark">x = 1 − 2a &gt; 1</span>, то есть не лежит на отрезке. Корней нет.</li>
+                </ul>
+            </section>
+
+            <section class="panel section">
+                <h2>Типичные ошибки</h2>
+                <ul class="mistake-list two-col-list">
+                    <li>Сразу извлечь корень и написать <span class="mark">2x + ln(x+2a) = 2x − ln(x+2a)</span>, забыв случай <span class="mark">U = −V</span>.</li>
+                    <li>Не проверить область определения логарифма: нужно <span class="mark">x + 2a &gt; 0</span>.</li>
+                    <li>Посчитать, что при <span class="mark">a = 1/2</span> корней два, хотя оба случая дают один и тот же корень <span class="mark">x = 0</span>.</li>
+                    <li>Проверить только формулы для корней, но забыть условие <span class="mark">x ∈ [0;1]</span>.</li>
+                    <li>Неверно обработать случай <span class="mark">a = 0</span>: корень <span class="mark">x = 0</span> запрещён, потому что логарифм не существует.</li>
+                </ul>
+            </section>
+
+            <section class="panel section">
+                <h2>Мини-квиз</h2>
+                <div id="quiz"></div>
+                <div class="btn-row" style="margin-top:10px">
+                    <button id="checkQuizBtn">Проверить квиз</button>
+                    <button id="resetQuizBtn">Сбросить</button>
+                </div>
+                <div id="quizResult" class="callout hidden"></div>
+            </section>
+
+            <section class="panel section">
+                <h2>Самопроверка</h2>
+                <details open>
+                    <summary>Что обязательно нужно проверить в самом конце?</summary>
+                    <div class="small muted" style="margin-top:10px">Нужно отдельно проверить: область определения, попадание в отрезок, совпадение/различие корней и отсутствие других случаев.</div>
+                </details>
+                <details>
+                    <summary>Почему вообще появляются только два кандидата на корни?</summary>
+                    <div class="small muted" style="margin-top:10px">Потому что из равенства квадратов следует только два случая: U = V или U = −V. Больше никаких возможностей нет.</div>
+                </details>
+                <details>
+                    <summary>Чем опасен случай a = 0?</summary>
+                    <div class="small muted" style="margin-top:10px">Тем, что формально x = 0 возникает из одного из случаев, но логарифм ln(x + 2a) = ln(0) не существует.</div>
+                </details>
+            </section>
+
+            <section class="panel section">
+                <h2>Похожие задачи</h2>
+                <div class="lead">Генератор сохраняет тот же метод решения: переход от равенства квадратов к двум простым случаям.</div>
+                <div class="grid2" style="margin-top:12px">
+                    <div class="task-box">
+                        <label for="taskCount">Сколько задач показать</label>
+                        <div class="seg" id="taskCountSeg">
+                            <button data-count="1">1</button>
+                            <button data-count="3" class="active">3</button>
+                            <button data-count="5">5</button>
+                        </div>
+                        <div class="btn-row" style="margin-top:12px">
+                            <button id="genBtn">Сгенерировать</button>
+                            <button id="applyTaskBtn">Применить 1-ю задачу к модели</button>
+                        </div>
+                        <div class="small muted" style="margin-top:10px">После применения меняется подпись, формула и критерий ответа для модели справа.</div>
+                    </div>
+                    <div class="task-box">
+                        <h3>Краткая общая идея</h3>
+                        <div class="small muted">Для шаблона <span class="mark">(mx + ln(x + ka))² = (mx − ln(x + ka))²</span> всегда получаем два кандидата: <span class="mark">x = 0</span> и <span class="mark">x = 1 − ka</span>.</div>
+                    </div>
+                </div>
+                <div id="generatedTasks" style="margin-top:12px"></div>
+            </section>
+        </main>
+
+        <aside class="right">
+            <div class="sticky">
+                <section class="panel section">
+                    <h2>Интерактивная модель</h2>
+                    <div class="controls">
+                        <div class="control-card">
+                            <h3>Параметр a</h3>
+                            <div class="range-line">
+                                <input id="aRange" type="range" min="-0.5" max="1.5" step="0.01" value="0.5" />
+                                <div class="value-box" id="aValue">0.50</div>
+                            </div>
+                            <div class="small muted">Двигайте ползунок и смотрите, сколько корней остаётся на отрезке [0;1].</div>
+                        </div>
+
+                        <div class="control-card">
+                            <h3>Подробность объяснения</h3>
+                            <div class="seg" id="detailSeg">
+                                <button data-detail="brief">Кратко</button>
+                                <button data-detail="standard" class="active">Стандартно</button>
+                                <button data-detail="full">Очень подробно</button>
+                            </div>
+                        </div>
+
+                        <div class="control-card">
+                            <h3>Пошаговое раскрытие</h3>
+                            <div class="btn-row">
+                                <button id="prevStepBtn">← Назад</button>
+                                <button id="nextStepBtn">Вперёд →</button>
+                                <button id="showAllBtn">Показать всё</button>
+                            </div>
+                            <div class="small muted" id="stepProgress">Открыто шагов: 1</div>
+                        </div>
+
+                        <div class="control-card">
+                            <h3>Что показать на модели</h3>
+                            <div class="toggle-row">
+                                <button class="chip-btn active" data-toggle="showAPlane">Плоскость (a,x)</button>
+                                <button class="chip-btn active" data-toggle="showInterval">Числовая ось</button>
+                                <button class="chip-btn active" data-toggle="showDomain">ОДЗ</button>
+                                <button class="chip-btn active" data-toggle="showLabels">Подписи</button>
+                            </div>
+                        </div>
+
+                        <div class="control-card">
+                            <h3>Зум чертежа</h3>
+                            <div class="range-line">
+                                <input id="zoomRange" type="range" min="0.7" max="2.4" step="0.01" value="1" />
+                                <div class="value-box" id="zoomValue">100%</div>
+                            </div>
+                            <div class="btn-row">
+                                <button id="zoomOutBtn">−</button>
+                                <button id="zoomInBtn">+</button>
+                                <button id="zoomResetBtn">Сброс</button>
+                            </div>
+                            <div class="small muted">Поддерживается и масштабирование колесом мыши прямо на рисунке.</div>
+                        </div>
+                    </div>
+
+                    <div class="canvas-wrap" style="margin-top:14px">
+                        <svg id="viz" viewBox="0 0 760 860" aria-label="Интерактивная математическая схема"></svg>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item"><span class="legend-swatch" style="background:#7cc4ff"></span> корень x = 0</div>
+                        <div class="legend-item"><span class="legend-swatch" style="background:#9effc5"></span> корень x = 1 − 2a</div>
+                        <div class="legend-item"><span class="legend-swatch" style="background:#ffd36e"></span> отрезок [0;1]</div>
+                        <div class="legend-item"><span class="legend-swatch" style="background:#ff8c8c"></span> недопустимая область</div>
+                    </div>
+                    <div class="summary-box" id="summaryBox"></div>
+                </section>
+
+                <section class="panel footer-note">
+                    Управление справа прокручивается вместе с чертежом. Наведите на шаг решения слева — связанные элементы на схеме подсветятся.
+                </section>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const baseProblem = { label: 'Исходная задача', m: 2, k: 2, interval: [0,1], title: '3DD135' };
+    let currentProblem = {...baseProblem};
+    let state = {
+        a: 0.5,
+        zoom: 1,
+        detail: 'standard',
+        openSteps: 1,
+        hoverKey: '',
+        toggles: { showAPlane:true, showInterval:true, showDomain:true, showLabels:true },
+        taskCount: 3
+    };
+
+    const stepsData = [
+        {
+            key:'given', title:'1) Что дано', tag:'Старт',
+            brief:'Решаем уравнение на отрезке [0;1] и ищем такие a, при которых корень ровно один.',
+            standard:'Нужно найти все значения параметра a, при которых уравнение (2x + ln(x + 2a))² = (2x − ln(x + 2a))² имеет единственный корень на отрезке [0;1].',
+            full:'Есть уравнение с логарифмом и параметром. Мы ищем не сами корни по x для одного конкретного a, а все такие значения параметра a, при которых на отрезке [0;1] остаётся ровно один допустимый корень. Значит, нам важны и формулы для корней, и область определения, и проверка количества корней.'
+        },
+        {
+            key:'meaning', title:'2) Что означает каждое условие', tag:'ОДЗ + отрезок',
+            brief:'Нужно одновременно учитывать ln(x+2a) и условие x ∈ [0;1].',
+            standard:'Так как есть логарифм ln(x + 2a), обязательно нужно требовать x + 2a > 0. Кроме того, по условию корень должен лежать на отрезке [0;1].',
+            full:'В задаче есть два фильтра. Первый фильтр — область определения: логарифм существует только при x + 2a > 0. Второй фильтр — геометрический: нас интересуют только те корни, которые попадают в отрезок [0;1]. Даже если число получилось из алгебры, оно не считается корнем задачи, если нарушает хотя бы один из этих двух фильтров.'
+        },
+        {
+            key:'interpretation', title:'3) Алгебраическая интерпретация', tag:'U² = V²',
+            brief:'Из U² = V² получаем два случая: U = V или U = −V.',
+            standard:'Обозначим U = 2x + ln(x + 2a), V = 2x − ln(x + 2a). Тогда из равенства U² = V² следует: либо U = V, либо U = −V.',
+            full:'Здесь очень удобно не раскрывать квадраты, а использовать стандартный факт: если два квадрата равны, то сами выражения либо равны, либо противоположны. Это значительно сокращает решение и сразу приводит к простым линейным условиям.'
+        },
+        {
+            key:'idea', title:'4) Ключевая идея', tag:'Два кандидата',
+            brief:'Оба случая сразу дают два кандидата: x = 0 и x = 1 − 2a.',
+            standard:'В первом случае получится ln(x + 2a) = 0, а во втором — x = 0. Значит, все возможные корни уже найдены: это x = 0 и x = 1 − 2a.',
+            full:'После разбиения на два случая задача почти решена. Из U = V исчезают части 2x, остаётся логарифм равный нулю. Из U = −V логарифмы сокращаются, и остаётся только 4x = 0. Поэтому дальше мы не ищем новые корни, а только проверяем допустимость двух найденных кандидатов.'
+        },
+        {
+            key:'solve', title:'5) Пошаговое доведение до ответа', tag:'Разбор случаев',
+            brief:'Проверяем по очереди x = 0 и x = 1 − 2a.',
+            standard:`
+          <div class="formula">1) U = V ⇒ 2x + ln(x+2a) = 2x − ln(x+2a) ⇒ 2ln(x+2a)=0 ⇒ ln(x+2a)=0 ⇒ x+2a=1 ⇒ x=1−2a.</div>
+          <div class="formula">2) U = −V ⇒ 2x + ln(x+2a) = −2x + ln(x+2a) ⇒ 4x=0 ⇒ x=0.</div>
+          Теперь проверяем условия существования и попадания в [0;1].`,
+            full:`
+          <div class="formula">Случай 1: U = V.<br>
+          2x + ln(x+2a) = 2x − ln(x+2a)<br>
+          ln(x+2a) = −ln(x+2a)<br>
+          2ln(x+2a)=0<br>
+          ln(x+2a)=0<br>
+          x+2a=1<br>
+          x=1−2a.</div>
+          <div class="formula">Случай 2: U = −V.<br>
+          2x + ln(x+2a) = −2x + ln(x+2a)<br>
+          4x=0<br>
+          x=0.</div>
+          <div class="formula">Проверка кандидата x=0:<br>
+          нужен логарифм ln(2a), значит 2a&gt;0, то есть a&gt;0.</div>
+          <div class="formula">Проверка кандидата x=1−2a:<br>
+          логарифм существует автоматически, потому что x+2a=1&gt;0;<br>
+          остаётся только условие 0 ≤ 1−2a ≤ 1, откуда 0 ≤ a ≤ 1/2.</div>
+          Итак, x=0 существует при a&gt;0, а x=1−2a существует на отрезке при 0≤a≤1/2.`
+        },
+        {
+            key:'check', title:'6) Финальная проверка по промежуткам', tag:'Количество корней',
+            brief:'Разбиваем ось параметра на случаи.',
+            standard:'Если a<0, корней нет. Если a=0, есть только x=1. Если 0<a<1/2, есть два корня. Если a=1/2, корень один: x=0. Если a>1/2, тоже один корень: x=0.',
+            full:'Разбираем все промежутки параметра. При a<0 точка x=0 запрещена, а x=1−2a>1, значит корней на [0;1] нет. При a=0 корень x=1−2a даёт x=1, а x=0 запрещён, значит корень один. При 0<a<1/2 корень x=0 допустим, и x=1−2a лежит внутри (0;1), значит корней два. При a=1/2 оба случая приводят к x=0, то есть корень один. При a>1/2 корень x=1−2a<0, остаётся только x=0, значит корень один.'
+        },
+        {
+            key:'conclusion', title:'7) Краткий вывод', tag:'Ответ',
+            brief:'Подходят a = 0 и a ≥ 1/2.',
+            standard:'Единственный корень на отрезке [0;1] получается при a = 0 или при a ≥ 1/2.',
+            full:'Мы проверили оба возможных типа корней, область определения логарифма, положение на отрезке и совпадение корней в граничном случае a=1/2. Поэтому окончательный ответ: a = 0 или a ≥ 1/2.'
+        }
+    ];
+
+    const quizData = [
+        { q:'Какой стандартный переход верен для равенства U² = V²?', options:['Только U = V','U = V или U = −V','U² − V² = 1'], correct:1, why:'Из равенства квадратов следуют два случая: U = V или U = −V.' },
+        { q:'Какой второй кандидат на корень получается в этой задаче?', options:['x = 2a − 1','x = 1 − 2a','x = a'], correct:1, why:'Из ln(x+2a)=0 получаем x+2a=1, значит x=1−2a.' },
+        { q:'При каком условии корень x = 0 допустим?', options:['a ≥ 0','a > 0','a < 1/2'], correct:1, why:'Нужно, чтобы ln(2a) существовал, то есть 2a > 0.' }
+    ];
+
+    function fmt(v){
+        if (Math.abs(v) < 1e-10) v = 0;
+        return (Math.round(v*100)/100).toFixed(2);
+    }
+    function close(a,b,eps=1e-9){return Math.abs(a-b)<eps}
+
+    function analyze(a, problem=currentProblem){
+        const [L,R] = problem.interval;
+        const k = problem.k;
+        const x0 = 0;
+        const x1 = 1 - k*a;
+        const root0Valid = (x0 >= L && x0 <= R && (x0 + k*a > 0));
+        const root1Valid = (x1 >= L && x1 <= R && (x1 + k*a > 0));
+        const roots = [];
+        if (root0Valid) roots.push({x:x0,type:'x0'});
+        if (root1Valid && !roots.some(r=>close(r.x,x1))) roots.push({x:x1,type:'x1'});
+        let verdict = '';
+        if (roots.length === 0) verdict = 'На отрезке нет корней.';
+        if (roots.length === 1) verdict = 'На отрезке ровно один корень.';
+        if (roots.length === 2) verdict = 'На отрезке два корня.';
+        return {a,x0,x1,root0Valid,root1Valid,roots,verdict};
+    }
+
+    function getAnswerDescription(problem){
+        const k = problem.k;
+        if (problem.interval[0]===0 && problem.interval[1]===1){
+            return `Для этой модели ответ по параметру: a = 0 или a ≥ ${1/k}.`;
+        }
+        return 'Ответ зависит от выбранного шаблона; он показан у каждой сгенерированной задачи.';
+    }
+
+    function renderSteps(){
+        const wrap = document.getElementById('steps');
+        wrap.innerHTML = '';
+        stepsData.forEach((s,idx)=>{
+            const open = idx < state.openSteps;
+            const div = document.createElement('div');
+            div.className = 'step' + (state.hoverKey===s.key ? ' active':'');
+            div.dataset.key = s.key;
+            const txt = state.detail === 'brief' ? s.brief : state.detail === 'full' ? s.full : s.standard;
+            div.innerHTML = `
+          <div class="step-head">
+            <div>
+              <div class="step-title">${s.title}</div>
+              <div class="small muted">${open ? 'Шаг открыт' : 'Нажмите, чтобы раскрыть'}</div>
+            </div>
+            <div class="step-tag">${s.tag}</div>
+          </div>
+          <div class="step-body ${open ? '' : 'hidden'}">${txt}</div>
+        `;
+            div.querySelector('.step-head').addEventListener('click',()=>{
+                state.openSteps = open ? Math.max(1, idx) : idx+1;
+                updateAll();
+            });
+            div.addEventListener('mouseenter',()=>{state.hoverKey=s.key; drawViz();});
+            div.addEventListener('mouseleave',()=>{state.hoverKey=''; drawViz();});
+            wrap.appendChild(div);
+        });
+        document.getElementById('stepProgress').textContent = `Открыто шагов: ${state.openSteps}`;
+    }
+
+    function renderQuiz(){
+        const qWrap = document.getElementById('quiz');
+        qWrap.innerHTML = '';
+        quizData.forEach((q,qi)=>{
+            const box = document.createElement('div');
+            box.className='quiz-q';
+            box.dataset.qi = qi;
+            box.innerHTML = `<div><span class="pill">Вопрос ${qi+1}</span></div><div style="margin-top:8px;font-weight:700">${q.q}</div>`;
+            q.options.forEach((opt,oi)=>{
+                const id = `q${qi}_${oi}`;
+                const p = document.createElement('div');
+                p.style.marginTop = '8px';
+                p.innerHTML = `<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="radio" name="q${qi}" value="${oi}" /> <span>${opt}</span></label>`;
+                box.appendChild(p);
+            });
+            const why = document.createElement('div');
+            why.className='small muted hidden';
+            why.style.marginTop='8px';
+            why.textContent=q.why;
+            box.appendChild(why);
+            qWrap.appendChild(box);
+        })
+    }
+
+    function checkQuiz(){
+        let correct = 0;
+        [...document.querySelectorAll('.quiz-q')].forEach((box,qi)=>{
+            const pick = box.querySelector('input:checked');
+            const why = box.querySelector('.small');
+            box.classList.remove('correct','wrong');
+            why.classList.remove('hidden');
+            if (pick && +pick.value === quizData[qi].correct){
+                correct++; box.classList.add('correct');
+            } else {
+                box.classList.add('wrong');
+            }
+        });
+        const res = document.getElementById('quizResult');
+        res.classList.remove('hidden');
+        res.innerHTML = `Ваш результат: <span class="mark">${correct} из ${quizData.length}</span>. ${correct===quizData.length ? 'Отлично: логика решения собрана правильно.' : 'Посмотрите пояснения под вопросами и ещё раз сопоставьте их с шагами решения.'}`;
+    }
+
+    function resetQuiz(){
+        renderQuiz();
+        document.getElementById('quizResult').classList.add('hidden');
+    }
+
+    function lineX(x, left=80, width=600){ return left + x*width; }
+    function aY(a, top=80, height=290, aMin=-0.5, aMax=1.5){ return top + (aMax-a)/(aMax-aMin)*height; }
+
+    function drawViz(){
+        const svg = document.getElementById('viz');
+        const a = state.a;
+        const z = state.zoom;
+        const info = analyze(a);
+        const w = 760, h = 860;
+        const left = 80, width = 600;
+        const planeTop=70, planeH=300;
+        const lineTop=540;
+        const x0X = lineX(0,left,width), x1X = lineX(info.x1,left,width);
+        const aLineY = aY(a,planeTop,planeH);
+        const highlightX0 = ['idea','solve','check','conclusion'].includes(state.hoverKey);
+        const highlightX1 = ['idea','solve','check','conclusion'].includes(state.hoverKey);
+        const highlightODZ = ['meaning','check'].includes(state.hoverKey);
+        const showLabels = state.toggles.showLabels;
+        const showAPlane = state.toggles.showAPlane;
+        const showInterval = state.toggles.showInterval;
+        const showDomain = state.toggles.showDomain;
+
+        svg.innerHTML = '';
+        const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+        g.setAttribute('transform', `translate(${(1-z)*w/2} ${(1-z)*h/2}) scale(${z})`);
+        svg.appendChild(g);
+
+        function add(tag, attrs, parent=g){
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+            parent.appendChild(el); return el;
+        }
+        function text(x,y,txt,fill='#e9eefc',size=18,weight='500',anchor='start', parent=g){
+            const t = add('text',{x,y,fill,'font-size':size,'font-weight':weight,'text-anchor':anchor}, parent);
+            t.textContent = txt; return t;
+        }
+
+        add('rect',{x:20,y:20,width:720,height:820,rx:24,fill:'rgba(255,255,255,0.02)',stroke:'#2d3a68'});
+        text(40,48, currentProblem.label, '#9effc5', 20, '700');
+        text(715,48, `a = ${fmt(a)}`, '#7cc4ff', 20, '700', 'end');
+
+        if (showAPlane){
+            text(40,80,'Плоскость (a, x): как меняются кандидаты на корни', '#e9eefc', 18, '700');
+            add('rect',{x:left,y:planeTop,width:width,height:planeH,rx:16,fill:'rgba(255,255,255,0.02)',stroke:'#34457d'});
+            for(let i=0;i<=10;i++){
+                const x = left + i*width/10;
+                add('line',{x1:x,y1:planeTop,x2:x,y2:planeTop+planeH,stroke:'rgba(255,255,255,.08)'});
+            }
+            for(let j=0;j<=8;j++){
+                const y = planeTop + j*planeH/8;
+                add('line',{x1:left,y1:y,x2:left+width,y2:y,stroke:'rgba(255,255,255,.08)'});
+            }
+            text(left-28, planeTop+planeH/2, 'a', '#ffd36e', 18, '700', 'middle').setAttribute('transform', `rotate(-90 ${left-28} ${planeTop+planeH/2})`);
+            text(left+width/2, planeTop+planeH+28, 'x', '#ffd36e', 18, '700', 'middle');
+
+            // region x in [0,1]
+            add('rect',{x:lineX(0,left,width),y:planeTop,width:lineX(1,left,width)-lineX(0,left,width),height:planeH,fill:'rgba(255,211,110,.08)',stroke:'rgba(255,211,110,.18)'});
+            if (showLabels) text(lineX(.5,left,width), planeTop+20, 'полоса x ∈ [0;1]', '#ffd36e', 15, '600', 'middle');
+
+            // x = 0 line
+            add('line',{x1:lineX(0,left,width),y1:planeTop,x2:lineX(0,left,width),y2:planeTop+planeH,stroke:'#7cc4ff','stroke-width': highlightX0 ? 5 : 3});
+            // x = 1 - ka line
+            const p1x = lineX(0,left,width), p1y = aY(1/currentProblem.k,planeTop,planeH);
+            const p2x = lineX(1,left,width), p2y = aY(0,planeTop,planeH);
+            add('line',{x1:p1x,y1:p1y,x2:p2x,y2:p2y,stroke:'#9effc5','stroke-width': highlightX1 ? 5 : 3});
+            // current a horizontal
+            add('line',{x1:left,y1:aLineY,x2:left+width,y2:aLineY,stroke:'#ffb266','stroke-width':2,'stroke-dasharray':'8 8'});
+            if (showLabels){
+                text(lineX(0,left,width)+8, planeTop+18, 'x = 0', '#7cc4ff', 15, '700');
+                text(lineX(.82,left,width), aY(.1,planeTop,planeH)-8, `x = 1 − ${currentProblem.k}a`, '#9effc5', 15, '700');
+                text(left+width-10, aLineY-8, `текущее a`, '#ffb266', 14, '600', 'end');
+            }
+            // intersection points
+            const ptR = lineX(0,left,width), ptG = lineX(Math.max(0,Math.min(1,info.x1)),left,width);
+            add('circle',{cx:ptR,cy:aLineY,r: highlightX0 ? 8 : 6,fill: info.root0Valid ? '#7cc4ff' : '#ff8c8c'});
+            add('circle',{cx:lineX(info.x1,left,width),cy:aLineY,r: highlightX1 ? 8 : 6,fill: info.root1Valid ? '#9effc5' : '#ff8c8c'});
+        }
+
+        if (showInterval){
+            text(40, lineTop-22, 'Числовая ось x на отрезке [0;1]', '#e9eefc', 18, '700');
+            add('line',{x1:left,y1:lineTop,x2:left+width,y2:lineTop,stroke:'#bcd0ff','stroke-width':3});
+            add('line',{x1:left,y1:lineTop-12,x2:left,y2:lineTop+12,stroke:'#ffd36e','stroke-width':4});
+            add('line',{x1:left+width,y1:lineTop-12,x2:left+width,y2:lineTop+12,stroke:'#ffd36e','stroke-width':4});
+            text(left, lineTop+34, '0', '#ffd36e', 18, '700', 'middle');
+            text(left+width, lineTop+34, '1', '#ffd36e', 18, '700', 'middle');
+            if (showDomain){
+                const border = -currentProblem.k * a;
+                const borderX = lineX(border,left,width);
+                if (isFinite(borderX)){
+                    add('rect',{x:left-40,y:lineTop+54,width:Math.max(0,borderX-(left-40)),height:38,fill:'rgba(255,140,140,.15)'});
+                    add('line',{x1:borderX,y1:lineTop+52,x2:borderX,y2:lineTop+96,stroke:'#ff8c8c','stroke-width':2,'stroke-dasharray':'6 6'});
+                    if (showLabels) text(Math.min(Math.max(borderX+6, 48), 708), lineTop+115, `граница ОДЗ: x > ${fmt(-currentProblem.k*a)}`, '#ff8c8c', 14, '600');
+                }
+            }
+            // x=0 point
+            add('circle',{cx:x0X,cy:lineTop,r:highlightX0 ? 11 : 8, fill: info.root0Valid ? '#7cc4ff' : '#ff8c8c', stroke:'#091022','stroke-width':2});
+            // x=1-ka point
+            add('circle',{cx:x1X,cy:lineTop,r:highlightX1 ? 11 : 8, fill: info.root1Valid ? '#9effc5' : '#ff8c8c', stroke:'#091022','stroke-width':2});
+            if (showLabels){
+                text(x0X, lineTop-18, 'x=0', info.root0Valid ? '#7cc4ff' : '#ff8c8c', 15, '700', 'middle');
+                text(x1X, lineTop-18, `x=1−${currentProblem.k}a`, info.root1Valid ? '#9effc5' : '#ff8c8c', 15, '700', 'middle');
+            }
+        }
+
+        // bottom logic summary in SVG
+        const boxY = 660;
+        add('rect',{x:40,y:boxY,width:680,height:150,rx:18,fill:'rgba(255,255,255,.03)',stroke:'#32457e'});
+        text(60, boxY+30, 'Текущий разбор для выбранного a', '#e9eefc', 18, '700');
+        text(60, boxY+64, `Кандидат 1: x = 0 ${analyze(a).root0Valid ? 'подходит' : 'не подходит'}`, analyze(a).root0Valid ? '#7cc4ff' : '#ff8c8c', 16, '600');
+        text(60, boxY+92, `Кандидат 2: x = 1 − ${currentProblem.k}a = ${fmt(analyze(a).x1)} ${analyze(a).root1Valid ? 'подходит' : 'не подходит'}`, analyze(a).root1Valid ? '#9effc5' : '#ff8c8c', 16, '600');
+        text(60, boxY+122, analyze(a).verdict, analyze(a).roots.length===1 ? '#8cf5b0' : analyze(a).roots.length===2 ? '#ffd36e' : '#ff8c8c', 18, '700');
+    }
+
+    function renderSummary(){
+        const info = analyze(state.a);
+        const box = document.getElementById('summaryBox');
+        const rootsText = info.roots.length ? info.roots.map(r=>fmt(r.x)).join(', ') : 'нет';
+        box.innerHTML = `
+        <div class="summary-item"><strong>Кандидаты:</strong> x = 0 и x = 1 − ${currentProblem.k}a = ${fmt(info.x1)}</div>
+        <div class="summary-item"><strong>Допустимые корни сейчас:</strong> ${rootsText}</div>
+        <div class="summary-item"><strong>Вывод:</strong> ${info.verdict}</div>
+        <div class="summary-item"><strong>Общий ответ для текущего шаблона:</strong> ${getAnswerDescription(currentProblem)}</div>
+      `;
+    }
+
+    function updateAll(){
+        document.getElementById('aValue').textContent = fmt(state.a);
+        document.getElementById('zoomValue').textContent = `${Math.round(state.zoom*100)}%`;
+        renderSteps();
+        drawViz();
+        renderSummary();
+        document.querySelectorAll('#detailSeg button').forEach(b=>b.classList.toggle('active', b.dataset.detail===state.detail));
+        document.querySelectorAll('.chip-btn').forEach(b=>b.classList.toggle('active', !!state.toggles[b.dataset.toggle]));
+        document.querySelectorAll('#taskCountSeg button').forEach(b=>b.classList.toggle('active', +b.dataset.count===state.taskCount));
+    }
+
+    function makeTask(k, m){
+        const answer = `a = 0 или a ≥ ${(1/k).toString().replace('.',',')}`;
+        return {
+            k,m,
+            text:`Найдите все значения a, при которых уравнение (${m}x + ln(x + ${k}a))² = (${m}x − ln(x + ${k}a))² имеет единственный корень на отрезке [0;1].`,
+            answer,
+            idea:`Кандидаты на корни: x = 0 и x = 1 − ${k}a. Далее проверяются ОДЗ и условие x ∈ [0;1].`
+        };
+    }
+
+    const taskBank = [makeTask(1,1), makeTask(3,2), makeTask(4,5), makeTask(5,3), makeTask(6,4), makeTask(2,7), makeTask(8,3)];
+    let generated = [];
+
+    function generateTasks(){
+        const rotated = [...taskBank];
+        const shift = Math.floor((state.a + 0.5) * 10) % taskBank.length;
+        generated = rotated.slice(shift).concat(rotated.slice(0,shift)).slice(0,state.taskCount);
+        const box = document.getElementById('generatedTasks');
+        box.innerHTML = generated.map((t,i)=>`
+        <div class="task-box" style="margin-top:10px">
+          <div class="pill">Задача ${i+1}</div>
+          <div style="margin-top:8px;font-weight:700">${t.text}</div>
+          <div class="hr"></div>
+          <div><strong>Ответ:</strong> <span class="mark">${t.answer}</span></div>
+          <div class="small muted" style="margin-top:6px"><strong>Идея:</strong> ${t.idea}</div>
+        </div>
+      `).join('');
+    }
+
+    function applyFirstTask(){
+        if (!generated.length) generateTasks();
+        const t = generated[0];
+        currentProblem = { label:'Применённая похожая задача', m:t.m, k:t.k, interval:[0,1], title:'Generated' };
+        document.querySelector('.equation').innerHTML = `(${t.m}x + ln(x + ${t.k}a))² = (${t.m}x − ln(x + ${t.k}a))², &nbsp; x ∈ [0;1]`;
+        updateAll();
+    }
+
+    // events
+    document.getElementById('aRange').addEventListener('input', e=>{ state.a = +e.target.value; updateAll(); });
+    document.getElementById('zoomRange').addEventListener('input', e=>{ state.zoom = +e.target.value; updateAll(); });
+    document.getElementById('zoomInBtn').addEventListener('click', ()=>{ state.zoom = Math.min(2.4, state.zoom + 0.1); document.getElementById('zoomRange').value = state.zoom; updateAll(); });
+    document.getElementById('zoomOutBtn').addEventListener('click', ()=>{ state.zoom = Math.max(0.7, state.zoom - 0.1); document.getElementById('zoomRange').value = state.zoom; updateAll(); });
+    document.getElementById('zoomResetBtn').addEventListener('click', ()=>{ state.zoom = 1; document.getElementById('zoomRange').value = 1; updateAll(); });
+    document.getElementById('detailSeg').addEventListener('click', e=>{ if(e.target.tagName==='BUTTON'){ state.detail = e.target.dataset.detail; updateAll(); } });
+    document.querySelectorAll('.chip-btn').forEach(btn=>btn.addEventListener('click', ()=>{ const key = btn.dataset.toggle; state.toggles[key] = !state.toggles[key]; updateAll(); }));
+    document.getElementById('prevStepBtn').addEventListener('click', ()=>{ state.openSteps = Math.max(1, state.openSteps-1); updateAll(); });
+    document.getElementById('nextStepBtn').addEventListener('click', ()=>{ state.openSteps = Math.min(stepsData.length, state.openSteps+1); updateAll(); });
+    document.getElementById('showAllBtn').addEventListener('click', ()=>{ state.openSteps = stepsData.length; updateAll(); });
+    document.getElementById('checkQuizBtn').addEventListener('click', checkQuiz);
+    document.getElementById('resetQuizBtn').addEventListener('click', resetQuiz);
+    document.getElementById('taskCountSeg').addEventListener('click', e=>{ if(e.target.tagName==='BUTTON'){ state.taskCount = +e.target.dataset.count; updateAll(); generateTasks(); } });
+    document.getElementById('genBtn').addEventListener('click', generateTasks);
+    document.getElementById('applyTaskBtn').addEventListener('click', applyFirstTask);
+
+    // wheel zoom on svg
+    document.getElementById('viz').addEventListener('wheel', e=>{
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.08 : -0.08;
+        state.zoom = Math.max(0.7, Math.min(2.4, state.zoom + delta));
+        document.getElementById('zoomRange').value = state.zoom;
+        updateAll();
+    }, {passive:false});
+
+    renderQuiz();
+    generateTasks();
+    updateAll();
+</script>
+</body>
+</html>

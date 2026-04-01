@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тригонометрия: формулы приведения — наглядная математика</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --panel:#121936;
+            --panel-2:#0f1530;
+            --text:#eaf0ff;
+            --muted:#aab6df;
+            --soft:#7f8bc0;
+            --accent:#7cc7ff;
+            --accent-2:#8bf0c8;
+            --warn:#ffd479;
+            --danger:#ff9c9c;
+            --ok:#9ef3a8;
+            --violet:#c2a9ff;
+            --line:#2a356b;
+            --shadow:0 12px 30px rgba(0,0,0,.28);
+            --radius:20px;
+            --step1:#7cc7ff;
+            --step2:#8bf0c8;
+            --step3:#ffd479;
+            --step4:#c2a9ff;
+            --step5:#ffb38a;
+            --step6:#a5f0ff;
+            --step7:#9ef3a8;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            color:var(--text);
+            background:
+            radial-gradient(circle at 20% 0%, rgba(124,199,255,.10), transparent 32%),
+            radial-gradient(circle at 100% 0%, rgba(139,240,200,.09), transparent 28%),
+            linear-gradient(180deg, #0a1020, #0b1020 30%, #0b1124);
+            line-height:1.55;
+        }
+        .page{
+            max-width:1520px;
+            margin:0 auto;
+            padding:20px 16px 80px;
+        }
+        .hero{
+            background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:28px;
+            box-shadow:var(--shadow);
+            padding:26px 22px;
+            margin-bottom:18px;
+            overflow:hidden;
+            position:relative;
+        }
+        .hero:before{
+            content:"";
+            position:absolute; inset:-2px auto auto -2px;
+            width:340px; height:340px;
+            background:radial-gradient(circle, rgba(124,199,255,.12), transparent 62%);
+            pointer-events:none;
+        }
+        .hero h1{
+            margin:0 0 8px;
+            font-size:clamp(28px, 5vw, 44px);
+            line-height:1.1;
+        }
+        .subtitle{
+            margin:0;
+            color:var(--muted);
+            max-width:1000px;
+            font-size:clamp(15px, 2vw, 18px);
+        }
+        .meta{
+            display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;
+        }
+        .badge{
+            padding:8px 12px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.08);
+            color:var(--muted);
+            font-size:14px;
+        }
+        .layout{
+            display:grid;
+            grid-template-columns:minmax(0, 1.06fr) minmax(360px, .94fr);
+            gap:18px;
+            align-items:start;
+        }
+        .leftCol, .rightCol{min-width:0}
+        .card{
+            background:linear-gradient(180deg, rgba(18,25,54,.95), rgba(13,19,44,.96));
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+        }
+        .section{
+            padding:18px 18px 16px;
+            margin-bottom:16px;
+        }
+        h2{
+            margin:0 0 10px;
+            font-size:clamp(22px, 3vw, 30px);
+        }
+        h3{
+            margin:0 0 10px;
+            font-size:clamp(18px, 2.4vw, 22px);
+        }
+        p, li{font-size:16px}
+        .muted{color:var(--muted)}
+        .small{font-size:14px}
+        .grid2{
+            display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px;
+        }
+        .subcard{
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.06);
+            border-radius:16px;
+            padding:14px;
+        }
+        .pillRow{display:flex; gap:8px; flex-wrap:wrap}
+        .pill{
+            display:inline-flex; align-items:center; gap:6px;
+            padding:6px 10px;
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:999px;
+            background:rgba(255,255,255,.03);
+            font-size:13px;
+            color:var(--muted);
+        }
+        .legend{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0,1fr));
+            gap:8px;
+            margin-top:10px;
+        }
+        .legend div{
+            display:flex; align-items:center; gap:8px; min-width:0;
+            color:var(--muted); font-size:14px;
+        }
+        .dot{
+            width:12px; height:12px; border-radius:50%;
+            flex:0 0 12px;
+        }
+        .controls{
+            display:grid;
+            gap:12px;
+        }
+        .toolbar{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            align-items:center;
+        }
+        button, select, input[type="range"]{
+            font:inherit;
+        }
+        button{
+            border:none;
+            border-radius:12px;
+            padding:10px 14px;
+            cursor:pointer;
+            background:linear-gradient(180deg, rgba(124,199,255,.22), rgba(124,199,255,.12));
+            color:var(--text);
+            border:1px solid rgba(124,199,255,.35);
+            transition:transform .14s ease, background .14s ease, opacity .14s ease;
+        }
+        button:hover{transform:translateY(-1px)}
+        button.secondary{
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        button.ghost{
+            background:transparent;
+            border:1px dashed rgba(255,255,255,.15);
+        }
+        button.active{
+            outline:2px solid rgba(139,240,200,.55);
+            background:linear-gradient(180deg, rgba(139,240,200,.22), rgba(139,240,200,.10));
+            border-color:rgba(139,240,200,.45);
+        }
+        .radioGroup{
+            display:flex; flex-wrap:wrap; gap:8px;
+        }
+        .toggle{
+            padding:8px 12px;
+            border-radius:12px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+            cursor:pointer;
+            user-select:none;
+        }
+        .toggle.active{
+            border-color:rgba(124,199,255,.45);
+            background:rgba(124,199,255,.12);
+            color:var(--text);
+        }
+        .stickyWrap{
+            position:sticky;
+            top:14px;
+            display:flex; flex-direction:column; gap:14px;
+            max-height:calc(100vh - 28px);
+        }
+        .viewer{
+            padding:14px;
+        }
+        .viewerTop{
+            display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;
+        }
+        .formulaFocus{
+            font-size:clamp(22px, 3vw, 30px);
+            font-weight:700;
+            line-height:1.2;
+            color:#f3f7ff;
+        }
+        .formulaHint{
+            color:var(--muted); font-size:14px; max-width:600px;
+        }
+        .canvasWrap{
+            margin-top:12px;
+            background:
+            linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.01)),
+            radial-gradient(circle at 50% 12%, rgba(124,199,255,.08), transparent 38%);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;
+            padding:10px;
+            overflow:hidden;
+            min-height:420px;
+        }
+        svg{
+            display:block;
+            width:100%;
+            height:auto;
+            touch-action:none;
+            user-select:none;
+        }
+        .readout{
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0,1fr));
+            gap:8px;
+            margin-top:10px;
+        }
+        .readout .cell{
+            border-radius:14px;
+            padding:10px 12px;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.06);
+            min-width:0;
+        }
+        .readout .label{font-size:12px; color:var(--soft); text-transform:uppercase; letter-spacing:.06em}
+        .readout .value{font-size:16px; font-weight:700}
+        .steps{
+            display:grid; gap:12px;
+        }
+        .step{
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;
+            background:rgba(255,255,255,.03);
+            overflow:hidden;
+            transition:background .15s ease, border-color .15s ease, transform .15s ease;
+        }
+        .step:hover{transform:translateY(-1px)}
+        .stepHeader{
+            display:flex; gap:12px; align-items:center; padding:14px 14px 10px; cursor:pointer;
+        }
+        .stepNum{
+            width:34px; height:34px; border-radius:50%;
+            display:grid; place-items:center; color:#07111d; font-weight:800;
+            flex:0 0 34px;
+        }
+        .stepBody{
+            padding:0 14px 14px 60px;
+        }
+        .step.collapsed .stepBody{display:none}
+        .step[data-step="1"] .stepNum{background:var(--step1)}
+        .step[data-step="2"] .stepNum{background:var(--step2)}
+        .step[data-step="3"] .stepNum{background:var(--step3)}
+        .step[data-step="4"] .stepNum{background:var(--step4)}
+        .step[data-step="5"] .stepNum{background:var(--step5)}
+        .step[data-step="6"] .stepNum{background:var(--step6)}
+        .step[data-step="7"] .stepNum{background:var(--step7)}
+        .step.active{
+            border-color:rgba(124,199,255,.45);
+            background:rgba(124,199,255,.075);
+        }
+        .hl{
+            display:inline-block;
+            padding:2px 8px;
+            border-radius:999px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.07);
+            margin:2px 4px 2px 0;
+        }
+        .formula{
+            font-size:clamp(18px, 2.7vw, 24px);
+            font-weight:700;
+            margin:8px 0;
+            overflow-wrap:anywhere;
+        }
+        .eq{
+            display:block;
+            padding:8px 10px;
+            margin:8px 0;
+            border-left:3px solid rgba(124,199,255,.5);
+            background:rgba(255,255,255,.025);
+            border-radius:0 12px 12px 0;
+        }
+        .ideaList, .mistakesList, .checkList{margin:0; padding-left:20px}
+        .truthTable{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:10px;
+            font-size:15px;
+        }
+        .truthTable th, .truthTable td{
+            border:1px solid rgba(255,255,255,.08);
+            padding:10px 8px;
+            text-align:left;
+            vertical-align:top;
+        }
+        .truthTable th{background:rgba(255,255,255,.05)}
+        .anchor{
+            border-bottom:1px dashed rgba(124,199,255,.6);
+            cursor:pointer;
+        }
+        .summaryBox{
+            background:linear-gradient(180deg, rgba(139,240,200,.10), rgba(139,240,200,.03));
+            border:1px solid rgba(139,240,200,.2);
+            border-radius:18px;
+            padding:14px;
+        }
+        .warning{
+            background:linear-gradient(180deg, rgba(255,212,121,.10), rgba(255,212,121,.03));
+            border:1px solid rgba(255,212,121,.22);
+            border-radius:18px;
+            padding:14px;
+        }
+        .danger{
+            background:linear-gradient(180deg, rgba(255,156,156,.10), rgba(255,156,156,.03));
+            border:1px solid rgba(255,156,156,.2);
+            border-radius:18px;
+            padding:14px;
+        }
+        .quizQ{
+            padding:14px;
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+        }
+        .quizOptions{
+            display:grid;
+            gap:8px;
+            margin-top:10px;
+        }
+        .quizOptions button{
+            text-align:left;
+            background:rgba(255,255,255,.03);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .quizOptions button.correct{
+            border-color:rgba(158,243,168,.55);
+            background:rgba(158,243,168,.14);
+        }
+        .quizOptions button.wrong{
+            border-color:rgba(255,156,156,.55);
+            background:rgba(255,156,156,.12);
+        }
+        .qaFeedback{
+            margin-top:10px;
+            color:var(--muted);
+        }
+        .taskList{
+            display:grid; gap:10px; margin-top:12px;
+        }
+        .task{
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.03);
+            padding:14px;
+        }
+        .task .ans{
+            margin-top:8px; color:var(--accent-2);
+            font-weight:700;
+        }
+        .task .idea{
+            color:var(--muted); margin-top:6px;
+        }
+        .footer{
+            margin-top:26px; color:var(--soft); text-align:center; font-size:14px;
+        }
+        .progressWrap{
+            display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+        }
+        .progress{
+            height:10px; flex:1 1 200px; min-width:140px;
+            border-radius:999px; background:rgba(255,255,255,.06); overflow:hidden;
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .progressBar{
+            height:100%; width:14%; background:linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+        .checkGrid{
+            display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px;
+        }
+        .printOnly{display:none}
+        .kbd{
+            display:inline-block; padding:2px 6px; border-radius:8px;
+            border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); font-size:13px;
+        }
+
+        @media (max-width: 1100px){
+            .layout{grid-template-columns:1fr}
+            .stickyWrap{position:relative; top:auto; max-height:none}
+        }
+        @media (max-width: 720px){
+            .page{padding:12px 10px 52px}
+            .hero{padding:18px 16px}
+            .section{padding:14px}
+            .grid2, .legend, .checkGrid, .readout{grid-template-columns:1fr}
+            .stepBody{padding:0 12px 12px 12px}
+            .stepHeader{align-items:flex-start}
+            .toolbar button, .toolbar .toggle{flex:1 1 auto}
+            .canvasWrap{min-height:300px}
+        }
+        @media print{
+            :root{
+                --bg:#ffffff;
+                --panel:#ffffff;
+                --panel-2:#ffffff;
+                --text:#111111;
+                --muted:#444444;
+                --soft:#555555;
+                --line:#bbbbbb;
+                --shadow:none;
+            }
+            body{background:#fff; color:#111}
+            .layout{grid-template-columns:1fr}
+            .stickyWrap{position:relative; top:auto; max-height:none}
+            button, .toolbar, .controls .subcard, .quizOptions button, .noPrint{display:none !important}
+            .card, .subcard, .step, .hero{box-shadow:none; background:#fff; border:1px solid #bbb}
+            .printOnly{display:block}
+            .canvasWrap{break-inside:avoid}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="hero">
+        <h1>Тригонометрия: формулы приведения</h1>
+        <p class="subtitle">
+            Наглядная страница для подготовки к ЕГЭ: разбираем, как быстро понять, что происходит с
+            знаком и названием функции при углах вида 90° ± α, 180° ± α, 270° ± α, 360° ± α.
+            Главный фокус — геометрическая идея на координатной окружности.
+        </p>
+        <div class="meta">
+            <span class="badge">Цель: подготовка к ЕГЭ</span>
+            <span class="badge">Уровень: уверенный</span>
+            <span class="badge">Стиль: как репетитор</span>
+            <span class="badge">Интерактивность: расширенная</span>
+            <span class="badge">Режим: пошаговое раскрытие</span>
+            <span class="badge">Автор: Лёвин Артём Александрович</span>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="leftCol">
+            <section class="card section">
+                <h2>Идея решения</h2>
+                <ol class="ideaList">
+                    <li>Смотри не на формулу как на набор символов, а на <span class="anchor" data-target="circle">точку на окружности</span>.</li>
+                    <li>Проверь, к какому «основному» углу сводится выражение: это и есть угол <b>α</b>.</li>
+                    <li>Пойми, меняется ли <b>название функции</b>: при сдвиге на 90° и 270° синус и косинус меняются местами, тангенс и котангенс тоже.</li>
+                    <li>Потом определи <b>знак</b> по четверти или по знакам координат точки.</li>
+                    <li>В конце обязательно проверь: полученная формула должна согласовываться с окружностью, а не просто «похоже выглядеть».</li>
+                </ol>
+            </section>
+
+            <section class="card section">
+                <h2>Что дано и что нужно понять</h2>
+                <div class="grid2">
+                    <div class="subcard">
+                        <h3>Что дано</h3>
+                        <p>Углы специального вида: <span class="hl">90° ± α</span>, <span class="hl">180° ± α</span>, <span class="hl">270° ± α</span>, <span class="hl">360° ± α</span>.</p>
+                        <p>Тригонометрические функции: sin, cos, tg, ctg.</p>
+                    </div>
+                    <div class="subcard">
+                        <h3>Что нужно понять</h3>
+                        <p>Как без зубрёжки определить:</p>
+                        <ul>
+                            <li>сохраняется ли функция или меняется на «соседнюю»;</li>
+                            <li>какой ставится знак;</li>
+                            <li>как быстро применять это в заданиях ЕГЭ.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card section">
+                <h2>Логика условий</h2>
+                <div class="steps" id="solutionSteps">
+                    <article class="step" data-step="1" data-objects="axes base angle">
+                        <div class="stepHeader">
+                            <div class="stepNum">1</div>
+                            <div>
+                                <h3>Что означает угол вида 90° + α, 180° − α и т.д.</h3>
+                                <div class="muted">Это не новый «особый» угол. Это обычный поворот от известной оси.</div>
+                            </div>
+                        </div>
+                        <div class="stepBody">
+                            <p>
+                                Например, <b>90° + α</b> означает: сначала дошли до положительной оси <i>Oy</i>, потом ещё повернули на α.
+                                Значит, итоговая точка получается из точки угла α не напрямую, а через <b>симметрию / дополнительный поворот</b>.
+                            </p>
+                            <div class="eq">Главный вопрос: <b>какие координаты точки меняются местами и какие меняют знак?</b></div>
+                            <p>
+                                На окружности <b>cos</b> — это абсцисса, а <b>sin</b> — ордината. Поэтому формулы приведения удобно понимать именно через координаты.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="step" data-step="2" data-objects="base proj">
+                        <div class="stepHeader">
+                            <div class="stepNum">2</div>
+                            <div>
+                                <h3>Геометрическая интерпретация</h3>
+                                <div class="muted">Точка на единичной окружности имеет координаты (cos α, sin α).</div>
+                            </div>
+                        </div>
+                        <div class="stepBody">
+                            <p>
+                                Если точка соответствует углу α, то её координаты равны
+                                <span class="formula">(cos α, sin α)</span>.
+                            </p>
+                            <p>
+                                Теперь посмотрим, что будет после сдвига:
+                            </p>
+                            <ul>
+                                <li><b>90° + α</b> даёт точку <b>(−sin α, cos α)</b>;</li>
+                                <li><b>90° − α</b> даёт точку <b>(sin α, cos α)</b>;</li>
+                                <li><b>180° − α</b> даёт точку <b>(−cos α, sin α)</b>;</li>
+                                <li><b>180° + α</b> даёт точку <b>(−cos α, −sin α)</b>.</li>
+                            </ul>
+                            <p>
+                                Именно отсюда возникают правила: иногда функция <b>сохраняется</b>, а иногда <b>меняется на соседнюю</b>.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="step" data-step="3" data-objects="base angle proj">
+                        <div class="stepHeader">
+                            <div class="stepNum">3</div>
+                            <div>
+                                <h3>Ключевая идея: правило «менять или не менять название функции»</h3>
+                                <div class="muted">Сдвиг на нечётное число четвертей меняет функцию на соседнюю.</div>
+                            </div>
+                        </div>
+                        <div class="stepBody">
+                            <div class="summaryBox">
+                                <p><b>Запомнить очень удобно так:</b></p>
+                                <ul>
+                                    <li>Углы с <b>90°</b> и <b>270°</b> → <b>название функции меняется</b>.</li>
+                                    <li>Углы с <b>180°</b> и <b>360°</b> → <b>название функции сохраняется</b>.</li>
+                                </ul>
+                            </div>
+                            <p>
+                                Почему? Потому что поворот на 90° или 270° фактически переставляет роли осей <i>Ox</i> и <i>Oy</i>.
+                                А значит, <b>x</b> и <b>y</b> меняются местами, то есть cos и sin переходят друг в друга.
+                            </p>
+                            <div class="eq">sin(90° − α) = cos α, &nbsp;&nbsp; cos(90° − α) = sin α</div>
+                            <div class="eq">sin(180° − α) = sin α, &nbsp;&nbsp; cos(180° − α) = −cos α</div>
+                        </div>
+                    </article>
+
+                    <article class="step" data-step="4" data-objects="quadrants sign">
+                        <div class="stepHeader">
+                            <div class="stepNum">4</div>
+                            <div>
+                                <h3>Как определить знак</h3>
+                                <div class="muted">Знак определяется не по памяти, а по четверти и координатам.</div>
+                            </div>
+                        </div>
+                        <div class="stepBody">
+                            <table class="truthTable">
+                                <thead>
+                                <tr>
+                                    <th>Четверть</th>
+                                    <th>Знаки координат</th>
+                                    <th>Что положительно</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>I</td>
+                                    <td>x &gt; 0, y &gt; 0</td>
+                                    <td>sin, cos, tg, ctg</td>
+                                </tr>
+                                <tr>
+                                    <td>II</td>
+                                    <td>x &lt; 0, y &gt; 0</td>
+                                    <td>sin</td>
+                                </tr>
+                                <tr>
+                                    <td>III</td>
+                                    <td>x &lt; 0, y &lt; 0</td>
+                                    <td>tg, ctg</td>
+                                </tr>
+                                <tr>
+                                    <td>IV</td>
+                                    <td>x &gt; 0, y &lt; 0</td>
+                                    <td>cos</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <p>
+                                Например, <b>cos(180° − α)</b>. Если α острый, то 180° − α лежит во II четверти.
+                                Там абсцисса отрицательна, значит cos отрицателен.
+                            </p>
+                            <div class="eq">cos(180° − α) = −cos α</div>
+                        </div>
+                    </article>
+
+                    <article class="step" data-step="5" data-objects="example angle proj sign">
+                        <div class="stepHeader">
+                            <div class="stepNum">5</div>
+                            <div>
+                                <h3>Пошаговый разбор типового примера</h3>
+                                <div class="muted">Разберём выражение sin(270° − α).</div>
+                            </div>
+                        </div>
+                        <div class="stepBody">
+                            <p><b>Шаг 1.</b> Внутри угла стоит <b>270°</b>, значит название функции <b>меняется</b>.</p>
+                            <p><b>Шаг 2.</b> sin перейдёт в cos.</p>
+                            <p><b>Шаг 3.</b> Проверяем знак по окружности: угол 270° − α расположен в III четверти, там cos отрицателен.</p>
+                            <div class="eq">sin(270° − α) = −cos α</div>
+                            <p><b>Проверка через координаты:</b> точка угла 270° − α имеет ординату, равную −cos α. Значит формула верна.</p>
+                        </div>
+                    </article>
+
+                    <article class="step" data-step="6" data-objects="example sign check">
+                        <div class="stepHeader">
+                            <div class="stepNum">6</div>
+                            <div>
+                                <h3>Финальная проверка ответа</h3>
+                                <div class="muted">После формулы всегда задаём два вопроса.</div>
+                            </div>
+                        </div>
+                        <div class="stepBody">
+                            <ol class="checkList">
+                                <li>Верно ли я понял, сохраняется функция или меняется?</li>
+                                <li>Совпадает ли знак с четвертью, где находится угол?</li>
+                            </ol>
+                            <div class="warning">
+                                <p><b>Очень полезная проверка:</b> возьмите, например, α = 30° и сравните численно обе части.</p>
+                                <div class="eq">sin(270° − 30°) = sin 240° = −√3/2</div>
+                                <div class="eq">−cos 30° = −√3/2</div>
+                                <p>Совпало — значит, правило сработало правильно.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step" data-step="7" data-objects="base angle sign">
+                        <div class="stepHeader">
+                            <div class="stepNum">7</div>
+                            <div>
+                                <h3>Краткий вывод</h3>
+                                <div class="muted">Формулы приведения — это геометрия, записанная символами.</div>
+                            </div>
+                        </div>
+                        <div class="stepBody">
+                            <div class="summaryBox">
+                                <ul>
+                                    <li>90° и 270° → <b>меняем название функции</b>.</li>
+                                    <li>180° и 360° → <b>сохраняем название функции</b>.</li>
+                                    <li>Знак берём по четверти или по знакам координат точки на окружности.</li>
+                                    <li>Надёжнее всего мыслить через координатную окружность, а не через механическое заучивание.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="card section">
+                <h2>Сводная таблица основных формул</h2>
+                <table class="truthTable">
+                    <thead>
+                    <tr>
+                        <th>Формула</th>
+                        <th>Результат</th>
+                        <th>Почему так</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>sin(90° − α)</td><td>cos α</td><td>90° меняет sin ↔ cos, знак положительный</td></tr>
+                    <tr><td>cos(90° − α)</td><td>sin α</td><td>90° меняет cos ↔ sin, знак положительный</td></tr>
+                    <tr><td>sin(90° + α)</td><td>cos α</td><td>во II четверти sin положителен</td></tr>
+                    <tr><td>cos(90° + α)</td><td>−sin α</td><td>во II четверти cos отрицателен</td></tr>
+                    <tr><td>sin(180° − α)</td><td>sin α</td><td>180° сохраняет sin, во II четверти sin положителен</td></tr>
+                    <tr><td>cos(180° − α)</td><td>−cos α</td><td>180° сохраняет cos, во II четверти cos отрицателен</td></tr>
+                    <tr><td>sin(180° + α)</td><td>−sin α</td><td>III четверть, sin отрицателен</td></tr>
+                    <tr><td>cos(180° + α)</td><td>−cos α</td><td>III четверть, cos отрицателен</td></tr>
+                    <tr><td>sin(270° − α)</td><td>−cos α</td><td>270° меняет функцию, знак по III четверти</td></tr>
+                    <tr><td>cos(270° − α)</td><td>−sin α</td><td>270° меняет функцию, знак отрицательный</td></tr>
+                    <tr><td>sin(360° − α)</td><td>−sin α</td><td>IV четверть, sin отрицателен</td></tr>
+                    <tr><td>cos(360° − α)</td><td>cos α</td><td>IV четверть, cos положителен</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="card section" id="mistakes">
+                <h2>Типичные ошибки</h2>
+                <div class="danger">
+                    <ol class="mistakesList">
+                        <li><b>Путают знак и смену функции.</b> Например, думают, что в cos(180° − α) меняется и функция, и знак. На самом деле меняется только знак.</li>
+                        <li><b>Ставят знак по α, а не по всему углу.</b> Нужно смотреть, где находится угол 180° − α, а не где находится α.</li>
+                        <li><b>Забывают, что 90° и 270° меняют название функции.</b> Именно потому что оси как бы меняются ролями.</li>
+                        <li><b>Механически учат таблицу без проверки на окружности.</b> Тогда при малейшем нестандартном виде угла появляются ошибки.</li>
+                        <li><b>Путают tg и ctg.</b> Для них правило такое же: при 90° и 270° они меняются местами.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="card section" id="quiz">
+                <h2>Мини-квиз</h2>
+                <div class="quizQ" data-correct="1">
+                    <div><b>1.</b> Чему равно cos(90° + α)?</div>
+                    <div class="quizOptions">
+                        <button data-choice="0">sin α</button>
+                        <button data-choice="1">−sin α</button>
+                        <button data-choice="2">cos α</button>
+                    </div>
+                    <div class="qaFeedback"></div>
+                </div>
+                <div class="quizQ" data-correct="2" style="margin-top:12px">
+                    <div><b>2.</b> Чему равно sin(180° − α)?</div>
+                    <div class="quizOptions">
+                        <button data-choice="0">−sin α</button>
+                        <button data-choice="1">cos α</button>
+                        <button data-choice="2">sin α</button>
+                    </div>
+                    <div class="qaFeedback"></div>
+                </div>
+                <div class="quizQ" data-correct="0" style="margin-top:12px">
+                    <div><b>3.</b> Чему равно sin(270° − α)?</div>
+                    <div class="quizOptions">
+                        <button data-choice="0">−cos α</button>
+                        <button data-choice="1">cos α</button>
+                        <button data-choice="2">−sin α</button>
+                    </div>
+                    <div class="qaFeedback"></div>
+                </div>
+            </section>
+
+            <section class="card section" id="selfcheck">
+                <h2>Самопроверка</h2>
+                <div class="checkGrid">
+                    <div class="subcard">
+                        <h3>Алгоритм в 4 шага</h3>
+                        <ol class="checkList">
+                            <li>Выдели опорный угол: 90°, 180°, 270° или 360°.</li>
+                            <li>Реши, меняется ли функция.</li>
+                            <li>Определи четверть для всего угла.</li>
+                            <li>Поставь знак и быстро проверь численно на α = 30° или α = 45°.</li>
+                        </ol>
+                    </div>
+                    <div class="subcard">
+                        <h3>Быстрый тест для себя</h3>
+                        <p>Сможете ли Вы без подсказки восстановить:</p>
+                        <ul>
+                            <li>cos(180° + α)</li>
+                            <li>tg(90° − α)</li>
+                            <li>sin(360° − α)</li>
+                        </ul>
+                        <button class="secondary" id="showSelfAnswers">Показать ответы</button>
+                        <div id="selfAnswers" class="muted" style="display:none; margin-top:10px">
+                            cos(180° + α) = −cos α;<br>
+                            tg(90° − α) = ctg α;<br>
+                            sin(360° − α) = −sin α.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card section" id="generator">
+                <h2>Генератор похожих задач</h2>
+                <p class="muted">
+                    Генератор создаёт 3 корректные задачи того же типа. У каждой задачи есть ответ и короткая идея решения.
+                    Можно подставить задачу в ту же визуальную модель справа.
+                </p>
+                <div class="toolbar noPrint">
+                    <button id="gen3">Сгенерировать 3 задачи</button>
+                    <button id="applyFirst" class="secondary">Применить 1-ю задачу к модели</button>
+                    <button id="applySecond" class="secondary">Применить 2-ю задачу</button>
+                    <button id="applyThird" class="secondary">Применить 3-ю задачу</button>
+                </div>
+                <div class="taskList" id="taskList"></div>
+            </section>
+        </main>
+
+        <aside class="rightCol">
+            <div class="stickyWrap">
+                <section class="card viewer">
+                    <div class="viewerTop">
+                        <div>
+                            <div class="formulaFocus" id="focusFormula">sin(270° − α) = −cos α</div>
+                            <div class="formulaHint" id="focusHint">
+                                Сейчас модель показывает, как угол 270° − α связан с углом α на координатной окружности.
+                            </div>
+                        </div>
+                        <div class="pillRow">
+                            <span class="pill">Фокус: геометрическая идея</span>
+                            <span class="pill">Модель: координатная плоскость</span>
+                        </div>
+                    </div>
+
+                    <div class="controls" style="margin-top:12px">
+                        <div class="subcard">
+                            <h3 style="margin-bottom:8px">Управление разбором</h3>
+                            <div class="toolbar">
+                                <button id="prevStep" class="secondary">← Шаг назад</button>
+                                <button id="nextStep">Следующий шаг →</button>
+                                <button id="toggleAll" class="ghost">Открыть всё</button>
+                            </div>
+                            <div class="progressWrap" style="margin-top:10px">
+                                <div class="progress"><div class="progressBar" id="progressBar"></div></div>
+                                <div class="muted small" id="progressLabel">Шаг 1 из 7</div>
+                            </div>
+                        </div>
+
+                        <div class="subcard">
+                            <h3 style="margin-bottom:8px">Параметры модели</h3>
+                            <div class="toolbar">
+                                <div style="min-width:180px; flex:1 1 220px">
+                                    <label for="detailSelect" class="small muted">Уровень объяснения</label><br>
+                                    <select id="detailSelect" style="width:100%; margin-top:6px; background:#0c1430; color:var(--text); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px">
+                                        <option value="short">Кратко</option>
+                                        <option value="standard" selected>Стандартно</option>
+                                        <option value="full">Очень подробно</option>
+                                    </select>
+                                </div>
+                                <div style="min-width:180px; flex:1 1 220px">
+                                    <label for="formulaSelect" class="small muted">Выбери формулу</label><br>
+                                    <select id="formulaSelect" style="width:100%; margin-top:6px; background:#0c1430; color:var(--text); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px"></select>
+                                </div>
+                            </div>
+                            <div style="margin-top:12px">
+                                <label class="small muted" for="alphaRange">Угол α: <span id="alphaValue">30°</span></label>
+                                <input id="alphaRange" type="range" min="5" max="85" step="1" value="30" style="width:100%; margin-top:8px">
+                            </div>
+                            <div style="margin-top:12px">
+                                <label class="small muted" for="zoomRange">Масштаб чертежа: <span id="zoomValue">100%</span></label>
+                                <input id="zoomRange" type="range" min="70" max="180" step="1" value="100" style="width:100%; margin-top:8px">
+                                <div class="toolbar" style="margin-top:8px">
+                                    <button id="zoomOut" class="secondary">−</button>
+                                    <button id="zoomIn" class="secondary">+</button>
+                                    <button id="zoomReset" class="ghost">Сброс масштаба</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="subcard">
+                            <h3 style="margin-bottom:8px">Показывать на схеме</h3>
+                            <div class="radioGroup" id="toggles">
+                                <div class="toggle active" data-toggle="base">угол α</div>
+                                <div class="toggle active" data-toggle="target">целевой угол</div>
+                                <div class="toggle active" data-toggle="proj">проекции</div>
+                                <div class="toggle active" data-toggle="quadrants">четверти</div>
+                                <div class="toggle active" data-toggle="labels">подписи</div>
+                            </div>
+                            <div class="legend">
+                                <div><span class="dot" style="background:var(--accent)"></span>точка угла α</div>
+                                <div><span class="dot" style="background:var(--accent-2)"></span>точка целевого угла</div>
+                                <div><span class="dot" style="background:var(--warn)"></span>проекции и оси</div>
+                                <div><span class="dot" style="background:var(--violet)"></span>дуга поворота</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="canvasWrap" id="circle">
+                        <svg id="circleSvg" viewBox="0 0 760 620" aria-label="Координатная окружность">
+                            <defs>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                                <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 7 3.5, 0 7" fill="#7cc7ff"></polygon>
+                                </marker>
+                            </defs>
+                            <rect x="0" y="0" width="760" height="620" rx="22" fill="transparent"></rect>
+                            <g id="viewport">
+                                <g id="quadLayer"></g>
+                                <g id="gridLayer"></g>
+                                <g id="axisLayer"></g>
+                                <g id="circleLayer"></g>
+                                <g id="angleLayer"></g>
+                                <g id="projLayer"></g>
+                                <g id="pointLayer"></g>
+                                <g id="labelLayer"></g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="readout">
+                        <div class="cell">
+                            <div class="label">Точка угла α</div>
+                            <div class="value" id="baseCoords">(0.866; 0.500)</div>
+                        </div>
+                        <div class="cell">
+                            <div class="label">Точка целевого угла</div>
+                            <div class="value" id="targetCoords">(-0.500; -0.866)</div>
+                        </div>
+                        <div class="cell">
+                            <div class="label">Вывод</div>
+                            <div class="value" id="resultReadout">sin(270° − α) = −cos α</div>
+                        </div>
+                    </div>
+                    <p class="muted small" style="margin-top:10px">
+                        Подсказка: колесо мыши над чертежом меняет масштаб. Клик по шагу слева синхронизирует подсветку справа.
+                    </p>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <div class="footer">
+        Наглядная математика с генерацией · автономный HTML · без внешних зависимостей
+    </div>
+</div>
+
+<script>
+    (() => {
+        // ===== Данные по формулам =====
+        const formulaSets = [
+            {
+                key: 'sin90-a',
+                label: 'sin(90° − α)',
+                base: 90, op: '-', fn: 'sin',
+                targetExpr: 'cos α',
+                targetFnResult: 'cos',
+                text: {
+                    short: '90° меняет sin на cos, знак положительный.',
+                    standard: 'Угол 90° − α лежит в I четверти. При 90° функции sin и cos меняются местами, а знак остаётся положительным.',
+                    full: 'Поворот до 90° и затем возврат на α ставит точку в I четверть. На единичной окружности ордината этой точки равна cos α, поэтому sin(90° − α) = cos α.'
+                }
+            },
+            {
+                key: 'cos90+a',
+                label: 'cos(90° + α)',
+                base: 90, op: '+', fn: 'cos',
+                targetExpr: '−sin α',
+                targetFnResult: '-sin',
+                text: {
+                    short: '90° меняет cos на sin, во II четверти знак минус.',
+                    standard: 'Угол 90° + α лежит во II четверти. При 90° функция меняется, а cos во II четверти отрицателен.',
+                    full: 'Поворот на 90° + α переносит точку во II четверть. Там абсцисса отрицательна. После смены cos ↔ sin получаем cos(90° + α) = −sin α.'
+                }
+            },
+            {
+                key: 'sin180-a',
+                label: 'sin(180° − α)',
+                base: 180, op: '-', fn: 'sin',
+                targetExpr: 'sin α',
+                targetFnResult: 'sin',
+                text: {
+                    short: '180° сохраняет функцию, во II четверти sin положителен.',
+                    standard: 'Угол 180° − α лежит во II четверти. Для 180° функция не меняется, а sin там положителен.',
+                    full: 'Точка угла 180° − α симметрична точке α относительно оси Oy. Ордината сохраняется, поэтому sin(180° − α) = sin α.'
+                }
+            },
+            {
+                key: 'cos180-a',
+                label: 'cos(180° − α)',
+                base: 180, op: '-', fn: 'cos',
+                targetExpr: '−cos α',
+                targetFnResult: '-cos',
+                text: {
+                    short: '180° сохраняет cos, во II четверти знак минус.',
+                    standard: 'Угол 180° − α лежит во II четверти, где cos отрицателен. Поэтому cos(180° − α) = −cos α.',
+                    full: 'При переходе от α к 180° − α точка отражается относительно оси Oy. Абсцисса меняет знак, а значит cos(180° − α) = −cos α.'
+                }
+            },
+            {
+                key: 'sin270-a',
+                label: 'sin(270° − α)',
+                base: 270, op: '-', fn: 'sin',
+                targetExpr: '−cos α',
+                targetFnResult: '-cos',
+                text: {
+                    short: '270° меняет sin на cos, в III четверти знак минус.',
+                    standard: 'Угол 270° − α лежит в III четверти. При 270° функция меняется, а знак берём по четверти: sin отрицателен.',
+                    full: 'Точка угла 270° − α получается из точки α поворотом к отрицательной оси Oy с отклонением в III четверть. Ордината этой точки равна −cos α, поэтому sin(270° − α) = −cos α.'
+                }
+            },
+            {
+                key: 'sin360-a',
+                label: 'sin(360° − α)',
+                base: 360, op: '-', fn: 'sin',
+                targetExpr: '−sin α',
+                targetFnResult: '-sin',
+                text: {
+                    short: '360° сохраняет sin, в IV четверти знак минус.',
+                    standard: 'Угол 360° − α лежит в IV четверти. Название функции сохраняется, но sin там отрицателен.',
+                    full: 'Угол 360° − α соответствует симметрии точки α относительно оси Ox. Ордината меняет знак, поэтому sin(360° − α) = −sin α.'
+                }
+            }
+        ];
+
+        // ===== Состояние =====
+        const state = {
+            alpha: 30,
+            scale: 1,
+            formulaKey: 'sin270-a',
+            detail: 'standard',
+            currentStep: 1,
+            show: { base:true, target:true, proj:true, quadrants:true, labels:true }
+        };
+
+        const el = {
+            formulaSelect: document.getElementById('formulaSelect'),
+            alphaRange: document.getElementById('alphaRange'),
+            alphaValue: document.getElementById('alphaValue'),
+            zoomRange: document.getElementById('zoomRange'),
+            zoomValue: document.getElementById('zoomValue'),
+            focusFormula: document.getElementById('focusFormula'),
+            focusHint: document.getElementById('focusHint'),
+            baseCoords: document.getElementById('baseCoords'),
+            targetCoords: document.getElementById('targetCoords'),
+            resultReadout: document.getElementById('resultReadout'),
+            progressBar: document.getElementById('progressBar'),
+            progressLabel: document.getElementById('progressLabel'),
+            taskList: document.getElementById('taskList'),
+            detailSelect: document.getElementById('detailSelect'),
+            selfAnswers: document.getElementById('selfAnswers'),
+            toggleAll: document.getElementById('toggleAll')
+        };
+
+        // ===== Наполнение списка формул =====
+        formulaSets.forEach(f => {
+            const op = document.createElement('option');
+            op.value = f.key;
+            op.textContent = f.label;
+            if (f.key === state.formulaKey) op.selected = true;
+            el.formulaSelect.appendChild(op);
+        });
+
+        // ===== Утилиты =====
+        const degToRad = deg => deg * Math.PI / 180;
+        const fmt = num => (Math.abs(num) < 1e-10 ? 0 : num).toFixed(3);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+        function getCurrentFormula(){
+            return formulaSets.find(f => f.key === state.formulaKey) || formulaSets[0];
+        }
+
+        function getTargetAngle(){
+            const f = getCurrentFormula();
+            return f.op === '+' ? f.base + state.alpha : f.base - state.alpha;
+        }
+
+        function pointForAngle(deg, radius=1){
+            const r = degToRad(deg);
+            return { x: Math.cos(r)*radius, y: Math.sin(r)*radius };
+        }
+
+        function buildInfoText(){
+            const f = getCurrentFormula();
+            return f.text[state.detail];
+        }
+
+        function updateHeaderText(){
+            const f = getCurrentFormula();
+            el.focusFormula.textContent = `${f.label} = ${f.targetExpr}`;
+            el.focusHint.textContent = buildInfoText();
+            el.resultReadout.textContent = `${f.label} = ${f.targetExpr}`;
+        }
+
+        // ===== SVG слои =====
+        const svg = document.getElementById('circleSvg');
+        const viewport = document.getElementById('viewport');
+        const layers = {
+            quad: document.getElementById('quadLayer'),
+            grid: document.getElementById('gridLayer'),
+            axis: document.getElementById('axisLayer'),
+            circle: document.getElementById('circleLayer'),
+            angle: document.getElementById('angleLayer'),
+            proj: document.getElementById('projLayer'),
+            point: document.getElementById('pointLayer'),
+            label: document.getElementById('labelLayer')
+        };
+
+        const geom = { cx: 380, cy: 310, R: 190 };
+
+        function clearLayer(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+        function make(tag, attrs={}){
+            const n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.entries(attrs).forEach(([k,v]) => n.setAttribute(k, v));
+            return n;
+        }
+
+        function polarToSvg(deg, scale=1){
+            const p = pointForAngle(deg, geom.R * scale);
+            return { x: geom.cx + p.x, y: geom.cy - p.y };
+        }
+
+        function addText(layer, x, y, text, attrs={}){
+            const t = make('text', { x, y, fill:'#dfe8ff', 'font-size':'16', 'font-weight':'600', ...attrs });
+            t.textContent = text;
+            layer.appendChild(t);
+            return t;
+        }
+
+        function drawGrid(){
+            clearLayer(layers.grid);
+            const g = layers.grid;
+            const step = 38;
+            for(let x = geom.cx - geom.R - 3*step; x <= geom.cx + geom.R + 3*step; x += step){
+                g.appendChild(make('line', { x1:x, y1:70, x2:x, y2:550, stroke:'rgba(255,255,255,.05)', 'stroke-width':'1' }));
+            }
+            for(let y = 70; y <= 550; y += step){
+                g.appendChild(make('line', { x1:100, y1:y, x2:660, y2:y, stroke:'rgba(255,255,255,.05)', 'stroke-width':'1' }));
+            }
+        }
+
+        function drawQuadrants(){
+            clearLayer(layers.quad);
+            if(!state.show.quadrants) return;
+            const colors = [
+                'rgba(124,199,255,.06)',
+                'rgba(139,240,200,.05)',
+                'rgba(194,169,255,.05)',
+                'rgba(255,212,121,.05)'
+            ];
+            const defs = [
+                {x:geom.cx, y:geom.cy-geom.R, w:geom.R, h:geom.R, name:'I'},
+                {x:geom.cx-geom.R, y:geom.cy-geom.R, w:geom.R, h:geom.R, name:'II'},
+                {x:geom.cx-geom.R, y:geom.cy, w:geom.R, h:geom.R, name:'III'},
+                {x:geom.cx, y:geom.cy, w:geom.R, h:geom.R, name:'IV'}
+            ];
+            defs.forEach((q,i)=>{
+                layers.quad.appendChild(make('rect', { x:q.x, y:q.y, width:q.w, height:q.h, fill:colors[i] }));
+                addText(layers.quad, q.x + q.w/2 - 8, q.y + q.h/2, q.name, {
+                    fill:'rgba(255,255,255,.23)',
+                    'font-size':'28',
+                    'font-weight':'700'
+                });
+            });
+        }
+
+        function drawAxes(){
+            clearLayer(layers.axis);
+            const a = layers.axis;
+            a.appendChild(make('line', {
+                x1:110, y1:geom.cy, x2:650, y2:geom.cy,
+                stroke:'rgba(255,255,255,.45)', 'stroke-width':'2.2'
+            }));
+            a.appendChild(make('line', {
+                x1:geom.cx, y1:90, x2:geom.cx, y2:530,
+                stroke:'rgba(255,255,255,.45)', 'stroke-width':'2.2'
+            }));
+            a.appendChild(make('line', {
+                x1:643, y1:geom.cy, x2:650, y2:geom.cy, stroke:'rgba(255,255,255,.45)', 'stroke-width':'2.2', 'marker-end':'url(#arrowHead)'
+            }));
+            a.appendChild(make('line', {
+                x1:geom.cx, y1:97, x2:geom.cx, y2:90, stroke:'rgba(255,255,255,.45)', 'stroke-width':'2.2', 'marker-end':'url(#arrowHead)'
+            }));
+            if(state.show.labels){
+                addText(a, 652, geom.cy - 10, 'x', {'font-size':'18'});
+                addText(a, geom.cx + 10, 92, 'y', {'font-size':'18'});
+                addText(a, geom.cx + geom.R + 8, geom.cy + 20, '1', {'font-size':'14', fill:'rgba(255,255,255,.6)'});
+                addText(a, geom.cx + 12, geom.cy - geom.R - 8, '1', {'font-size':'14', fill:'rgba(255,255,255,.6)'});
+            }
+        }
+
+        function drawCircle(){
+            clearLayer(layers.circle);
+            layers.circle.appendChild(make('circle', {
+                cx:geom.cx, cy:geom.cy, r:geom.R, fill:'none',
+                stroke:'rgba(124,199,255,.75)', 'stroke-width':'3'
+            }));
+            layers.circle.appendChild(make('circle', {
+                cx:geom.cx, cy:geom.cy, r:3.8, fill:'#ffffff'
+            }));
+        }
+
+        function svgArcPath(startDeg, endDeg, radius){
+            let s = polarToSvg(startDeg, radius/geom.R);
+            let e = polarToSvg(endDeg, radius/geom.R);
+            let diff = ((endDeg - startDeg) % 360 + 360) % 360;
+            const large = diff > 180 ? 1 : 0;
+            return `M ${s.x} ${s.y} A ${radius} ${radius} 0 ${large} 0 ${e.x} ${e.y}`;
+        }
+
+        function drawAnglesAndPoints(){
+            clearLayer(layers.angle);
+            clearLayer(layers.proj);
+            clearLayer(layers.point);
+            clearLayer(layers.label);
+
+            const alpha = state.alpha;
+            const targetAngle = getTargetAngle();
+            const bp = polarToSvg(alpha, 1);
+            const tp = polarToSvg(targetAngle, 1);
+
+            // Основные лучи
+            if(state.show.base){
+                layers.angle.appendChild(make('line', {
+                    x1:geom.cx, y1:geom.cy, x2:bp.x, y2:bp.y,
+                    stroke:'var(--accent)', 'stroke-width':'4', filter:'url(#glow)', 'data-object':'base'
+                }));
+                layers.angle.appendChild(make('path', {
+                    d: svgArcPath(0, alpha, 52),
+                    stroke:'var(--accent)', 'stroke-width':'4', fill:'none', opacity:'0.95'
+                }));
+            }
+            if(state.show.target){
+                layers.angle.appendChild(make('line', {
+                    x1:geom.cx, y1:geom.cy, x2:tp.x, y2:tp.y,
+                    stroke:'var(--accent-2)', 'stroke-width':'4', filter:'url(#glow)', 'data-object':'target'
+                }));
+                layers.angle.appendChild(make('path', {
+                    d: svgArcPath(0, ((targetAngle % 360)+360)%360, 80),
+                    stroke:'var(--violet)', 'stroke-width':'3.3', fill:'none', opacity:'0.85', 'stroke-dasharray':'10 8'
+                }));
+            }
+
+            // Проекции
+            if(state.show.proj){
+                [[bp,'var(--accent)'], [tp,'var(--accent-2)']].forEach(([p,color])=>{
+                    layers.proj.appendChild(make('line', {
+                        x1:p.x, y1:p.y, x2:p.x, y2:geom.cy,
+                        stroke:'var(--warn)', 'stroke-width':'2.3', 'stroke-dasharray':'7 6'
+                    }));
+                    layers.proj.appendChild(make('line', {
+                        x1:p.x, y1:p.y, x2:geom.cx, y2:p.y,
+                        stroke:'var(--warn)', 'stroke-width':'2.3', 'stroke-dasharray':'7 6'
+                    }));
+                    layers.point.appendChild(make('circle', {
+                        cx:p.x, cy:p.y, r:7, fill:color, stroke:'#fff', 'stroke-width':'1.4'
+                    }));
+                });
+            } else {
+                [[bp,'var(--accent)'], [tp,'var(--accent-2)']].forEach(([p,color])=>{
+                    layers.point.appendChild(make('circle', {
+                        cx:p.x, cy:p.y, r:7, fill:color, stroke:'#fff', 'stroke-width':'1.4'
+                    }));
+                });
+            }
+
+            // Подписи
+            if(state.show.labels){
+                addText(layers.label, bp.x + 10, bp.y - 10, 'A(α)', {'font-size':'15', fill:'var(--accent)'});
+                addText(layers.label, tp.x + 10, tp.y - 10, 'B', {'font-size':'15', fill:'var(--accent-2)'});
+                addText(layers.label, geom.cx + 55, geom.cy - 18, 'α', {'font-size':'18', fill:'var(--accent)'});
+                addText(layers.label, geom.cx + 84, geom.cy - 58, getCurrentFormula().base + '° ' + getCurrentFormula().op + ' α', {
+                    'font-size':'18', fill:'var(--violet)', 'font-weight':'700'
+                });
+                addText(layers.label, bp.x + 10, geom.cy - 10, 'cos α', {'font-size':'14', fill:'var(--warn)'});
+                addText(layers.label, geom.cx + 10, bp.y - 6, 'sin α', {'font-size':'14', fill:'var(--warn)'});
+            }
+
+            // Числовые подписи координат
+            const bNorm = pointForAngle(alpha);
+            const tNorm = pointForAngle(targetAngle);
+            el.baseCoords.textContent = `(${fmt(bNorm.x)}; ${fmt(bNorm.y)})`;
+            el.targetCoords.textContent = `(${fmt(tNorm.x)}; ${fmt(tNorm.y)})`;
+
+            // Подсветка по активному шагу
+            highlightObjectsForStep();
+        }
+
+        function renderSvg(){
+            drawGrid();
+            drawQuadrants();
+            drawAxes();
+            drawCircle();
+            drawAnglesAndPoints();
+            viewport.setAttribute('transform', `translate(${geom.cx} ${geom.cy}) scale(${state.scale}) translate(${-geom.cx} ${-geom.cy})`);
+            el.zoomValue.textContent = `${Math.round(state.scale * 100)}%`;
+            el.zoomRange.value = Math.round(state.scale * 100);
+        }
+
+        // ===== Детализация текста =====
+        const detailPatches = {
+            short: {
+                '1': 'Смотри на угол как на поворот от известной оси.',
+                '2': 'На окружности координаты точки: (cos α, sin α).',
+                '3': '90° и 270° меняют функцию, 180° и 360° сохраняют.',
+                '4': 'Знак определяется по четверти.',
+                '5': 'sin(270° − α) = −cos α.',
+                '6': 'Проверь смену функции и знак.',
+                '7': 'Главное — мыслить через окружность.'
+            },
+            standard: {
+                '1': 'Например, 90° + α означает поворот от оси Oy ещё на α. Нужно понять, где окажется точка и какие координаты поменяются местами.',
+                '2': 'Точка угла α имеет координаты (cos α, sin α). Отсюда и выводятся формулы приведения.',
+                '3': 'Углы с 90° и 270° меняют функцию на соседнюю, а с 180° и 360° сохраняют её.',
+                '4': 'Знак удобно брать по четверти: во II положителен sin, в IV — cos, в III — tg и ctg.',
+                '5': 'Угол 270° − α лежит в III четверти, поэтому sin отрицателен, а название функции меняется на cos.',
+                '6': 'Финальная проверка: верно ли выбрана функция и совпадает ли знак с четвертью.',
+                '7': 'Формулы приведения — это геометрия координатной окружности.'
+            },
+            full: {
+                '1': 'Каждый угол вида 90° ± α, 180° ± α, 270° ± α, 360° ± α нужно читать как комбинацию известного поворота и малого отклонения α. Это позволяет не заучивать формулу вслепую, а видеть путь точки на окружности.',
+                '2': 'На единичной окружности любой угол α задаёт точку A(cos α, sin α). Формулы приведения фактически описывают, как изменяются координаты этой точки после симметрии или поворота на 90°, 180°, 270° или 360°.',
+                '3': 'Если опорный угол 90° или 270°, оси меняются ролями: то, что было абсциссой, становится ординатой, и наоборот. Поэтому sin ↔ cos, tg ↔ ctg. Если опорный угол 180° или 360°, роли осей не меняются, значит название функции сохраняется.',
+                '4': 'После того как определена функция, остаётся установить знак. Это делается по четверти итогового угла. На языке координат это означает: смотрим, положительны или отрицательны x и y у соответствующей точки.',
+                '5': 'Для sin(270° − α): опорный угол 270°, значит sin переходит в cos. Угол 270° − α расположен в III четверти, поэтому ордината отрицательна. Значит окончательно получаем −cos α.',
+                '6': 'Проверка обязательна: можно взять конкретный острый α, например 30° или 45°, вычислить обе части и убедиться, что они совпадают. Это особенно полезно, когда есть риск ошибиться со знаком.',
+                '7': 'Если строить рассуждение через окружность, формулы приведения перестают быть набором правил и превращаются в понятную систему.'
+            }
+        };
+
+        function applyDetailText(){
+            document.querySelectorAll('.step').forEach(step => {
+                const n = step.dataset.step;
+                const body = step.querySelector('.stepBody');
+                if(!body) return;
+                let firstP = body.querySelector('p');
+                if(firstP) firstP.innerHTML = detailPatches[state.detail][n];
+            });
+            updateHeaderText();
+        }
+
+        // ===== Шаги =====
+        const steps = Array.from(document.querySelectorAll('.step'));
+        steps.forEach((step, idx) => {
+            if(idx > 0) step.classList.add('collapsed');
+            step.addEventListener('click', e => {
+                if(e.target.tagName.toLowerCase() === 'button') return;
+                const n = Number(step.dataset.step);
+                state.currentStep = n;
+                syncSteps();
+                step.scrollIntoView({behavior:'smooth', block:'nearest'});
+            });
+        });
+
+        function syncSteps(){
+            steps.forEach(step => {
+                const n = Number(step.dataset.step);
+                step.classList.toggle('active', n === state.currentStep);
+                step.classList.toggle('collapsed', n > state.currentStep);
+            });
+            el.progressBar.style.width = `${(state.currentStep / steps.length) * 100}%`;
+            el.progressLabel.textContent = `Шаг ${state.currentStep} из ${steps.length}`;
+            highlightObjectsForStep();
+        }
+
+        function highlightObjectsForStep(){
+            const step = steps.find(s => Number(s.dataset.step) === state.currentStep);
+            const objects = (step?.dataset.objects || '').split(/\s+/);
+            const tint = {
+                base:['var(--accent)', '#0b1020'],
+                target:['var(--accent-2)', '#0b1020'],
+                proj:['var(--warn)', '#111'],
+                sign:['var(--violet)', '#111'],
+                angle:['var(--violet)', '#111'],
+                axes:['rgba(255,255,255,.85)', '#111'],
+                quadrants:['rgba(255,255,255,.2)', '#111']
+            };
+            // Здесь просто усиливаем непрозрачность нужных слоёв.
+            layers.angle.style.opacity = objects.includes('angle') || objects.includes('base') || objects.includes('target') ? 1 : 0.85;
+            layers.proj.style.opacity = objects.includes('proj') ? 1 : 0.75;
+            layers.quad.style.opacity = objects.includes('quadrants') || objects.includes('sign') ? 1 : 0.75;
+            layers.axis.style.opacity = objects.includes('axes') ? 1 : 0.9;
+        }
+
+        document.getElementById('nextStep').addEventListener('click', () => {
+            state.currentStep = clamp(state.currentStep + 1, 1, steps.length);
+            syncSteps();
+        });
+        document.getElementById('prevStep').addEventListener('click', () => {
+            state.currentStep = clamp(state.currentStep - 1, 1, steps.length);
+            syncSteps();
+        });
+        el.toggleAll.addEventListener('click', () => {
+            const openAll = steps.some(s => s.classList.contains('collapsed'));
+            steps.forEach((s, idx) => s.classList.toggle('collapsed', !openAll ? idx>0 : false));
+            if(openAll){
+                state.currentStep = steps.length;
+                el.toggleAll.textContent = 'Свернуть к шагу';
+            } else {
+                state.currentStep = 1;
+                el.toggleAll.textContent = 'Открыть всё';
+            }
+            syncSteps();
+        });
+
+        // ===== Переключатели =====
+        document.getElementById('toggles').addEventListener('click', e => {
+            const t = e.target.closest('.toggle');
+            if(!t) return;
+            const key = t.dataset.toggle;
+            state.show[key] = !state.show[key];
+            t.classList.toggle('active', state.show[key]);
+            renderSvg();
+        });
+
+        el.alphaRange.addEventListener('input', () => {
+            state.alpha = Number(el.alphaRange.value);
+            el.alphaValue.textContent = `${state.alpha}°`;
+            renderSvg();
+        });
+
+        el.zoomRange.addEventListener('input', () => {
+            state.scale = Number(el.zoomRange.value) / 100;
+            renderSvg();
+        });
+
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            state.scale = clamp(state.scale + 0.1, 0.7, 1.8);
+            renderSvg();
+        });
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            state.scale = clamp(state.scale - 0.1, 0.7, 1.8);
+            renderSvg();
+        });
+        document.getElementById('zoomReset').addEventListener('click', () => {
+            state.scale = 1;
+            renderSvg();
+        });
+
+        svg.addEventListener('wheel', e => {
+            e.preventDefault();
+            state.scale = clamp(state.scale + (e.deltaY < 0 ? 0.08 : -0.08), 0.7, 1.8);
+            renderSvg();
+        }, {passive:false});
+
+        el.formulaSelect.addEventListener('change', () => {
+            state.formulaKey = el.formulaSelect.value;
+            updateHeaderText();
+            renderSvg();
+        });
+
+        el.detailSelect.addEventListener('change', () => {
+            state.detail = el.detailSelect.value;
+            applyDetailText();
+        });
+
+        document.getElementById('showSelfAnswers').addEventListener('click', () => {
+            el.selfAnswers.style.display = el.selfAnswers.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // ===== Подсветка шагов при наведении =====
+        steps.forEach(step => {
+            step.addEventListener('mouseenter', () => {
+                state.currentStep = Number(step.dataset.step);
+                syncSteps();
+            });
+        });
+
+        document.querySelectorAll('.anchor').forEach(a => {
+            a.addEventListener('click', () => {
+                document.getElementById(a.dataset.target)?.scrollIntoView({behavior:'smooth', block:'center'});
+            });
+        });
+
+        // ===== Мини-квиз =====
+        document.querySelectorAll('.quizQ').forEach(box => {
+            const correct = box.dataset.correct;
+            const feedback = box.querySelector('.qaFeedback');
+            box.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    box.querySelectorAll('button').forEach(b => b.classList.remove('correct','wrong'));
+                    if(btn.dataset.choice === correct){
+                        btn.classList.add('correct');
+                        feedback.textContent = 'Верно. Сначала смотрите, меняется ли функция, потом определяйте знак.';
+                    } else {
+                        btn.classList.add('wrong');
+                        const good = box.querySelector(`button[data-choice="${correct}"]`);
+                        if(good) good.classList.add('correct');
+                        feedback.textContent = 'Есть ошибка. Проверь: меняется ли функция и в какой четверти лежит угол.';
+                    }
+                });
+            });
+        });
+
+        // ===== Генератор заданий =====
+        const genPatterns = [
+            { display:'sin(90° − α)', answer:'cos α', idea:'90° меняет sin на cos, знак положительный.' },
+            { display:'cos(90° + α)', answer:'−sin α', idea:'90° меняет cos на sin, во II четверти знак минус.' },
+            { display:'sin(180° − α)', answer:'sin α', idea:'180° сохраняет функцию, sin во II четверти положителен.' },
+            { display:'cos(180° + α)', answer:'−cos α', idea:'180° сохраняет функцию, в III четверти cos отрицателен.' },
+            { display:'sin(270° − α)', answer:'−cos α', idea:'270° меняет функцию, в III четверти знак отрицательный.' },
+            { display:'cos(360° − α)', answer:'cos α', idea:'360° сохраняет функцию, в IV четверти cos положителен.' },
+            { display:'tg(90° − α)', answer:'ctg α', idea:'90° меняет tg на ctg; знак положительный в I четверти.' },
+            { display:'ctg(180° + α)', answer:'ctg α', idea:'180° сохраняет ctg; в III четверти ctg положителен.' }
+        ];
+
+        function shuffle(arr){
+            const a = arr.slice();
+            for(let i=a.length-1;i>0;i--){
+                const j = Math.floor(Math.random()*(i+1));
+                [a[i],a[j]]=[a[j],a[i]];
+            }
+            return a;
+        }
+
+        function generateTasks(){
+            const picks = shuffle(genPatterns).slice(0,3);
+            el.taskList.innerHTML = '';
+            picks.forEach((t, idx) => {
+                const div = document.createElement('div');
+                div.className = 'task';
+                div.innerHTML = `
+        <div><b>Задача ${idx+1}.</b> Упростить: <span class="formula" style="display:inline; font-size:20px">${t.display}</span></div>
+        <div class="ans">Ответ: ${t.answer}</div>
+        <div class="idea">Идея: ${t.idea}</div>
+      `;
+                el.taskList.appendChild(div);
+            });
+            currentTasks = picks;
+        }
+        let currentTasks = [];
+        generateTasks();
+
+        document.getElementById('gen3').addEventListener('click', generateTasks);
+
+        function applyTask(index){
+            const t = currentTasks[index];
+            if(!t) return;
+            const match = formulaSets.find(f => f.label === t.display);
+            if(match){
+                state.formulaKey = match.key;
+                el.formulaSelect.value = match.key;
+                updateHeaderText();
+                renderSvg();
+                document.getElementById('circle').scrollIntoView({behavior:'smooth', block:'center'});
+            } else {
+                el.focusFormula.textContent = `${t.display} = ${t.answer}`;
+                el.focusHint.textContent = t.idea;
+            }
+        }
+        document.getElementById('applyFirst').addEventListener('click', () => applyTask(0));
+        document.getElementById('applySecond').addEventListener('click', () => applyTask(1));
+        document.getElementById('applyThird').addEventListener('click', () => applyTask(2));
+
+        // ===== Начальная инициализация =====
+        updateHeaderText();
+        applyDetailText();
+        renderSvg();
+        syncSteps();
+
+    })();
+</script>
+</body>
+</html>

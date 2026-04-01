@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планиметрия: Методы и Приёмы | Лёвин Артём Александрович</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --accent: #008080;
+            --accent-light: #00a8a8;
+            --accent-dark: #004d4d;
+            --text-primary: #e8e8e8;
+            --text-secondary: #b0b0b0;
+            --text-muted: #7a7a7a;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --border-color: #2a2a4a;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        header h1 {
+            color: var(--accent-light);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        header .author {
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .main-content {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .section-title {
+            color: var(--accent-light);
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-dark);
+        }
+
+        .step-block {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .step-block:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 128, 128, 0.2);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--accent-light);
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .highlight {
+            background: rgba(0, 128, 128, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--accent-light);
+        }
+
+        .canvas-container {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #geometryCanvas {
+            width: 100%;
+            height: 350px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            cursor: grab;
+        }
+
+        #geometryCanvas:active {
+            cursor: grabbing;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-dark);
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            background: var(--bg-tertiary);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .zoom-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 15px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .legend {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .mistake-block {
+            background: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .mistake-title {
+            color: var(--danger);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .quiz-block {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .quiz-question {
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quiz-option {
+            padding: 10px 15px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+        }
+
+        .quiz-option.correct {
+            background: rgba(40, 167, 69, 0.2);
+            border-color: var(--success);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: var(--danger);
+        }
+
+        .generated-task {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--accent-dark);
+        }
+
+        .task-number {
+            color: var(--accent-light);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .answer-reveal {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            display: none;
+        }
+
+        .answer-reveal.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-level {
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+        }
+
+        .detail-content {
+            transition: all 0.3s ease;
+            max-height: 2000px;
+            overflow: hidden;
+        }
+
+        .detail-content.collapsed {
+            max-height: 100px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-primary);
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .check-mark {
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .warning-mark {
+            color: var(--warning);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        @media print {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: static;
+                margin-top: 30px;
+            }
+            .btn, .controls, .zoom-controls {
+                display: none;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+            .step-block, .main-content, .sidebar {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: static;
+                margin-top: 30px;
+            }
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        .interactive-hint {
+            background: rgba(0, 128, 128, 0.15);
+            border: 1px dashed var(--accent);
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interactive-hint:hover {
+            background: rgba(0, 128, 128, 0.25);
+        }
+
+        .hidden-content {
+            display: none;
+        }
+
+        .hidden-content.revealed {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .math-symbol {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
+
+        .angle-symbol {
+            font-family: 'Times New Roman', serif;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>📐 Планиметрия: Методы и Приёмы</h1>
+        <p class="subtitle">Интерактивное пособие для подготовки к ЕГЭ и олимпиадам</p>
+        <p class="author">Автор: Лёвин Артём Александрович</p>
+    </header>
+
+    <main class="main-content">
+        <h2 class="section-title">🎯 Идея Решения</h2>
+        <div class="step-block">
+            <p><span class="step-number">1</span>Определяем, в какую фигуру входит искомая величина (угол, отрезок, площадь)</p>
+            <p><span class="step-number">2</span>Записываем все известные свойства фигуры (сумма углов, равенство сторон, параллельность)</p>
+            <p><span class="step-number">3</span>Ищем прямоугольные треугольники для применения тригонометрии</p>
+            <p><span class="step-number">4</span>Используем ключевые свойства: биссектриса, средняя линия, вписанные углы</p>
+            <p><span class="step-number">5</span>Проверяем ответ подстановкой в исходные условия</p>
+        </div>
+
+        <h2 class="section-title">📝 Подробное Решение</h2>
+
+        <div class="detail-level">
+            <div class="toggle-group">
+                <div class="toggle-btn active" data-level="brief">Кратко</div>
+                <div class="toggle-btn" data-level="standard">Стандартно</div>
+                <div class="toggle-btn" data-level="detailed">Подробно</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="step-block" data-step="1">
+            <p class="step-title"><span class="step-number">1</span>Что Дано</p>
+            <div class="detail-content" id="step1-content">
+                <p>Рассмотрим классическую задачу на равнобедренный треугольник с биссектрисой:</p>
+                <div class="formula">
+                    ΔABC: AB = BC (равнобедренный)<br>
+                    ∠ABC = 76°<br>
+                    AF — биссектриса ∠BAC<br>
+                    Найти: ∠AFC = ?
+                </div>
+                <div class="interactive-hint" onclick="toggleHint('hint1')">
+                    💡 Нажмите, чтобы увидеть ключевые свойства равнобедренного треугольника
+                    <div class="hidden-content" id="hint1">
+                        <p>✓ Углы при основании равны: ∠BAC = ∠BCA</p>
+                        <p>✓ Сумма углов треугольника: ∠A + ∠B + ∠C = 180°</p>
+                        <p>✓ Биссектриса делит угол пополам</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-block" data-step="2">
+            <p class="step-title"><span class="step-number">2</span>Анализ Условий</p>
+            <div class="detail-content" id="step2-content">
+                <p>Из условия AB = BC следует:</p>
+                <div class="formula">
+                    ∠BAC = ∠BCA = (180° - 76°) / 2 = 52°
+                </div>
+                <p>Так как AF — биссектриса:</p>
+                <div class="formula">
+                    ∠BAF = ∠FAC = 52° / 2 = 26°
+                </div>
+                <div class="interactive-hint" onclick="toggleHighlight('triangle-angles')">
+                    🔍 Подсветить углы на чертеже
+                </div>
+            </div>
+        </div>
+
+        <div class="step-block" data-step="3">
+            <p class="step-title"><span class="step-number">3</span>Ключевая Идея</p>
+            <div class="detail-content" id="step3-content">
+                <p>Рассматриваем треугольник <span class="highlight">ΔAFC</span>, в который входит искомый угол:</p>
+                <div class="formula">
+                    ∠AFC + ∠FAC + ∠FCA = 180°
+                </div>
+                <p>Откуда:</p>
+                <div class="formula">
+                    ∠AFC = 180° - ∠FAC - ∠FCA
+                </div>
+                <div class="interactive-hint" onclick="toggleHighlight('triangle-afc')">
+                    🎯 Выделить треугольник AFC на чертеже
+                </div>
+            </div>
+        </div>
+
+        <div class="step-block" data-step="4">
+            <p class="step-title"><span class="step-number">4</span>Вычисления</p>
+            <div class="detail-content" id="step4-content">
+                <p>Подставляем известные значения:</p>
+                <div class="formula">
+                    ∠FAC = 26° (половина ∠BAC)<br>
+                    ∠FCA = 52° (равен ∠BCA)<br>
+                    ∠AFC = 180° - 26° - 52° = <span class="highlight">102°</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-block" data-step="5">
+            <p class="step-title"><span class="step-number">5</span>Проверка Ответа</p>
+            <div class="detail-content" id="step5-content">
+                <p><span class="check-mark">✓</span> Сумма углов ΔAFC: 102° + 26° + 52° = 180°</p>
+                <p><span class="check-mark">✓</span> Угол тупой, что соответствует чертежу</p>
+                <p><span class="check-mark">✓</span> Все условия задачи выполнены</p>
+                <div class="formula">
+                    <strong>Ответ: 102°</strong>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">⚠️ Типичные Ошибки</h2>
+        <div class="mistake-block">
+            <p class="mistake-title"><span class="warning-mark">!</span> Ошибка 1: Неправильное применение свойства биссектрисы</p>
+            <p>Некоторые забывают, что биссектриса делит угол <strong>пополам</strong>, и используют полное значение угла.</p>
+        </div>
+        <div class="mistake-block">
+            <p class="mistake-title"><span class="warning-mark">!</span> Ошибка 2: Путаница с углами при основании</p>
+            <p>В равнобедренном треугольнике равны углы при <strong>основании</strong>, а не при вершине.</p>
+        </div>
+        <div class="mistake-block">
+            <p class="mistake-title"><span class="warning-mark">!</span> Ошибка 3: Арифметические ошибки</p>
+            <p>При вычислении (180 - 76) / 2 часто ошибаются. Проверьте: 104 / 2 = 52°</p>
+        </div>
+
+        <h2 class="section-title">📚 Мини-Квиз</h2>
+        <div class="quiz-block">
+            <div class="quiz-question">
+                <p><strong>Вопрос 1:</strong> В равнобедренном треугольнике угол при вершине равен 40°. Чему равен угол при основании?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">40°</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true)">70°</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">80°</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">140°</div>
+                </div>
+            </div>
+            <div class="quiz-question">
+                <p><strong>Вопрос 2:</strong> Биссектриса угла параллелограмма отсекает:</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">Прямоугольный треугольник</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true)">Равнобедренный треугольник</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">Равносторонний треугольник</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">Произвольный треугольник</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">🔄 Генератор Задач</h2>
+        <div class="generated-task" id="generatedTask">
+            <p class="task-number">Задача #1</p>
+            <p id="taskText">В равнобедренном треугольнике ABC (AB = BC) угол при вершине B равен 76°. Биссектриса AF угла BAC пересекает сторону BC. Найдите угол AFC.</p>
+            <div class="controls" style="margin-top: 15px;">
+                <button class="btn" onclick="generateTask()">🎲 Новая задача</button>
+                <button class="btn btn-secondary" onclick="toggleAnswer()">👁️ Показать ответ</button>
+            </div>
+            <div class="answer-reveal" id="answerReveal">
+                <p><strong>Ответ:</strong> <span id="taskAnswer">102°</span></p>
+                <p><strong>Идея:</strong> Найдите углы при основании, разделите пополам для биссектрисы, используйте сумму углов треугольника AFC.</p>
+            </div>
+        </div>
+    </main>
+
+    <aside class="sidebar">
+        <h3 style="color: var(--accent-light); margin-bottom: 15px;">📐 Интерактивный Чертёж</h3>
+
+        <div class="canvas-container">
+            <canvas id="geometryCanvas"></canvas>
+        </div>
+
+        <div class="zoom-controls">
+            <button class="btn btn-secondary" onclick="zoomOut()" style="min-width: 40px; flex: 0;">−</button>
+            <input type="range" class="zoom-slider" id="zoomSlider" min="50" max="200" value="100" oninput="updateZoom()">
+            <button class="btn btn-secondary" onclick="zoomIn()" style="min-width: 40px; flex: 0;">+</button>
+            <button class="btn btn-secondary" onclick="resetZoom()" style="min-width: 60px; flex: 0;">Сброс</button>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="toggleLabels()">🏷️ Подписи</button>
+            <button class="btn btn-secondary" onclick="toggleAngles">📐 Углы</button>
+            <button class="btn btn-secondary" onclick="toggleBisector()">✂️ Биссектриса</button>
+        </div>
+
+        <div class="legend">
+            <p style="color: var(--accent-light); font-weight: 600; margin-bottom: 10px;">Легенда:</p>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #00a8a8;"></div>
+                <span>Стороны треугольника</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffc107;"></div>
+                <span>Биссектриса</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #dc3545;"></div>
+                <span>Искомый угол</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #28a745;"></div>
+                <span>Равные углы</span>
+            </div>
+        </div>
+
+        <div class="detail-level" style="margin-top: 20px;">
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                <strong>💡 Совет:</strong> Наведите на элементы чертежа, чтобы увидеть соответствующие шаги решения. Используйте зум для детального рассмотрения.
+            </p>
+        </div>
+
+        <div class="controls" style="margin-top: 20px;">
+            <button class="btn" onclick="rotateFigure()">🔄 Поворот</button>
+            <button class="btn btn-secondary" onclick="resetFigure()">↺ Сброс</button>
+        </div>
+    </aside>
+</div>
+
+<script>
+    // Canvas и визуализация
+    const canvas = document.getElementById('geometryCanvas');
+    const ctx = canvas.getContext('2d');
+    let zoom = 1;
+    let rotation = 0;
+    let showLabels = true;
+    let showAngles = true;
+    let showBisector = true;
+
+    // Параметры треугольника
+    const triangle = {
+        A: { x: 100, y: 300 },
+        B: { x: 200, y: 50 },
+        C: { x: 300, y: 300 },
+        F: { x: 230, y: 300 } // Точка пересечения биссектрисы
+    };
+
+    // Углы
+    const angles = {
+        ABC: 76,
+        BAC: 52,
+        BCA: 52,
+        FAC: 26,
+        AFC: 102
+    };
+
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth - 30;
+        canvas.height = 350;
+        draw();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(zoom, zoom);
+        ctx.rotate(rotation * Math.PI / 180);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+        // Рисуем треугольник
+        ctx.beginPath();
+        ctx.moveTo(triangle.A.x, triangle.A.y);
+        ctx.lineTo(triangle.B.x, triangle.B.y);
+        ctx.lineTo(triangle.C.x, triangle.C.y);
+        ctx.closePath();
+        ctx.strokeStyle = '#00a8a8';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Рисуем биссектрису
+        if (showBisector) {
+            ctx.beginPath();
+            ctx.moveTo(triangle.A.x, triangle.A.y);
+            ctx.lineTo(triangle.F.x, triangle.F.y);
+            ctx.strokeStyle = '#ffc107';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Рисуем точки
+        Object.values(triangle).forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#008080';
+            ctx.fill();
+        });
+
+        // Подписи
+        if (showLabels) {
+            ctx.fillStyle = '#e8e8e8';
+            ctx.font = '16px Segoe UI';
+            ctx.fillText('A', triangle.A.x - 20, triangle.A.y + 20);
+            ctx.fillText('B', triangle.B.x, triangle.B.y - 10);
+            ctx.fillText('C', triangle.C.x + 10, triangle.C.y + 20);
+            ctx.fillText('F', triangle.F.x, triangle.F.y + 20);
+        }
+
+        // Углы
+        if (showAngles) {
+            drawAngle(triangle.B, triangle.A, triangle.C, angles.ABC, '76°');
+            drawAngle(triangle.A, triangle.B, triangle.C, angles.BAC, '52°');
+            drawAngle(triangle.C, triangle.A, triangle.B, angles.BCA, '52°');
+            if (showBisector) {
+                drawAngle(triangle.A, triangle.F, triangle.C, angles.FAC, '26°', '#ffc107');
+                drawAngle(triangle.F, triangle.A, triangle.C, angles.AFC, '102°', '#dc3545');
+            }
+        }
+
+        ctx.restore();
+    }
+
+    function drawAngle(vertex, point1, point2, angle, label, color = '#28a745') {
+        const radius = 30;
+        const startAngle = Math.atan2(point1.y - vertex.y, point1.x - vertex.x);
+        const endAngle = Math.atan2(point2.y - vertex.y, point2.x - vertex.x);
+
+        ctx.beginPath();
+        ctx.arc(vertex.x, vertex.y, radius, startAngle, endAngle);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        ctx.font = '12px Segoe UI';
+        ctx.fillText(label, vertex.x + 40, vertex.y);
+    }
+
+    // Управление зумом
+    function zoomIn() {
+        zoom = Math.min(zoom * 1.2, 2);
+        updateZoomSlider();
+        draw();
+    }
+
+    function zoomOut() {
+        zoom = Math.max(zoom / 1.2, 0.5);
+        updateZoomSlider();
+        draw();
+    }
+
+    function resetZoom() {
+        zoom = 1;
+        updateZoomSlider();
+        draw();
+    }
+
+    function updateZoom() {
+        zoom = document.getElementById('zoomSlider').value / 100;
+        draw();
+    }
+
+    function updateZoomSlider() {
+        document.getElementById('zoomSlider').value = zoom * 100;
+    }
+
+    // Переключатели
+    function toggleLabels() {
+        showLabels = !showLabels;
+        draw();
+    }
+
+    function toggleAngles() {
+        showAngles = !showAngles;
+        draw();
+    }
+
+    function toggleBisector() {
+        showBisector = !showBisector;
+        draw();
+    }
+
+    function rotateFigure() {
+        rotation = (rotation + 45) % 360;
+        draw();
+    }
+
+    function resetFigure() {
+        rotation = 0;
+        zoom = 1;
+        updateZoomSlider();
+        draw();
+    }
+
+    // Интерактивные подсказки
+    function toggleHint(hintId) {
+        const hint = document.getElementById(hintId);
+        hint.classList.toggle('revealed');
+    }
+
+    function toggleHighlight(elementId) {
+        // Подсветка элементов на чертеже
+        draw();
+        // Дополнительная визуализация может быть добавлена
+    }
+
+    // Детализация
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const level = this.dataset.level;
+            document.querySelectorAll('.detail-content').forEach(content => {
+                if (level === 'brief') {
+                    content.classList.add('collapsed');
+                } else {
+                    content.classList.remove('collapsed');
+                }
+            });
+        });
+    });
+
+    // Прогресс
+    function updateProgress() {
+        const visibleSteps = document.querySelectorAll('.step-block[style*="display: block"], .step-block:not([style*="display"])');
+        const totalSteps = document.querySelectorAll('.step-block').length;
+        const progress = (visibleSteps.length / totalSteps) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    // Квиз
+    function checkAnswer(element, isCorrect) {
+        const parent = element.parentElement;
+        parent.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.classList.remove('correct', 'incorrect');
+        });
+
+        if (isCorrect) {
+            element.classList.add('correct');
+        } else {
+            element.classList.add('incorrect');
+        }
+    }
+
+    // Генератор задач
+    function generateTask() {
+        const vertexAngles = [40, 50, 60, 70, 80, 100, 120];
+        const vertexAngle = vertexAngles[Math.floor(Math.random() * vertexAngles.length)];
+        const baseAngle = (180 - vertexAngle) / 2;
+        const bisectorAngle = baseAngle / 2;
+        const answer = 180 - bisectorAngle - baseAngle;
+
+        document.getElementById('taskText').textContent =
+        `В равнобедренном треугольнике ABC (AB = BC) угол при вершине B равен ${vertexAngle}°. Биссектриса AF угла BAC пересекает сторону BC. Найдите угол AFC.`;
+
+        document.getElementById('taskAnswer').textContent = answer + '°';
+        document.getElementById('answerReveal').classList.remove('show');
+
+        // Обновляем углы на чертеже
+        angles.ABC = vertexAngle;
+        angles.BAC = baseAngle;
+        angles.BCA = baseAngle;
+        angles.FAC = bisectorAngle;
+        angles.AFC = answer;
+        draw();
+    }
+
+    function toggleAnswer() {
+        document.getElementById('answerReveal').classList.toggle('show');
+    }
+
+    // Инициализация
+    window.addEventListener('load', () => {
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        updateProgress();
+    });
+
+    // Масштабирование колесом мыши
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+            zoomIn();
+        } else {
+            zoomOut();
+        }
+    });
+</script>
+</body>
+</html>

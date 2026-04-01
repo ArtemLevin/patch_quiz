@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>9F53F5 — параметр: ровно один корень</title>
+    <style>
+        :root{
+            --bg:#0b1020; --panel:#121933; --panel2:#0f1530; --text:#edf2ff; --muted:#a7b0d6;
+            --line:#2b376d; --accent:#7cc7ff; --accent2:#8bffcf; --warn:#ffd166; --danger:#ff7b7b;
+            --good:#72f1b8; --shadow:0 12px 30px rgba(0,0,0,.35); --radius:20px;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:radial-gradient(circle at top, #111936 0%, #0b1020 55%, #080c18 100%);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5}
+        body{min-height:100vh}
+        .page{max-width:1500px;margin:0 auto;padding:24px 18px 64px}
+        .hero{background:linear-gradient(135deg,rgba(124,199,255,.12),rgba(139,255,207,.08));border:1px solid rgba(124,199,255,.18);border-radius:28px;padding:22px 24px;box-shadow:var(--shadow);margin-bottom:20px}
+        .hero h1{margin:0 0 8px;font-size:clamp(26px,3.4vw,42px);line-height:1.1}
+        .sub{color:var(--muted);font-size:15px}
+        .grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:22px;align-items:start}
+        .left{min-width:0}
+        .sticky{position:sticky;top:14px;display:flex;flex-direction:column;gap:16px}
+        .card{background:linear-gradient(180deg,rgba(18,25,51,.92),rgba(13,19,39,.96));border:1px solid rgba(167,176,214,.14);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+        h2,h3{margin:0 0 10px}
+        h2{font-size:24px}
+        h3{font-size:19px}
+        .equation{font-size:clamp(20px,2.4vw,30px);padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);overflow:auto}
+        .math{font-family:"Cambria Math", "DejaVu Serif", Georgia, serif}
+        .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+        .badge{padding:7px 10px;border-radius:999px;background:rgba(124,199,255,.12);border:1px solid rgba(124,199,255,.18);color:#d9f2ff;font-size:13px}
+        .idea-list,.mistakes,.check-list,.quiz-list,.legend{margin:0;padding-left:20px}
+        .stage{margin-bottom:16px;border-left:4px solid rgba(124,199,255,.45);padding:14px 14px 14px 16px;background:rgba(255,255,255,.025);border-radius:14px;transition:.22s ease}
+        .stage.active{background:rgba(124,199,255,.09);border-left-color:var(--accent);transform:translateX(2px)}
+        .stage .tag{display:inline-block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+        .muted{color:var(--muted)}
+        .focus-link{cursor:pointer;text-decoration:underline dotted rgba(124,199,255,.65);text-underline-offset:3px}
+        .controls{display:grid;gap:12px}
+        .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+        button,.select,select,input[type="range"]{accent-color:var(--accent)}
+        button{background:linear-gradient(180deg,#1a2550,#111939);color:var(--text);border:1px solid rgba(124,199,255,.18);border-radius:12px;padding:10px 12px;font-weight:600;cursor:pointer;transition:.18s ease;box-shadow:none}
+        button:hover{transform:translateY(-1px);border-color:rgba(124,199,255,.38)}
+        button.ghost{background:rgba(255,255,255,.03)}
+        .pill-toggle{display:flex;flex-wrap:wrap;gap:8px}
+        .pill-toggle button.active{outline:2px solid rgba(124,199,255,.55);background:linear-gradient(180deg,#1c2c62,#152149)}
+        .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+        .stat{padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+        .stat .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+        .stat .value{font-size:22px;font-weight:800;margin-top:5px}
+        .good{color:var(--good)} .warn{color:var(--warn)} .danger{color:var(--danger)}
+        .viz-wrap{background:linear-gradient(180deg,rgba(6,10,23,.92),rgba(12,16,34,.98));border-radius:18px;padding:10px;border:1px solid rgba(255,255,255,.08)}
+        .zoom-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+        .zoom-value{min-width:64px;color:var(--muted);font-size:14px}
+        svg{width:100%;height:auto;display:block;border-radius:14px;background:linear-gradient(180deg,rgba(12,18,38,.9),rgba(8,12,25,.95))}
+        .legend{font-size:14px}
+        .legend li{margin:4px 0}
+        .inline-code{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:8px}
+        .step-hide .stage[data-step="2"], .step-hide .stage[data-step="3"], .step-hide .stage[data-step="4"], .step-hide .stage[data-step="5"], .step-hide .stage[data-step="6"], .step-hide .stage[data-step="7"]{display:none}
+        .step-2 .stage[data-step="3"], .step-2 .stage[data-step="4"], .step-2 .stage[data-step="5"], .step-2 .stage[data-step="6"], .step-2 .stage[data-step="7"]{display:none}
+        .step-3 .stage[data-step="4"], .step-3 .stage[data-step="5"], .step-3 .stage[data-step="6"], .step-3 .stage[data-step="7"]{display:none}
+        .step-4 .stage[data-step="5"], .step-4 .stage[data-step="6"], .step-4 .stage[data-step="7"]{display:none}
+        .step-5 .stage[data-step="6"], .step-5 .stage[data-step="7"]{display:none}
+        .step-6 .stage[data-step="7"]{display:none}
+        .details-short [data-detail="full"], .details-short [data-detail="extra"]{display:none}
+        .details-standard [data-detail="extra"]{display:none}
+        .callout{padding:13px 14px;border-radius:14px;background:rgba(114,241,184,.07);border:1px solid rgba(114,241,184,.2)}
+        .callout.warnbox{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.22)}
+        .task-card{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);margin-top:10px}
+        .small{font-size:13px;color:var(--muted)}
+        .footer-note{margin-top:14px;color:var(--muted);font-size:13px}
+        .highlight-step{outline:2px solid rgba(139,255,207,.55)}
+        .quiz-option{display:block;width:100%;text-align:left;margin-top:8px}
+        .hidden{display:none !important}
+        .print-only{display:none}
+        @media (max-width: 1040px){
+            .grid{grid-template-columns:1fr}
+            .sticky{position:relative;top:0}
+        }
+        @media (max-width: 640px){
+            .page{padding:14px 10px 50px}
+            .hero,.card{padding:14px}
+            .stat-grid{grid-template-columns:1fr}
+            .equation{font-size:18px}
+        }
+        @media print{
+            :root{--bg:#fff;--panel:#fff;--panel2:#fff;--text:#111;--muted:#555;--line:#bbb;--accent:#2459d1;--accent2:#12805b;--warn:#9a6a00;--danger:#9b1c1c;--good:#0f7a47}
+            html,body{background:#fff;color:#111}
+            .page{max-width:none;padding:0}
+            .grid{grid-template-columns:1fr}
+            .sticky{position:relative}
+            button,input,select{display:none !important}
+            .card,.hero{box-shadow:none;background:#fff;border:1px solid #ccc}
+            .print-only{display:block}
+        }
+    </style>
+</head>
+<body>
+<div class="page" id="pageRoot">
+    <section class="hero">
+        <div class="sub">ТЕМА: решение задания с параметром • формат «Наглядная математика с генерацией»</div>
+        <h1>9F53F5. Ровно один корень на отрезке [0; 1]</h1>
+        <div class="equation math">
+            √(4x − 1) · ln(x² − 2x + 2 − a²) = 0
+        </div>
+        <div class="badges">
+            <span class="badge">Цель: подготовка к ЕГЭ</span>
+            <span class="badge">Уровень: уверенный</span>
+            <span class="badge">Фокус: геометрическая идея</span>
+            <span class="badge">Только школьные методы</span>
+            <span class="badge">Пошаговое раскрытие</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <main class="left">
+            <section class="card">
+                <h2>Идея решения</h2>
+                <ol class="idea-list">
+                    <li>Произведение равно нулю, когда <span class="focus-link" data-focus="sqrtroot">√(4x − 1) = 0</span> или <span class="focus-link" data-focus="logroot">ln(...) = 0</span>, но всё выражение должно быть определено.</li>
+                    <li>Первый источник корня даёт специальную точку <span class="inline-code">x = 1/4</span>.</li>
+                    <li>Второй источник корней даёт уравнение <span class="inline-code">(x − 1)² = a²</span>, то есть точки вида <span class="inline-code">x = 1 ± |a|</span>.</li>
+                    <li>Дальше нужно понять, когда на отрезке <span class="inline-code">[0;1]</span> и с учётом области определения остаётся ровно одна точка.</li>
+                </ol>
+            </section>
+
+            <section class="card">
+                <div class="row" style="justify-content:space-between;align-items:flex-end;gap:12px">
+                    <div>
+                        <h2>Пошаговое решение</h2>
+                        <div class="small">Можно раскрывать постепенно и менять подробность объяснения.</div>
+                    </div>
+                    <div class="row">
+                        <button id="prevStep" class="ghost">← Назад</button>
+                        <button id="nextStep">Следующий шаг →</button>
+                    </div>
+                </div>
+
+                <div id="solutionSteps" class="details-standard step-3">
+                    <article class="stage" data-step="1" id="stage1">
+                        <div class="tag">1) Что дано</div>
+                        <div>
+                            Нужно найти все значения параметра <span class="inline-code">a</span>, при которых уравнение
+                            <span class="math">√(4x − 1) · ln(x² − 2x + 2 − a²) = 0</span>
+                            имеет ровно один корень на отрезке <span class="inline-code">[0;1]</span>.
+                        </div>
+                        <div class="muted" data-detail="full">Здесь важно не просто решить уравнение, а именно посчитать число его корней на заданном отрезке.</div>
+                    </article>
+
+                    <article class="stage" data-step="2" id="stage2">
+                        <div class="tag">2) Что означает каждое условие</div>
+                        <div>
+                            Чтобы выражение существовало, должны выполняться два требования:
+                            <ul>
+                                <li><span class="math">4x − 1 ≥ 0</span>, то есть <span class="inline-code">x ≥ 1/4</span>;</li>
+                                <li><span class="math">x² − 2x + 2 − a² &gt; 0</span>, потому что аргумент логарифма должен быть положительным.</li>
+                            </ul>
+                        </div>
+                        <div data-detail="full">
+                            На отрезке <span class="inline-code">[0;1]</span> первая часть сразу отсекает кусок <span class="inline-code">[0;1/4)</span>. Значит, искать корни имеет смысл только на <span class="inline-code">[1/4;1]</span>.
+                        </div>
+                        <div class="callout warnbox" data-detail="extra">Даже если какой-то множитель «мог бы дать ноль», это не считается корнем, если всё выражение в этой точке не определено.</div>
+                    </article>
+
+                    <article class="stage" data-step="3" id="stage3">
+                        <div class="tag">3) Интерпретация</div>
+                        <div>
+                            Произведение равно нулю, если хотя бы один множитель равен нулю:
+                            <ul>
+                                <li><span class="focus-link" data-focus="sqrtroot">√(4x − 1) = 0</span>;</li>
+                                <li><span class="focus-link" data-focus="logroot">ln(x² − 2x + 2 − a²) = 0</span>.</li>
+                            </ul>
+                        </div>
+                        <div data-detail="full">
+                            Во втором случае <span class="math">ln T = 0 ⇔ T = 1</span>. Поэтому графически удобно смотреть на параболу
+                            <span class="math">y = (x − 1)²</span>
+                            и на горизонтальный уровень <span class="math">y = a²</span>.
+                        </div>
+                    </article>
+
+                    <article class="stage" data-step="4" id="stage4">
+                        <div class="tag">4) Ключевая идея</div>
+                        <div>
+                            Считаем отдельно:
+                            <ol>
+                                <li>когда существует специальный корень <span class="inline-code">x = 1/4</span>;</li>
+                                <li>когда существуют корни от логарифма;</li>
+                                <li>не совпадают ли они.</li>
+                            </ol>
+                        </div>
+                        <div class="callout" data-detail="full">Именно это и превращает задачу в задачу на число решений: надо учесть существование, попадание на отрезок и возможное совпадение корней.</div>
+                    </article>
+
+                    <article class="stage" data-step="5" id="stage5">
+                        <div class="tag">5) Пошаговое доведение до ответа</div>
+                        <div>
+                            <strong>Первый источник корня.</strong><br>
+                            <span class="math">√(4x − 1) = 0 ⇔ 4x − 1 = 0 ⇔ x = 1/4.</span>
+                        </div>
+                        <div data-detail="full">
+                            Но точка <span class="inline-code">x = 1/4</span> годится только тогда, когда логарифм определён:
+                            <div class="math">(1/4)² − 2·(1/4) + 2 − a² &gt; 0</div>
+                            <div class="math">1/16 − 1/2 + 2 − a² &gt; 0</div>
+                            <div class="math">25/16 − a² &gt; 0</div>
+                            <div class="math">|a| &lt; 5/4.</div>
+                        </div>
+                        <div data-detail="full">
+                            <strong>Второй источник корней.</strong><br>
+                            <span class="math">ln(x² − 2x + 2 − a²) = 0</span>
+                            ⇔ <span class="math">x² − 2x + 2 − a² = 1</span>
+                            ⇔ <span class="math">x² − 2x + 1 − a² = 0</span>
+                            ⇔ <span class="math">(x − 1)² = a²</span>.
+                        </div>
+                        <div data-detail="full">
+                            Отсюда <span class="math">x = 1 ± |a|</span>.
+                            На отрезке <span class="inline-code">[0;1]</span> точка <span class="inline-code">1 + |a|</span> не подходит, остаётся только
+                            <span class="inline-code">x = 1 − |a|</span>, причём нужно, чтобы она лежала не левее <span class="inline-code">1/4</span>:
+                            <div class="math">1 − |a| ≥ 1/4 ⇔ |a| ≤ 3/4.</div>
+                        </div>
+                        <div data-detail="extra">
+                            Здесь дополнительных ограничений на логарифм уже не нужно: при <span class="math">ln(...) = 0</span> его аргумент автоматически равен 1, а это положительное число.
+                        </div>
+                        <div data-detail="full">
+                            <strong>Теперь считаем число корней.</strong>
+                            <ul>
+                                <li>Если <span class="inline-code">|a| &lt; 3/4</span>, есть два разных корня: <span class="inline-code">1/4</span> и <span class="inline-code">1 − |a|</span>.</li>
+                                <li>Если <span class="inline-code">|a| = 3/4</span>, второй корень равен <span class="inline-code">1 − 3/4 = 1/4</span>, то есть оба источника дают одну и ту же точку.</li>
+                                <li>Если <span class="inline-code">3/4 &lt; |a| &lt; 5/4</span>, логарифмический корень уже ушёл левее <span class="inline-code">1/4</span>, но специальный корень <span class="inline-code">1/4</span> ещё существует. Значит, корень один.</li>
+                                <li>Если <span class="inline-code">|a| ≥ 5/4</span>, точка <span class="inline-code">1/4</span> перестаёт входить в область определения, а логарифмического корня на допустимом участке нет. Корней нет.</li>
+                            </ul>
+                        </div>
+                    </article>
+
+                    <article class="stage" data-step="6" id="stage6">
+                        <div class="tag">6) Финальная проверка</div>
+                        <div>
+                            Подходят случаи, когда получается ровно один корень:
+                            <div class="math">|a| = 3/4</div>
+                            или
+                            <div class="math">3/4 &lt; |a| &lt; 5/4.</div>
+                        </div>
+                        <div data-detail="full">
+                            Объединяем:
+                            <div class="math">3/4 ≤ |a| &lt; 5/4.</div>
+                        </div>
+                        <div class="callout" data-detail="full">
+                            Почему других значений нет:
+                            <ul class="check-list">
+                                <li>при <span class="inline-code">|a| &lt; 3/4</span> корней два;</li>
+                                <li>при <span class="inline-code">|a| ≥ 5/4</span> корней нет.</li>
+                            </ul>
+                        </div>
+                    </article>
+
+                    <article class="stage" data-step="7" id="stage7">
+                        <div class="tag">7) Краткий вывод</div>
+                        <div class="equation math" style="font-size:24px">
+                            a ∈ (−5/4; −3/4] ∪ [3/4; 5/4)
+                        </div>
+                        <div class="muted">То же самое можно записать короче: <span class="math">3/4 ≤ |a| &lt; 5/4</span>.</div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Типичные ошибки</h2>
+                <ul class="mistakes">
+                    <li>Забыть, что всё уравнение должно быть определено, и автоматически принять <span class="inline-code">x = 1/4</span> при любых <span class="inline-code">a</span>.</li>
+                    <li>После <span class="math">ln T = 0</span> написать <span class="math">T = 0</span> вместо правильного <span class="math">T = 1</span>.</li>
+                    <li>Взять обе точки <span class="inline-code">1 ± |a|</span> на отрезке <span class="inline-code">[0;1]</span>, хотя <span class="inline-code">1 + |a|</span> почти всегда лежит правее 1.</li>
+                    <li>Не заметить совпадение корней при <span class="inline-code">|a| = 3/4</span>.</li>
+                    <li>Смешать условия «корень существует» и «корень лежит в допустимой области <span class="inline-code">x ≥ 1/4</span>».</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>Мини-квиз</h2>
+                <div class="quiz-list">
+                    <p><strong>Что означает равенство</strong> <span class="math">ln(M)=0</span>?</p>
+                    <button class="quiz-option ghost" data-quiz="q1" data-answer="0">A. <span class="math">M=0</span></button>
+                    <button class="quiz-option ghost" data-quiz="q1" data-answer="1">B. <span class="math">M=1</span></button>
+                    <button class="quiz-option ghost" data-quiz="q1" data-answer="2">C. <span class="math">M&gt;0</span></button>
+                    <div id="quiz1Result" class="small" style="margin-top:10px"></div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Самопроверка</h2>
+                <div class="row">
+                    <button id="showChecklist">Показать контрольный список</button>
+                </div>
+                <div id="checklistBox" class="hidden" style="margin-top:12px">
+                    <ul class="check-list">
+                        <li>Я выписал область определения: <span class="math">x ≥ 1/4</span> и аргумент логарифма положителен.</li>
+                        <li>Я отдельно рассмотрел ноль первого множителя и ноль второго множителя.</li>
+                        <li>Я проверил, когда точка <span class="inline-code">x=1/4</span> действительно допустима.</li>
+                        <li>Я проверил, когда точка <span class="inline-code">x=1−|a|</span> попадает в допустимый участок.</li>
+                        <li>Я не забыл случай совпадения корней.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Генератор похожих задач</h2>
+                <p class="muted">Генерируются задачи того же типа: один специальный корень от корня и один потенциальный корень от логарифма. Метод решения остаётся тем же.</p>
+                <div class="row">
+                    <button id="generateTasks">Сгенерировать 3 задачи</button>
+                    <button id="applyFirstTask" class="ghost">Применить 1-ю задачу к модели</button>
+                </div>
+                <div id="generatedTasks"></div>
+            </section>
+
+            <section class="card print-only">
+                <h2>Ответ</h2>
+                <div class="equation math">a ∈ (−5/4; −3/4] ∪ [3/4; 5/4)</div>
+            </section>
+
+            <div class="footer-note">Автор: Лёвин Артём Александрович • Страница автономна, работает локально, пригодна для печати.</div>
+        </main>
+
+        <aside class="sticky">
+            <section class="card">
+                <h2>Интерактивная модель</h2>
+                <div class="controls">
+                    <div>
+                        <div class="small">Параметр <span class="inline-code">a</span></div>
+                        <div class="row">
+                            <input id="aSlider" type="range" min="-1.5" max="1.5" step="0.01" value="0.90" style="width:100%" />
+                        </div>
+                        <div class="row" style="justify-content:space-between">
+                            <div id="aValue" class="small">a = 0.90</div>
+                            <button id="snapAnswer">Поставить граничный случай</button>
+                        </div>
+                    </div>
+                    <div class="pill-toggle" id="detailToggle">
+                        <button data-detail-mode="short">Кратко</button>
+                        <button data-detail-mode="standard" class="active">Стандартно</button>
+                        <button data-detail-mode="full">Очень подробно</button>
+                    </div>
+                    <div class="row">
+                        <label><input type="checkbox" id="toggleDomain" checked /> допустимая область</label>
+                        <label><input type="checkbox" id="toggleLogRoots" checked /> логарифм. корень</label>
+                        <label><input type="checkbox" id="toggleSpecial" checked /> точка x=1/4</label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="stat-grid">
+                    <div class="stat"><div class="label">|a|</div><div class="value" id="absAVal">0.90</div></div>
+                    <div class="stat"><div class="label">число корней</div><div class="value" id="rootCount">1</div></div>
+                    <div class="stat"><div class="label">спец. корень x=1/4</div><div class="value" id="specialState">есть</div></div>
+                    <div class="stat"><div class="label">корень от ln</div><div class="value" id="logState">нет</div></div>
+                </div>
+                <div id="statusText" class="callout" style="margin-top:12px"></div>
+            </section>
+
+            <section class="card viz-wrap">
+                <div class="zoom-bar">
+                    <button id="zoomOut">−</button>
+                    <input id="zoomSlider" type="range" min="0.7" max="2.2" step="0.01" value="1" style="flex:1" />
+                    <button id="zoomIn">+</button>
+                    <button id="zoomReset" class="ghost">Сброс</button>
+                    <div class="zoom-value" id="zoomValue">100%</div>
+                </div>
+                <svg id="plot" viewBox="0 0 720 520" aria-label="Графическая модель">
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#c8d6ff"></path>
+                        </marker>
+                    </defs>
+                    <g id="zoomGroup">
+                        <rect x="0" y="0" width="720" height="520" fill="transparent"></rect>
+                        <g id="domainBand"></g>
+                        <g id="gridLayer"></g>
+                        <g id="axesLayer"></g>
+                        <g id="curveLayer"></g>
+                        <g id="levelLayer"></g>
+                        <g id="pointLayer"></g>
+                        <g id="labelLayer"></g>
+                    </g>
+                </svg>
+                <ul class="legend">
+                    <li><span style="color:var(--accent)">Голубая кривая</span>: y = (x − 1)²</li>
+                    <li><span style="color:var(--warn)">Жёлтая горизонталь</span>: y = a²</li>
+                    <li><span style="color:var(--good)">Зелёная точка</span>: специальный корень x = 1/4, если он допустим</li>
+                    <li><span style="color:#ff9fcf">Розовая точка</span>: x = 1 − |a|, если она попадает в допустимую область</li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const state = {
+            a: 0.90,
+            step: 3,
+            detail: 'standard',
+            zoom: 1,
+            showDomain: true,
+            showLogRoots: true,
+            showSpecial: true,
+            taskMode: null,
+            customTask: null,
+        };
+
+        const el = id => document.getElementById(id);
+        const aSlider = el('aSlider');
+        const root = el('pageRoot');
+        const solution = el('solutionSteps');
+        const plot = el('plot');
+        const zoomGroup = el('zoomGroup');
+
+        function fBase(x, cfg){
+            return x*x - cfg.q*x + cfg.r; // default x^2 -2x +2
+        }
+        function makeConfig(task){
+            if(task) return task;
+            return { id:'base', alpha:4, beta:1, q:2, r:2, title:'Базовая задача' };
+        }
+
+        function computeRoots(a, task){
+            const cfg = makeConfig(task);
+            const absA = Math.abs(a);
+            const specialX = cfg.beta / cfg.alpha;
+            const specialArg = fBase(specialX, cfg) - absA*absA;
+            const specialExists = specialArg > 0 && specialX >= 0 && specialX <= 1;
+            const logRoots = [];
+            const center = cfg.q / 2;
+            const c = cfg.r - 1 - absA*absA;
+            const D = cfg.q*cfg.q - 4*c;
+            if (D >= -1e-9) {
+                const sqrtD = Math.sqrt(Math.max(0, D));
+                const x1 = (cfg.q - sqrtD) / 2;
+                const x2 = (cfg.q + sqrtD) / 2;
+                [x1, x2].forEach(x => {
+                    if (x >= 0 - 1e-9 && x <= 1 + 1e-9) {
+                        const inSqrt = cfg.alpha*x - cfg.beta >= -1e-9;
+                        if (inSqrt) logRoots.push(+x.toFixed(6));
+                    }
+                });
+            }
+            const merged = [];
+            function addRoot(x, type){
+                const found = merged.find(r => Math.abs(r.x - x) < 1e-6);
+                if(found){ found.type += '+' + type; }
+                else merged.push({x, type});
+            }
+            if(specialExists) addRoot(specialX, 'special');
+            logRoots.forEach(x => addRoot(x, 'log'));
+            merged.sort((a,b)=>a.x-b.x);
+            return { cfg, absA, specialX, specialArg, specialExists, logRoots: [...new Set(logRoots)], merged };
+        }
+
+        function updateText(){
+            const res = computeRoots(state.a, state.customTask);
+            el('aValue').textContent = 'a = ' + Number(state.a).toFixed(2);
+            el('absAVal').textContent = res.absA.toFixed(2);
+            el('rootCount').textContent = String(res.merged.length);
+            el('specialState').textContent = res.specialExists ? 'есть' : 'нет';
+            el('logState').textContent = res.logRoots.length ? res.logRoots.map(x=>x.toFixed(2)).join(', ') : 'нет';
+
+            const countClass = res.merged.length === 1 ? 'good' : (res.merged.length === 0 ? 'danger' : 'warn');
+            el('rootCount').className = 'value ' + countClass;
+
+            let html = '';
+            if(res.merged.length === 1) html += '<strong class="good">Сейчас ровно один корень.</strong><br>';
+            else if(res.merged.length === 2) html += '<strong class="warn">Сейчас два корня.</strong><br>';
+            else html += '<strong class="danger">Сейчас корней нет.</strong><br>';
+
+            html += 'Допустимые корни на [0;1]: ';
+            html += res.merged.length ? res.merged.map(r => 'x = ' + r.x.toFixed(2)).join('; ') : 'отсутствуют';
+            html += '<br><span class="small">Условие ответа: 3/4 ≤ |a| &lt; 5/4.</span>';
+
+            if(state.customTask){
+                html += '<br><span class="small">Сейчас активна сгенерированная задача: '+ state.customTask.title +'.</span>';
+            }
+            el('statusText').innerHTML = html;
+        }
+
+        function setDetail(mode){
+            state.detail = mode;
+            solution.classList.remove('details-short','details-standard','details-full');
+            solution.classList.add(mode === 'short' ? 'details-short' : mode === 'full' ? 'details-full' : 'details-standard');
+            document.querySelectorAll('#detailToggle button').forEach(btn => btn.classList.toggle('active', btn.dataset.detailMode === mode));
+        }
+
+        function setStep(n){
+            state.step = Math.max(1, Math.min(7, n));
+            solution.className = solution.className.replace(/step-\d|step-hide/g,'').trim();
+            solution.classList.add(state.step === 1 ? 'step-hide' : 'step-' + state.step);
+        }
+
+        function sx(x){ return 70 + x * 560; }
+        function sy(y){ return 430 - y * 230; }
+
+        function draw(){
+            const res = computeRoots(state.a, state.customTask);
+            const cfg = res.cfg;
+            const layers = {
+                grid: el('gridLayer'), axes: el('axesLayer'), curve: el('curveLayer'), level: el('levelLayer'), point: el('pointLayer'), label: el('labelLayer'), domain: el('domainBand')
+            };
+            Object.values(layers).forEach(g => g.innerHTML = '');
+
+            zoomGroup.setAttribute('transform', `translate(${360*(1-state.zoom)} ${260*(1-state.zoom)}) scale(${state.zoom})`);
+            el('zoomValue').textContent = Math.round(state.zoom*100) + '%';
+
+            for(let i=0;i<=10;i++){
+                const x = i/10;
+                const vx = sx(x);
+                layers.grid.innerHTML += `<line x1="${vx}" y1="60" x2="${vx}" y2="440" stroke="rgba(255,255,255,.08)" />`;
+            }
+            for(let i=0;i<=6;i++){
+                const y = i/4;
+                const vy = sy(y);
+                layers.grid.innerHTML += `<line x1="60" y1="${vy}" x2="650" y2="${vy}" stroke="rgba(255,255,255,.08)" />`;
+            }
+
+            layers.axes.innerHTML = `
+      <line x1="60" y1="430" x2="660" y2="430" stroke="#c8d6ff" stroke-width="2" marker-end="url(#arrow)" />
+      <line x1="70" y1="450" x2="70" y2="50" stroke="#c8d6ff" stroke-width="2" marker-end="url(#arrow)" />
+      <text x="666" y="448" fill="#dbe6ff" font-size="18">x</text>
+      <text x="48" y="55" fill="#dbe6ff" font-size="18">y</text>
+      <text x="64" y="450" fill="#97a6dd" font-size="15">0</text>
+      <text x="620" y="448" fill="#97a6dd" font-size="15">1</text>
+    `;
+
+            if(state.showDomain){
+                const specialX = cfg.beta / cfg.alpha;
+                layers.domain.innerHTML += `<rect x="${sx(specialX)}" y="66" width="${sx(1)-sx(specialX)}" height="364" fill="rgba(114,241,184,.08)" stroke="rgba(114,241,184,.22)" />`;
+                layers.label.innerHTML += `<text x="${sx(specialX)+6}" y="85" fill="#8ff0c7" font-size="15">допустимо по √: x ≥ ${specialX.toFixed(2)}</text>`;
+            }
+
+            let path = '';
+            for(let i=0;i<=500;i++){
+                const x = i/500;
+                const y = fBase(x, cfg)-1;
+                const X = sx(x), Y = sy(y);
+                path += (i===0?`M ${X} ${Y}`:` L ${X} ${Y}`);
+            }
+            layers.curve.innerHTML = `<path d="${path}" fill="none" stroke="#7cc7ff" stroke-width="4" id="curvePath" />`;
+            layers.label.innerHTML += `<text x="420" y="160" fill="#9ed6ff" font-size="18">y = x² − ${cfg.q}x + ${cfg.r-1}</text>`;
+
+            const levelY = res.absA * res.absA;
+            layers.level.innerHTML = `<line x1="70" y1="${sy(levelY)}" x2="650" y2="${sy(levelY)}" stroke="#ffd166" stroke-width="3" stroke-dasharray="10 8" />`;
+            layers.label.innerHTML += `<text x="480" y="${sy(levelY)-10}" fill="#ffe4a1" font-size="17">y = a² = ${levelY.toFixed(2)}</text>`;
+
+            layers.axes.innerHTML += `<line x1="${sx(cfg.beta/cfg.alpha)}" y1="424" x2="${sx(cfg.beta/cfg.alpha)}" y2="436" stroke="#fff" stroke-width="3" />`;
+            layers.label.innerHTML += `<text x="${sx(cfg.beta/cfg.alpha)-20}" y="462" fill="#d5defd" font-size="16">1/4</text>`;
+
+            if(state.showSpecial){
+                const color = res.specialExists ? '#72f1b8' : '#ff7b7b';
+                layers.point.innerHTML += `<circle cx="${sx(cfg.beta/cfg.alpha)}" cy="430" r="8" fill="${color}" stroke="#0b1020" stroke-width="2" data-focus-target="sqrtroot" />`;
+                layers.label.innerHTML += `<text x="${sx(cfg.beta/cfg.alpha)+10}" y="420" fill="${color}" font-size="16">x = ${cfg.beta/cfg.alpha}</text>`;
+                if(!res.specialExists){
+                    layers.label.innerHTML += `<text x="${sx(cfg.beta/cfg.alpha)+10}" y="442" fill="#ffb1b1" font-size="14">не годится: ln не определён</text>`;
+                }
+            }
+
+            if(state.showLogRoots){
+                res.logRoots.forEach((x, i) => {
+                    layers.point.innerHTML += `<circle cx="${sx(x)}" cy="430" r="8" fill="#ff9fcf" stroke="#0b1020" stroke-width="2" data-focus-target="logroot" />`;
+                    layers.label.innerHTML += `<text x="${sx(x)+8}" y="${402 - i*18}" fill="#ffc2dd" font-size="16">x = ${x.toFixed(2)}</text>`;
+                });
+                if(res.logRoots.length){
+                    layers.point.innerHTML += res.logRoots.map(x => `<circle cx="${sx(x)}" cy="${sy(levelY)}" r="7" fill="#ffd166" stroke="#0b1020" stroke-width="2" />`).join('');
+                }
+            }
+        }
+
+        function setA(v){
+            state.a = +v;
+            aSlider.value = v;
+            updateText();
+            draw();
+        }
+
+        aSlider.addEventListener('input', e => setA(e.target.value));
+        el('snapAnswer').addEventListener('click', () => setA(0.75));
+        el('prevStep').addEventListener('click', () => setStep(state.step - 1));
+        el('nextStep').addEventListener('click', () => setStep(state.step + 1));
+        document.querySelectorAll('#detailToggle button').forEach(btn => btn.addEventListener('click', () => setDetail(btn.dataset.detailMode)));
+        el('toggleDomain').addEventListener('change', e => { state.showDomain = e.target.checked; draw(); });
+        el('toggleLogRoots').addEventListener('change', e => { state.showLogRoots = e.target.checked; draw(); });
+        el('toggleSpecial').addEventListener('change', e => { state.showSpecial = e.target.checked; draw(); });
+
+        document.querySelectorAll('.focus-link').forEach(link => {
+            link.addEventListener('mouseenter', () => highlight(link.dataset.focus, true));
+            link.addEventListener('mouseleave', () => highlight(link.dataset.focus, false));
+        });
+        function highlight(key, on){
+            const map = { sqrtroot:['stage5','stage3'], logroot:['stage3','stage5'] };
+            (map[key]||[]).forEach(id => el(id).classList.toggle('active', on));
+            document.querySelectorAll(`[data-focus-target="${key}"]`).forEach(node => node.setAttribute('stroke-width', on ? '4' : '2'));
+        }
+
+        el('showChecklist').addEventListener('click', () => el('checklistBox').classList.toggle('hidden'));
+        document.querySelectorAll('[data-quiz="q1"]').forEach(btn => btn.addEventListener('click', () => {
+            const ok = btn.dataset.answer === '1';
+            el('quiz1Result').innerHTML = ok
+            ? '<span class="good">Верно.</span> Из ln(M)=0 следует M=1.'
+            : '<span class="danger">Не совсем.</span> Нужно помнить: ln(M)=0 ⇔ M=1.';
+        }));
+
+        el('zoomIn').addEventListener('click', ()=>{ state.zoom=Math.min(2.2, +(state.zoom+0.1).toFixed(2)); el('zoomSlider').value=state.zoom; draw(); });
+        el('zoomOut').addEventListener('click', ()=>{ state.zoom=Math.max(0.7, +(state.zoom-0.1).toFixed(2)); el('zoomSlider').value=state.zoom; draw(); });
+        el('zoomReset').addEventListener('click', ()=>{ state.zoom=1; el('zoomSlider').value=1; draw(); });
+        el('zoomSlider').addEventListener('input', e=>{ state.zoom=+e.target.value; draw(); });
+        plot.addEventListener('wheel', e=>{
+            e.preventDefault();
+            state.zoom = Math.max(0.7, Math.min(2.2, +(state.zoom + (e.deltaY < 0 ? 0.06 : -0.06)).toFixed(2)));
+            el('zoomSlider').value = state.zoom;
+            draw();
+        }, {passive:false});
+
+        function createTaskSet(){
+            const base = [
+                { alpha:3, beta:1, q:2, r:2, title:'√(3x−1)·ln(x²−2x+2−a²)=0 на [0;1]' },
+                { alpha:8, beta:2, q:2, r:2, title:'√(8x−2)·ln(x²−2x+2−a²)=0 на [0;1]' },
+                { alpha:5, beta:1, q:2, r:2, title:'√(5x−1)·ln(x²−2x+2−a²)=0 на [0;1]' }
+            ];
+            return base.map(cfg => {
+                const s = cfg.beta / cfg.alpha;
+                const left = +(1 - s).toFixed(6);
+                const rightSq = +(fBase(s, cfg).toFixed(6));
+                const answer = `${left} ≤ |a| < ${Math.sqrt(rightSq).toFixed(3)}`;
+                return {
+                    ...cfg,
+                    answer,
+                    idea: `Такой же метод: отдельная точка x=${s.toFixed(2)} и логарифмический корень x=1−|a|, затем подсчёт числа корней.`
+                };
+            });
+        }
+
+        function renderTasks(){
+            const tasks = createTaskSet();
+            const box = el('generatedTasks');
+            box.innerHTML = tasks.map((t,i)=>`
+      <div class="task-card">
+        <div><strong>${i+1}.</strong> ${t.title}</div>
+        <div class="small" style="margin-top:8px"><strong>Ответ:</strong> ${t.answer}</div>
+        <div class="small"><strong>Идея:</strong> ${t.idea}</div>
+      </div>
+    `).join('');
+            el('applyFirstTask').onclick = () => {
+                state.customTask = tasks[0];
+                setA(0.80);
+            };
+        }
+
+        el('generateTasks').addEventListener('click', renderTasks);
+
+        setDetail('standard');
+        setStep(3);
+        setA(0.90);
+    })();
+</script>
+</body>
+</html>

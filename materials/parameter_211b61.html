@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>211B61 — задача с параметром</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --bg2:#121933;
+            --card:#161f3f;
+            --card2:#0f1731;
+            --ink:#eef2ff;
+            --muted:#a9b5d6;
+            --line:#2b3a72;
+            --accent:#7cc7ff;
+            --accent2:#8ef0c2;
+            --warn:#ffd479;
+            --danger:#ff9696;
+            --good:#a4ffb0;
+            --shadow:0 18px 40px rgba(0,0,0,.35);
+            --radius:22px;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0;
+            font-family:Inter,Segoe UI,Arial,sans-serif;
+            background:
+            radial-gradient(circle at top right, rgba(124,199,255,.16), transparent 24%),
+            radial-gradient(circle at bottom left, rgba(142,240,194,.10), transparent 20%),
+            linear-gradient(180deg,var(--bg),#090d1a 100%);
+            color:var(--ink);
+            line-height:1.55;
+        }
+        .page{
+            max-width:1500px;
+            margin:0 auto;
+            padding:24px;
+        }
+        .hero{
+            background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.025));
+            border:1px solid rgba(255,255,255,.08);
+            box-shadow:var(--shadow);
+            border-radius:28px;
+            padding:24px 26px;
+            margin-bottom:22px;
+            overflow:hidden;
+            position:relative;
+        }
+        .hero::after{
+            content:"";
+            position:absolute;
+            right:-120px;top:-120px;
+            width:260px;height:260px;border-radius:50%;
+            background:radial-gradient(circle, rgba(124,199,255,.22), transparent 65%);
+            pointer-events:none;
+        }
+        .eyebrow{color:var(--accent2);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.82rem}
+        h1{margin:.2rem 0 1rem;font-size:clamp(1.4rem,2.7vw,2.4rem);line-height:1.15}
+        .problem-box{
+            background:rgba(9,13,29,.55);
+            border:1px solid rgba(255,255,255,.09);
+            border-radius:20px;
+            padding:16px 18px;
+            font-size:1.08rem;
+        }
+        .formula{
+            display:block;
+            margin-top:8px;
+            font-size:clamp(1.05rem,2vw,1.4rem);
+            font-weight:700;
+            word-break:break-word;
+        }
+        .meta{
+            display:flex;flex-wrap:wrap;gap:10px;margin-top:14px
+        }
+        .pill{
+            border:1px solid rgba(255,255,255,.09);
+            background:rgba(255,255,255,.04);
+            border-radius:999px;
+            padding:8px 12px;
+            color:var(--muted);
+            font-size:.94rem;
+        }
+        .layout{
+            display:grid;
+            grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);
+            gap:22px;
+            align-items:start;
+        }
+        .left-col{min-width:0}
+        .sticky-wrap{
+            position:sticky;
+            top:14px;
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+            max-height:calc(100vh - 28px);
+            overflow:auto;
+            padding-right:4px;
+        }
+        .card{
+            background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.025));
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            padding:18px;
+        }
+        .section-title{
+            display:flex;align-items:center;gap:10px;
+            margin:0 0 12px;
+            font-size:1.18rem;
+        }
+        .section-title .dot{
+            width:12px;height:12px;border-radius:50%;background:var(--accent);
+            box-shadow:0 0 0 6px rgba(124,199,255,.14);
+            flex:0 0 auto;
+        }
+        .idea-list,.mistakes-list,.check-list,.summary-list{padding-left:1.15rem;margin:.3rem 0}
+        .idea-list li,.mistakes-list li,.check-list li,.summary-list li{margin:.55rem 0}
+        .step{
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:18px;
+            background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+            overflow:hidden;
+            margin:14px 0;
+            transition:.22s ease;
+        }
+        .step.highlight,
+        .legend-item.highlight,
+        .toggle-row.highlight{
+            outline:2px solid rgba(124,199,255,.48);
+            box-shadow:0 0 0 7px rgba(124,199,255,.08);
+        }
+        .step-head{
+            width:100%;text-align:left;border:none;background:transparent;color:var(--ink);
+            padding:16px 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;
+            cursor:pointer;font:inherit;font-weight:700;font-size:1rem;
+        }
+        .step-head small{display:block;color:var(--muted);font-weight:500;margin-top:4px}
+        .step-body{padding:0 18px 18px;display:block}
+        .step.collapsed .step-body{display:none}
+        .chev{transition:transform .2s ease;color:var(--accent)}
+        .step.collapsed .chev{transform:rotate(-90deg)}
+        .math-line{
+            font-family:"Segoe UI",Arial,sans-serif;
+            background:rgba(8,12,25,.5);
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:14px;
+            padding:10px 12px;margin:10px 0;
+            overflow:auto hidden;
+            white-space:nowrap;
+        }
+        .note,.conclusion,.warning,.success{
+            border-radius:16px;padding:12px 14px;margin-top:10px;
+            border:1px solid rgba(255,255,255,.08)
+        }
+        .note{background:rgba(124,199,255,.08)}
+        .conclusion{background:rgba(142,240,194,.08)}
+        .warning{background:rgba(255,212,121,.10)}
+        .success{background:rgba(164,255,176,.10)}
+        .control-grid{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px
+        }
+        .control{
+            background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+            border-radius:16px;padding:12px
+        }
+        .control label,.small-label{display:block;color:var(--muted);font-size:.9rem;margin-bottom:6px}
+        select,input[type="range"],button{
+            width:100%;
+        }
+        select,input[type="range"],.ghost-input{
+            background:#0a1023;color:var(--ink);border:1px solid rgba(255,255,255,.12);
+            border-radius:12px;padding:10px 12px;font:inherit
+        }
+        button{
+            background:linear-gradient(180deg,#1d3f74,#15335d);
+            color:white;border:none;border-radius:14px;padding:11px 12px;
+            font:inherit;font-weight:700;cursor:pointer;transition:transform .12s ease, filter .12s ease;
+            box-shadow:0 10px 20px rgba(0,0,0,.28)
+        }
+        button:hover{filter:brightness(1.08)}
+        button:active{transform:translateY(1px)}
+        .btn-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+        .btn-soft{background:linear-gradient(180deg,#23315d,#182344)}
+        .btn-green{background:linear-gradient(180deg,#215244,#18392f)}
+        .toggle-list{display:grid;gap:8px;margin-top:8px}
+        .toggle-row{
+            display:flex;justify-content:space-between;gap:10px;align-items:center;
+            padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:14px;
+            background:rgba(255,255,255,.03)
+        }
+        .toggle-row input{accent-color:var(--accent)}
+        .graph-card{padding:14px}
+        .viz-caption{color:var(--muted);font-size:.94rem;margin:.2rem 0 .8rem}
+        .svg-wrap{
+            background:linear-gradient(180deg,#0c1227,#0a1021);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;
+            overflow:hidden;
+            position:relative;
+            aspect-ratio:1.08/1;
+            min-height:300px;
+            touch-action:none;
+        }
+        svg{width:100%;height:100%;display:block}
+        .legend{display:grid;gap:8px;margin-top:12px}
+        .legend-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .sw{width:20px;height:4px;border-radius:999px;flex:0 0 auto}
+        .legend small{color:var(--muted)}
+        .result-box{
+            font-size:1.04rem;font-weight:700;background:rgba(164,255,176,.09);
+            border:1px solid rgba(164,255,176,.22);padding:12px 14px;border-radius:16px;margin-top:10px
+        }
+        .quiz-item{margin:12px 0;padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+        .quiz-item label{display:block;margin:6px 0;cursor:pointer}
+        .quiz-result,.selfcheck-result,.generator-result{margin-top:10px;color:var(--muted)}
+        .selfcheck-grid{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+        .selfcheck-grid input{
+            background:#0a1023;color:var(--ink);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;font:inherit
+        }
+        .generator-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+        .mini{color:var(--muted);font-size:.92rem}
+        .footer-space{height:30px}
+        .muted{color:var(--muted)}
+        code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+
+        .compact-system{display:inline-grid;grid-template-columns:auto 1fr;gap:8px;align-items:start}
+        .compact-brace{font-size:1.65em;line-height:1;transform:translateY(1px)}
+
+        .d-k .detail-standard,.d-k .detail-long{display:none}
+        .d-s .detail-long,.d-s .detail-short{display:none}
+        .d-v .detail-short,.d-v .detail-standard{display:none}
+
+        .step-mode .step:not(.open-first){opacity:.55}
+        .step-mode .step.revealed{opacity:1}
+        .step-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+        .step-tools button{width:auto;padding:9px 12px}
+
+        @media (max-width: 1100px){
+            .layout{grid-template-columns:1fr}
+            .sticky-wrap{position:relative;top:auto;max-height:none;overflow:visible}
+        }
+        @media (max-width: 760px){
+            .page{padding:14px}
+            .control-grid,.generator-grid,.selfcheck-grid{grid-template-columns:1fr}
+            .btn-row{grid-template-columns:repeat(2,1fr)}
+            .hero,.card{border-radius:20px}
+            .formula{font-size:1rem}
+        }
+        @media print{
+            body{background:white;color:black}
+            .page{max-width:none;padding:0}
+            .hero,.card,.step,.problem-box{box-shadow:none;background:white;color:black;border:1px solid #bbb}
+            .sticky-wrap{position:static;max-height:none;overflow:visible}
+            button,input,select,.control,.toggle-row{display:none !important}
+            .layout{grid-template-columns:1fr}
+            .svg-wrap{border:1px solid #777}
+            .muted,.pill,.viz-caption,.legend small{color:#444 !important}
+        }
+    </style>
+</head>
+<body>
+<div class="page detail-root d-s" id="pageRoot">
+    <section class="hero">
+        <div class="eyebrow">Наглядная математика с генерацией</div>
+        <h1>211B61. Найдите все значения a, при которых уравнение имеет единственное решение</h1>
+        <div class="problem-box">
+            <strong>Задача.</strong>
+            <span class="formula">(2x + a + 1 + tan x)<sup>2</sup> = (2x + a − 1 − tan x)<sup>2</sup>, &nbsp; x ∈ [−π/2; π/2]</span>
+            <div class="mini" style="margin-top:8px">
+                Важно: функция tan x не определена при x = ±π/2, поэтому реально рассматриваем только точки из интервала (−π/2; π/2).
+            </div>
+        </div>
+        <div class="meta">
+            <span class="pill">Цель: подготовка к ЕГЭ</span>
+            <span class="pill">Уровень: уверенный</span>
+            <span class="pill">Фокус: геометрическая идея</span>
+            <span class="pill">Режим: пошаговое раскрытие</span>
+            <span class="pill">Автор: Лёвин Артём Александрович</span>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="left-col">
+            <section class="card">
+                <h2 class="section-title"><span class="dot"></span><span>Идея решения</span></h2>
+                <ol class="idea-list">
+                    <li>Используем факт: из равенства квадратов <strong>U<sup>2</sup> = V<sup>2</sup></strong> следует <strong>U = V</strong> или <strong>U = −V</strong>.</li>
+                    <li>После этого исходное уравнение распадается на <strong>две независимые ветки</strong>: одна даёт фиксированное решение по x, другая — решение, зависящее от параметра a.</li>
+                    <li>Дальше нужно не просто найти обе ветки, а понять, <strong>когда на допустимом промежутке остаётся ровно одна точка</strong>.</li>
+                    <li>На рисунке справа это видно как сочетание <strong>постоянной точки x = −π/4</strong> и <strong>подвижной точки x = −a/2</strong>.</li>
+                </ol>
+                <div class="note">
+                    Ключевой замысел: задача на параметр здесь превращается в аккуратный <strong>подсчёт числа корней</strong> после разбиения на две простые ветви.
+                </div>
+            </section>
+
+            <section class="card">
+                <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+                    <h2 class="section-title" style="margin:0"><span class="dot"></span><span>Пошаговое решение</span></h2>
+                    <div class="step-tools">
+                        <button class="btn-soft" id="expandAllBtn">Раскрыть всё</button>
+                        <button class="btn-soft" id="collapseAllBtn">Свернуть</button>
+                        <button class="btn-soft" id="nextStepBtn">Следующий шаг</button>
+                    </div>
+                </div>
+
+                <article class="step open-first revealed" data-target="domain branch1 branch2">
+                    <button class="step-head" type="button">
+                        <span>1) Что дано и где область допустимых значений<small>Сначала аккуратно проверяем, где вообще имеет смысл tan x.</small></span>
+                        <span class="chev">▾</span>
+                    </button>
+                    <div class="step-body">
+                        <div class="detail-short">
+                            Так как в уравнении есть tan x, точки x = −π/2 и x = π/2 не подходят. Значит, искать решения нужно только при x ∈ (−π/2; π/2).
+                        </div>
+                        <div class="detail-standard">
+                            На отрезке [−π/2; π/2] записано условие задачи, но функция tan x не определена в концах. Поэтому фактическая область поиска решений такая:
+                            <div class="math-line">x ∈ (−π/2; π/2).</div>
+                        </div>
+                        <div class="detail-long">
+                            Формально задача говорит про отрезок [−π/2; π/2], но у нас в формуле присутствует tan x. А функция tan x не существует при x = π/2 + πk, в частности при x = −π/2 и x = π/2. Поэтому конечные точки отрезка сразу исключаются из рассмотрения. Это очень важный шаг: если забыть про него, можно ошибочно засчитать «корни» на границе.
+                            <div class="math-line">ОДЗ: x ∈ (−π/2; π/2).</div>
+                        </div>
+                        <div class="warning">Нельзя подставлять x = ±π/2 даже для проверки: исходное выражение там не определено.</div>
+                    </div>
+                </article>
+
+                <article class="step revealed" data-target="branch1 branch2">
+                    <button class="step-head" type="button">
+                        <span>2) Что означает равенство квадратов<small>Это главный алгебраический ход.</small></span>
+                        <span class="chev">▾</span>
+                    </button>
+                    <div class="step-body">
+                        <div class="detail-short">
+                            Если U<sup>2</sup> = V<sup>2</sup>, то U = V или U = −V.
+                        </div>
+                        <div class="detail-standard">
+                            Обозначим
+                            <div class="math-line">U = 2x + a + 1 + tan x, &nbsp; V = 2x + a − 1 − tan x.</div>
+                            Тогда из равенства квадратов получаем два случая:
+                            <div class="compact-system">
+                                <span class="compact-brace">{</span>
+                                <div>
+                                    <div class="math-line" style="margin-top:0">U = V</div>
+                                    <div class="math-line">U = −V</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-long">
+                            Используем стандартный факт: числа имеют равные квадраты тогда и только тогда, когда они либо равны, либо противоположны. Поэтому вместо одного уравнения четвёртой «снаружи» формы мы получаем два гораздо более простых уравнения. Это и есть переломный момент решения.
+                            <div class="math-line">(2x + a + 1 + tan x)<sup>2</sup> = (2x + a − 1 − tan x)<sup>2</sup></div>
+                            <div class="math-line">⇔ 2x + a + 1 + tan x = 2x + a − 1 − tan x &nbsp; или &nbsp; 2x + a + 1 + tan x = −(2x + a − 1 − tan x).</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="step" data-target="branch1 tanLine fixedRoot">
+                    <button class="step-head" type="button">
+                        <span>3) Первая ветка: U = V<small>Здесь получается фиксированный корень, не зависящий от a.</small></span>
+                        <span class="chev">▾</span>
+                    </button>
+                    <div class="step-body">
+                        <div class="detail-short">
+                            Получаем 1 + tan x = −1 − tan x, то есть tan x = −1. Значит, x = −π/4.
+                        </div>
+                        <div class="detail-standard">
+                            Приравниваем левые части:
+                            <div class="math-line">2x + a + 1 + tan x = 2x + a − 1 − tan x.</div>
+                            Сокращаем одинаковые части:
+                            <div class="math-line">1 + tan x = −1 − tan x.</div>
+                            Тогда
+                            <div class="math-line">2 tan x = −2, &nbsp; tan x = −1.</div>
+                            На интервале (−π/2; π/2) это даёт единственную точку
+                            <div class="math-line">x = −π/4.</div>
+                        </div>
+                        <div class="detail-long">
+                            В первом случае параметр a полностью исчезает — это очень удобно. После сокращения 2x + a остаётся тригонометрическое уравнение:
+                            <div class="math-line">1 + tan x = −1 − tan x.</div>
+                            Переносим tan x влево, числа вправо:
+                            <div class="math-line">tan x + tan x = −1 − 1.</div>
+                            <div class="math-line">2 tan x = −2.</div>
+                            <div class="math-line">tan x = −1.</div>
+                            На промежутке (−π/2; π/2) функция tan x строго возрастает и принимает каждое значение ровно один раз. Значению −1 соответствует угол −π/4. Значит, первая ветка всегда даёт один и тот же корень:
+                            <div class="math-line">x<sub>1</sub> = −π/4.</div>
+                        </div>
+                        <div class="conclusion">Этот корень существует <strong>при любом a</strong>.</div>
+                    </div>
+                </article>
+
+                <article class="step" data-target="branch2 movingRoot axisLine">
+                    <button class="step-head" type="button">
+                        <span>4) Вторая ветка: U = −V<small>Здесь корень уже зависит от параметра a.</small></span>
+                        <span class="chev">▾</span>
+                    </button>
+                    <div class="step-body">
+                        <div class="detail-short">
+                            Получаем 4x + 2a = 0, значит x = −a/2.
+                        </div>
+                        <div class="detail-standard">
+                            Рассмотрим второй случай:
+                            <div class="math-line">2x + a + 1 + tan x = −(2x + a − 1 − tan x).</div>
+                            Раскрываем скобки:
+                            <div class="math-line">2x + a + 1 + tan x = −2x − a + 1 + tan x.</div>
+                            Сокращаем одинаковые слагаемые 1 и tan x:
+                            <div class="math-line">2x + a = −2x − a.</div>
+                            <div class="math-line">4x + 2a = 0.</div>
+                            <div class="math-line">x = −a/2.</div>
+                        </div>
+                        <div class="detail-long">
+                            Во второй ветке как раз появляется зависимость от параметра. После раскрытия скобок получается приятное линейное уравнение:
+                            <div class="math-line">2x + a + 1 + tan x = −2x − a + 1 + tan x.</div>
+                            Здесь сокращаются и единицы, и tan x. Это значит, что тригонометрии в этой ветке уже не остаётся вовсе:
+                            <div class="math-line">2x + a = −2x − a.</div>
+                            <div class="math-line">4x + 2a = 0.</div>
+                            <div class="math-line">x<sub>2</sub> = −a/2.</div>
+                            Но этот корень надо ещё проверить на принадлежность ОДЗ, то есть он годится только тогда, когда попадает внутрь интервала (−π/2; π/2).
+                        </div>
+                    </div>
+                </article>
+
+                <article class="step" data-target="movingRoot fixedRoot domain">
+                    <button class="step-head" type="button">
+                        <span>5) Когда решений ровно одно<small>Теперь считаем, сколько разных точек получается.</small></span>
+                        <span class="chev">▾</span>
+                    </button>
+                    <div class="step-body">
+                        <div class="detail-short">
+                            Всегда есть x = −π/4. Второй корень x = −a/2 либо не попадает в ОДЗ, либо совпадает с −π/4. В этих случаях решение единственно.
+                        </div>
+                        <div class="detail-standard">
+                            Итак, кандидаты на решения:
+                            <div class="math-line">x<sub>1</sub> = −π/4, &nbsp; x<sub>2</sub> = −a/2.</div>
+                            Первый корень есть всегда. Чтобы решение было единственным, второй корень должен:
+                            <ul class="check-list">
+                                <li>либо <strong>не принадлежать</strong> интервалу (−π/2; π/2);</li>
+                                <li>либо <strong>совпасть</strong> с x = −π/4.</li>
+                            </ul>
+                            Условие непопадания в ОДЗ:
+                            <div class="math-line">−a/2 ∉ (−π/2; π/2) ⇔ a ∉ (−π; π).</div>
+                            Условие совпадения:
+                            <div class="math-line">−a/2 = −π/4 ⇔ a = π/2.</div>
+                        </div>
+                        <div class="detail-long">
+                            После разбиения всё стало очень прозрачным:
+                            <div class="math-line">x<sub>1</sub> = −π/4 — существует всегда;</div>
+                            <div class="math-line">x<sub>2</sub> = −a/2 — существует только если попадает в ОДЗ.</div>
+                            Значит, ровно одно решение будет в двух ситуациях.
+                            <ol class="check-list">
+                                <li><strong>Вторая ветка не даёт допустимого корня.</strong><br>
+                                    Для этого нужно, чтобы x = −a/2 не лежал в интервале (−π/2; π/2):
+                                    <div class="math-line">−a/2 ≤ −π/2 &nbsp; или &nbsp; −a/2 ≥ π/2.</div>
+                                    Умножаем на −2 и не забываем поменять знаки:
+                                    <div class="math-line">a ≥ π &nbsp; или &nbsp; a ≤ −π.</div>
+                                    То есть
+                                    <div class="math-line">a ∈ (−∞; −π] ∪ [π; +∞).</div>
+                                </li>
+                                <li><strong>Вторая ветка попадает ровно в ту же точку, что и первая.</strong><br>
+                                    Тогда два найденных «кандидата» совпадают:
+                                    <div class="math-line">−a/2 = −π/4.</div>
+                                    <div class="math-line">a = π/2.</div>
+                                </li>
+                            </ol>
+                            Больше вариантов нет: если a ∈ (−π; π) и a ≠ π/2, то второй корень существует и отличается от −π/4, значит решений будет уже два.
+                        </div>
+                        <div class="success">Итак, единственность достигается либо при <strong>выпадении</strong> второй ветки из ОДЗ, либо при <strong>совпадении</strong> двух ветвей в одной точке.</div>
+                    </div>
+                </article>
+
+                <article class="step" data-target="fixedRoot movingRoot">
+                    <button class="step-head" type="button">
+                        <span>6) Явная проверка ответа<small>Показываем, почему найденные значения подходят и почему других нет.</small></span>
+                        <span class="chev">▾</span>
+                    </button>
+                    <div class="step-body">
+                        <div class="detail-short">
+                            Если a ≤ −π или a ≥ π, второй корень не входит в ОДЗ, остаётся только x = −π/4. Если a = π/2, оба корня совпадают. В остальных случаях корней два.
+                        </div>
+                        <div class="detail-standard">
+                            Проверим три случая:
+                            <ol class="check-list">
+                                <li><strong>a ≤ −π или a ≥ π.</strong> Тогда x = −a/2 не лежит в (−π/2; π/2), значит из второй ветки допустимого корня нет. Остаётся только x = −π/4.</li>
+                                <li><strong>a = π/2.</strong> Тогда x = −a/2 = −π/4. Обе ветки дают одну и ту же точку, значит решение одно.</li>
+                                <li><strong>a ∈ (−π; π), a ≠ π/2.</strong> Тогда x = −a/2 — допустимый корень и он не равен −π/4. Значит, решений два.</li>
+                            </ol>
+                        </div>
+                        <div class="detail-long">
+                            Проверка обязана разделять «подходит» и «не подходит».
+                            <ol class="check-list">
+                                <li><strong>При a ∈ (−∞; −π] ∪ [π; +∞)</strong> число x = −a/2 находится не внутри (−π/2; π/2), а значит, во второй ветке допустимого решения нет. Но первая ветка по-прежнему даёт x = −π/4. Следовательно, имеется ровно один допустимый корень.</li>
+                                <li><strong>При a = π/2</strong> получаем x<sub>2</sub> = −a/2 = −π/4 = x<sub>1</sub>. Ветки не дают два разных решения — они дают одну и ту же точку. Значит, решение опять единственно.</li>
+                                <li><strong>Если a лежит внутри интервала (−π; π), но не равно π/2</strong>, то x<sub>2</sub> = −a/2 принадлежит ОДЗ и отличается от −π/4. Тогда существуют две разные допустимые точки, то есть условие задачи нарушается.</li>
+                            </ol>
+                            Этим доказано не только то, что найденные значения подходят, но и то, что никаких других значений параметра быть не может.
+                        </div>
+                        <div class="result-box">Ответ: a ∈ (−∞; −π] ∪ {π/2} ∪ [π; +∞).</div>
+                    </div>
+                </article>
+
+                <article class="step" data-target="fixedRoot movingRoot">
+                    <button class="step-head" type="button">
+                        <span>7) Краткий вывод<small>Финальная сжатая формулировка.</small></span>
+                        <span class="chev">▾</span>
+                    </button>
+                    <div class="step-body">
+                        <ul class="summary-list">
+                            <li>После разложения равенства квадратов получаем два корня-кандидата: <strong>x = −π/4</strong> и <strong>x = −a/2</strong>.</li>
+                            <li>Первый корень существует всегда, второй — только при попадании в ОДЗ.</li>
+                            <li>Ровно одно решение получается, если второй корень отсутствует или совпадает с первым.</li>
+                        </ul>
+                        <div class="result-box">Итог: <strong>a ≤ −π</strong>, либо <strong>a = π/2</strong>, либо <strong>a ≥ π</strong>.</div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="card">
+                <h2 class="section-title"><span class="dot"></span><span>Типичные ошибки</span></h2>
+                <ul class="mistakes-list">
+                    <li>Считать, что на концах x = ±π/2 можно проверять уравнение. Нельзя: там tan x не существует.</li>
+                    <li>Из U<sup>2</sup> = V<sup>2</sup> делать только вывод U = V и забывать про случай U = −V.</li>
+                    <li>После получения x = −a/2 не проверить, попадает ли этот x в ОДЗ.</li>
+                    <li>Не заметить случай совпадения двух веток: x = −a/2 = −π/4, то есть a = π/2.</li>
+                    <li>Перепутать знак при переходе от условия −a/2 ∉ (−π/2; π/2) к условию на параметр a.</li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2 class="section-title"><span class="dot"></span><span>Мини-квиз</span></h2>
+                <div class="quiz-item">
+                    <div><strong>1.</strong> Какой факт используется первым?</div>
+                    <label><input type="radio" name="q1" value="0"> Из равенства квадратов следует равенство оснований.</label>
+                    <label><input type="radio" name="q1" value="1"> Из U<sup>2</sup> = V<sup>2</sup> следует U = V или U = −V.</label>
+                    <label><input type="radio" name="q1" value="0"> Нужно сразу извлечь квадратный корень.</label>
+                </div>
+                <div class="quiz-item">
+                    <div><strong>2.</strong> Какой корень получается из ветки U = V?</div>
+                    <label><input type="radio" name="q2" value="0"> x = a/2</label>
+                    <label><input type="radio" name="q2" value="1"> x = −π/4</label>
+                    <label><input type="radio" name="q2" value="0"> x = π/4</label>
+                </div>
+                <div class="quiz-item">
+                    <div><strong>3.</strong> Когда второй корень x = −a/2 не входит в ОДЗ?</div>
+                    <label><input type="radio" name="q3" value="1"> При a ∉ (−π; π)</label>
+                    <label><input type="radio" name="q3" value="0"> При a ∈ (−π; π)</label>
+                    <label><input type="radio" name="q3" value="0"> Только при a = 0</label>
+                </div>
+                <button id="checkQuizBtn">Проверить мини-квиз</button>
+                <div class="quiz-result" id="quizResult"></div>
+            </section>
+
+            <section class="card">
+                <h2 class="section-title"><span class="dot"></span><span>Самопроверка</span></h2>
+                <p class="muted">Введите все значения параметра a, при которых решение единственно. Подойдут, например, записи вида <code>a&lt;=−π; a=π/2; a&gt;=π</code> или <code>(−∞;−π] ∪ {π/2} ∪ [π;+∞)</code>.</p>
+                <div class="selfcheck-grid">
+                    <input id="selfInput" placeholder="Введите ответ" />
+                    <button id="selfCheckBtn">Сверить</button>
+                </div>
+                <div class="selfcheck-result" id="selfcheckResult"></div>
+            </section>
+
+            <section class="card">
+                <h2 class="section-title"><span class="dot"></span><span>Генератор похожих задач</span></h2>
+                <p class="muted">Здесь строятся задачи того же метода: после разложения равенства квадратов получаются ветви <strong>tan x = −c</strong> и <strong>kx + a = 0</strong>.</p>
+                <div class="generator-grid">
+                    <div class="control">
+                        <label for="genCount">Количество задач</label>
+                        <select id="genCount">
+                            <option value="1">1 задача</option>
+                            <option value="3" selected>3 задачи</option>
+                            <option value="5">5 задач</option>
+                        </select>
+                    </div>
+                    <div class="control">
+                        <label for="genAnswers">Показывать ответы</label>
+                        <select id="genAnswers">
+                            <option value="yes" selected>Да</option>
+                            <option value="no">Нет</option>
+                        </select>
+                    </div>
+                    <div class="control">
+                        <label for="genIdeas">Показывать идею</label>
+                        <select id="genIdeas">
+                            <option value="yes" selected>Да</option>
+                            <option value="no">Нет</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+                    <button id="generateBtn">Сгенерировать</button>
+                    <button class="btn-soft" id="useFirstGenBtn">Перенести первую задачу в модель</button>
+                </div>
+                <div class="generator-result" id="generatorResult"></div>
+            </section>
+        </main>
+
+        <aside class="sticky-wrap">
+            <section class="card">
+                <h2 class="section-title"><span class="dot"></span><span>Управление разбором</span></h2>
+                <div class="control-grid">
+                    <div class="control">
+                        <label for="detailSelect">Подробность</label>
+                        <select id="detailSelect">
+                            <option value="d-k">Кратко</option>
+                            <option value="d-s" selected>Стандартно</option>
+                            <option value="d-v">Очень подробно</option>
+                        </select>
+                    </div>
+                    <div class="control">
+                        <label for="stepModeSelect">Режим показа</label>
+                        <select id="stepModeSelect">
+                            <option value="step">Сразу полное</option>
+                            <option value="step-mode" selected>Пошаговое раскрытие</option>
+                        </select>
+                    </div>
+                    <div class="control">
+                        <label for="aSlider">Параметр a</label>
+                        <input type="range" id="aSlider" min="-6.5" max="6.5" step="0.01" value="1.57079632679" />
+                    </div>
+                    <div class="control">
+                        <label for="aNumber">Точное значение a</label>
+                        <input class="ghost-input" id="aNumber" type="number" step="0.01" value="1.57" />
+                    </div>
+                </div>
+                <div class="result-box" id="liveConclusion">Сейчас a ≈ 1.57, поэтому две ветки совпадают и решение единственно.</div>
+                <div class="toggle-list">
+                    <div class="toggle-row" data-target="branch1 tanLine fixedRoot">
+                        <span>Показывать ветку tan x = −1</span>
+                        <input type="checkbox" id="showTanBranch" checked>
+                    </div>
+                    <div class="toggle-row" data-target="branch2 axisLine movingRoot">
+                        <span>Показывать ветку x = −a/2</span>
+                        <input type="checkbox" id="showLinearBranch" checked>
+                    </div>
+                    <div class="toggle-row" data-target="domain">
+                        <span>Показывать границы ОДЗ</span>
+                        <input type="checkbox" id="showDomain" checked>
+                    </div>
+                    <div class="toggle-row" data-target="legend">
+                        <span>Показывать легенду</span>
+                        <input type="checkbox" id="showLegend" checked>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card graph-card">
+                <h2 class="section-title"><span class="dot"></span><span>Интерактивная модель</span></h2>
+                <p class="viz-caption">На одном чертеже совмещены две идеи: <strong>tan x = −1</strong> и <strong>2x + a = 0</strong>. Меняйте a и следите, когда подвижная точка <strong>x = −a/2</strong> исчезает из ОДЗ или совпадает с <strong>x = −π/4</strong>.</p>
+                <div class="svg-wrap" id="svgWrap">
+                    <svg viewBox="0 0 760 680" id="graphSvg" aria-label="График">
+                        <defs>
+                            <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+                                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+                            </pattern>
+                            <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        </defs>
+                        <rect x="0" y="0" width="760" height="680" fill="url(#grid)"></rect>
+                        <g id="zoomGroup">
+                            <g id="mainGroup"></g>
+                        </g>
+                    </svg>
+                </div>
+                <div style="margin-top:12px">
+                    <div class="small-label">Масштаб чертежа</div>
+                    <input type="range" id="zoomSlider" min="0.7" max="2.4" step="0.01" value="1" />
+                    <div class="btn-row" style="margin-top:8px">
+                        <button class="btn-soft" id="zoomOutBtn">−</button>
+                        <button class="btn-soft" id="zoomInBtn">+</button>
+                        <button class="btn-soft" id="zoomResetBtn">Сброс</button>
+                        <button class="btn-soft" id="copyAnswerBtn">Копировать ответ</button>
+                    </div>
+                </div>
+                <div class="legend" id="legendBox">
+                    <div class="legend-item" data-target="tanLine fixedRoot branch1"><span class="sw" style="background:#7cc7ff"></span><div><strong>tan x</strong> и линия y = −1<br><small>Их пересечение даёт x = −π/4</small></div></div>
+                    <div class="legend-item" data-target="axisLine movingRoot branch2"><span class="sw" style="background:#8ef0c2"></span><div><strong>Прямая y = 2x + a</strong><br><small>Её нуль даёт x = −a/2</small></div></div>
+                    <div class="legend-item" data-target="domain"><span class="sw" style="background:#ffd479"></span><div><strong>Границы ОДЗ</strong><br><small>x = ±π/2 не входят в область определения</small></div></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+    <div class="footer-space"></div>
+</div>
+
+<script>
+    // ===== Небольшие удобные ссылки на элементы =====
+    const root = document.getElementById('pageRoot');
+    const steps = [...document.querySelectorAll('.step')];
+    const stepModeSelect = document.getElementById('stepModeSelect');
+    const detailSelect = document.getElementById('detailSelect');
+    const aSlider = document.getElementById('aSlider');
+    const aNumber = document.getElementById('aNumber');
+    const liveConclusion = document.getElementById('liveConclusion');
+    const showTanBranch = document.getElementById('showTanBranch');
+    const showLinearBranch = document.getElementById('showLinearBranch');
+    const showDomain = document.getElementById('showDomain');
+    const showLegend = document.getElementById('showLegend');
+    const legendBox = document.getElementById('legendBox');
+
+    // ===== Математические константы =====
+    const PI = Math.PI;
+    let currentTask = {
+        k: 2,
+        c: 1,
+        fixedX: -Math.atan(1), // tan x = -1 -> x = -π/4
+        fixedLabel: '−π/4',
+        fixedEquationLabel: 'tan x = −1',
+        linearLabel: '2x + a = 0',
+        answerLabel: 'a ∈ (−∞; −π] ∪ {π/2} ∪ [π; +∞)'
+    };
+
+    // ===== Координатная модель =====
+    const mainGroup = document.getElementById('mainGroup');
+    const zoomGroup = document.getElementById('zoomGroup');
+    const svgWrap = document.getElementById('svgWrap');
+    const W = 760, H = 680;
+    const margin = {left:78,right:28,top:28,bottom:72};
+    const plotW = W - margin.left - margin.right;
+    const plotH = H - margin.top - margin.bottom;
+    const xMin = -PI/2 - 0.28;
+    const xMax =  PI/2 + 0.28;
+    const yMin = -3.2;
+    const yMax =  3.2;
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+
+    function sx(x){ return margin.left + (x - xMin) / (xMax - xMin) * plotW; }
+    function sy(y){ return margin.top + (yMax - y) / (yMax - yMin) * plotH; }
+    function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+    function fmt(n){
+        if (Math.abs(n - PI/2) < 0.03) return 'π/2';
+        if (Math.abs(n + PI/2) < 0.03) return '−π/2';
+        if (Math.abs(n - PI/4) < 0.03) return 'π/4';
+        if (Math.abs(n + PI/4) < 0.03) return '−π/4';
+        if (Math.abs(n) < 0.01) return '0';
+        return n.toFixed(2).replace('-', '−');
+    }
+    function inODZ(x){ return x > -PI/2 && x < PI/2; }
+    function eq(a,b,eps=1e-9){ return Math.abs(a-b) < eps; }
+
+    function taskAnswerText(k, c){
+        const x0 = -Math.atan(c); // tan x = -c
+        const coincidence = -k*x0; // a so that -a/k = x0
+        const bound = k*PI/2;
+        return {
+            x0,
+            coincidence,
+            bound,
+            text: `a ∈ (−∞; ${fmt(-bound)}] ∪ {${fmt(coincidence)}} ∪ [${fmt(bound)}; +∞)`
+        };
+    }
+
+    function solveCurrent(a){
+        const x1 = currentTask.fixedX;
+        const x2 = -a/currentTask.k;
+        const x2ok = inODZ(x2);
+        const same = x2ok && eq(x1,x2,1e-7);
+        let count = 1;
+        if (x2ok && !same) count = 2;
+        return {x1,x2,x2ok,same,count};
+    }
+
+    function liveText(a){
+        const s = solveCurrent(a);
+        const bound = currentTask.k*PI/2;
+        const coincidence = -currentTask.k*currentTask.fixedX;
+        if (s.same) return `Сейчас a ≈ ${a.toFixed(2).replace('-', '−')}, поэтому две ветки совпадают в точке x = ${currentTask.fixedLabel}. Решение единственно.`;
+        if (!s.x2ok) return `Сейчас a ≈ ${a.toFixed(2).replace('-', '−')}, поэтому подвижная точка x = ${fmt(s.x2)} вне ОДЗ. Остаётся только x = ${currentTask.fixedLabel}. Решение единственно.`;
+        return `Сейчас a ≈ ${a.toFixed(2).replace('-', '−')}, поэтому внутри ОДЗ есть две разные точки: x = ${currentTask.fixedLabel} и x = ${fmt(s.x2)}. Значит, решений два.`;
+    }
+
+    function pathForTan(){
+        const pts = [];
+        const step = 0.01;
+        let part = [];
+        for(let x = -PI/2 + 0.03; x <= PI/2 - 0.03; x += step){
+            const y = Math.tan(x);
+            if (y < yMin - .4 || y > yMax + .4){
+                if (part.length > 1) pts.push(part);
+                part = [];
+                continue;
+            }
+            part.push([sx(x), sy(y)]);
+        }
+        if (part.length > 1) pts.push(part);
+        return pts.map(seg => seg.map((p,i)=>`${i?'L':'M'} ${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' ')).join(' ');
+    }
+
+    function renderGraph(){
+        const a = parseFloat(aSlider.value);
+        const s = solveCurrent(a);
+        const xODZL = -PI/2;
+        const xODZR = PI/2;
+        const zeroX = -a/currentTask.k;
+        const lineY0 = sy(-1 * currentTask.c);
+        const axisY = sy(0);
+        const lineStart = sx(xMin), lineEnd = sx(xMax);
+
+        mainGroup.innerHTML = `
+        <g data-key="domain" opacity="${showDomain.checked?1:0.12}">
+          <line x1="${sx(xODZL)}" y1="${margin.top}" x2="${sx(xODZL)}" y2="${margin.top+plotH}" stroke="#ffd479" stroke-width="3" stroke-dasharray="10 8" filter="url(#glow)" />
+          <line x1="${sx(xODZR)}" y1="${margin.top}" x2="${sx(xODZR)}" y2="${margin.top+plotH}" stroke="#ffd479" stroke-width="3" stroke-dasharray="10 8" filter="url(#glow)" />
+          <text x="${sx(xODZL)+8}" y="${margin.top+28}" fill="#ffd479" font-size="16">x = −π/2</text>
+          <text x="${sx(xODZR)-72}" y="${margin.top+28}" fill="#ffd479" font-size="16">x = π/2</text>
+        </g>
+
+        <g opacity="0.85">
+          <line x1="${margin.left}" y1="${axisY}" x2="${margin.left+plotW}" y2="${axisY}" stroke="rgba(255,255,255,.6)" stroke-width="2" />
+          <line x1="${sx(0)}" y1="${margin.top}" x2="${sx(0)}" y2="${margin.top+plotH}" stroke="rgba(255,255,255,.45)" stroke-width="2" />
+          <text x="${margin.left+plotW-12}" y="${axisY-10}" fill="rgba(255,255,255,.75)" font-size="15">x</text>
+          <text x="${sx(0)+10}" y="${margin.top+18}" fill="rgba(255,255,255,.75)" font-size="15">y</text>
+        </g>
+
+        <g opacity="0.85">
+          ${[-PI/2,-PI/4,0,PI/4,PI/2].map(x => `
+            <g>
+              <line x1="${sx(x)}" y1="${axisY-7}" x2="${sx(x)}" y2="${axisY+7}" stroke="rgba(255,255,255,.5)" />
+              <text x="${sx(x)}" y="${axisY+24}" fill="rgba(255,255,255,.78)" font-size="14" text-anchor="middle">${fmt(x)}</text>
+            </g>
+          `).join('')}
+          ${[-2,-1,1,2].map(y => `
+            <g>
+              <line x1="${sx(0)-7}" y1="${sy(y)}" x2="${sx(0)+7}" y2="${sy(y)}" stroke="rgba(255,255,255,.5)" />
+              <text x="${sx(0)-12}" y="${sy(y)+5}" fill="rgba(255,255,255,.78)" font-size="14" text-anchor="end">${y}</text>
+            </g>
+          `).join('')}
+        </g>
+
+        <g data-key="tanLine branch1" opacity="${showTanBranch.checked?1:0.08}">
+          <path d="${pathForTan()}" fill="none" stroke="#7cc7ff" stroke-width="4" stroke-linecap="round" />
+          <line x1="${lineStart}" y1="${sy(-currentTask.c)}" x2="${lineEnd}" y2="${sy(-currentTask.c)}" stroke="#7cc7ff" stroke-width="3" stroke-dasharray="12 8" />
+          <text x="${lineStart+10}" y="${sy(-currentTask.c)-10}" fill="#a7ddff" font-size="16">y = ${currentTask.c===1?'−1':('−'+currentTask.c)}</text>
+          <circle data-key="fixedRoot" cx="${sx(currentTask.fixedX)}" cy="${sy(-currentTask.c)}" r="8" fill="#7cc7ff" filter="url(#glow)" />
+          <text x="${sx(currentTask.fixedX)+10}" y="${sy(-currentTask.c)-12}" fill="#d8f1ff" font-size="16">x = ${currentTask.fixedLabel}</text>
+        </g>
+
+        <g data-key="axisLine branch2" opacity="${showLinearBranch.checked?0.98:0.08}">
+          <line x1="${lineStart}" y1="${sy(currentTask.k*xMin + a)}" x2="${lineEnd}" y2="${sy(currentTask.k*xMax + a)}" stroke="#8ef0c2" stroke-width="4" />
+          <line x1="${lineStart}" y1="${axisY}" x2="${lineEnd}" y2="${axisY}" stroke="#8ef0c2" stroke-width="2" stroke-dasharray="7 8" opacity="0.25" />
+          <text x="${lineStart+10}" y="${sy(currentTask.k*xMin + a)-10}" fill="#b9ffe0" font-size="16">y = ${currentTask.k}x + a</text>
+          ${s.x2ok ? `
+            <circle data-key="movingRoot" cx="${sx(zeroX)}" cy="${axisY}" r="8" fill="#8ef0c2" filter="url(#glow)" />
+            <text x="${sx(zeroX)+10}" y="${axisY-12}" fill="#ddfff0" font-size="16">x = ${fmt(zeroX)}</text>
+          ` : `
+            <text x="${clamp(sx(zeroX), margin.left+20, margin.left+plotW-120)}" y="${axisY-16}" fill="#8ef0c2" font-size="16">x = ${fmt(zeroX)} вне ОДЗ</text>
+          `}
+        </g>
+      `;
+        applyHighlights();
+        applyZoom();
+        liveConclusion.textContent = liveText(a);
+        legendBox.style.display = showLegend.checked ? 'grid' : 'none';
+    }
+
+    function applyZoom(){
+        zoomGroup.setAttribute('transform', `translate(${panX.toFixed(1)} ${panY.toFixed(1)}) scale(${zoom.toFixed(3)})`);
+    }
+
+    function setA(val){
+        const v = clamp(parseFloat(val)||0, parseFloat(aSlider.min), parseFloat(aSlider.max));
+        aSlider.value = v;
+        aNumber.value = v.toFixed(2);
+        renderGraph();
+    }
+
+    aSlider.addEventListener('input', e => setA(e.target.value));
+    aNumber.addEventListener('input', e => setA(e.target.value));
+
+    detailSelect.addEventListener('change', ()=>{
+        root.classList.remove('d-k','d-s','d-v');
+        root.classList.add(detailSelect.value);
+    });
+    stepModeSelect.addEventListener('change', ()=>{
+        root.classList.toggle('step-mode', stepModeSelect.value === 'step-mode');
+    });
+
+    [showTanBranch, showLinearBranch, showDomain, showLegend].forEach(el => el.addEventListener('change', renderGraph));
+
+    // ===== Подсветка связи текст ↔ рисунок =====
+    let activeTargets = new Set();
+    function parseTargets(el){ return (el.dataset.target || '').split(/\s+/).filter(Boolean); }
+    function clearHighlights(){
+        document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+        mainGroup.querySelectorAll('[data-key]').forEach(el => el.setAttribute('filter', ''));
+        activeTargets.clear();
+    }
+    function applyHighlights(){
+        mainGroup.querySelectorAll('[data-key]').forEach(el => {
+            const keys = (el.getAttribute('data-key') || '').split(/\s+/).filter(Boolean);
+            if (keys.some(k => activeTargets.has(k))) {
+                el.setAttribute('filter','url(#glow)');
+                el.setAttribute('opacity', '1');
+            }
+        });
+    }
+    function activateTargets(targets){
+        clearHighlights();
+        targets.forEach(t => activeTargets.add(t));
+        document.querySelectorAll('[data-target]').forEach(el => {
+            const keys = parseTargets(el);
+            if (keys.some(k => activeTargets.has(k))) el.classList.add('highlight');
+        });
+        applyHighlights();
+    }
+    document.querySelectorAll('[data-target]').forEach(el => {
+        el.addEventListener('mouseenter', ()=> activateTargets(parseTargets(el)));
+        el.addEventListener('mouseleave', clearHighlights);
+        el.addEventListener('focusin', ()=> activateTargets(parseTargets(el)));
+        el.addEventListener('focusout', clearHighlights);
+    });
+
+    // ===== Пошаговое раскрытие =====
+    steps.forEach((step, idx) => {
+        if (idx > 1) step.classList.add('collapsed');
+        const btn = step.querySelector('.step-head');
+        btn.addEventListener('click', ()=> step.classList.toggle('collapsed'));
+    });
+    let revealedCount = 2;
+    function revealNext(){
+        if (revealedCount < steps.length) {
+            steps[revealedCount].classList.remove('collapsed');
+            steps[revealedCount].classList.add('revealed');
+            steps[revealedCount].scrollIntoView({behavior:'smooth', block:'nearest'});
+            revealedCount++;
+        }
+    }
+    document.getElementById('nextStepBtn').addEventListener('click', revealNext);
+    document.getElementById('expandAllBtn').addEventListener('click', ()=>{
+        steps.forEach(s => { s.classList.remove('collapsed'); s.classList.add('revealed'); });
+        revealedCount = steps.length;
+    });
+    document.getElementById('collapseAllBtn').addEventListener('click', ()=>{
+        steps.forEach((s,idx) => {
+            if (idx > 1) s.classList.add('collapsed');
+        });
+        revealedCount = 2;
+    });
+
+    // ===== Зум =====
+    const zoomSlider = document.getElementById('zoomSlider');
+    function setZoom(v){
+        zoom = clamp(parseFloat(v)||1, 0.7, 2.4);
+        zoomSlider.value = zoom.toFixed(2);
+        applyZoom();
+    }
+    zoomSlider.addEventListener('input', e => setZoom(e.target.value));
+    document.getElementById('zoomInBtn').addEventListener('click', ()=> setZoom(zoom + 0.12));
+    document.getElementById('zoomOutBtn').addEventListener('click', ()=> setZoom(zoom - 0.12));
+    document.getElementById('zoomResetBtn').addEventListener('click', ()=>{ zoom = 1; panX = 0; panY = 0; zoomSlider.value = 1; applyZoom(); });
+    svgWrap.addEventListener('wheel', e => {
+        e.preventDefault();
+        setZoom(zoom + (e.deltaY < 0 ? 0.08 : -0.08));
+    }, {passive:false});
+    let dragging = false, startX = 0, startY = 0;
+    svgWrap.addEventListener('pointerdown', e => { dragging = true; startX = e.clientX - panX; startY = e.clientY - panY; svgWrap.setPointerCapture(e.pointerId); });
+    svgWrap.addEventListener('pointermove', e => { if (!dragging) return; panX = e.clientX - startX; panY = e.clientY - startY; applyZoom(); });
+    svgWrap.addEventListener('pointerup', ()=> dragging = false);
+    svgWrap.addEventListener('pointerleave', ()=> dragging = false);
+
+    // ===== Копирование ответа =====
+    document.getElementById('copyAnswerBtn').addEventListener('click', async ()=>{
+        try {
+            await navigator.clipboard.writeText('a ∈ (−∞; −π] ∪ {π/2} ∪ [π; +∞)');
+            liveConclusion.textContent = 'Ответ скопирован: a ∈ (−∞; −π] ∪ {π/2} ∪ [π; +∞).';
+        } catch {
+            liveConclusion.textContent = 'Не удалось скопировать автоматически. Ответ: a ∈ (−∞; −π] ∪ {π/2} ∪ [π; +∞).';
+        }
+    });
+
+    // ===== Квиз =====
+    document.getElementById('checkQuizBtn').addEventListener('click', ()=>{
+        let score = 0;
+        ['q1','q2','q3'].forEach(q => {
+            const ch = document.querySelector(`input[name="${q}"]:checked`);
+            if (ch && ch.value === '1') score++;
+        });
+        const box = document.getElementById('quizResult');
+        if (score === 3) box.innerHTML = '<span style="color:var(--good)">Отлично: 3 из 3. Логика решения уже схвачена.</span>';
+        else box.innerHTML = `<span style="color:var(--warn)">Результат: ${score} из 3. Ещё раз посмотрите шаги 2, 4 и 5.</span>`;
+    });
+
+    // ===== Самопроверка =====
+    function normalizeAnswer(s){
+        return (s || '')
+            .toLowerCase()
+            .replace(/\s+/g,'')
+            .replace(/–|—/g,'-')
+            .replace(/<=/g,'≤')
+            .replace(/>=/g,'≥')
+            .replace(/\+/g,'+')
+            .replace(/\{/g,'')
+            .replace(/\}/g,'');
+    }
+    document.getElementById('selfCheckBtn').addEventListener('click', ()=>{
+        const s = normalizeAnswer(document.getElementById('selfInput').value);
+        const ok = s.includes('π/2') && (
+        s.includes('a≤-π') && s.includes('a≥π') ||
+        s.includes('(-∞;-π]∪π/2∪[π;+∞)') ||
+        s.includes('(−∞;−π]∪π/2∪[π;+∞)') ||
+        s.includes('(−∞;-π]∪{π/2}∪[π;+∞)') ||
+        s.includes('(−∞;−π]∪{π/2}∪[π;+∞)')
+        );
+        const out = document.getElementById('selfcheckResult');
+        out.innerHTML = ok
+        ? '<span style="color:var(--good)">Верно. Ответ: a ∈ (−∞; −π] ∪ {π/2} ∪ [π; +∞).</span>'
+        : '<span style="color:var(--warn)">Пока не совпало. Подумайте: второй корень должен либо исчезнуть из ОДЗ, либо совпасть с x = −π/4.</span>';
+    });
+
+    // ===== Генератор похожих задач =====
+    let generatedTasks = [];
+    function taskToHtml(t, idx, showAns, showIdea){
+        return `
+        <div class="quiz-item">
+          <div><strong>${idx+1}.</strong> Найдите все значения <strong>a</strong>, при которых уравнение
+          <div class="math-line">(${t.k}x + a + ${t.c} + tan x)<sup>2</sup> = (${t.k}x + a − ${t.c} − tan x)<sup>2</sup></div>
+          имеет единственное решение на отрезке [−π/2; π/2].</div>
+          ${showIdea ? `<div class="mini" style="margin-top:8px">Идея: после разложения равенства квадратов получаем ветви <strong>tan x = −${t.c}</strong> и <strong>${t.k}x + a = 0</strong>.</div>` : ''}
+          ${showAns ? `<div class="success" style="margin-top:10px">Ответ: ${t.answer.text}.</div>` : ''}
+        </div>
+      `;
+    }
+    document.getElementById('generateBtn').addEventListener('click', ()=>{
+        const count = parseInt(document.getElementById('genCount').value,10);
+        const showAns = document.getElementById('genAnswers').value === 'yes';
+        const showIdea = document.getElementById('genIdeas').value === 'yes';
+        generatedTasks = [];
+        const used = new Set();
+        while (generatedTasks.length < count) {
+            const k = [1,2,3,4][Math.floor(Math.random()*4)];
+            const c = [1,2,0.5,1.5][Math.floor(Math.random()*4)];
+            const key = `${k}_${c}`;
+            if (used.has(key)) continue;
+            used.add(key);
+            const ans = taskAnswerText(k,c);
+            generatedTasks.push({k,c,answer:ans});
+        }
+        document.getElementById('generatorResult').innerHTML = generatedTasks.map((t,i)=>taskToHtml(t,i,showAns,showIdea)).join('');
+    });
+
+    document.getElementById('useFirstGenBtn').addEventListener('click', ()=>{
+        if (!generatedTasks.length) {
+            document.getElementById('generatorResult').innerHTML = '<div class="warning">Сначала сгенерируйте хотя бы одну задачу.</div>';
+            return;
+        }
+        const t = generatedTasks[0];
+        const fixedX = -Math.atan(t.c);
+        currentTask = {
+            k: t.k,
+            c: t.c,
+            fixedX,
+            fixedLabel: fmt(fixedX),
+            fixedEquationLabel: `tan x = −${t.c}`,
+            linearLabel: `${t.k}x + a = 0`,
+            answerLabel: t.answer.text
+        };
+        setA(-t.k*fixedX);
+        liveConclusion.textContent = `В модель перенесена первая сгенерированная задача: tan x = −${t.c} и ${t.k}x + a = 0.`;
+        renderGraph();
+    });
+
+    // ===== Первичная инициализация =====
+    root.classList.add('step-mode');
+    setA(Math.PI/2);
+    renderGraph();
+</script>
+</body>
+</html>

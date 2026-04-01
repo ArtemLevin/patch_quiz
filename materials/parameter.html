@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Профильная математика — задачи с параметром</title>
+    <style>
+        :root{
+            --bg:#0b1020; --panel:rgba(18,26,49,.88); --panel2:rgba(255,255,255,.04);
+            --text:#edf2ff; --muted:#a8b3cf; --line:rgba(255,255,255,.12);
+            --accent:#7cc4ff; --ok:#8ef0c2; --shadow:0 18px 60px rgba(0,0,0,.35); --radius:22px;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            margin:0; color:var(--text);
+            font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+            background:
+            radial-gradient(circle at top left, rgba(124,196,255,.18), transparent 28%),
+            radial-gradient(circle at top right, rgba(185,147,255,.14), transparent 30%),
+            linear-gradient(180deg,#0a0f1d 0%, #0d1326 100%);
+            min-height:100vh;
+        }
+        .wrap{width:min(1320px,calc(100% - 32px)); margin:0 auto; padding:28px 0 56px}
+        .hero{
+            padding:34px; border:1px solid var(--line); border-radius:30px;
+            background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+            box-shadow:var(--shadow); backdrop-filter:blur(16px);
+        }
+        .hero h1{margin:0 0 12px; font-size:clamp(2rem,4vw,3.4rem); line-height:1.05; letter-spacing:-.03em}
+        .hero p{margin:0; color:var(--muted); font-size:1.05rem; max-width:900px; line-height:1.6}
+        .hero-stats{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px}
+        .pill{padding:10px 14px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text); font-size:.95rem}
+        .layout{display:grid; grid-template-columns:320px 1fr; gap:22px; margin-top:22px; align-items:start}
+        .toc{
+            position:sticky; top:18px; padding:18px; border-radius:var(--radius); border:1px solid var(--line);
+            background:var(--panel); box-shadow:var(--shadow); backdrop-filter:blur(14px);
+        }
+        .toc h2{margin:0 0 12px; font-size:1.1rem}
+        .toc-list{display:grid; gap:10px}
+        .toc-link{
+            display:flex; justify-content:space-between; gap:12px; padding:12px 14px; border-radius:16px;
+            border:1px solid transparent; background:var(--panel2); color:var(--text); text-decoration:none; transition:.2s ease;
+        }
+        .toc-link:hover{transform:translateY(-1px); border-color:rgba(124,196,255,.35); background:rgba(124,196,255,.08)}
+        .count{color:var(--muted); white-space:nowrap}
+        .content{display:grid; gap:18px}
+        .section-block{border:1px solid var(--line); border-radius:26px; background:var(--panel); box-shadow:var(--shadow); overflow:hidden}
+        .section-head{
+            display:flex; justify-content:space-between; align-items:end; gap:12px; padding:22px 24px 10px;
+            border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+        }
+        .section-head h2{margin:0; font-size:clamp(1.15rem,2vw,1.5rem); line-height:1.3}
+        .section-meta{color:var(--muted); font-size:.95rem}
+        .task-list{margin:0; padding:18px 24px 24px 48px; display:grid; gap:16px}
+        .task-item::marker{color:var(--accent); font-weight:700}
+        .task-card{padding:18px; border-radius:20px; border:1px solid var(--line); background:rgba(255,255,255,.03)}
+        .task-top{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap}
+        .badge{
+            display:inline-flex; align-items:center; padding:8px 10px; border-radius:12px; background:rgba(124,196,255,.13);
+            border:1px solid rgba(124,196,255,.22); color:var(--accent); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+            font-size:.92rem; font-weight:700; letter-spacing:.02em;
+        }
+        .solution-link, .copy-btn{
+            display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; border-radius:14px; text-decoration:none;
+            font-weight:700; transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
+            border:none; cursor:pointer; font:inherit;
+        }
+        .solution-link{
+            color:#06101e; background:linear-gradient(135deg,var(--accent),#d5e8ff);
+            box-shadow:0 8px 22px rgba(124,196,255,.24);
+        }
+        .solution-link:hover{transform:translateY(-1px); box-shadow:0 12px 28px rgba(124,196,255,.34)}
+        .copy-btn{
+            color:var(--text); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+            box-shadow:none;
+        }
+        .copy-btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.12)}
+        .copy-btn.copied{background:rgba(142,240,194,.16); border-color:rgba(142,240,194,.35); color:var(--ok)}
+        .task-actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+        .task-text{display:grid; gap:10px}
+        .task-intro,.task-outro{color:var(--text); line-height:1.65; font-size:1rem}
+        .equation{
+            padding:14px 16px; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:rgba(7,11,24,.6);
+            overflow-x:auto; color:#f7f9ff;
+        }
+        .equation math{display:block}
+        .task-text math{font-size:1.05rem}
+        .equation math{font-size:1.22rem}
+        math{color:inherit}
+        .stub-note{margin-top:14px; color:var(--muted); font-size:.9rem}
+        .copy-status{min-height:1.2em; color:var(--muted); font-size:.92rem; margin-top:10px}
+        code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:var(--ok)}
+        .footer{margin-top:20px; color:var(--muted); text-align:center; font-size:.95rem}
+        @media (max-width:980px){.layout{grid-template-columns:1fr}.toc{position:static}}
+        @media (max-width:640px){
+            .wrap{width:min(100% - 20px,1320px)} .hero{padding:24px} .section-head{padding:18px 18px 10px}
+            .task-list{padding:16px 18px 20px 38px} .task-card{padding:14px} .solution-link,.copy-btn{width:100%}
+            .equation math{font-size:1.05rem}
+        }
+        @media print{
+            body{background:#fff; color:#000}
+            .hero,.toc,.section-block,.task-card{box-shadow:none; background:#fff; border-color:#bbb}
+            .solution-link{color:#000; background:#eee; box-shadow:none}
+            .stub-note,.section-meta,.count,.hero p{color:#444}
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header class="hero">
+        <h1>Профильная математика — задачи с параметром</h1>
+        <p>На странице собраны все задачи из вашего списка. Каждая задача показана в общем нумерованном списке внутри своего раздела и снабжена ссылкой-заглушкой на отдельную страницу с решением. Вся математика оформлена через встроенный MathML.</p>
+        <div class="hero-stats">
+            <div class="pill">Всего задач: <strong>49</strong></div>
+            <div class="pill">Разделов: <strong>6</strong></div>
+            <div class="pill">Формат ссылок: <code>solutions/КОД.html</code></div>
+        </div>
+    </header>
+    <main class="layout">
+        <aside class="toc">
+            <h2>Разделы</h2>
+            <nav class="toc-list" id="toc"></nav>
+        </aside>
+        <div class="content" id="content"></div>
+    </main>
+    <div class="footer">Автономная страница без внешних библиотек. Математические формулы встроены в HTML как MathML.</div>
+</div>
+
+<script>
+    const sections = [
+        {
+            title: 'Уравнения с логарифмами, корнями и условиями на отрезке',
+            tasks: [
+                {code:'8D6C09', intro:'Найдите все значения <math><mi>a</mi></math>, при которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mi>x</mi><mo>+</mo><mi>ln</mi><mo>(</mo><mi>x</mi><mo>+</mo><mi>a</mi><mo>)</mo><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>=</mo>
+      <msup><mrow><mo>(</mo><mi>x</mi><mo>-</mo><mi>ln</mi><mo>(</mo><mi>x</mi><mo>+</mo><mi>a</mi><mo>)</mo><mo>)</mo></mrow><mn>2</mn></msup>
+    </math>`, outro:'имеет единственное решение на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>1</mn><mo>]</mo></math>.'},
+                {code:'211B61', intro:'Найдите все значения <math><mi>a</mi></math>, при которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mn>2</mn><mi>x</mi><mo>+</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>+</mo><mi>tan</mi><mo>&#x2061;</mo><mi>x</mi><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>=</mo>
+      <msup><mrow><mo>(</mo><mn>2</mn><mi>x</mi><mo>+</mo><mi>a</mi><mo>-</mo><mn>1</mn><mo>-</mo><mi>tan</mi><mo>&#x2061;</mo><mi>x</mi><mo>)</mo></mrow><mn>2</mn></msup>
+    </math>`, outro:'имеет единственное решение на отрезке <math><mo>[</mo><mo>-</mo><mfrac><mi>&#x03C0;</mi><mn>2</mn></mfrac><mo>;</mo><mfrac><mi>&#x03C0;</mi><mn>2</mn></mfrac><mo>]</mo></math>.'},
+                {code:'3DD135', intro:'Найдите все значения <math><mi>a</mi></math>, при которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mn>2</mn><mi>x</mi><mo>+</mo><mi>ln</mi><mo>(</mo><mi>x</mi><mo>+</mo><mn>2</mn><mi>a</mi><mo>)</mo><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>=</mo>
+      <msup><mrow><mo>(</mo><mn>2</mn><mi>x</mi><mo>-</mo><mi>ln</mi><mo>(</mo><mi>x</mi><mo>+</mo><mn>2</mn><mi>a</mi><mo>)</mo><mo>)</mo></mrow><mn>2</mn></msup>
+    </math>`, outro:'имеет единственный корень на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>1</mn><mo>]</mo></math>.'},
+                {code:'A22E40', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msqrt><mrow><mn>2</mn><mo>-</mo><mn>3</mn><mi>x</mi></mrow></msqrt><mi>ln</mi><mo>(</mo><mn>16</mn><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup><mo>)</mo>
+      <mo>=</mo>
+      <msqrt><mrow><mn>2</mn><mo>-</mo><mn>3</mn><mi>x</mi></mrow></msqrt><mi>ln</mi><mo>(</mo><mn>4</mn><mi>x</mi><mo>+</mo><mi>a</mi><mo>)</mo>
+    </math>`, outro:'имеет ровно один корень.'},
+                {code:'9F53F5', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msqrt><mrow><mn>4</mn><mi>x</mi><mo>-</mo><mn>1</mn></mrow></msqrt><mi>ln</mi><mo>(</mo><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>2</mn><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup><mo>)</mo>
+      <mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно один корень на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>1</mn><mo>]</mo></math>.'},
+                {code:'9437D5', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>(</mo><mn>5</mn><mi>x</mi><mo>-</mo><mn>2</mn><mo>)</mo><mi>ln</mi><mo>(</mo><mi>x</mi><mo>+</mo><mi>a</mi><mo>)</mo>
+      <mo>=</mo>
+      <mo>(</mo><mn>5</mn><mi>x</mi><mo>-</mo><mn>2</mn><mo>)</mo><mi>ln</mi><mo>(</mo><mn>2</mn><mi>x</mi><mo>-</mo><mi>a</mi><mo>)</mo>
+    </math>`, outro:'имеет ровно один корень на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>1</mn><mo>]</mo></math>.'},
+                {code:'93CF53', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msqrt><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt>
+      <mo>=</mo>
+      <msqrt><mrow><mn>4</mn><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mn>4</mn><mi>a</mi><mo>+</mo><mn>2</mn><mo>)</mo><mi>x</mi><mo>+</mo><mn>2</mn><mi>a</mi></mrow></msqrt>
+    </math>`, outro:'на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>1</mn><mo>]</mo></math> имеет ровно один корень.'},
+                {code:'7F7EC4', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msqrt><mrow><mn>7</mn><mi>x</mi><mo>-</mo><mn>4</mn></mrow></msqrt><mi>ln</mi><mo>(</mo><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>8</mn><mi>x</mi><mo>+</mo><mn>17</mn><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup><mo>)</mo>
+      <mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>4</mn><mo>]</mo></math> ровно один корень.'},
+                {code:'3E3293', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mi>ln</mi><mo>(</mo><mn>4</mn><mi>x</mi><mo>-</mo><mn>1</mn><mo>)</mo><msqrt><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>6</mn><mi>x</mi><mo>+</mo><mn>6</mn><mi>a</mi><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt>
+      <mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно один корень на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>3</mn><mo>]</mo></math>.'},
+                {code:'C7C26F', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msqrt><mrow><mi>x</mi><mo>+</mo><mn>2</mn><mi>a</mi></mrow></msqrt><mi>ln</mi><mo>(</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>)</mo>
+      <mo>=</mo>
+      <mo>(</mo><mi>x</mi><mo>-</mo><mn>1</mn><mo>)</mo><mi>ln</mi><mo>(</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>)</mo>
+    </math>`, outro:'имеет ровно один корень на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>1</mn><mo>]</mo></math>.'},
+                {code:'997C65', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msqrt><mrow><mn>2</mn><mi>x</mi><mo>-</mo><mn>1</mn></mrow></msqrt><mi>ln</mi><mo>(</mo><mn>4</mn><mi>x</mi><mo>-</mo><mi>a</mi><mo>)</mo>
+      <mo>=</mo>
+      <msqrt><mrow><mn>2</mn><mi>x</mi><mo>-</mo><mn>1</mn></mrow></msqrt><mi>ln</mi><mo>(</mo><mn>5</mn><mi>x</mi><mo>+</mo><mi>a</mi><mo>)</mo>
+    </math>`, outro:'имеет ровно один корень на отрезке <math><mo>[</mo><mn>0</mn><mo>;</mo><mn>1</mn><mo>]</mo></math>.'},
+            ]
+        },
+        {
+            title: 'Показательные уравнения с параметром',
+            tasks: [
+                {code:'617476', intro:'Найдите все значения <math><mi>a</mi></math>, для каждого из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mn>4</mn><mi>x</mi></msup><mo>+</mo><mo>(</mo><mi>a</mi><mo>-</mo><mn>6</mn><mo>)</mo><msup><mn>2</mn><mi>x</mi></msup>
+      <mo>=</mo>
+      <mo>(</mo><mn>2</mn><mo>+</mo><mn>3</mn><mo>|</mo><mi>a</mi><mo>|</mo><mo>)</mo><msup><mn>2</mn><mi>x</mi></msup><mo>+</mo><mo>(</mo><mi>a</mi><mo>-</mo><mn>6</mn><mo>)</mo><mo>(</mo><mn>3</mn><mo>|</mo><mi>a</mi><mo>|</mo><mo>+</mo><mn>2</mn><mo>)</mo>
+    </math>`, outro:'имеет единственное решение.'},
+                {code:'B384BC', intro:'Найдите все значения <math><mi>a</mi></math>, для каждого из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mn>25</mn><mi>x</mi></msup><mo>-</mo><mo>(</mo><mi>a</mi><mo>+</mo><mn>6</mn><mo>)</mo><msup><mn>5</mn><mi>x</mi></msup>
+      <mo>=</mo>
+      <mo>(</mo><mn>5</mn><mo>+</mo><mn>3</mn><mo>|</mo><mi>a</mi><mo>|</mo><mo>)</mo><msup><mn>5</mn><mi>x</mi></msup><mo>-</mo><mo>(</mo><mi>a</mi><mo>+</mo><mn>6</mn><mo>)</mo><mo>(</mo><mn>3</mn><mo>|</mo><mi>a</mi><mo>|</mo><mo>+</mo><mn>5</mn><mo>)</mo>
+    </math>`, outro:'имеет единственное решение.'},
+            ]
+        },
+        {
+            title:'Алгебраические уравнения с модулем и числом корней',
+            tasks:[
+                {code:'11D603', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mi>a</mi><msup><mrow><mo>(</mo><mi>x</mi><mo>+</mo><mfrac><mn>4</mn><mi>x</mi></mfrac><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>+</mo><mn>2</mn><mo>(</mo><mi>x</mi><mo>+</mo><mfrac><mn>4</mn><mi>x</mi></mfrac><mo>)</mo><mo>-</mo><mn>25</mn><mi>a</mi><mo>+</mo><mn>10</mn><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'44907E', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>-</mo><mi>x</mi><mo>-</mo><mn>7</mn><mi>a</mi><mo>=</mo><mo>|</mo><mn>7</mn><mi>x</mi><mo>-</mo><mi>a</mi><mo>|</mo>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'1CCE7C', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mn>4</mn><mi>x</mi><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>|</mo><mo>-</mo><mo>|</mo><mn>3</mn><mi>x</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>-</mo><mo>(</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>(</mo><mn>4</mn><mi>x</mi><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>|</mo><mo>-</mo><mo>|</mo><mn>3</mn><mi>x</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo><mo>+</mo><mn>1</mn><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'831474', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mn>9</mn><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>8</mn><mi>x</mi><mo>+</mo><mn>16</mn><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'093D22', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>|</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>-</mo><mn>6</mn><mi>x</mi><mo>+</mo><mn>4</mn><mi>a</mi><mo>|</mo><mo>=</mo><mn>2</mn><mi>x</mi><mo>-</mo><mn>2</mn><mi>a</mi>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'0106DC', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msqrt><msup><mi>x</mi><mn>4</mn></msup></msqrt><mo>+</mo><msup><mrow><mo>(</mo><mi>a</mi><mo>-</mo><mn>3</mn><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>=</mo>
+      <mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>+</mo><mn>3</mn><mo>|</mo><mo>+</mo><mo>|</mo><mi>x</mi><mo>+</mo><mi>a</mi><mo>-</mo><mn>3</mn><mo>|</mo>
+    </math>`, outro:'либо имеет единственное решение, либо не имеет решений.'},
+                {code:'EDB7D3', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>+</mo><mi>x</mi><mo>-</mo><mn>7</mn><mi>a</mi><mo>=</mo><mo>|</mo><mn>7</mn><mi>x</mi><mo>+</mo><mi>a</mi><mo>|</mo>
+    </math>`, outro:'имеет больше двух различных корней.'},
+                {code:'C06958', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>-</mo><mn>1</mn><mo>|</mo><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>+</mo><mi>a</mi><mo>(</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>-</mo><mn>1</mn><mo>|</mo><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>-</mo><mn>16</mn><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'073F98', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mi>a</mi><mn>2</mn></msup><mo>-</mo><mi>a</mi><mi>x</mi><mo>-</mo><mn>2</mn><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>6</mn><mi>a</mi><mo>+</mo><mn>3</mn><mi>x</mi><mo>+</mo><mn>9</mn><mo>|</mo><mi>x</mi><mo>|</mo><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет четыре различных корня.'},
+                {code:'ACF79C', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mn>3</mn><mi>x</mi><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>|</mo><mo>+</mo><mo>|</mo><mn>2</mn><mi>x</mi><mo>+</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>-</mo><mi>a</mi><mo>(</mo><mn>3</mn><mi>x</mi><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>|</mo><mo>+</mo><mo>|</mo><mn>2</mn><mi>x</mi><mo>+</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>-</mo><mn>16</mn><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно один корень.'},
+                {code:'421A63', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>|</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>-</mo><mn>6</mn><mi>x</mi><mo>-</mo><mn>4</mn><mi>a</mi><mo>|</mo><mo>=</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>2</mn><mi>a</mi>
+    </math>`, outro:'имеет четыре различных корня.'},
+                {code:'162563', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mn>4</mn><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>6</mn><mi>x</mi><mo>+</mo><mn>9</mn><mo>-</mo><msup><mi>a</mi><mn>2</mn></msup><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'BC0636', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mo>|</mo><mi>x</mi><mo>-</mo><mfrac><mi>a</mi><mn>2</mn></mfrac><mo>|</mo><mo>+</mo><mo>|</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>-</mo><mn>7</mn><mo>(</mo><mo>|</mo><mi>x</mi><mo>-</mo><mfrac><mi>a</mi><mn>2</mn></mfrac><mo>|</mo><mo>+</mo><mo>|</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo>|</mo><mo>)</mo>
+      <mo>+</mo><mn>4</mn><msup><mi>a</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно два различных корня.'},
+                {code:'E9FA32', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых уравнение', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <msup><mrow><mo>(</mo><mn>4</mn><mi>x</mi><mo>-</mo><mn>3</mn><mo>|</mo><mi>x</mi><mo>+</mo><mfrac><mi>a</mi><mn>2</mn></mfrac><mo>|</mo><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mn>1</mn><mo>|</mo><mo>+</mo><mn>3</mn><msup><mi>a</mi><mn>2</mn></msup><mo>)</mo></mrow><mn>2</mn></msup>
+      <mo>-</mo><mo>(</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>(</mo><mn>4</mn><mi>x</mi><mo>-</mo><mn>3</mn><mo>|</mo><mi>x</mi><mo>+</mo><mfrac><mi>a</mi><mn>2</mn></mfrac><mo>|</mo><mo>+</mo><mo>|</mo><mi>x</mi><mo>-</mo><mn>1</mn><mo>|</mo><mo>+</mo><mn>3</mn><msup><mi>a</mi><mn>2</mn></msup><mo>)</mo><mo>+</mo><mn>4</mn><mo>=</mo><mn>0</mn>
+    </math>`, outro:'имеет ровно два различных корня.'},
+            ]
+        },
+        {
+            title:'Системы уравнений с прямой и кривой',
+            tasks:[
+                {code:'56C747', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><mi>x</mi><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><mn>3</mn><mi>x</mi><mi>y</mi><mo>-</mo><mn>3</mn><mi>y</mi><mo>+</mo><mn>9</mn><mo>)</mo><msqrt><mrow><mn>3</mn><mo>-</mo><mi>x</mi></mrow></msqrt><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><mi>a</mi><mi>x</mi></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно три различных решения.'},
+                {code:'ABE248', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>x</mi><mo>+</mo><mi>a</mi><mi>y</mi><mo>+</mo><mi>a</mi><mo>-</mo><mn>2</mn><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>x</mi><mo>|</mo><mi>y</mi><mo>|</mo><mo>+</mo><mi>x</mi><mo>-</mo><mn>2</mn><mo>=</mo><mn>0</mn></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет единственное решение.'},
+                {code:'DA9BFE', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>y</mi><mo>=</mo><mo>|</mo><mi>x</mi><mo>-</mo><mi>a</mi><mo>|</mo><mo>-</mo><mn>4</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mn>4</mn><mo>|</mo><mi>y</mi><mo>|</mo><mo>+</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>8</mn><mi>x</mi><mo>=</mo><mn>0</mn></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно четыре различных решения.'},
+                {code:'7B510F', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>x</mi><mo>+</mo><mi>y</mi><mo>=</mo><mi>a</mi><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mo>|</mo><mi>y</mi><mo>|</mo><mo>=</mo><mo>|</mo><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>2</mn><mi>x</mi><mo>|</mo></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'45927B', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>a</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi>a</mi><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mn>2</mn><mi>a</mi><mo>-</mo><mn>5</mn><mo>)</mo><mi>x</mi><mo>+</mo><mn>2</mn><mi>a</mi><mi>y</mi><mo>+</mo><mn>1</mn><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi>y</mi><mo>=</mo><mi>x</mi><mi>y</mi><mo>+</mo><mi>x</mi></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно четыре различных решения.'},
+                {code:'04FEB6', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>5</mn><mi>x</mi><mo>-</mo><mi>y</mi><mo>+</mo><mn>3</mn><mo>)</mo><msqrt><mrow><mi>x</mi><mo>-</mo><mi>y</mi><mo>+</mo><mn>3</mn></mrow></msqrt><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><mn>3</mn><mi>x</mi><mo>+</mo><mi>a</mi></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'07CC1C', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>y</mi><mo>=</mo><mo>(</mo><mi>a</mi><mo>+</mo><mn>2</mn><mo>)</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>a</mi><mi>x</mi><mo>+</mo><mi>a</mi><mo>-</mo><mn>2</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><msup><mi>y</mi><mn>2</mn></msup><mo>=</mo><msup><mi>x</mi><mn>2</mn></msup></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно четыре различных решения.'},
+                {code:'37FD10', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><msup><mi>x</mi><mn>2</mn></msup><mo>-</mo><mn>5</mn><mi>x</mi><mo>-</mo><mi>y</mi><mo>+</mo><mn>3</mn><mo>)</mo><msqrt><mrow><mi>x</mi><mo>-</mo><mi>y</mi><mo>+</mo><mn>3</mn></mrow></msqrt><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><mi>a</mi><mi>x</mi><mo>+</mo><mi>a</mi></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'4A8E2F', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn><mi>x</mi><mo>)</mo><msqrt><mrow><mn>2</mn><mi>x</mi><mo>+</mo><mi>y</mi><mo>+</mo><mn>6</mn></mrow></msqrt><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><mi>a</mi><mi>x</mi><mo>-</mo><mn>2</mn><mi>a</mi></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'F3A6D5', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn><mi>x</mi><mo>)</mo><msqrt><mrow><mn>2</mn><mi>x</mi><mo>+</mo><mi>y</mi><mo>+</mo><mn>6</mn></mrow></msqrt><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><mi>x</mi><mo>+</mo><mi>a</mi></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'F605A0', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mn>4</mn><mi>x</mi><mo>-</mo><mi>y</mi><mo>+</mo><mi>a</mi><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mn>2</mn><mo>|</mo><mi>y</mi><mo>|</mo><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn><mi>x</mi><mo>=</mo><mn>0</mn></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'752FA4', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><mi>x</mi><mi>y</mi><mo>-</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>12</mn><mo>)</mo><msqrt><mrow><mi>y</mi><mo>-</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>12</mn></mrow></msqrt><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><mi>a</mi><mi>x</mi><mo>-</mo><mn>10</mn></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'6854C0', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><mi>x</mi><mi>y</mi><mo>-</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>12</mn><mo>)</mo><msqrt><mrow><mi>y</mi><mo>-</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>12</mn></mrow></msqrt><mo>=</mo><mn>0</mn><mo>,</mo></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><mn>3</mn><mi>x</mi><mo>+</mo><mi>a</mi></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+                {code:'7CC260', intro:'Найдите все положительные значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo>
+      <mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>|</mo><mi>x</mi><mo>|</mo><mo>+</mo><mo>|</mo><mi>y</mi><mo>|</mo><mo>=</mo><mi>a</mi><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>y</mi><mo>=</mo><msqrt><mrow><mi>x</mi><mo>+</mo><mn>4</mn></mrow></msqrt></mtd></mtr>
+      </mtable>
+    </math>`, outro:'имеет ровно два различных решения.'},
+            ]
+        },
+        {
+            title:'Системы уравнений специального вида',
+            tasks:[
+                {code:'EE054F', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><msup><mi>x</mi><mn>4</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup><mo>=</mo><msup><mi>a</mi><mn>2</mn></msup><mo>,</mo></mtd></mtr>
+        <mtr><mtd><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi>y</mi><mo>=</mo><mo>|</mo><mn>2</mn><mi>a</mi><mo>-</mo><mn>4</mn><mo>|</mo></mtd></mtr>
+      </mtable></math>`, outro:'имеет ровно четыре различных решения.'},
+                {code:'D5CA79', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mo>(</mo><mi>x</mi><mo>+</mo><mi>a</mi><mi>y</mi><mo>-</mo><mn>5</mn><mo>)</mo><mo>(</mo><mi>x</mi><mo>+</mo><mi>a</mi><mi>y</mi><mo>-</mo><mn>5</mn><mi>a</mi><mo>)</mo><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup><mo>=</mo><mn>16</mn></mtd></mtr>
+      </mtable></math>`, outro:'имеет ровно четыре различных решения.'},
+                {code:'D5A8E6', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>a</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi>a</mi><msup><mi>y</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>a</mi><mi>x</mi><mo>+</mo><mo>(</mo><mi>a</mi><mo>+</mo><mn>2</mn><mo>)</mo><mi>y</mi><mo>+</mo><mn>1</mn><mo>=</mo><mn>0</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>x</mi><mi>y</mi><mo>+</mo><mn>1</mn><mo>=</mo><mi>x</mi><mo>+</mo><mi>y</mi></mtd></mtr>
+      </mtable></math>`, outro:'имеет ровно четыре различных решения.'},
+                {code:'E156E1', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система уравнений', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><msup><mi>x</mi><mn>4</mn></msup><mo>-</mo><msup><mi>y</mi><mn>4</mn></msup><mo>=</mo><mn>12</mn><mi>a</mi><mo>-</mo><mn>28</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup><mo>=</mo><mi>a</mi></mtd></mtr>
+      </mtable></math>`, outro:'имеет ровно четыре различных решения.'},
+            ]
+        },
+        {
+            title:'Системы неравенств с параметром',
+            tasks:[
+                {code:'BB4A02', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система неравенств', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mn>2</mn><mi>a</mi><mo>&#x2264;</mo><mi>x</mi><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mn>6</mn><mi>x</mi><mo>&gt;</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>x</mi><mo>+</mo><mi>a</mi><mo>&#x2264;</mo><mn>6</mn></mtd></mtr>
+      </mtable></math>`, outro:'имеет хотя бы одно решение на отрезке <math><mo>[</mo><mn>4</mn><mo>;</mo><mn>5</mn><mo>]</mo></math>.'},
+                {code:'AD93BF', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система неравенств', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>a</mi><mo>(</mo><mi>x</mi><mo>-</mo><mn>1</mn><mo>)</mo><mo>&#x2265;</mo><mn>4</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><msqrt><mrow><mn>2</mn><mi>x</mi><mo>-</mo><mn>2</mn></mrow></msqrt><mo>&#x2265;</mo><mi>a</mi><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mn>3</mn><mi>x</mi><mo>&lt;</mo><mi>a</mi><mo>+</mo><mn>14</mn></mtd></mtr>
+      </mtable></math>`, outro:'имеет хотя бы одно решение на отрезке <math><mo>[</mo><mn>4</mn><mo>;</mo><mn>5</mn><mo>]</mo></math>.'},
+                {code:'8257C0', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система неравенств', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>a</mi><mi>x</mi><mo>&#x2265;</mo><mn>2</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><msqrt><mrow><mi>x</mi><mo>-</mo><mn>1</mn></mrow></msqrt><mo>&gt;</mo><mi>a</mi><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mn>3</mn><mi>x</mi><mo>&#x2264;</mo><mn>2</mn><mi>a</mi><mo>+</mo><mn>11</mn></mtd></mtr>
+      </mtable></math>`, outro:'имеет хотя бы одно решение на отрезке <math><mo>[</mo><mn>3</mn><mo>;</mo><mn>4</mn><mo>]</mo></math>.'},
+                {code:'456B95', intro:'Найдите все значения <math><mi>a</mi></math>, при каждом из которых система неравенств', eq:`<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mo>{</mo><mtable columnalign="left left" rowspacing="0.35em">
+        <mtr><mtd><mi>x</mi><mo>&#x2264;</mo><mn>2</mn><mi>a</mi><mo>+</mo><mn>6</mn><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mn>6</mn><mi>x</mi><mo>&#x2265;</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><mo>,</mo></mtd></mtr>
+        <mtr><mtd><mi>x</mi><mo>+</mo><mi>a</mi><mo>&gt;</mo><mn>0</mn></mtd></mtr>
+      </mtable></math>`, outro:'имеет хотя бы одно решение на отрезке <math><mo>[</mo><mn>1</mn><mo>;</mo><mn>2</mn><mo>]</mo></math>.'},
+            ]
+        }
+    ];
+
+    const content = document.getElementById('content');
+    const toc = document.getElementById('toc');
+    let start = 1;
+
+    sections.forEach((section, index) => {
+        const count = section.tasks.length;
+        const secId = `sec-${index + 1}`;
+        toc.insertAdjacentHTML('beforeend',
+            `<a class="toc-link" href="#${secId}"><span>${index + 1}. ${section.title}</span><span class="count">${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}</span></a>`
+        );
+
+        const items = section.tasks.map(task => `
+    <li class="task-item">
+      <article class="task-card">
+        <div class="task-top">
+          <span class="badge">${task.code}</span>
+          <div class="task-actions">
+            <button class="copy-btn" type="button" data-code="${task.code}" aria-label="Скопировать условие задачи ${task.code}">Копировать условие</button>
+            <a class="solution-link" href="solutions/${task.code}.html" aria-label="Открыть страницу решения для задачи ${task.code}">Открыть решение</a>
+          </div>
+        </div>
+        <div class="task-text">
+          <div class="task-intro">${task.intro}</div>
+          <div class="equation">${task.eq}</div>
+          <div class="task-outro">${task.outro}</div>
+        </div>
+        <div class="copy-status" aria-live="polite"></div>
+        <div class="stub-note">Ссылка-заглушка: <code>solutions/${task.code}.html</code></div>
+      </article>
+    </li>
+  `).join('');
+
+        content.insertAdjacentHTML('beforeend', `
+    <section class="section-block" id="${secId}">
+      <div class="section-head">
+        <h2>${index + 1}. ${section.title}</h2>
+        <div class="section-meta">${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}</div>
+      </div>
+      <ol class="task-list" start="${start}">
+        ${items}
+      </ol>
+    </section>
+  `);
+        start += count;
+    });
+
+
+    function normalizeMarkdown(text) {
+        return text
+            .replace(/\r/g, '')
+            .replace(/[ \t]+\n/g, '\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .replace(/ +/g, ' ')
+            .replace(/ *([,.;:!?])/g, '$1')
+            .replace(/\( /g, '(')
+            .replace(/ \)/g, ')')
+            .replace(/\[ /g, '[')
+            .replace(/ \]/g, ']')
+            .replace(/\{ /g, '{')
+            .replace(/ \}/g, '}')
+            .replace(/ *; */g, '; ')
+            .trim();
+    }
+
+    function operatorToLatex(text) {
+        const map = {
+            '≤':'\\le ',
+            '≥':'\\ge ',
+            'π':'\\pi',
+            '−':'-',
+            '–':'-',
+            '—':'-',
+            '·':'\\cdot ',
+            '×':'\\times ',
+            '∈':'\\in ',
+            '∞':'\\infty',
+            '≠':'\\ne ',
+            '√':'\\sqrt{}'
+        };
+        return (map[text] ?? text)
+            .replace(/tan/g, '\\tan')
+            .replace(/ln/g, '\\ln');
+    }
+
+    function mathNodeToLatex(node) {
+        if (!node) return '';
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent || '';
+        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+
+        const tag = node.tagName.toLowerCase();
+        const children = Array.from(node.childNodes);
+        const joinChildren = () => children.map(mathNodeToLatex).join('');
+
+        switch (tag) {
+            case 'math':
+            case 'mrow':
+            case 'mtd':
+                return joinChildren();
+            case 'mi':
+            case 'mn':
+                return node.textContent || '';
+            case 'mo':
+                return operatorToLatex((node.textContent || '').trim());
+            case 'msup': {
+                const [base, sup] = children;
+                return `{${mathNodeToLatex(base)}}^{${mathNodeToLatex(sup)}}`;
+            }
+            case 'msub': {
+                const [base, sub] = children;
+                return `{${mathNodeToLatex(base)}}_{${mathNodeToLatex(sub)}}`;
+            }
+            case 'mfrac': {
+                const [num, den] = children;
+                return `\\frac{${mathNodeToLatex(num)}}{${mathNodeToLatex(den)}}`;
+            }
+            case 'msqrt':
+                return `\\sqrt{${joinChildren()}}`;
+            case 'mtable': {
+                const rows = children.filter(child => child.nodeType === Node.ELEMENT_NODE && child.tagName.toLowerCase() === 'mtr');
+                return `\\begin{cases} ${rows.map(mathNodeToLatex).join(' \\\\ ')} \\end{cases}`;
+            }
+            case 'mtr': {
+                const cols = children.filter(child => child.nodeType === Node.ELEMENT_NODE && child.tagName.toLowerCase() === 'mtd');
+                return cols.map(mathNodeToLatex).join(' ');
+            }
+            default:
+                return joinChildren();
+        }
+    }
+
+    function inlineNodeToMarkdown(node) {
+        if (!node) return '';
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent || '';
+        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+        if (node.tagName.toLowerCase() === 'math') return `$${mathNodeToLatex(node)}$`;
+        return Array.from(node.childNodes).map(inlineNodeToMarkdown).join('');
+    }
+
+    function blockNodeToMarkdown(node) {
+        if (!node) return '';
+        const math = node.querySelector('math');
+        if (math) return `$$\n${mathNodeToLatex(math)}\n$$`;
+        return Array.from(node.childNodes).map(inlineNodeToMarkdown).join('').trim();
+    }
+
+    function cardToMarkdown(card, code) {
+        const intro = normalizeMarkdown(Array.from(card.querySelector('.task-intro')?.childNodes || []).map(inlineNodeToMarkdown).join(''));
+        const equation = blockNodeToMarkdown(card.querySelector('.equation'));
+        const outro = normalizeMarkdown(Array.from(card.querySelector('.task-outro')?.childNodes || []).map(inlineNodeToMarkdown).join(''));
+        return `**${code}**\n\n${intro}\n\n${equation}\n\n${outro}`.trim();
+    }
+
+    async function copyTask(button) {
+        const card = button.closest('.task-card');
+        const code = button.dataset.code || '';
+        const payload = cardToMarkdown(card, code);
+        const status = card.querySelector('.copy-status');
+        try {
+            await navigator.clipboard.writeText(payload);
+            button.classList.add('copied');
+            button.textContent = 'Скопировано';
+            if (status) status.textContent = 'Markdown-версия условия скопирована в буфер обмена.';
+            setTimeout(() => {
+                button.classList.remove('copied');
+                button.textContent = 'Копировать условие';
+                if (status) status.textContent = '';
+            }, 1800);
+        } catch (err) {
+            if (status) status.textContent = 'Не удалось скопировать автоматически. Попробуйте ещё раз.';
+        }
+    }
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('.copy-btn');
+        if (!button) return;
+        copyTask(button);
+    });
+
+</script>
+</body>
+</html>
