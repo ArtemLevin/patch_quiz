@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7F7EC4 — задача с параметром</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --panel:#131a2e;
+            --panel-2:#1a2340;
+            --text:#edf2ff;
+            --muted:#a9b6d3;
+            --accent:#7cc7ff;
+            --accent-2:#9bffb0;
+            --warn:#ffd36e;
+            --danger:#ff8f8f;
+            --violet:#c2a6ff;
+            --border:#2c375f;
+            --shadow:0 16px 40px rgba(0,0,0,.35);
+            --radius:20px;
+            --stepGlow:0 0 0 1px rgba(124,199,255,.35), 0 0 24px rgba(124,199,255,.12);
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:linear-gradient(180deg,#09101d 0%, #0d1325 100%);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;}
+        body{line-height:1.55}
+        .page{
+            max-width:1600px;
+            margin:0 auto;
+            padding:24px 18px 80px;
+        }
+        .hero{
+            background:linear-gradient(135deg,rgba(124,199,255,.09),rgba(194,166,255,.08));
+            border:1px solid var(--border);
+            border-radius:28px;
+            padding:24px;
+            box-shadow:var(--shadow);
+            margin-bottom:18px;
+        }
+        .hero h1{
+            margin:0 0 10px;
+            font-size:clamp(1.4rem,2.4vw,2.6rem);
+            line-height:1.15;
+        }
+        .code{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:6px 12px;border-radius:999px;
+            background:#0f1832;border:1px solid var(--border);color:var(--accent);
+            font-weight:700;letter-spacing:.05em;
+        }
+        .hero-grid{
+            display:grid;grid-template-columns:1.35fr .95fr;gap:16px;align-items:start;
+        }
+        .task-box,.meta-box{
+            background:rgba(255,255,255,.02);
+            border:1px solid var(--border);
+            border-radius:20px;
+            padding:16px 18px;
+        }
+        .math{
+            font-family:"Times New Roman",Georgia,serif;
+            font-size:clamp(1.1rem,1.5vw,1.45rem);
+            overflow-wrap:anywhere;
+        }
+        .muted{color:var(--muted)}
+        .meta-list{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+            font-size:.96rem;
+        }
+        .chip{
+            background:#111a35;border:1px solid var(--border);padding:10px 12px;border-radius:14px;
+        }
+        .layout{
+            display:grid;
+            grid-template-columns:minmax(0,1.06fr) minmax(380px,.94fr);
+            gap:18px;
+            align-items:start;
+        }
+        .left-col{min-width:0}
+        .right-col{min-width:0}
+        .panel{
+            background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.015));
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+        .section{
+            padding:18px 18px 0;
+        }
+        .section:last-child{padding-bottom:18px}
+        .section h2,.section h3{
+            margin:0 0 12px;
+            line-height:1.2;
+        }
+        .section h2{font-size:1.45rem}
+        .section h3{font-size:1.12rem}
+        .idea{
+            display:grid;gap:10px;
+        }
+        .idea .point,.summary-card,.error-item,.quiz-card,.check-card,.generated-item,.legend-item{
+            background:var(--panel);
+            border:1px solid var(--border);
+            border-radius:16px;
+            padding:12px 14px;
+        }
+        .summary-card strong,.error-item strong,.legend-item strong{color:#fff}
+        .controls, .top-controls{
+            display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+        }
+        .btn, button, .toggle button{
+            border:none;
+            background:#172347;
+            color:var(--text);
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:10px 12px;
+            font-weight:700;
+            cursor:pointer;
+            transition:.18s transform,.18s background,.18s border-color,.18s box-shadow;
+        }
+        button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.2)}
+        button.active{
+            background:linear-gradient(135deg,#1b3e62,#184a79);
+            border-color:#4f89c9;
+        }
+        .toggle{
+            display:flex;flex-wrap:wrap;gap:8px;
+        }
+        .badge{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:6px 10px;border-radius:999px;
+            background:#0f1832;border:1px solid var(--border);color:var(--muted);font-size:.92rem;
+        }
+        .two-col{
+            display:grid;grid-template-columns:1fr 1fr;gap:12px;
+        }
+        .steps{display:grid;gap:12px}
+        .step{
+            background:var(--panel);
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:14px 14px 12px;
+            position:relative;
+            transition:.2s box-shadow,.2s border-color,.2s transform,.2s opacity;
+        }
+        .step:hover{transform:translateY(-1px)}
+        .step .num{
+            position:absolute;top:12px;right:12px;
+            width:34px;height:34px;border-radius:50%;
+            display:grid;place-items:center;
+            background:#0f1832;border:1px solid var(--border);color:var(--accent);font-weight:800;
+        }
+        .step.highlight{
+            border-color:#4f89c9;box-shadow:var(--stepGlow);
+        }
+        .step-title{padding-right:48px;font-weight:800;font-size:1.06rem;margin-bottom:8px}
+        .step.hidden-step .step-content{display:none}
+        .step .mini{
+            font-size:.96rem;color:var(--muted)
+        }
+        .formula{
+            font-family:"Times New Roman",Georgia,serif;
+            font-size:1.08rem;
+            background:#0d142b;
+            border:1px solid #253155;
+            border-radius:14px;
+            padding:10px 12px;
+            overflow-wrap:anywhere;
+            margin:8px 0;
+        }
+        .note{
+            padding:10px 12px;background:#0f1832;border:1px solid var(--border);
+            border-radius:14px;color:var(--muted);
+        }
+        .sticky{
+            position:sticky;
+            top:16px;
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+        }
+        .canvas-panel{
+            padding:14px;
+        }
+        .canvas-head{
+            display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;
+            margin-bottom:10px;
+        }
+        .mini-stats{
+            display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+        }
+        .mini-stats .stat{
+            background:#101935;border:1px solid var(--border);border-radius:14px;padding:10px 12px;
+        }
+        .label{font-size:.86rem;color:var(--muted)}
+        .value{font-weight:800;font-size:1.03rem}
+        .svg-wrap{
+            background:linear-gradient(180deg,#0c1120,#0d1530);
+            border:1px solid var(--border);
+            border-radius:18px;
+            overflow:hidden;
+            min-height:520px;
+            position:relative;
+        }
+        svg{display:block;width:100%;height:100%}
+        .legend{
+            display:grid;gap:8px;
+        }
+        .legend-item{display:flex;gap:10px;align-items:flex-start}
+        .legend-swatch{
+            width:14px;height:14px;border-radius:50%;flex:0 0 auto;margin-top:5px;
+        }
+        .range-row{
+            display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+        }
+        input[type=range]{width:100%}
+        .hint-box{
+            background:#101935;border:1px solid var(--border);border-radius:14px;padding:12px;
+        }
+        .hint-list{display:grid;gap:8px}
+        details{
+            background:#111a35;border:1px solid var(--border);border-radius:14px;padding:10px 12px;
+        }
+        details summary{cursor:pointer;font-weight:700}
+        .quiz-grid,.checks-grid,.generated-list{
+            display:grid;gap:12px;
+        }
+        .quiz-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+        .ok{color:var(--accent-2);font-weight:800}
+        .bad{color:var(--danger);font-weight:800}
+        .warn{color:var(--warn);font-weight:800}
+        .footer-box{
+            margin-top:18px;
+            padding:14px 16px;
+            border-radius:18px;
+            background:#0f1832;
+            border:1px solid var(--border);
+            color:var(--muted);
+        }
+        .hoverable{cursor:pointer}
+        .linked-target.emph{filter:drop-shadow(0 0 8px rgba(124,199,255,.9))}
+        .katexless{
+            font-family:"Times New Roman",Georgia,serif;
+            white-space:normal;
+        }
+        .small{font-size:.94rem}
+        .print-only{display:none}
+        .nowrap{white-space:nowrap}
+        @media (max-width:1180px){
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative;top:auto}
+        }
+        @media (max-width:860px){
+            .hero-grid,.two-col,.meta-list{grid-template-columns:1fr}
+            .svg-wrap{min-height:440px}
+        }
+        @media print{
+            :root{
+                --bg:#fff;--panel:#fff;--panel-2:#fff;--text:#000;--muted:#333;--border:#999;
+                --shadow:none;
+            }
+            body{background:#fff;color:#000}
+            .page{max-width:none;padding:0}
+            .hero,.panel,.task-box,.meta-box,.step,.idea .point,.summary-card,.error-item,.quiz-card,.check-card,.generated-item,.legend-item,.footer-box,.hint-box,details{
+                box-shadow:none;background:#fff;color:#000;
+            }
+            .controls,.top-controls,.quiz-actions,.no-print{display:none !important}
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative}
+            .print-only{display:block}
+            a{text-decoration:none;color:#000}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header class="hero">
+        <div class="hero-grid">
+            <div class="task-box">
+                <div class="code">7F7EC4</div>
+                <h1>Задача с параметром: ровно один корень на отрезке [0; 4]</h1>
+                <div class="math">
+                    √(7x − 4) · ln(x² − 8x + 17 − a²) = 0
+                </div>
+                <p class="muted">Нужно найти все значения параметра <b>a</b>, при которых на отрезке <b>[0; 4]</b> уравнение имеет <b>ровно один корень</b>.</p>
+            </div>
+            <div class="meta-box">
+                <h3>Настройки разбора</h3>
+                <div class="meta-list">
+                    <div class="chip"><b>Цель:</b> подготовка к ЕГЭ</div>
+                    <div class="chip"><b>Уровень:</b> уверенный</div>
+                    <div class="chip"><b>Стиль:</b> как репетитор</div>
+                    <div class="chip"><b>Фокус:</b> геометрическая идея</div>
+                    <div class="chip"><b>Визуализация:</b> координатная плоскость</div>
+                    <div class="chip"><b>Интерактивность:</b> расширенная</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <main class="left-col">
+            <section class="panel section">
+                <h2>Идея решения</h2>
+                <div class="idea">
+                    <div class="point">1) Произведение равно нулю, когда хотя бы один множитель равен нулю, но при этом само выражение должно быть определено.</div>
+                    <div class="point">2) Первый множитель √(7x − 4) обращается в ноль только в точке <span class="katexless">x = 4/7</span>.</div>
+                    <div class="point">3) Второй множитель ln(x² − 8x + 17 − a²) обращается в ноль, когда его аргумент равен 1. Это приводит к уравнению <span class="katexless">(x − 4)² = a²</span>.</div>
+                    <div class="point">4) Значит, мы считаем, сколько корней даёт точка <span class="katexless">x = 4/7</span> и сколько корней даёт пересечение параболы <span class="katexless">y = (x − 4)² + 1</span> с уровнем <span class="katexless">y = a²</span> на допустимой части отрезка.</div>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <div class="top-controls no-print">
+                    <div>
+                        <h2 style="margin:0 0 8px">Подробное решение</h2>
+                        <div class="muted">Можно менять подробность и открывать шаги постепенно.</div>
+                    </div>
+                    <div class="controls">
+                        <div class="toggle" id="detailToggle">
+                            <button class="active" data-detail="standard">Стандартно</button>
+                            <button data-detail="brief">Кратко</button>
+                            <button data-detail="full">Очень подробно</button>
+                        </div>
+                        <button id="revealAllBtn">Открыть всё</button>
+                        <button id="collapseBtn">Свернуть шаги</button>
+                    </div>
+                </div>
+
+                <div class="steps" id="steps">
+                    <article class="step hoverable" data-step="1" data-target="domainArea domainLine">
+                        <div class="num">1</div>
+                        <div class="step-title">Что дано и где вообще можно искать корни</div>
+                        <div class="step-content">
+                            <div class="formula">
+                                √(7x − 4) · ln(x² − 8x + 17 − a²) = 0, x ∈ [0; 4]
+                            </div>
+                            <div class="mini detail-brief">Сначала находим область определения: подкоренное выражение должно быть неотрицательным, а аргумент логарифма — положительным.</div>
+                            <div class="detail-standard">
+                                <p>Чтобы выражение имело смысл, нужно одновременно:</p>
+                                <div class="formula">
+                                    7x − 4 ≥ 0  и  x² − 8x + 17 − a² &gt; 0.
+                                </div>
+                                <p>Из первого условия получаем:</p>
+                                <div class="formula">x ≥ 4/7.</div>
+                                <p>Так как по условию ещё задан отрезок [0; 4], реальные кандидаты на корни ищем только на отрезке:</p>
+                                <div class="formula">x ∈ [4/7; 4].</div>
+                            </div>
+                            <div class="detail-full">
+                                <p>Это важный шаг: значения x из части [0; 4/7) даже не рассматриваются как корни, потому что там √(7x − 4) не определён. Частая ошибка — сначала решить уравнение от произведения, а потом уже вспоминать про область определения. Здесь нужно наоборот: сначала разрешённые x, потом корни.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step hoverable hidden-step" data-step="2" data-target="sqrtRoot">
+                        <div class="num">2</div>
+                        <div class="step-title">Когда нулём становится первый множитель</div>
+                        <div class="step-content">
+                            <div class="formula">√(7x − 4) = 0  ⇔  7x − 4 = 0  ⇔  x = 4/7.</div>
+                            <div class="mini detail-brief">У первого множителя только одна точка зануления: x = 4/7.</div>
+                            <div class="detail-standard">
+                                <p>Но точка <span class="katexless">x = 4/7</span> будет корнем исходного уравнения только тогда, когда логарифм в этой точке определён.</p>
+                                <p>Подставим:</p>
+                                <div class="formula">
+                                    x² − 8x + 17 = (x − 4)² + 1, поэтому при x = 4/7 получаем
+                                    ((4/7) − 4)² + 1 = (−24/7)² + 1 = 576/49 + 49/49 = 625/49.
+                                </div>
+                                <div class="formula">
+                                    Аргумент логарифма = 625/49 − a².
+                                </div>
+                                <div class="formula">
+                                    Нужно: 625/49 − a² &gt; 0  ⇔  |a| &lt; 25/7.
+                                </div>
+                            </div>
+                            <div class="detail-full">
+                                <p>Здесь не требуется, чтобы логарифм был равен нулю. Достаточно только того, чтобы он существовал. Тогда произведение уже равно нулю из-за первого множителя.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step hoverable hidden-step" data-step="3" data-target="parabola levelLine logIntersections">
+                        <div class="num">3</div>
+                        <div class="step-title">Когда нулём становится логарифм</div>
+                        <div class="step-content">
+                            <div class="formula">
+                                ln(x² − 8x + 17 − a²) = 0  ⇔  x² − 8x + 17 − a² = 1.
+                            </div>
+                            <div class="formula">
+                                x² − 8x + 16 = a²  ⇔  (x − 4)² = a².
+                            </div>
+                            <div class="mini detail-brief">Получаем точки x = 4 ± |a|. На отрезке [0; 4] может остаться только x = 4 − |a|.</div>
+                            <div class="detail-standard">
+                                <p>Решения уравнения <span class="katexless">(x − 4)² = a²</span> таковы:</p>
+                                <div class="formula">x = 4 − |a|  или  x = 4 + |a|.</div>
+                                <p>Но на отрезке [0; 4] точка <span class="katexless">x = 4 + |a|</span> не подходит, кроме случая <span class="katexless">a = 0</span>, когда обе формулы дают одно и то же значение <span class="katexless">x = 4</span>.</p>
+                                <p>Значит, на нашем отрезке логарифм даёт кандидат:</p>
+                                <div class="formula">x = 4 − |a|.</div>
+                                <p>Но этот x должен ещё лежать в допустимой части, где корень существует:</p>
+                                <div class="formula">4 − |a| ≥ 4/7  ⇔  |a| ≤ 24/7.</div>
+                            </div>
+                            <div class="detail-full">
+                                <p>Геометрически это особенно удобно: мы смотрим, пересекает ли горизонтальная линия <span class="katexless">y = a²</span> параболу <span class="katexless">y = (x − 4)² + 1</span> на разрешённой части графика. Левая точка пересечения имеет абсциссу <span class="katexless">x = 4 − |a|</span>. Когда эта точка уходит левее <span class="katexless">x = 4/7</span>, она перестаёт быть корнем исходного уравнения, потому что исходное выражение там не определено.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step hoverable hidden-step" data-step="4" data-target="classificationBand answerBand">
+                        <div class="num">4</div>
+                        <div class="step-title">Считаем число корней по случаям</div>
+                        <div class="step-content">
+                            <div class="mini detail-brief">Нужно аккуратно сложить вклад точки x = 4/7 и вклад точки x = 4 − |a|.</div>
+                            <div class="detail-standard">
+                                <div class="summary-card">
+                                    <strong>Случай 1: |a| &lt; 24/7</strong><br/>
+                                    Точка <span class="katexless">x = 4/7</span> есть, и точка <span class="katexless">x = 4 − |a|</span> тоже есть. Это две разные точки. Получаем <b>2 корня</b>.
+                                </div>
+                                <div class="summary-card">
+                                    <strong>Случай 2: |a| = 24/7</strong><br/>
+                                    Тогда <span class="katexless">x = 4 − |a| = 4/7</span>. Оба механизма дают одну и ту же точку. Получаем <b>ровно 1 корень</b>.
+                                </div>
+                                <div class="summary-card">
+                                    <strong>Случай 3: 24/7 &lt; |a| &lt; 25/7</strong><br/>
+                                    Логарифмический корень уже ушёл левее допустимой области, но точка <span class="katexless">x = 4/7</span> ещё остаётся допустимой. Получаем <b>ровно 1 корень</b>.
+                                </div>
+                                <div class="summary-card">
+                                    <strong>Случай 4: |a| ≥ 25/7</strong><br/>
+                                    В точке <span class="katexless">x = 4/7</span> логарифм уже не определён, а логарифмического корня в допустимой области нет. Получаем <b>0 корней</b>.
+                                </div>
+                            </div>
+                            <div class="detail-full">
+                                <p>Обратите внимание на границу <span class="katexless">|a| = 25/7</span>. При ней аргумент логарифма в точке <span class="katexless">x = 4/7</span> равен нулю, а логарифм нуля не существует. Поэтому эта граница не включается.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step hoverable hidden-step" data-step="5" data-target="answerBand">
+                        <div class="num">5</div>
+                        <div class="step-title">Ответ, проверка и окончательный вывод</div>
+                        <div class="step-content">
+                            <div class="formula">
+                                24/7 ≤ |a| &lt; 25/7.
+                            </div>
+                            <div class="formula">
+                                Значит, a ∈ (−25/7; −24/7] ∪ [24/7; 25/7).
+                            </div>
+                            <div class="detail-standard">
+                                <p><b>Почему эти значения подходят:</b> при них либо две потенциальные точки сливаются в одну, либо остаётся только точка <span class="katexless">x = 4/7</span>.</p>
+                                <p><b>Почему других значений нет:</b> при меньших |a| получается две разные точки, а при слишком больших |a| корней не остаётся вообще.</p>
+                            </div>
+                            <div class="detail-full">
+                                <p>Итак, вся задача сводится к очень наглядной картине: есть фиксированная особая точка <span class="katexless">x = 4/7</span> и подвижная точка <span class="katexless">x = 4 − |a|</span>. Нужно добиться, чтобы в допустимой области на отрезке осталось ровно одно значение x. Это и даёт ответ.</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <h2>Типичные ошибки</h2>
+                <div class="two-col">
+                    <div class="error-item"><strong>1. Забыть про область определения</strong><br/>Нельзя считать корнем точку, где исходное выражение не определено. Это особенно важно для части x &lt; 4/7.</div>
+                    <div class="error-item"><strong>2. Считать, что при произведении = 0 достаточно решить по множителям без проверки</strong><br/>Проверка существования логарифма обязательна.</div>
+                    <div class="error-item"><strong>3. Потерять точку x = 4/7</strong><br/>Она возникает не из логарифма, а из квадратного корня.</div>
+                    <div class="error-item"><strong>4. Включить границу |a| = 25/7</strong><br/>При ней аргумент логарифма в точке x = 4/7 равен нулю, а ln(0) не существует.</div>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <h2>Мини-квиз</h2>
+                <div class="quiz-grid">
+                    <div class="quiz-card">
+                        <div><b>Вопрос 1.</b> Почему на отрезке [0; 4] из решений (x − 4)² = a² обычно остаётся только x = 4 − |a|?</div>
+                        <div class="quiz-actions">
+                            <button data-quiz="q1" data-answer="wrong1">Потому что x = 4 + |a| всегда отрицателен</button>
+                            <button data-quiz="q1" data-answer="ok">Потому что x = 4 + |a| обычно правее точки 4</button>
+                            <button data-quiz="q1" data-answer="wrong2">Потому что логарифм запрещает все x больше 1</button>
+                        </div>
+                        <div class="quiz-result" id="q1Result"></div>
+                    </div>
+                    <div class="quiz-card">
+                        <div><b>Вопрос 2.</b> При каком условии точка x = 4/7 является корнем исходного уравнения?</div>
+                        <div class="quiz-actions">
+                            <button data-quiz="q2" data-answer="wrong1">Когда логарифм равен нулю</button>
+                            <button data-quiz="q2" data-answer="ok">Когда логарифм в этой точке определён</button>
+                            <button data-quiz="q2" data-answer="wrong2">Когда a = 0</button>
+                        </div>
+                        <div class="quiz-result" id="q2Result"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <h2>Самопроверка</h2>
+                <div class="checks-grid">
+                    <div class="check-card">
+                        <div><b>Проверь себя на примере:</b> возьми a = 3.5. Сколько корней будет?</div>
+                        <details>
+                            <summary>Показать ответ</summary>
+                            <p><span class="warn">|a| = 3.5 = 24.5/7</span>, то есть <span class="katexless">24/7 &lt; |a| &lt; 25/7</span>. Значит, остаётся только точка <span class="katexless">x = 4/7</span>. Ответ: <b>1 корень</b>.</p>
+                        </details>
+                    </div>
+                    <div class="check-card">
+                        <div><b>Проверь себя на примере:</b> возьми a = 3. Тогда сколько корней?</div>
+                        <details>
+                            <summary>Показать ответ</summary>
+                            <p><span class="warn">|a| = 3 &lt; 24/7</span>. Значит, есть и <span class="katexless">x = 4/7</span>, и <span class="katexless">x = 4 − 3 = 1</span>. Это две разные точки. Ответ: <b>2 корня</b>.</p>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <h2>Генератор похожих задач</h2>
+                <p class="muted">Генератор сохраняет тот же метод: один корень идёт из квадратного корня, другой — из условия ln(...) = 0 через пересечение параболы и уровня a².</p>
+                <div class="controls no-print" style="margin-bottom:12px">
+                    <button id="genBtn">Сгенерировать 3 задачи</button>
+                    <button id="useFirstBtn">Применить первую задачу к модели справа</button>
+                </div>
+                <div class="generated-list" id="generatedList"></div>
+            </section>
+
+            <section class="panel section print-only">
+                <h2>Печатная выжимка</h2>
+                <div class="formula">Ответ: a ∈ (−25/7; −24/7] ∪ [24/7; 25/7).</div>
+                <p>Смысл: точка x = 4/7 существует при |a| &lt; 25/7, а логарифмический корень x = 4 − |a| попадает в допустимую область при |a| ≤ 24/7. Нужно, чтобы в сумме остался ровно один корень.</p>
+            </section>
+        </main>
+
+        <aside class="right-col">
+            <div class="sticky">
+                <section class="panel canvas-panel">
+                    <div class="canvas-head">
+                        <div>
+                            <h2 style="margin:0 0 8px">Интерактивная модель</h2>
+                            <div class="muted small">Парабола y = (x − 4)² + 1, уровень y = a² и допустимая часть по x.</div>
+                        </div>
+                        <div class="badge">Автор: Лёвин Артём Александрович</div>
+                    </div>
+
+                    <div class="controls no-print" style="margin-bottom:10px">
+                        <button id="minusBtn">−</button>
+                        <button id="plusBtn">+</button>
+                        <button id="resetZoomBtn">Сброс масштаба</button>
+                        <label class="badge">Масштаб <input id="zoomRange" type="range" min="0.75" max="2.4" step="0.01" value="1" /></label>
+                    </div>
+
+                    <div class="controls no-print" style="margin-bottom:10px">
+                        <label class="badge">a = <span id="aValueLabel">3.43</span></label>
+                        <input id="aSlider" type="range" min="-4.2" max="4.2" step="0.01" value="3.43" style="flex:1;min-width:180px"/>
+                    </div>
+
+                    <div class="controls no-print" style="margin-bottom:12px">
+                        <label><input type="checkbox" id="showDomain" checked /> допустимая область</label>
+                        <label><input type="checkbox" id="showLevel" checked /> уровень y = a²</label>
+                        <label><input type="checkbox" id="showIntersections" checked /> точки логарифма</label>
+                        <label><input type="checkbox" id="showRootPoint" checked /> точка x = 4/7</label>
+                    </div>
+
+                    <div class="mini-stats" style="margin-bottom:12px">
+                        <div class="stat">
+                            <div class="label">Текущее |a|</div>
+                            <div class="value" id="absAStat">3.43</div>
+                        </div>
+                        <div class="stat">
+                            <div class="label">Число корней</div>
+                            <div class="value" id="rootsCountStat">1</div>
+                        </div>
+                        <div class="stat">
+                            <div class="label">Статус x = 4/7</div>
+                            <div class="value" id="sqrtRootStat">есть</div>
+                        </div>
+                        <div class="stat">
+                            <div class="label">Статус x = 4 − |a|</div>
+                            <div class="value" id="logRootStat">есть</div>
+                        </div>
+                    </div>
+
+                    <div class="svg-wrap" id="svgWrap">
+                        <svg id="plot" viewBox="0 0 760 540" xmlns="http://www.w3.org/2000/svg" aria-label="Графическая модель">
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L10,5 L0,10 z" fill="#7b86aa"></path>
+                                </marker>
+                            </defs>
+                            <rect x="0" y="0" width="760" height="540" fill="transparent"></rect>
+                            <g id="zoomGroup">
+                                <g id="grid"></g>
+                                <g id="axes"></g>
+                                <g id="domainArea" class="linked-target"></g>
+                                <g id="domainLine" class="linked-target"></g>
+                                <g id="parabola" class="linked-target"></g>
+                                <g id="levelLine" class="linked-target"></g>
+                                <g id="classificationBand" class="linked-target"></g>
+                                <g id="answerBand" class="linked-target"></g>
+                                <g id="sqrtRoot" class="linked-target"></g>
+                                <g id="logIntersections" class="linked-target"></g>
+                                <g id="labels"></g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="legend" style="margin-top:12px">
+                        <div class="legend-item"><span class="legend-swatch" style="background:#7cc7ff"></span><div><strong>Парабола</strong><br/><span class="muted small">y = (x − 4)² + 1</span></div></div>
+                        <div class="legend-item"><span class="legend-swatch" style="background:#9bffb0"></span><div><strong>Уровень</strong><br/><span class="muted small">y = a²</span></div></div>
+                        <div class="legend-item"><span class="legend-swatch" style="background:#ffd36e"></span><div><strong>Особая точка</strong><br/><span class="muted small">x = 4/7, откуда может прийти корень из √(7x − 4)</span></div></div>
+                        <div class="legend-item"><span class="legend-swatch" style="background:#ff8f8f"></span><div><strong>Логарифмический корень</strong><br/><span class="muted small">x = 4 − |a|, если он попадает в допустимую область</span></div></div>
+                    </div>
+                </section>
+
+                <section class="panel section">
+                    <h3>Подсказки по чтению модели</h3>
+                    <div class="hint-list">
+                        <div class="hint-box">1) Левую границу допустимых x задаёт вертикальная линия <b>x = 4/7</b>.</div>
+                        <div class="hint-box">2) Горизонталь <b>y = a²</b> поднимается или опускается при изменении параметра.</div>
+                        <div class="hint-box">3) Левое пересечение с параболой — это кандидат <b>x = 4 − |a|</b>.</div>
+                        <div class="hint-box">4) Если оно совпало с <b>x = 4/7</b> или ушло левее, число корней меняется.</div>
+                    </div>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <div class="footer-box">
+        Эта страница специально построена через <b>геометрическую идею</b>: вместо громоздких вычислений мы следим за тем, где находится уровень <span class="katexless">y = a²</span> относительно параболы <span class="katexless">y = (x − 4)² + 1</span> и допустимой границы <span class="katexless">x = 4/7</span>.
+    </div>
+</div>
+
+<script>
+    (function(){
+        const state = {
+            a: 24/7,
+            zoom: 1,
+            detail: 'standard',
+            reveal: 1,
+            generated: [],
+            currentTemplate: {
+                c: 4, L: 4/7, p: 7, q: 4, left: 0, right: 4, code: '7F7EC4',
+                task: '√(7x − 4) · ln(x² − 8x + 17 − a²) = 0 на [0; 4]'
+            }
+        };
+
+        const svg = document.getElementById('plot');
+        const zoomGroup = document.getElementById('zoomGroup');
+        const gridG = document.getElementById('grid');
+        const axesG = document.getElementById('axes');
+        const domainAreaG = document.getElementById('domainArea');
+        const domainLineG = document.getElementById('domainLine');
+        const parabolaG = document.getElementById('parabola');
+        const levelLineG = document.getElementById('levelLine');
+        const sqrtRootG = document.getElementById('sqrtRoot');
+        const logIntersectionsG = document.getElementById('logIntersections');
+        const labelsG = document.getElementById('labels');
+        const classificationBandG = document.getElementById('classificationBand');
+        const answerBandG = document.getElementById('answerBand');
+
+        const aSlider = document.getElementById('aSlider');
+        const aValueLabel = document.getElementById('aValueLabel');
+        const absAStat = document.getElementById('absAStat');
+        const rootsCountStat = document.getElementById('rootsCountStat');
+        const sqrtRootStat = document.getElementById('sqrtRootStat');
+        const logRootStat = document.getElementById('logRootStat');
+        const zoomRange = document.getElementById('zoomRange');
+
+        const W = 760, H = 540;
+        const pad = {l:74, r:32, t:26, b:56};
+        const xMin = 0, xMax = 4.25;
+        const yMin = 0, yMax = 13.7;
+
+        const showDomain = document.getElementById('showDomain');
+        const showLevel = document.getElementById('showLevel');
+        const showIntersections = document.getElementById('showIntersections');
+        const showRootPoint = document.getElementById('showRootPoint');
+
+        function sx(x){ return pad.l + (x - xMin) / (xMax - xMin) * (W - pad.l - pad.r); }
+        function sy(y){ return H - pad.b - (y - yMin) / (yMax - yMin) * (H - pad.t - pad.b); }
+
+        function fmt(n){
+            if (Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
+            return n.toFixed(2).replace('.', ',');
+        }
+        function frac24over7(){ return '24/7'; }
+        function frac25over7(){ return '25/7'; }
+
+        function el(name, attrs = {}, text = null){
+            const node = document.createElementNS('http://www.w3.org/2000/svg', name);
+            for (const [k,v] of Object.entries(attrs)) node.setAttribute(k, v);
+            if (text !== null) node.textContent = text;
+            return node;
+        }
+        function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+
+        function drawGrid(){
+            clear(gridG); clear(axesG); clear(labelsG); clear(classificationBandG); clear(answerBandG);
+
+            for(let x=0; x<=4; x+=0.5){
+                gridG.appendChild(el('line',{
+                    x1:sx(x), y1:sy(yMin), x2:sx(x), y2:sy(yMax),
+                    stroke:x % 1 === 0 ? '#2d365a' : '#202844', 'stroke-width':1
+                }));
+            }
+            for(let y=0; y<=13; y+=1){
+                gridG.appendChild(el('line',{
+                    x1:sx(xMin), y1:sy(y), x2:sx(xMax), y2:sy(y),
+                    stroke:'#202844', 'stroke-width':1
+                }));
+            }
+
+            axesG.appendChild(el('line',{
+                x1:sx(0), y1:sy(0), x2:sx(4.15), y2:sy(0),
+                stroke:'#7b86aa','stroke-width':2,'marker-end':'url(#arrow)'
+            }));
+            axesG.appendChild(el('line',{
+                x1:sx(0), y1:sy(0), x2:sx(0), y2:sy(13.2),
+                stroke:'#7b86aa','stroke-width':2,'marker-end':'url(#arrow)'
+            }));
+
+            for(let x=0; x<=4; x++){
+                labelsG.appendChild(el('text',{
+                    x:sx(x), y:sy(0)+24, fill:'#a9b6d3', 'font-size':'15', 'text-anchor':'middle'
+                }, String(x)));
+            }
+            for(let y=1; y<=13; y+=2){
+                labelsG.appendChild(el('text',{
+                    x:sx(0)-18, y:sy(y)+5, fill:'#a9b6d3', 'font-size':'15', 'text-anchor':'end'
+                }, String(y)));
+            }
+            labelsG.appendChild(el('text',{x:sx(4.16), y:sy(0)+6, fill:'#cbd8ff', 'font-size':'18'},'x'));
+            labelsG.appendChild(el('text',{x:sx(0)+8, y:sy(13.1), fill:'#cbd8ff', 'font-size':'18'},'y'));
+
+            const L = 4/7;
+            const band1 = el('rect',{
+                x:sx(24/7), y:sy(yMax)-2, width:Math.max(1, sx(25/7)-sx(24/7)), height:22,
+                fill:'rgba(155,255,176,.18)', stroke:'#9bffb0', 'stroke-width':1.2, rx:4
+            });
+            const txt1 = el('text',{
+                x:(sx(24/7)+sx(25/7))/2, y:sy(yMax)+14, fill:'#d8ffe0', 'font-size':'13', 'text-anchor':'middle'
+            }, 'ровно 1 корень');
+            answerBandG.appendChild(band1); answerBandG.appendChild(txt1);
+
+            const band2 = el('rect',{
+                x:sx(0), y:sy(yMax)-2, width:Math.max(1, sx(24/7)-sx(0)), height:22,
+                fill:'rgba(124,199,255,.10)', stroke:'#7cc7ff', 'stroke-width':1.2, rx:4
+            });
+            const txt2 = el('text',{
+                x:(sx(0)+sx(24/7))/2, y:sy(yMax)+14, fill:'#cde8ff', 'font-size':'13', 'text-anchor':'middle'
+            }, '2 корня');
+
+            const band3 = el('rect',{
+                x:sx(25/7), y:sy(yMax)-2, width:Math.max(1, sx(4.15)-sx(25/7)), height:22,
+                fill:'rgba(255,143,143,.10)', stroke:'#ff8f8f', 'stroke-width':1.2, rx:4
+            });
+            const txt3 = el('text',{
+                x:(sx(25/7)+sx(4.15))/2, y:sy(yMax)+14, fill:'#ffd2d2', 'font-size':'13', 'text-anchor':'middle'
+            }, '0 корней');
+
+            classificationBandG.appendChild(band2); classificationBandG.appendChild(txt2);
+            classificationBandG.appendChild(band3); classificationBandG.appendChild(txt3);
+        }
+
+        function pathForParabola(){
+            let d = '';
+            for(let x = 0; x <= xMax; x += 0.02){
+                const y = (x - 4)*(x - 4) + 1;
+                const cmd = x === 0 ? 'M' : 'L';
+                d += `${cmd}${sx(x)},${sy(y)} `;
+            }
+            return d;
+        }
+
+        function computeRootInfo(a){
+            const absA = Math.abs(a);
+            const L = 4/7;
+            const rootPointDefined = absA < 25/7 - 1e-12;
+            const candidate = 4 - absA;
+            const logRootInside = candidate >= L - 1e-12 && candidate <= 4 + 1e-12;
+            let roots = [];
+            if(rootPointDefined) roots.push({x:L, type:'sqrt'});
+            if(logRootInside) roots.push({x:candidate, type:'log'});
+            roots.sort((u,v)=>u.x-v.x);
+
+            const unique = [];
+            for(const r of roots){
+                if(!unique.length || Math.abs(unique[unique.length-1].x - r.x) > 1e-8){
+                    unique.push({x:r.x, types:[r.type]});
+                }else{
+                    unique[unique.length-1].types.push(r.type);
+                }
+            }
+            return {absA, rootPointDefined, candidate, logRootInside, roots:unique};
+        }
+
+        function drawModel(){
+            const a = state.a;
+            const info = computeRootInfo(a);
+            drawGrid();
+
+            clear(domainAreaG); clear(domainLineG); clear(parabolaG); clear(levelLineG); clear(sqrtRootG); clear(logIntersectionsG);
+
+            if(showDomain.checked){
+                domainAreaG.appendChild(el('rect',{
+                    x:sx(4/7), y:sy(yMax), width:sx(4)-sx(4/7), height:sy(yMin)-sy(yMax),
+                    fill:'rgba(124,199,255,.06)'
+                }));
+                domainLineG.appendChild(el('line',{
+                    x1:sx(4/7), y1:sy(yMin), x2:sx(4/7), y2:sy(yMax),
+                    stroke:'#ffd36e', 'stroke-width':3, 'stroke-dasharray':'8 8'
+                }));
+                domainLineG.appendChild(el('text',{
+                    x:sx(4/7)+8, y:sy(10.9), fill:'#ffe7a9', 'font-size':'16'
+                }, 'x = 4/7'));
+                domainLineG.appendChild(el('text',{
+                    x:(sx(4/7)+sx(4))/2, y:sy(0.45), fill:'#8fb6dc', 'font-size':'15', 'text-anchor':'middle'
+                }, 'допустимая часть по x'));
+            }
+
+            parabolaG.appendChild(el('path',{
+                d:pathForParabola(), fill:'none', stroke:'#7cc7ff', 'stroke-width':4
+            }));
+            parabolaG.appendChild(el('text',{
+                x:sx(2.55), y:sy(3.3), fill:'#d7efff', 'font-size':'17'
+            }, 'y = (x − 4)² + 1'));
+
+            const level = a*a;
+            if(showLevel.checked){
+                levelLineG.appendChild(el('line',{
+                    x1:sx(0), y1:sy(level), x2:sx(4.15), y2:sy(level),
+                    stroke:'#9bffb0','stroke-width':3,'stroke-dasharray':'11 7'
+                }));
+                levelLineG.appendChild(el('text',{
+                    x:sx(0.2), y:sy(level)-10, fill:'#d8ffe0', 'font-size':'17'
+                }, `y = a² = ${fmt(level)}`));
+            }
+
+            if(showRootPoint.checked){
+                const yRootPoint = ((4/7)-4)*((4/7)-4)+1;
+                const arg = 625/49 - a*a;
+                sqrtRootG.appendChild(el('circle',{
+                    cx:sx(4/7), cy:sy(yRootPoint), r:8, fill: info.rootPointDefined ? '#ffd36e' : '#7b5564',
+                    stroke:'#fff','stroke-width':1.5
+                }));
+                sqrtRootG.appendChild(el('text',{
+                    x:sx(4/7)+10, y:sy(yRootPoint)-12, fill:'#ffe7a9', 'font-size':'15'
+                }, info.rootPointDefined ? 'точка корня из √(7x−4)' : 'точка запрещена: ln не определён'));
+                sqrtRootG.appendChild(el('text',{
+                    x:sx(4/7)+10, y:sy(yRootPoint)+10, fill: info.rootPointDefined ? '#ffe7a9' : '#ffb4b4', 'font-size':'14'
+                }, `625/49 − a² = ${fmt(arg)}`));
+            }
+
+            if(showIntersections.checked){
+                const yCandidate = (info.candidate - 4)*(info.candidate - 4) + 1;
+                const rightCandidate = 4 + info.absA;
+                if(info.logRootInside){
+                    logIntersectionsG.appendChild(el('circle',{
+                        cx:sx(info.candidate), cy:sy(yCandidate), r:8, fill:'#ff8f8f', stroke:'#fff','stroke-width':1.5
+                    }));
+                    logIntersectionsG.appendChild(el('line',{
+                        x1:sx(info.candidate), y1:sy(0), x2:sx(info.candidate), y2:sy(yCandidate),
+                        stroke:'#ff8f8f','stroke-width':2,'stroke-dasharray':'6 6'
+                    }));
+                    logIntersectionsG.appendChild(el('text',{
+                        x:sx(info.candidate), y:sy(0)-8, fill:'#ffd4d4', 'font-size':'15', 'text-anchor':'middle'
+                    }, `x = 4 − |a| = ${fmt(info.candidate)}`));
+                }else{
+                    logIntersectionsG.appendChild(el('text',{
+                        x:sx(1.08), y:sy(2.1), fill:'#ffb7b7', 'font-size':'16'
+                    }, 'левое пересечение ушло левее x = 4/7'));
+                }
+                if(rightCandidate <= xMax){
+                    logIntersectionsG.appendChild(el('circle',{
+                        cx:sx(rightCandidate), cy:sy(yCandidate), r:6, fill:'#5b3248', stroke:'#cfa3b7','stroke-width':1.2
+                    }));
+                    logIntersectionsG.appendChild(el('text',{
+                        x:sx(Math.min(rightCandidate+0.05,4.12)), y:sy(yCandidate)-10, fill:'#cfa3b7', 'font-size':'14'
+                    }, 'вторая точка пересечения'));
+                }
+            }
+
+            const status = classify(info);
+            aValueLabel.textContent = fmt(a);
+            absAStat.textContent = fmt(info.absA);
+            rootsCountStat.textContent = String(status.count);
+            sqrtRootStat.textContent = info.rootPointDefined ? 'есть' : 'нет';
+            logRootStat.textContent = info.logRootInside ? 'есть' : 'нет';
+
+            const scale = state.zoom;
+            const tx = (W*(1-scale))/2;
+            const ty = (H*(1-scale))/2;
+            zoomGroup.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
+        }
+
+        function classify(info){
+            let count = info.roots.length;
+            let text = '';
+            if(count === 2) text = '2 корня';
+            if(count === 1) text = '1 корень';
+            if(count === 0) text = '0 корней';
+            return {count, text};
+        }
+
+        function bindStepUI(){
+            const steps = [...document.querySelectorAll('.step')];
+            function applyReveal(){
+                steps.forEach((step, i)=>{
+                    const open = i < state.reveal;
+                    step.classList.toggle('hidden-step', !open);
+                });
+            }
+            applyReveal();
+
+            steps.forEach((step, i)=>{
+                step.addEventListener('click', (e)=>{
+                    if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('details')) return;
+                    if(state.reveal === i+1 && i+1 < steps.length){
+                        state.reveal = i+2;
+                    }else{
+                        state.reveal = Math.max(state.reveal, i+1);
+                    }
+                    applyReveal();
+                });
+                const targets = (step.dataset.target || '').split(/\s+/).filter(Boolean);
+                step.addEventListener('mouseenter', ()=>{
+                    step.classList.add('highlight');
+                    targets.forEach(id=>{
+                        const node = document.getElementById(id);
+                        if(node) node.classList.add('emph');
+                    });
+                });
+                step.addEventListener('mouseleave', ()=>{
+                    step.classList.remove('highlight');
+                    targets.forEach(id=>{
+                        const node = document.getElementById(id);
+                        if(node) node.classList.remove('emph');
+                    });
+                });
+            });
+
+            document.getElementById('revealAllBtn').addEventListener('click', ()=>{
+                state.reveal = steps.length;
+                applyReveal();
+            });
+            document.getElementById('collapseBtn').addEventListener('click', ()=>{
+                state.reveal = 1;
+                applyReveal();
+            });
+        }
+
+        function bindDetailToggle(){
+            const buttons = [...document.querySelectorAll('#detailToggle button')];
+            function applyDetail(){
+                buttons.forEach(btn=>btn.classList.toggle('active', btn.dataset.detail === state.detail));
+                document.body.setAttribute('data-detail', state.detail);
+                document.querySelectorAll('.detail-brief,.detail-standard,.detail-full').forEach(node=>{
+                    node.style.display = 'none';
+                });
+                document.querySelectorAll('.detail-' + state.detail).forEach(node=>{
+                    node.style.display = '';
+                });
+            }
+            buttons.forEach(btn=>{
+                btn.addEventListener('click', ()=>{
+                    state.detail = btn.dataset.detail;
+                    applyDetail();
+                });
+            });
+            applyDetail();
+        }
+
+        function bindControls(){
+            aSlider.addEventListener('input', ()=>{
+                state.a = Number(aSlider.value);
+                drawModel();
+            });
+            zoomRange.addEventListener('input', ()=>{
+                state.zoom = Number(zoomRange.value);
+                drawModel();
+            });
+            document.getElementById('plusBtn').addEventListener('click', ()=>{
+                state.zoom = Math.min(2.4, state.zoom + 0.12);
+                zoomRange.value = state.zoom.toFixed(2);
+                drawModel();
+            });
+            document.getElementById('minusBtn').addEventListener('click', ()=>{
+                state.zoom = Math.max(0.75, state.zoom - 0.12);
+                zoomRange.value = state.zoom.toFixed(2);
+                drawModel();
+            });
+            document.getElementById('resetZoomBtn').addEventListener('click', ()=>{
+                state.zoom = 1;
+                zoomRange.value = '1';
+                drawModel();
+            });
+            [showDomain, showLevel, showIntersections, showRootPoint].forEach(box=>{
+                box.addEventListener('change', drawModel);
+            });
+
+            const wrap = document.getElementById('svgWrap');
+            wrap.addEventListener('wheel', (e)=>{
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 0.08 : -0.08;
+                state.zoom = Math.max(0.75, Math.min(2.4, state.zoom + delta));
+                zoomRange.value = state.zoom.toFixed(2);
+                drawModel();
+            }, {passive:false});
+        }
+
+        function bindQuiz(){
+            document.querySelectorAll('[data-quiz]').forEach(btn=>{
+                btn.addEventListener('click', ()=>{
+                    const q = btn.dataset.quiz;
+                    const ans = btn.dataset.answer;
+                    const out = document.getElementById(q + 'Result');
+                    if(ans === 'ok'){
+                        out.innerHTML = '<p class="ok">Верно.</p><p>Именно так: точка x = 4 + |a| обычно лежит правее 4, поэтому на отрезке [0; 4] остаётся только x = 4 − |a|.</p>';
+                    }else if(q === 'q2' && ans !== 'ok'){
+                        out.innerHTML = '<p class="bad">Нет.</p><p>Для корня x = 4/7 важно не зануление логарифма, а только его существование.</p>';
+                    }else{
+                        out.innerHTML = '<p class="bad">Не совсем.</p><p>Подумай про положение точки x = 4 + |a| относительно правого конца отрезка 4.</p>';
+                    }
+                });
+            });
+        }
+
+        function generateTask(){
+            // Шаблон: sqrt(px-q) ln((x-c)^2 + 1 - a^2) = 0 on [0;c]
+            const templates = [
+                {p:5,q:2,c:3,left:0,right:3},
+                {p:4,q:1,c:3,left:0,right:3},
+                {p:6,q:5,c:4,left:0,right:4},
+                {p:8,q:3,c:2,left:0,right:2},
+                {p:9,q:4,c:3,left:0,right:3}
+            ];
+            const t = templates[Math.floor(Math.random()*templates.length)];
+            const L = t.q / t.p;
+            const alpha = t.c - L;
+            const beta = Math.sqrt(alpha*alpha + 1);
+            const prettyAlpha = rationalString(alpha);
+            const prettyBeta = smartSqrt(alpha*alpha + 1);
+
+            const linear = t.p === 1 ? `x − ${t.q}` : `${t.p}x − ${t.q}`;
+            const quadExpanded = expandShiftedSquare(t.c);
+            const task = `√(${linear}) · ln(${quadExpanded} − a²) = 0`;
+            const answer = `${prettyAlpha} ≤ |a| < ${prettyBeta}`;
+            const idea = `Особая точка: x = ${rationalString(L)}. Логарифм даёт x = ${t.c} − |a|. Нужно, чтобы остался ровно один корень, поэтому ${prettyAlpha} ≤ |a| < ${prettyBeta}.`;
+            return {...t, L, alpha, beta, task, answer, idea};
+        }
+
+        function rationalString(v){
+            const eps = 1e-10;
+            for(let den=1; den<=20; den++){
+                const num = Math.round(v*den);
+                if(Math.abs(v - num/den) < eps){
+                    if(den === 1) return String(num);
+                    return `${num}/${den}`;
+                }
+            }
+            return fmt(v).replace(',', '.');
+        }
+        function smartSqrt(v){
+            const rounded = Math.round(v*1000000)/1000000;
+            const int = Math.round(rounded);
+            if(Math.abs(rounded - int) < 1e-10){
+                const root = Math.round(Math.sqrt(int));
+                if(root*root === int) return String(root);
+                return `√${int}`;
+            }
+            return `√(${rounded})`;
+        }
+        function expandShiftedSquare(c){
+            // (x-c)^2 + 1 = x^2 -2cx + c^2 +1
+            const b = -2*c;
+            const d = c*c + 1;
+            const bStr = b < 0 ? `${b}x` : `+ ${b}x`;
+            return `x² ${b < 0 ? '− ' + Math.abs(b) : '+ ' + b}x + ${d}`;
+        }
+
+        function renderGenerated(){
+            const box = document.getElementById('generatedList');
+            box.innerHTML = '';
+            state.generated.forEach((g, idx)=>{
+                const div = document.createElement('div');
+                div.className = 'generated-item';
+                div.innerHTML = `
+        <div><b>Задача ${idx+1}.</b> Найдите все значения a, при которых уравнение <span class="katexless">${g.task}</span> имеет на отрезке [${g.left}; ${g.right}] ровно один корень.</div>
+        <details style="margin-top:10px">
+          <summary>Показать ответ и идею</summary>
+          <p><b>Ответ:</b> ${g.answer}.</p>
+          <p><b>Идея:</b> ${g.idea}</p>
+        </details>
+      `;
+                box.appendChild(div);
+            });
+        }
+
+        function bindGenerator(){
+            document.getElementById('genBtn').addEventListener('click', ()=>{
+                state.generated = [generateTask(), generateTask(), generateTask()];
+                renderGenerated();
+            });
+            document.getElementById('useFirstBtn').addEventListener('click', ()=>{
+                if(!state.generated.length){
+                    state.generated = [generateTask(), generateTask(), generateTask()];
+                    renderGenerated();
+                }
+                const g = state.generated[0];
+                state.currentTemplate = {
+                    c:g.c, L:g.L, p:g.p, q:g.q, left:g.left, right:g.right, code:'GEN', task:g.task
+                };
+                // Для модели справа используем тот же графический принцип, но оставляем исходную параболу,
+                // потому что метод тот же, а пользователь видит логику перемещения точки.
+                state.a = Math.max(-4.2, Math.min(4.2, g.alpha + 0.08));
+                aSlider.value = state.a.toFixed(2);
+                drawModel();
+            });
+            state.generated = [generateTask(), generateTask(), generateTask()];
+            renderGenerated();
+        }
+
+        function wireHoverLinks(){
+            document.querySelectorAll('.hoverable').forEach(step=>{
+                const targets = (step.dataset.target || '').split(/\s+/).filter(Boolean);
+                targets.forEach(id=>{
+                    const node = document.getElementById(id);
+                    if(node){
+                        node.addEventListener('mouseenter', ()=>step.classList.add('highlight'));
+                        node.addEventListener('mouseleave', ()=>step.classList.remove('highlight'));
+                    }
+                });
+            });
+        }
+
+        bindStepUI();
+        bindDetailToggle();
+        bindControls();
+        bindQuiz();
+        bindGenerator();
+        drawModel();
+        wireHoverLinks();
+    })();
+</script>
+</body>
+</html>

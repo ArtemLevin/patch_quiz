@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>C7C26F — параметр</title>
+    <style>
+        :root{
+            --bg:#0b1020; --panel:#121933; --panel2:#182243; --text:#e9eefc; --muted:#aab6da;
+            --accent:#7cc7ff; --accent2:#8ef0c2; --warn:#ffd479; --danger:#ff9b9b; --good:#9dffb4;
+            --line:#2a3766; --shadow:0 14px 34px rgba(0,0,0,.35); --radius:18px;
+            --stepH: auto;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:linear-gradient(180deg,#08101d,#0d1430 35%,#0a1021);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;scroll-behavior:smooth}
+        body{line-height:1.55}
+        .page{max-width:1500px;margin:0 auto;padding:20px}
+        .hero{background:linear-gradient(135deg,rgba(124,199,255,.12),rgba(142,240,194,.08));border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow);margin-bottom:18px}
+        .hero h1{margin:0 0 10px;font-size:clamp(26px,4vw,42px)}
+        .hero .code{display:inline-block;padding:6px 10px;border-radius:999px;background:#0e1733;border:1px solid var(--line);color:var(--accent);font-weight:700;letter-spacing:.06em}
+        .hero-grid{display:grid;grid-template-columns:1.25fr .95fr;gap:16px;align-items:start}
+        .task-box,.answer-box{background:rgba(8,14,31,.55);border:1px solid var(--line);border-radius:18px;padding:18px}
+        .formula{font-size:clamp(18px,2.2vw,28px);margin:12px 0;font-weight:700;overflow-wrap:anywhere}
+        .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+        .badge{padding:8px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:14px;background:#0d1630}
+        .layout{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(360px,.94fr);gap:18px;align-items:start}
+        .left-col{min-width:0}
+        .right-col{position:sticky;top:12px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 24px)}
+        .panel{background:linear-gradient(180deg,rgba(18,25,51,.98),rgba(13,19,39,.98));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+        .panel h2,.panel h3{margin:0 0 10px}
+        .pad{padding:18px}
+        .idea ul,.mistakes ul{margin:8px 0 0 18px;padding:0}
+        .section{margin-bottom:16px}
+        .section:last-child{margin-bottom:0}
+        .step{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02);margin-bottom:12px;overflow:hidden;transition:.2s}
+        .step.open{box-shadow:0 0 0 1px rgba(124,199,255,.12) inset}
+        .step-head{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;background:rgba(255,255,255,.02)}
+        .step-head:hover{background:rgba(255,255,255,.04)}
+        .step-num{min-width:34px;height:34px;border-radius:999px;display:grid;place-items:center;background:#0e1733;border:1px solid var(--line);color:var(--accent);font-weight:700}
+        .step-title{font-weight:700;font-size:18px}
+        .step-body{display:none;padding:0 16px 16px}
+        .step.open .step-body{display:block}
+        .subtle{color:var(--muted)}
+        .math{font-family:"Cambria Math",Cambria,serif;font-size:1.06em}
+        .key{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(124,199,255,.12);color:var(--accent)}
+        .ok{color:var(--good)} .warn{color:var(--warn)} .danger{color:var(--danger)}
+        .controls{display:grid;gap:12px}
+        .control-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+        label{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
+        input[type="range"], select, button, .toggle{width:100%}
+        input[type="range"]{accent-color:var(--accent)}
+        select,button,.mini-btn,.toggle{background:#0d1630;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+        button,.mini-btn,.toggle{cursor:pointer}
+        button:hover,.mini-btn:hover,.toggle:hover{filter:brightness(1.08)}
+        .seg{display:flex;gap:8px;flex-wrap:wrap}
+        .seg button{width:auto}
+        .seg button.active{outline:2px solid var(--accent);background:#13214d}
+        .canvas-wrap{padding:12px;border-top:1px solid var(--line);display:grid;gap:10px}
+        .viz{background:radial-gradient(circle at top,rgba(124,199,255,.08),transparent 60%), #091228;border:1px solid var(--line);border-radius:18px;padding:8px;min-height:400px;overflow:hidden;position:relative}
+        .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+        .legend span{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#0d1630;border:1px solid var(--line)}
+        .dot{width:11px;height:11px;border-radius:999px;display:inline-block}
+        .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+        .summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+        .kpi{padding:12px;border-radius:14px;background:#0d1630;border:1px solid var(--line)}
+        .kpi .big{font-size:22px;font-weight:800;color:var(--accent)}
+        .focus-link{border-bottom:1px dashed rgba(124,199,255,.45);cursor:pointer}
+        .focus-link:hover,.focused-text{background:rgba(124,199,255,.08)}
+        .svg-obj{transition:.18s}
+        .svg-obj.focused{filter:drop-shadow(0 0 6px rgba(124,199,255,.8));stroke-width:4 !important}
+        .callout{padding:14px 16px;background:rgba(157,255,180,.08);border:1px solid rgba(157,255,180,.18);border-radius:16px}
+        .mistakes li,.idea li{margin:8px 0}
+        details.quiz{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02);padding:12px 14px}
+        details.quiz summary{cursor:pointer;font-weight:700}
+        .qa{display:grid;gap:10px;margin-top:10px}
+        .q{padding:12px;border:1px solid var(--line);border-radius:14px;background:#0d1630}
+        .q .ans{display:none;margin-top:8px;color:var(--accent2)}
+        .q.show .ans{display:block}
+        .gen-card{border:1px solid var(--line);border-radius:16px;background:#0d1630;padding:14px}
+        .small{font-size:13px}
+        .print-note{color:var(--muted);font-size:13px}
+        .footer-space{height:30px}
+        .mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+        @media (max-width: 1100px){
+            .layout,.hero-grid{grid-template-columns:1fr}
+            .right-col{position:relative;top:auto;max-height:none}
+        }
+        @media (max-width: 720px){
+            .control-grid,.summary{grid-template-columns:1fr}
+            .page{padding:12px}
+            .hero,.pad{padding:14px}
+            .step-head{padding:12px}
+            .formula{font-size:20px}
+        }
+        @media print{
+            body{background:#fff;color:#111}
+            .panel,.hero,.task-box,.answer-box,.kpi,.q,.gen-card,.step,.viz{box-shadow:none !important;background:#fff !important;color:#111 !important;border-color:#bbb !important}
+            .right-col{position:static}
+            button,input,select,.toggle{display:none !important}
+            .step-body{display:block !important}
+            .step{break-inside:avoid}
+            .hero{margin-bottom:10px}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="hero">
+        <div class="hero-grid">
+            <div class="task-box">
+                <div class="code">C7C26F</div>
+                <h1>Задача с параметром</h1>
+                <div class="formula math">√(x + 2a) · ln(x − a) = (x − 1) · ln(x − a), &nbsp; x ∈ [0; 1]</div>
+                <div>Найти все значения параметра <span class="math">a</span>, при которых уравнение имеет <b>ровно один корень</b> на отрезке <span class="math">[0; 1]</span>.</div>
+                <div class="badge-row">
+                    <div class="badge">только школьные методы</div>
+                    <div class="badge">геометрическая идея</div>
+                    <div class="badge">пошаговое раскрытие</div>
+                    <div class="badge">расширенная интерактивность</div>
+                </div>
+            </div>
+            <div class="answer-box">
+                <h3>Итоговый ответ</h3>
+                <div class="formula math ok">a ∈ [−1/3; 0] ∪ {−1/2}</div>
+                <div class="subtle">Ниже показано, откуда берётся именно этот набор: сначала выделяем общий множитель <span class="math">ln(x − a)</span>, затем проверяем область определения и отдельно считаем корни от каждого множителя.</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="left-col">
+            <section class="panel pad idea section">
+                <h2>Идея решения</h2>
+                <ul>
+                    <li>Вынести общий множитель <span class="math focus-link" data-focus="logbranch">ln(x − a)</span> и свести задачу к произведению двух множителей.</li>
+                    <li>От множителя <span class="math">ln(x − a)</span> получить кандидата <span class="math focus-link" data-focus="candidate1">x = a + 1</span>, но не забыть про область определения: нужно ещё <span class="math">x + 2a ≥ 0</span>.</li>
+                    <li>От второго множителя <span class="math focus-link" data-focus="graphs">√(x + 2a) = x − 1</span> на отрезке <span class="math">[0;1]</span> возможен только крайний случай <span class="math">x = 1</span>.</li>
+                    <li>Потом проверить, когда получается ровно один корень, а когда корней нет или они совпадают/не совпадают.</li>
+                </ul>
+            </section>
+
+            <section class="panel pad section">
+                <h2>Пошаговый разбор</h2>
+
+                <div class="step open" data-step="1">
+                    <div class="step-head"><div class="row"><div class="step-num">1</div><div class="step-title">Что дано</div></div><div>▾</div></div>
+                    <div class="step-body">
+                        <p>Рассматриваем уравнение на отрезке <span class="math">[0;1]</span>:</p>
+                        <p class="math">√(x + 2a) · ln(x − a) = (x − 1) · ln(x − a).</p>
+                        <p>Нужно подобрать все <span class="math">a</span>, при которых на этом отрезке будет <b>ровно один</b> корень.</p>
+                        <div class="callout">Главная техническая тонкость: даже если <span class="math">ln(x − a)=0</span>, исходное уравнение всё равно требует существования <span class="math">√(x+2a)</span>. Поэтому область определения проверяем для каждого найденного кандидата.</div>
+                    </div>
+                </div>
+
+                <div class="step" data-step="2">
+                    <div class="step-head"><div class="row"><div class="step-num">2</div><div class="step-title">Что означает каждое условие</div></div><div>▸</div></div>
+                    <div class="step-body">
+                        <p>Чтобы выражение было определено, нужны условия:</p>
+                        <ul>
+                            <li class="math">x − a &gt; 0</li>
+                            <li class="math">x + 2a ≥ 0</li>
+                            <li class="math">x ∈ [0;1]</li>
+                        </ul>
+                        <p>То есть каждый корень должен лежать <span class="key">сразу</span> в трёх ограничениях: внутри отрезка, в области логарифма и в области корня.</p>
+                    </div>
+                </div>
+
+                <div class="step" data-step="3">
+                    <div class="step-head"><div class="row"><div class="step-num">3</div><div class="step-title">Алгебраическая и графическая интерпретация</div></div><div>▸</div></div>
+                    <div class="step-body">
+                        <p>Перенесём всё в одну сторону и вынесем общий множитель:</p>
+                        <p class="math">[√(x + 2a) − (x − 1)] · ln(x − a) = 0.</p>
+                        <p>Значит, корни могут появиться из двух ветвей:</p>
+                        <ol>
+                            <li class="math"><span class="focus-link" data-focus="candidate1">ln(x − a) = 0</span></li>
+                            <li class="math"><span class="focus-link" data-focus="candidate2">√(x + 2a) = x − 1</span></li>
+                        </ol>
+                        <p>Справа на рисунке эти две идеи показаны отдельно: вертикальный маркер <span class="math">x=a+1</span> для логарифмической ветви и графики <span class="math">y=√(x+2a)</span>, <span class="math">y=x−1</span> для второй ветви.</p>
+                    </div>
+                </div>
+
+                <div class="step" data-step="4">
+                    <div class="step-head"><div class="row"><div class="step-num">4</div><div class="step-title">Ключевая идея</div></div><div>▸</div></div>
+                    <div class="step-body">
+                        <p>На отрезке <span class="math">[0;1]</span> величина <span class="math">x−1 ≤ 0</span>, а корень <span class="math">√(x+2a) ≥ 0</span>. Значит, уравнение</p>
+                        <p class="math">√(x + 2a) = x − 1</p>
+                        <p>может выполняться <b>только тогда</b>, когда обе части равны нулю.</p>
+                        <p>Это сразу сильно упрощает задачу: почти все корни идут из ветви <span class="math">ln(x−a)=0</span>, а вторая ветвь даёт лишь один особый случай.</p>
+                    </div>
+                </div>
+
+                <div class="step" data-step="5">
+                    <div class="step-head"><div class="row"><div class="step-num">5</div><div class="step-title">Пошаговое доведение до ответа</div></div><div>▸</div></div>
+                    <div class="step-body">
+                        <h3>Ветвь 1. Логарифм равен нулю</h3>
+                        <p class="math">ln(x − a)=0 ⇔ x − a = 1 ⇔ <span class="focus-link" data-focus="candidate1">x = a + 1</span>.</p>
+                        <p>Теперь проверяем все требования:</p>
+                        <ul>
+                            <li class="math">x ∈ [0;1] ⇒ a+1 ∈ [0;1] ⇒ a ∈ [−1;0]</li>
+                            <li class="math">x + 2a ≥ 0 ⇒ (a+1)+2a ≥ 0 ⇒ 3a+1 ≥ 0 ⇒ a ≥ −1/3</li>
+                        </ul>
+                        <p>Совмещаем:</p>
+                        <p class="math ok">ветвь 1 даёт один корень тогда и только тогда, когда a ∈ [−1/3;0].</p>
+                        <p>При этом сам корень равен <span class="math">x=a+1</span>.</p>
+
+                        <h3>Ветвь 2. Равенство √(x + 2a) = x − 1</h3>
+                        <p>На отрезке <span class="math">[0;1]</span> правая часть не положительна, левая не отрицательна. Поэтому нужно:</p>
+                        <p class="math">x−1 = 0 и √(x+2a)=0.</p>
+                        <p>Отсюда:</p>
+                        <p class="math">x = 1, &nbsp; 1 + 2a = 0, &nbsp; a = −1/2.</p>
+                        <p class="math ok">ветвь 2 даёт единственный специальный корень: x=1 при a=−1/2.</p>
+
+                        <h3>Сборка</h3>
+                        <p>Получили два набора параметров:</p>
+                        <ul>
+                            <li class="math">a ∈ [−1/3;0] — корень из логарифмической ветви;</li>
+                            <li class="math">a = −1/2 — особый корень x=1 из второй ветви.</li>
+                        </ul>
+                        <p>Они не пересекаются, потому что <span class="math">−1/2 ∉ [−1/3;0]</span>.</p>
+                        <p class="math ok">Итак, ответ: a ∈ [−1/3;0] ∪ {−1/2}.</p>
+                    </div>
+                </div>
+
+                <div class="step" data-step="6">
+                    <div class="step-head"><div class="row"><div class="step-num">6</div><div class="step-title">Явная проверка ответа</div></div><div>▸</div></div>
+                    <div class="step-body">
+                        <p><b>Почему подходят все <span class="math">a ∈ [−1/3;0]</span>?</b></p>
+                        <ul>
+                            <li class="math">x=a+1 ∈ [2/3;1]</li>
+                            <li class="math">x−a = 1 ⇒ ln(x−a)=0</li>
+                            <li class="math">x+2a = 3a+1 ≥ 0</li>
+                            <li>вторая ветвь новых корней не даёт, потому что на <span class="math">[0;1]</span> она возможна только в особой точке <span class="math">a=-1/2</span></li>
+                        </ul>
+                        <p><b>Почему подходит <span class="math">a=-1/2</span>?</b></p>
+                        <ul>
+                            <li class="math">x=1</li>
+                            <li class="math">√(1+2a)=√0=0</li>
+                            <li class="math">x−1=0</li>
+                            <li class="math">ln(1−a)=ln(3/2)</li>
+                            <li>обе части равны нулю, значит это корень</li>
+                            <li>логарифмическая ветвь не даёт корня, так как <span class="math">x=a+1=1/2</span>, но там <span class="math">x+2a = -1/2 &lt; 0</span>, то есть исходное выражение не определено</li>
+                        </ul>
+                        <p><b>Почему других значений нет?</b></p>
+                        <p>Потому что вне этих случаев:</p>
+                        <ul>
+                            <li>логарифмическая ветвь либо не попадает в отрезок, либо нарушает условие <span class="math">x+2a ≥ 0</span>;</li>
+                            <li>вторая ветвь невозможна, так как требует одновременно <span class="math">x=1</span> и <span class="math">a=-1/2</span>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step" data-step="7">
+                    <div class="step-head"><div class="row"><div class="step-num">7</div><div class="step-title">Краткий вывод</div></div><div>▸</div></div>
+                    <div class="step-body">
+                        <p>После разложения на множители задача сводится к двум очень простым источникам корней. Основной корень идёт из <span class="math">ln(x−a)=0</span>, но проходит только при <span class="math">a ≥ −1/3</span>. Ещё есть один специальный параметр <span class="math">a=-1/2</span>, когда второй множитель зануляется в точке <span class="math">x=1</span>.</p>
+                        <p class="math ok">Ответ: a ∈ [−1/3;0] ∪ {−1/2}.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel pad mistakes section">
+                <h2>Типичные ошибки</h2>
+                <ul>
+                    <li>Считать, что из <span class="math">ln(x−a)=0</span> сразу следует корень <span class="math">x=a+1</span>, не проверяя существование <span class="math">√(x+2a)</span>.</li>
+                    <li>После факторизации забыть, что область определения исходного уравнения важнее, чем область определения уже преобразованной записи.</li>
+                    <li>Пытаться квадратировать уравнение <span class="math">√(x+2a)=x−1</span>, не заметив знаковую идею: на <span class="math">[0;1]</span> правая часть неположительна.</li>
+                    <li>Потерять специальный случай <span class="math">a=-1/2</span>, когда обе части второго множителя становятся нулём.</li>
+                    <li>Записать ответ только как <span class="math">[−1/3;0]</span> и забыть отдельную точку <span class="math">−1/2</span>.</li>
+                </ul>
+            </section>
+
+            <section class="panel pad section">
+                <h2>Мини-квиз</h2>
+                <div class="qa">
+                    <div class="q" id="q1"><b>1.</b> Почему уравнение <span class="math">√(x+2a)=x−1</span> на отрезке <span class="math">[0;1]</span> почти всегда невозможно?<br><button class="mini-btn" onclick="toggleAnswer('q1')">Показать ответ</button><div class="ans">Потому что левая часть неотрицательна, а правая на этом отрезке неположительна. Значит, равенство возможно только при одновременном равенстве обеих частей нулю.</div></div>
+                    <div class="q" id="q2"><b>2.</b> Почему при <span class="math">a=-1/2</span> точка <span class="math">x=1/2</span> не считается корнем ветви <span class="math">ln(x−a)=0</span>?<br><button class="mini-btn" onclick="toggleAnswer('q2')">Показать ответ</button><div class="ans">Потому что в исходном уравнении тогда нужно значение <span class="math">√(x+2a)=√(-1/2)</span>, а оно не определено.</div></div>
+                    <div class="q" id="q3"><b>3.</b> Какая точка x соответствует логарифмической ветви?<br><button class="mini-btn" onclick="toggleAnswer('q3')">Показать ответ</button><div class="ans">Всегда <span class="math">x=a+1</span>, если она попадает в отрезок и проходит область определения корня.</div></div>
+                </div>
+            </section>
+
+            <section class="panel pad section">
+                <h2>Самопроверка</h2>
+                <details class="quiz" open>
+                    <summary>Проверьте себя перед тем, как смотреть на итог</summary>
+                    <ul>
+                        <li>Вы отдельно выписали область определения <span class="math">x−a&gt;0</span> и <span class="math">x+2a≥0</span>?</li>
+                        <li>Вы нашли обе ветви после вынесения общего множителя?</li>
+                        <li>Вы заметили, что у второй ветви нужен именно край отрезка <span class="math">x=1</span>?</li>
+                        <li>Вы проверили, что для <span class="math">a=-1/2</span> логарифмическая ветвь не работает из-за области определения?</li>
+                        <li>Вы объяснили, почему других параметров нет?</li>
+                    </ul>
+                </details>
+            </section>
+
+            <section class="panel pad section">
+                <h2>Похожие задачи</h2>
+                <p class="subtle">Генератор берёт задачи того же типа: общий множитель <span class="math">ln(…)</span> и ветвь вида <span class="math">√(…)=x−1</span>, которая на отрезке <span class="math">[0;1]</span> решается той же идеей знаков.</p>
+                <div class="row">
+                    <button onclick="generateTasks()">Сгенерировать 3 задачи</button>
+                    <button onclick="applyGeneratedToModel()">Применить первую к модели</button>
+                    <span class="print-note">Для первой задачи справа автоматически перестроится модель.</span>
+                </div>
+                <div id="generatedList" class="qa" style="margin-top:14px"></div>
+            </section>
+        </main>
+
+        <aside class="right-col">
+            <section class="panel pad">
+                <h2>Интерактивная модель</h2>
+                <div class="controls">
+                    <div class="control-grid">
+                        <div>
+                            <label for="aRange">Параметр a: <span id="aVal" class="mono"></span></label>
+                            <input id="aRange" type="range" min="-1.2" max="0.3" step="0.01" value="-0.33" />
+                        </div>
+                        <div>
+                            <label for="detailSelect">Подробность</label>
+                            <select id="detailSelect">
+                                <option value="short">кратко</option>
+                                <option value="normal" selected>стандартно</option>
+                                <option value="full">очень подробно</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <button id="solveBtn">Показать все шаги</button>
+                        <button id="collapseBtn">Свернуть шаги</button>
+                    </div>
+                    <div class="seg">
+                        <button class="toggle active" data-toggle="showLog">ветвь ln(x − a)=0</button>
+                        <button class="toggle active" data-toggle="showGraph">графики второй ветви</button>
+                        <button class="toggle active" data-toggle="showODZ">область допустимых x</button>
+                        <button class="toggle active" data-toggle="showAnswer">ответ по a</button>
+                    </div>
+                </div>
+
+                <div class="summary" style="margin-top:14px">
+                    <div class="kpi"><div class="subtle">Кандидат из ln = 0</div><div class="big math" id="cand1">x = a + 1</div></div>
+                    <div class="kpi"><div class="subtle">Особый случай второй ветви</div><div class="big math" id="cand2">a = −1/2</div></div>
+                    <div class="kpi"><div class="subtle">Число корней сейчас</div><div class="big" id="rootCount">—</div></div>
+                    <div class="kpi"><div class="subtle">Статус</div><div class="big" id="statusText">—</div></div>
+                </div>
+            </section>
+
+            <section class="panel canvas-wrap">
+                <div class="row">
+                    <button onclick="zoomBy(1.15)">＋</button>
+                    <button onclick="zoomBy(1/1.15)">－</button>
+                    <button onclick="resetZoom()">Сброс</button>
+                    <label style="margin:0;flex:1">Масштаб
+                        <input id="zoomRange" type="range" min="0.7" max="2.2" step="0.01" value="1" />
+                    </label>
+                </div>
+                <div class="legend">
+                    <span><i class="dot" style="background:#7cc7ff"></i> y = √(x + 2a)</span>
+                    <span><i class="dot" style="background:#ffd479"></i> y = x − 1</span>
+                    <span><i class="dot" style="background:#8ef0c2"></i> x = a + 1</span>
+                    <span><i class="dot" style="background:#ff9b9b"></i> допустимые точки</span>
+                </div>
+                <div class="viz">
+                    <svg id="vizSvg" viewBox="0 0 760 630" width="100%" height="100%" aria-label="Интерактивная визуализация"></svg>
+                </div>
+                <div id="modelText" class="small subtle"></div>
+            </section>
+        </aside>
+    </div>
+    <div class="footer-space"></div>
+</div>
+
+<script>
+    const state = {
+        a: -0.33,
+        zoom: 1,
+        showLog: true,
+        showGraph: true,
+        showODZ: true,
+        showAnswer: true,
+        task: {
+            title: 'Исходная задача',
+            interval: [0,1],
+            m: 2,
+            n: 0,
+            s: 0,
+            rhsShift: 1,
+            display: '√(x + 2a) · ln(x − a) = (x − 1) · ln(x − a), x ∈ [0;1]'
+        },
+        generated: []
+    };
+
+    function fmt(v){
+        if (Math.abs(v) < 1e-10) return '0';
+        const s = (Math.round(v*100)/100).toString();
+        return s.replace('-', '−');
+    }
+    function near(a,b,eps=1e-9){ return Math.abs(a-b) < eps; }
+    function setOpenAll(flag){
+        document.querySelectorAll('.step').forEach(st=>{
+            st.classList.toggle('open', flag);
+            st.querySelector('.step-head div:last-child').textContent = flag ? '▾' : '▸';
+        });
+    }
+    function toggleStep(step){
+        step.classList.toggle('open');
+        step.querySelector('.step-head div:last-child').textContent = step.classList.contains('open') ? '▾' : '▸';
+    }
+    document.querySelectorAll('.step').forEach(st=>st.querySelector('.step-head').addEventListener('click',()=>toggleStep(st)));
+    document.getElementById('solveBtn').addEventListener('click',()=>setOpenAll(true));
+    document.getElementById('collapseBtn').addEventListener('click',()=>setOpenAll(false));
+    document.getElementById('aRange').addEventListener('input',e=>{ state.a = +e.target.value; render(); });
+    document.getElementById('zoomRange').addEventListener('input',e=>{ state.zoom = +e.target.value; render(); });
+    document.getElementById('detailSelect').addEventListener('change',e=>applyDetail(e.target.value));
+    document.querySelectorAll('.toggle').forEach(btn=>btn.addEventListener('click',()=>{
+        const k = btn.dataset.toggle;
+        state[k] = !state[k];
+        btn.classList.toggle('active', state[k]);
+        render();
+    }));
+    function applyDetail(mode){
+        document.body.dataset.detail = mode;
+        document.querySelectorAll('.step-body').forEach(b=>{
+            b.querySelectorAll('.detail-extra-short,.detail-extra-full').forEach(x=>x.remove());
+        });
+        if(mode==='short'){
+            document.querySelectorAll('.step-body').forEach(b=>{
+                const ps = [...b.querySelectorAll('p, ul, ol')];
+                ps.forEach((el,idx)=>{ el.style.display = idx<2 ? '' : 'none'; });
+            });
+        } else if (mode==='normal'){
+            document.querySelectorAll('.step-body').forEach(b=>{
+                [...b.querySelectorAll('p, ul, ol')].forEach(el=>el.style.display='');
+            });
+        } else {
+            document.querySelectorAll('.step-body').forEach(b=>{
+                [...b.querySelectorAll('p, ul, ol')].forEach(el=>el.style.display='');
+            });
+        }
+    }
+
+    function solveCurrentTask(a=state.a, task=state.task){
+        const [L,R] = task.interval;
+        const roots = [];
+        const x1 = a - task.s + 1;
+        const inInterval = x1 >= L - 1e-9 && x1 <= R + 1e-9;
+        const logDomain = x1 - a + task.s > 0;
+        const sqrtDomain = x1 + task.m*a + task.n >= -1e-9;
+        if(inInterval && logDomain && sqrtDomain){
+            roots.push({x:x1, via:'log'});
+        }
+        // second branch: sqrt(...) = x - rhsShift ; on [0, rhsShift] with rhsShift==R==1 in our bank, equality only if both 0
+        const x2 = task.rhsShift;
+        if (x2 >= L - 1e-9 && x2 <= R + 1e-9) {
+            if (near(x2 - task.rhsShift, 0) && near(x2 + task.m*a + task.n, 0)) {
+                const okLog = x2 - a + task.s > 0;
+                if (okLog) roots.push({x:x2, via:'graph'});
+            }
+        }
+        const uniq = [];
+        roots.forEach(r=>{ if(!uniq.some(u=>near(u.x,r.x))) uniq.push(r); });
+        return {
+            roots: uniq,
+            x1,
+            branch1Allowed: inInterval && logDomain && sqrtDomain,
+            branch1Interval: [Math.max(L-1+task.s, -(task.n - task.s + 1)/(task.m+1)), task.s],
+            specialA: -(task.n + task.rhsShift)/task.m,
+            branch2Allowed: uniq.some(r=>r.via==='graph')
+        };
+    }
+
+    function draw(){
+        const svg = document.getElementById('vizSvg');
+        const W=760, H=630;
+        const a=state.a, task=state.task;
+        const [L,R] = task.interval;
+        const sol = solveCurrentTask(a, task);
+        const xMin=L-0.05, xMax=R+0.05, yMin=-1.2, yMax=1.6;
+        const z = state.zoom;
+        const pad = 58;
+        function X(x){ const mid=(xMin+xMax)/2; return pad + ((x-mid)*z + (xMax-xMin)/2)*((W-2*pad)/(xMax-xMin)); }
+        function Y(y){ const mid=(yMin+yMax)/2; return H-pad - (((y-mid)*z + (yMax-yMin)/2)*((H-2*pad)/(yMax-yMin))); }
+        let g='';
+        g += `<rect x="0" y="0" width="${W}" height="${H}" rx="22" fill="#091228"/>`;
+        for(let k=-1;k<=2;k+=0.5){ g += `<line x1="${X(xMin)}" y1="${Y(k)}" x2="${X(xMax)}" y2="${Y(k)}" stroke="#1c2752" stroke-width="1"/>`; }
+        for(let k=0;k<=1;k+=0.1){ g += `<line x1="${X(k)}" y1="${Y(yMin)}" x2="${X(k)}" y2="${Y(yMax)}" stroke="#1c2752" stroke-width="1"/>`; }
+        g += `<line x1="${X(xMin)}" y1="${Y(0)}" x2="${X(xMax)}" y2="${Y(0)}" stroke="#7787c2" stroke-width="2"/>`;
+        g += `<line x1="${X(0)}" y1="${Y(yMin)}" x2="${X(0)}" y2="${Y(yMax)}" stroke="#7787c2" stroke-width="2"/>`;
+        for(let k=0;k<=1;k+=0.2){ g += `<text x="${X(k)}" y="${Y(0)+22}" fill="#aab6da" font-size="14" text-anchor="middle">${fmt(k)}</text>`; }
+        [-1,-.5,0,.5,1,1.5].forEach(k=> g += `<text x="${X(0)-14}" y="${Y(k)+5}" fill="#aab6da" font-size="14" text-anchor="end">${fmt(k)}</text>`);
+
+        if(state.showGraph){
+            let p1='', start=false;
+            for(let i=0;i<=300;i++){
+                const x=xMin + (xMax-xMin)*i/300;
+                const rad = x + task.m*a + task.n;
+                if(rad>=0){
+                    const y=Math.sqrt(rad);
+                    p1 += `${start?'L':'M'} ${X(x)} ${Y(y)} `; start=true;
+                } else start=false;
+            }
+            g += `<path class="svg-obj" data-focus="graphs" d="${p1}" fill="none" stroke="#7cc7ff" stroke-width="3"/>`;
+            let p2='';
+            for(let i=0;i<=300;i++){
+                const x=xMin + (xMax-xMin)*i/300;
+                const y=x-task.rhsShift;
+                p2 += `${i?'L':'M'} ${X(x)} ${Y(y)} `;
+            }
+            g += `<path class="svg-obj" data-focus="graphs candidate2" d="${p2}" fill="none" stroke="#ffd479" stroke-width="3"/>`;
+        }
+
+        if(state.showODZ){
+            const yBar=H-44;
+            const start=Math.max(L, a-task.s+1e-4, -task.m*a-task.n);
+            const end=R;
+            g += `<text x="20" y="${yBar-8}" fill="#aab6da" font-size="14">Допустимые x на [0;1]</text>`;
+            g += `<line x1="${X(L)}" y1="${yBar}" x2="${X(R)}" y2="${yBar}" stroke="#5b668e" stroke-width="4" stroke-linecap="round"/>`;
+            if(start<=end){ g += `<line class="svg-obj" data-focus="odz" x1="${X(start)}" y1="${yBar}" x2="${X(end)}" y2="${yBar}" stroke="#ff9b9b" stroke-width="8" stroke-linecap="round"/>`; }
+            g += `<circle cx="${X(L)}" cy="${yBar}" r="5" fill="#d4dcff"/><circle cx="${X(R)}" cy="${yBar}" r="5" fill="#d4dcff"/>`;
+        }
+
+        if(state.showLog){
+            const x1=sol.x1;
+            if(x1>=xMin && x1<=xMax){
+                g += `<line class="svg-obj" data-focus="candidate1 logbranch" x1="${X(x1)}" y1="${Y(yMin)}" x2="${X(x1)}" y2="${Y(yMax)}" stroke="#8ef0c2" stroke-width="2.5" stroke-dasharray="8 6"/>`;
+                g += `<text x="${X(x1)+6}" y="${Y(1.35)}" fill="#8ef0c2" font-size="15">x = a + 1</text>`;
+            }
+        }
+
+        sol.roots.forEach((r,idx)=>{
+            g += `<circle class="svg-obj" data-focus="root root${idx}" cx="${X(r.x)}" cy="${Y(0)}" r="8" fill="#9dffb4" stroke="#052312" stroke-width="2"/>`;
+            g += `<text x="${X(r.x)}" y="${Y(0)-14}" fill="#9dffb4" font-size="15" text-anchor="middle">корень x=${fmt(r.x)}</text>`;
+        });
+
+        if(state.showAnswer){
+            const xs = X(-0.02), yTop=20;
+            g += `<rect x="${W-246}" y="16" width="220" height="112" rx="16" fill="#0d1630" stroke="#2a3766"/>`;
+            g += `<text x="${W-228}" y="42" fill="#e9eefc" font-size="16" font-weight="700">Ответ по параметру</text>`;
+            g += `<text x="${W-228}" y="66" fill="#9dffb4" font-size="16">[−1/3; 0] ∪ {−1/2}</text>`;
+            g += `<text x="${W-228}" y="92" fill="#aab6da" font-size="14">текущий a = ${fmt(a)}</text>`;
+            g += `<text x="${W-228}" y="114" fill="${sol.roots.length===1?'#9dffb4':'#ffd479'}" font-size="14">корней сейчас: ${sol.roots.length}</text>`;
+        }
+
+        svg.innerHTML = g;
+        bindFocusLinks();
+    }
+
+    function render(){
+        const a=state.a, task=state.task;
+        document.getElementById('aVal').textContent = fmt(a);
+        const sol = solveCurrentTask(a, task);
+        document.getElementById('cand1').textContent = `x = ${fmt(sol.x1)}`;
+        document.getElementById('cand2').textContent = `a = ${fmt(sol.specialA)}`;
+        document.getElementById('rootCount').textContent = sol.roots.length;
+        const st = sol.roots.length===1 ? 'ровно один' : sol.roots.length===0 ? 'корней нет' : 'несколько';
+        document.getElementById('statusText').textContent = st;
+        document.getElementById('modelText').innerHTML = `
+    Сейчас для <span class="math">a=${fmt(a)}</span>:
+    кандидат из <span class="math">ln=0</span> даёт <span class="math">x=${fmt(sol.x1)}</span> и он ${sol.branch1Allowed?'<span class="ok">проходит область определения</span>':'<span class="danger">не проходит область определения</span>'}.
+    Вторая ветвь работает только при <span class="math">a=${fmt(sol.specialA)}</span>.
+    Поэтому число корней на <span class="math">[0;1]</span> сейчас равно <b>${sol.roots.length}</b>.`;
+        draw();
+    }
+
+    function bindFocusLinks(){
+        document.querySelectorAll('.focus-link').forEach(el=>{
+            el.onmouseenter = ()=>focusByKey(el.dataset.focus, true);
+            el.onmouseleave = ()=>focusByKey(el.dataset.focus, false);
+        });
+        document.querySelectorAll('.svg-obj').forEach(el=>{
+            el.onmouseenter = ()=>{
+                const keys = (el.dataset.focus||'').split(/\s+/).filter(Boolean);
+                keys.forEach(k=>document.querySelectorAll(`[data-focus="${k}"]`).forEach(t=>t.classList.add('focused-text')));
+                el.classList.add('focused');
+            };
+            el.onmouseleave = ()=>{
+                document.querySelectorAll('.focused-text').forEach(t=>t.classList.remove('focused-text'));
+                el.classList.remove('focused');
+            };
+        });
+    }
+    function focusByKey(key, on){
+        document.querySelectorAll(`.svg-obj`).forEach(el=>{
+            const keys=(el.dataset.focus||'').split(/\s+/);
+            if(keys.includes(key)) el.classList.toggle('focused', on);
+        });
+        document.querySelectorAll(`[data-focus="${key}"]`).forEach(el=>el.classList.toggle('focused-text', on));
+    }
+
+    function zoomBy(k){
+        state.zoom = Math.max(0.7, Math.min(2.2, state.zoom*k));
+        document.getElementById('zoomRange').value = state.zoom;
+        render();
+    }
+    function resetZoom(){ state.zoom = 1; document.getElementById('zoomRange').value = 1; render(); }
+
+    document.querySelector('.viz').addEventListener('wheel', e=>{
+        e.preventDefault();
+        zoomBy(e.deltaY<0 ? 1.08 : 1/1.08);
+    },{passive:false});
+
+    function toggleAnswer(id){ document.getElementById(id).classList.toggle('show'); }
+
+    function formatAnswerRange(start,end,special){
+        const parts=[];
+        if(start<=end+1e-9) parts.push(`[${fmt(start)}; ${fmt(end)}]`);
+        if(special!==null && !isNaN(special)) parts.push(`{${fmt(special)}}`);
+        return parts.join(' ∪ ');
+    }
+
+    function taskAnswer(task){
+        const [L,R] = task.interval;
+        const start = Math.max(L-1+task.s, -(task.n - task.s + 1)/(task.m+1));
+        const end = task.s;
+        const special = -(task.n + task.rhsShift)/task.m;
+        let includeSpecial = true;
+        if(special >= start-1e-9 && special <= end+1e-9){
+            const x1 = special - task.s + 1;
+            const x2 = task.rhsShift;
+            if(near(x1,x2)) includeSpecial = false;
+        }
+        return {
+            interval: start<=end ? [start,end] : null,
+            special: includeSpecial ? special : null,
+            text: formatAnswerRange(start,end,includeSpecial?special:null),
+            idea: 'Разложить на два множителя, взять x из ln(…)=0 и отдельно заметить, что равенство √(…)=x−1 на [0;1] возможно только в точке x=1.'
+        };
+    }
+
+    function generateTasks(){
+        const bank = [
+            {display:'√(x + 3a + 1) · ln(x − a) = (x − 1) · ln(x − a), x ∈ [0;1]', interval:[0,1], m:3, n:1, s:0, rhsShift:1},
+            {display:'√(x + 2a − 1) · ln(x − a) = (x − 1) · ln(x − a), x ∈ [0;1]', interval:[0,1], m:2, n:-1, s:0, rhsShift:1},
+            {display:'√(x + 4a) · ln(x − a + 1/4) = (x − 1) · ln(x − a + 1/4), x ∈ [0;1]', interval:[0,1], m:4, n:0, s:0.25, rhsShift:1},
+            {display:'√(x + 5a + 2) · ln(x − a − 1/5) = (x − 1) · ln(x − a − 1/5), x ∈ [0;1]', interval:[0,1], m:5, n:2, s:-0.2, rhsShift:1},
+            {display:'√(x + a + 1) · ln(x − a + 1/2) = (x − 1) · ln(x − a + 1/2), x ∈ [0;1]', interval:[0,1], m:1, n:1, s:0.5, rhsShift:1}
+        ];
+        state.generated = bank.sort(()=>Math.random()-0.5).slice(0,3).map((t,i)=>({ ...t, ans: taskAnswer(t) }));
+        const box = document.getElementById('generatedList');
+        box.innerHTML = state.generated.map((t,i)=>`
+    <div class="gen-card">
+      <div><b>Задача ${i+1}.</b> <span class="math">${t.display}</span></div>
+      <div style="margin-top:8px"><span class="subtle">Ответ:</span> <span class="math ok">${t.ans.text}</span></div>
+      <div class="small subtle" style="margin-top:6px">Идея: ${t.ans.idea}</div>
+    </div>`).join('');
+    }
+    function applyGeneratedToModel(){
+        if(!state.generated.length) generateTasks();
+        state.task = state.generated[0];
+        state.a = state.task.ans.interval ? state.task.ans.interval[0] : state.task.ans.special;
+        document.getElementById('aRange').min = -1.5;
+        document.getElementById('aRange').max = 0.8;
+        document.getElementById('aRange').value = state.a;
+        document.querySelector('.hero .formula').textContent = state.task.display.replace(/\[0;1\]/g,'[0;1]');
+        render();
+    }
+
+    applyDetail('normal');
+    generateTasks();
+    render();
+</script>
+</body>
+</html>

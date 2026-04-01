@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3E3293 — параметр, логарифм и корень</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --panel:#11182d;
+            --panel-2:#16203a;
+            --text:#ecf2ff;
+            --muted:#aeb9d6;
+            --accent:#7cc7ff;
+            --accent-2:#8ef0b5;
+            --warn:#ffd36d;
+            --bad:#ff8d8d;
+            --good:#9ef7b0;
+            --line:#2b395f;
+            --shadow:0 14px 34px rgba(0,0,0,.35);
+            --radius:22px;
+            --stickyTop:14px;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:radial-gradient(circle at top, #12203f 0%, #0b1020 46%, #090d18 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;scroll-behavior:smooth}
+        body{line-height:1.55}
+        .page{max-width:1500px;margin:0 auto;padding:20px}
+        .hero{padding:20px 22px;border:1px solid var(--line);background:linear-gradient(180deg, rgba(124,199,255,.08), rgba(255,255,255,.02));border-radius:28px;box-shadow:var(--shadow);margin-bottom:18px}
+        .hero-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+        .badge{display:inline-flex;gap:8px;align-items:center;background:#091226;border:1px solid #27416a;color:#d8ebff;padding:7px 12px;border-radius:999px;font-weight:700;letter-spacing:.04em}
+        h1{font-size:clamp(28px,4vw,44px);line-height:1.1;margin:16px 0 12px}
+        .lead{color:var(--muted);font-size:1.02rem;max-width:1050px}
+        .formula{margin:18px 0;padding:16px 18px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:20px;font-size:clamp(22px,2.4vw,30px);font-weight:700;overflow:auto}
+        .formula .math{white-space:nowrap}
+        .layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);gap:18px;align-items:start}
+        .left{min-width:0}
+        .right{position:sticky;top:var(--stickyTop);align-self:start}
+        .panel{background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+        .section{padding:18px 18px 16px;margin-bottom:16px}
+        .section h2,.section h3{margin:0 0 10px}
+        .section h2{font-size:1.45rem}
+        .section h3{font-size:1.07rem}
+        .soft{color:var(--muted)}
+        .idea-list,.mistake-list,.mini-list,.check-list{display:grid;gap:10px;padding:0;margin:12px 0 0;list-style:none}
+        .idea-list li,.mistake-list li,.mini-list li,.check-list li{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .chip-row{display:flex;flex-wrap:wrap;gap:8px}
+        .chip{padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:#0c1428;color:#dce8ff;font-size:.93rem}
+        .key{color:var(--accent);font-weight:700}
+        .ok{color:var(--good);font-weight:700}
+        .warn{color:var(--warn);font-weight:700}
+        .bad{color:var(--bad);font-weight:700}
+        .case-table{display:grid;gap:10px;margin-top:12px}
+        .case{padding:14px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg, rgba(124,199,255,.06), rgba(255,255,255,.02))}
+        .case strong{display:block;margin-bottom:5px}
+        .answer-box{padding:16px 18px;border-radius:20px;border:1px solid #2c5f48;background:linear-gradient(180deg, rgba(142,240,181,.10), rgba(142,240,181,.03));font-size:1.08rem}
+        .answer-main{font-size:1.18rem;font-weight:800}
+        .step-nav{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 14px}
+        .btn,.toggle,.small-btn{appearance:none;border:none;cursor:pointer;color:var(--text);background:#152544;border:1px solid #2f4b7d;padding:10px 14px;border-radius:14px;font-weight:700;transition:.18s transform,.18s background,.18s border-color}
+        .btn:hover,.toggle:hover,.small-btn:hover{transform:translateY(-1px);background:#1b3158}
+        .btn.active,.toggle.active{background:#23467f;border-color:#7cc7ff}
+        .small-btn{padding:8px 10px;font-size:.92rem}
+        .steps{display:grid;gap:12px}
+        .step{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.025)}
+        .step-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px 16px;background:rgba(255,255,255,.03)}
+        .step-head h3{margin:0;font-size:1.04rem}
+        .step-body{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease}
+        .step.open .step-body{max-height:1200px;padding:14px 16px 16px}
+        .step.open .step-head{background:rgba(124,199,255,.08)}
+        .step p,.step ul{margin:0 0 10px}
+        .step ul{padding-left:20px}
+        .detail-switch,.tools{display:flex;flex-wrap:wrap;gap:8px}
+        .detail-block{display:none}
+        .detail-brief .d-brief,.detail-standard .d-standard,.detail-full .d-full{display:block}
+        .detail-standard .d-brief,.detail-full .d-brief,.detail-full .d-standard{display:block}
+        .note{padding:12px 14px;border-left:4px solid var(--accent);background:rgba(124,199,255,.08);border-radius:0 14px 14px 0}
+        .right .section{padding:16px}
+        .control-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+        .control{padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .control label{display:block;font-size:.95rem;color:#d7e7ff;margin-bottom:8px;font-weight:700}
+        .slider-wrap{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
+        input[type="range"]{width:100%}
+        .value{min-width:84px;text-align:center;padding:8px 10px;border-radius:12px;background:#0b1428;border:1px solid var(--line);font-weight:800}
+        .check{display:flex;gap:8px;align-items:center;margin:6px 0;color:#dce8ff}
+        svg{width:100%;height:auto;display:block;border-radius:18px;background:linear-gradient(180deg,#0d1730,#091225)}
+        .legend{display:grid;gap:8px;margin-top:12px}
+        .legend-item{display:flex;align-items:center;gap:9px;color:#dce7ff;font-size:.94rem}
+        .sw{width:18px;height:4px;border-radius:999px;background:#fff}
+        .hover-target{transition:background .18s, border-color .18s, transform .18s}
+        .hover-target.highlight{background:rgba(124,199,255,.13)!important;border-color:#7cc7ff!important;transform:translateY(-1px)}
+        .subtle{font-size:.93rem;color:var(--muted)}
+        .quiz-item{padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025);margin-bottom:12px}
+        .quiz-item input[type="text"]{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b1428;color:#fff}
+        .quiz-result,.gen-result{margin-top:10px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+        .generated-card{padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-top:10px}
+        .footer{padding:12px 2px 28px;color:var(--muted);text-align:center}
+        .print-note{display:none}
+        .top-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+        .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+        @media (max-width: 1080px){
+            .layout{grid-template-columns:1fr}
+            .right{position:relative;top:auto}
+        }
+        @media (max-width: 700px){
+            .page{padding:12px}
+            .hero,.section{padding:14px}
+            .control-grid,.grid-2{grid-template-columns:1fr}
+            .formula{font-size:1.22rem}
+            .step-head{align-items:flex-start;flex-direction:column}
+        }
+        @media print{
+            :root{--bg:#fff;--panel:#fff;--panel-2:#fff;--text:#111;--muted:#444;--line:#bbb;--accent:#0a5fb8}
+            body{background:#fff;color:#111}
+            .page{max-width:none;padding:0}
+            .layout{display:block}
+            .right{position:static}
+            .panel{box-shadow:none;background:#fff}
+            .btn,.toggle,.small-btn,input,select,.quiz-item button{display:none!important}
+            .step .step-body{max-height:none!important;padding:14px 16px 16px!important}
+            .print-note{display:block;color:#111;margin-top:10px}
+            .section{break-inside:avoid-page}
+        }
+    </style>
+</head>
+<body>
+<div class="page" id="appRoot">
+    <header class="hero panel">
+        <div class="hero-top">
+            <div>
+                <div class="badge">3E3293 · Задача с параметром</div>
+                <h1>Ровно один корень на отрезке [0; 3]</h1>
+                <div class="lead">
+                    Наглядный разбор уравнения с параметром школьными методами: отдельно отслеживаем,
+                    <span class="key">когда нуль даёт логарифм</span>, а когда —
+                    <span class="key">квадратный корень</span>, и затем считаем количество различных корней на отрезке.
+                </div>
+            </div>
+            <div class="chip-row">
+                <div class="chip">Цель: подготовка к ЕГЭ</div>
+                <div class="chip">Уровень: уверенный</div>
+                <div class="chip">Фокус: геометрическая идея</div>
+                <div class="chip">Интерактивность: расширенная</div>
+            </div>
+        </div>
+
+        <div class="formula" aria-label="Условие задачи">
+            <div class="math">ln(4x − 1) · √(x² − 6x + 6a − a²) = 0, &nbsp; x ∈ [0; 3]</div>
+        </div>
+
+        <div class="top-tools">
+            <button class="btn" id="copyMdBtn">Скопировать условие в Markdown</button>
+            <button class="btn" id="showAllBtn">Раскрыть всё решение</button>
+            <button class="btn" id="hideAllBtn">Свернуть шаги</button>
+            <div class="subtle">Автор: Лёвин Артём Александрович</div>
+        </div>
+    </header>
+
+    <main class="layout">
+        <section class="left">
+            <article class="section panel">
+                <h2>Идея решения</h2>
+                <ul class="idea-list">
+                    <li>У произведения двух множителей нуль получается тогда и только тогда, когда <strong>хотя бы один множитель равен нулю</strong>, но оба множителя при этом должны быть определены.</li>
+                    <li>Логарифм даёт ровно одну кандидатуру: <strong>x = 1/2</strong>.</li>
+                    <li>Подкоренное выражение удобно разложить как <strong>(x − 3)² − (a − 3)²</strong>, поэтому нули корня сразу видны: <strong>x = a</strong> и <strong>x = 6 − a</strong>.</li>
+                    <li>Дальше остаётся аккуратно посчитать, в какие моменты среди точек <strong>1/2, a, 6 − a</strong> на отрезке [0; 3] остаётся <strong>ровно одна</strong>.</li>
+                </ul>
+            </article>
+
+            <article class="section panel detail-standard" id="detailContainer">
+                <h2>Режим подробности</h2>
+                <div class="detail-switch">
+                    <button class="toggle active" data-detail="standard">Стандартно</button>
+                    <button class="toggle" data-detail="brief">Кратко</button>
+                    <button class="toggle" data-detail="full">Очень подробно</button>
+                </div>
+                <div class="note" style="margin-top:12px">
+                    При переключении меняется объём пояснений, но сама математическая логика и ответ остаются теми же.
+                </div>
+            </article>
+
+            <article class="section panel">
+                <h2>Пошаговое решение</h2>
+                <div class="step-nav">
+                    <button class="btn active" data-step-open="1">Шаг 1</button>
+                    <button class="btn" data-step-open="2">Шаг 2</button>
+                    <button class="btn" data-step-open="3">Шаг 3</button>
+                    <button class="btn" data-step-open="4">Шаг 4</button>
+                    <button class="btn" data-step-open="5">Шаг 5</button>
+                    <button class="btn" data-step-open="6">Шаг 6</button>
+                    <button class="btn" data-step-open="7">Шаг 7</button>
+                </div>
+
+                <div class="steps">
+                    <section class="step open hover-target" id="step1" data-link="domain">
+                        <div class="step-head">
+                            <h3>1) Что дано</h3>
+                            <button class="small-btn step-toggle">Открыть / закрыть</button>
+                        </div>
+                        <div class="step-body">
+                            <p>Нужно найти все значения параметра <strong>a</strong>, при которых уравнение</p>
+                            <p class="mono">ln(4x − 1) · √(x² − 6x + 6a − a²) = 0</p>
+                            <p>имеет на отрезке <strong>[0; 3]</strong> ровно один корень.</p>
+                            <div class="detail-block d-brief">
+                                <p>Главная мысль: сначала ищем все возможные корни, потом считаем их число.</p>
+                            </div>
+                            <div class="detail-block d-standard">
+                                <p>Поскольку слева стоит произведение, корни будут появляться из двух источников:</p>
+                                <ul>
+                                    <li>из равенства <strong>ln(4x − 1) = 0</strong>;</li>
+                                    <li>из равенства <strong>√(x² − 6x + 6a − a²) = 0</strong>.</li>
+                                </ul>
+                            </div>
+                            <div class="detail-block d-full">
+                                <p>Но нельзя забывать и про область допустимых значений: логарифм должен быть определён, а подкоренное выражение не может быть отрицательным. В этой задаче очень важно не только найти «формальные» точки, но и проверить, действительно ли они допустимы.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="step hover-target" id="step2" data-link="domain">
+                        <div class="step-head">
+                            <h3>2) Что означает каждое условие</h3>
+                            <button class="small-btn step-toggle">Открыть / закрыть</button>
+                        </div>
+                        <div class="step-body">
+                            <p><strong>Логарифм определён</strong>, если <span class="key">4x − 1 &gt; 0</span>, то есть <span class="key">x &gt; 1/4</span>.</p>
+                            <p><strong>Квадратный корень определён</strong>, если <span class="key">x² − 6x + 6a − a² ≥ 0</span>.</p>
+                            <p>Значит, каждый корень обязан лежать не просто на [0; 3], а на части этого отрезка, где одновременно выполнены оба условия.</p>
+                            <div class="detail-block d-standard">
+                                <p>Уже отсюда видно, что точка <strong>x = 1/4</strong> не подходит: логарифм в ней не определён.</p>
+                            </div>
+                            <div class="detail-block d-full">
+                                <p>Это один из самых частых источников ошибок: ученик находит нуль подкоренного выражения в точке x = 1/4 и автоматически засчитывает его как корень всего уравнения. Так делать нельзя, потому что множитель ln(4x − 1) в этой точке вообще не существует.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="step hover-target" id="step3" data-link="logroot">
+                        <div class="step-head">
+                            <h3>3) Интерпретация логарифмического множителя</h3>
+                            <button class="small-btn step-toggle">Открыть / закрыть</button>
+                        </div>
+                        <div class="step-body">
+                            <p>Решаем <strong>ln(4x − 1) = 0</strong>.</p>
+                            <p>Логарифм равен нулю тогда и только тогда, когда его аргумент равен 1:</p>
+                            <p class="mono">4x − 1 = 1 ⇒ 4x = 2 ⇒ x = 1/2.</p>
+                            <p>Значит, от логарифма возникает одна кандидатура: <strong class="key">x = 1/2</strong>.</p>
+                            <div class="detail-block d-standard">
+                                <p>Но эта точка станет настоящим корнем только тогда, когда подкоренное выражение в ней неотрицательно.</p>
+                            </div>
+                            <div class="detail-block d-full">
+                                <p>Подставим x = 1/2:</p>
+                                <p class="mono">(1/2)² − 6·(1/2) + 6a − a² = 1/4 − 3 + 6a − a² = −a² + 6a − 11/4.</p>
+                                <p>Требуем неотрицательность:</p>
+                                <p class="mono">−a² + 6a − 11/4 ≥ 0 ⇔ a² − 6a + 11/4 ≤ 0.</p>
+                                <p>Корни квадратного трёхчлена:</p>
+                                <p class="mono">D = 36 − 11 = 25, &nbsp; a₁ = 1/2, &nbsp; a₂ = 11/2.</p>
+                                <p>Следовательно, точка <strong>x = 1/2</strong> существует как корень при <strong class="key">a ∈ [1/2; 11/2]</strong>.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="step hover-target" id="step4" data-link="sqrtroots">
+                        <div class="step-head">
+                            <h3>4) Интерпретация корневого множителя</h3>
+                            <button class="small-btn step-toggle">Открыть / закрыть</button>
+                        </div>
+                        <div class="step-body">
+                            <p>Теперь ищем нули подкоренного выражения:</p>
+                            <p class="mono">x² − 6x + 6a − a² = 0.</p>
+                            <p>Выделяем квадрат:</p>
+                            <p class="mono">x² − 6x + 9 − 9 + 6a − a² = 0</p>
+                            <p class="mono">(x − 3)² − (a − 3)² = 0.</p>
+                            <p>Разность квадратов равна нулю, значит:</p>
+                            <p class="mono">x − 3 = ±(a − 3).</p>
+                            <p>Отсюда получаем две кандидатуры:</p>
+                            <p class="mono"><strong>x = a</strong> и <strong>x = 6 − a</strong>.</p>
+                            <div class="detail-block d-standard">
+                                <p>Это очень удобная геометрическая картина: две симметричные точки относительно числа 3.</p>
+                            </div>
+                            <div class="detail-block d-full">
+                                <p>Но обе эти точки надо ещё проверить на попадание в область допустимых значений для логарифма и на отрезок [0; 3].</p>
+                                <ul>
+                                    <li><strong>x = a</strong> подходит как корень тогда и только тогда, когда <strong>a ∈ (1/4; 3]</strong>.</li>
+                                    <li><strong>x = 6 − a</strong> подходит как корень тогда и только тогда, когда <strong>6 − a ∈ (1/4; 3]</strong>, то есть <strong>a ∈ [3; 23/4)</strong>.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="step hover-target" id="step5" data-link="counting">
+                        <div class="step-head">
+                            <h3>5) Ключевая идея: считаем точки 1/2, a, 6 − a</h3>
+                            <button class="small-btn step-toggle">Открыть / закрыть</button>
+                        </div>
+                        <div class="step-body">
+                            <p>Все возможные корни — это точки:</p>
+                            <p class="mono">x = 1/2, &nbsp; x = a, &nbsp; x = 6 − a,</p>
+                            <p>но засчитываются только те, которые действительно допустимы.</p>
+                            <div class="detail-block d-brief">
+                                <p>Дальше идём по промежуткам параметра a и смотрим, сколько точек остаётся.</p>
+                            </div>
+                            <div class="detail-block d-standard">
+                                <p>Надо помнить о совпадениях:</p>
+                                <ul>
+                                    <li>x = a и x = 6 − a совпадают при <strong>a = 3</strong>;</li>
+                                    <li>x = 1/2 и x = a совпадают при <strong>a = 1/2</strong>;</li>
+                                    <li>x = 1/2 и x = 6 − a совпадают при <strong>a = 11/2</strong>.</li>
+                                </ul>
+                            </div>
+                            <div class="detail-block d-full">
+                                <p>Именно из-за этих совпадений ответ нельзя получить простым «объединением условий». Нужно считать количество <strong>различных</strong> корней, а не количество формул, которые дали нуль.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="step hover-target" id="step6" data-link="cases">
+                        <div class="step-head">
+                            <h3>6) Разбор по случаям</h3>
+                            <button class="small-btn step-toggle">Открыть / закрыть</button>
+                        </div>
+                        <div class="step-body">
+                            <div class="case-table">
+                                <div class="case">
+                                    <strong>a ≤ 1/4</strong>
+                                    Корней нет: x = a не проходит условие x &gt; 1/4, x = 6 − a не попадает в [0; 3], x = 1/2 ещё не появился.
+                                </div>
+                                <div class="case">
+                                    <strong>1/4 &lt; a &lt; 1/2</strong>
+                                    Есть только корень <strong>x = a</strong>. Следовательно, корень ровно один.
+                                </div>
+                                <div class="case">
+                                    <strong>a = 1/2</strong>
+                                    Точки x = a и x = 1/2 совпали. Всё равно получаем <strong>один</strong> корень.
+                                </div>
+                                <div class="case">
+                                    <strong>1/2 &lt; a &lt; 3</strong>
+                                    Есть два различных корня: <strong>x = 1/2</strong> и <strong>x = a</strong>.
+                                </div>
+                                <div class="case">
+                                    <strong>a = 3</strong>
+                                    Получаются два корня: <strong>x = 1/2</strong> и <strong>x = 3</strong>.
+                                </div>
+                                <div class="case">
+                                    <strong>3 &lt; a &lt; 11/2</strong>
+                                    Есть два различных корня: <strong>x = 1/2</strong> и <strong>x = 6 − a</strong>.
+                                </div>
+                                <div class="case">
+                                    <strong>a = 11/2</strong>
+                                    Точки x = 1/2 и x = 6 − a совпали. Получаем <strong>один</strong> корень.
+                                </div>
+                                <div class="case">
+                                    <strong>11/2 &lt; a &lt; 23/4</strong>
+                                    Остаётся только корень <strong>x = 6 − a</strong>. Значит, корень ровно один.
+                                </div>
+                                <div class="case">
+                                    <strong>a ≥ 23/4</strong>
+                                    Корней нет. При a = 23/4 формально x = 6 − a = 1/4, но логарифм там не определён.
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="step hover-target" id="step7" data-link="answer">
+                        <div class="step-head">
+                            <h3>7) Финальная проверка и ответ</h3>
+                            <button class="small-btn step-toggle">Открыть / закрыть</button>
+                        </div>
+                        <div class="step-body">
+                            <div class="answer-box">
+                                <div class="answer-main">Ответ: a ∈ (1/4; 1/2] ∪ [11/2; 23/4).</div>
+                                <p>Проверка:</p>
+                                <ul>
+                                    <li>при <strong>a ∈ (1/4; 1/2)</strong> единственный корень — <strong>x = a</strong>;</li>
+                                    <li>при <strong>a = 1/2</strong> единственный корень — <strong>x = 1/2</strong>;</li>
+                                    <li>при <strong>a = 11/2</strong> единственный корень — <strong>x = 1/2 = 6 − a</strong>;</li>
+                                    <li>при <strong>a ∈ (11/2; 23/4)</strong> единственный корень — <strong>x = 6 − a</strong>.</li>
+                                </ul>
+                                <p>Во всех остальных случаях либо корней нет, либо их два.</p>
+                            </div>
+                            <div class="print-note">
+                                Печатная версия: ответ a ∈ (1/4; 1/2] ∪ [11/2; 23/4).
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </article>
+
+            <article class="section panel">
+                <h2>Типичные ошибки</h2>
+                <ul class="mistake-list">
+                    <li><strong>Засчитать x = 1/4 как корень.</strong> Нельзя: ln(4x − 1) в этой точке не определён.</li>
+                    <li><strong>Не проверить x = 1/2.</strong> Логарифм даёт эту точку всегда формально, но настоящим корнем она становится только при a ∈ [1/2; 11/2].</li>
+                    <li><strong>Забыть про совпадения корней.</strong> При a = 1/2 и a = 11/2 число формул-источников больше, чем число различных корней.</li>
+                    <li><strong>Не заметить симметрию x = a и x = 6 − a.</strong> Из-за неё задача решается намного быстрее и чище.</li>
+                    <li><strong>Считать только нули множителей без ОДЗ.</strong> Для произведения этого недостаточно: оба множителя должны быть определены.</li>
+                </ul>
+            </article>
+
+            <article class="section panel">
+                <h2>Мини-квиз</h2>
+                <div class="quiz-item">
+                    <p><strong>1.</strong> При каком условии логарифм ln(4x − 1) определён?</p>
+                    <label class="check"><input type="radio" name="q1" value="0"> x ≥ 1/4</label>
+                    <label class="check"><input type="radio" name="q1" value="1"> x &gt; 1/4</label>
+                    <label class="check"><input type="radio" name="q1" value="0"> x &gt; −1/4</label>
+                </div>
+                <div class="quiz-item">
+                    <p><strong>2.</strong> Какие нули даёт подкоренное выражение x² − 6x + 6a − a²?</p>
+                    <label class="check"><input type="radio" name="q2" value="0"> x = 3 ± a</label>
+                    <label class="check"><input type="radio" name="q2" value="1"> x = a и x = 6 − a</label>
+                    <label class="check"><input type="radio" name="q2" value="0"> x = 3 и x = a − 3</label>
+                </div>
+                <div class="quiz-item">
+                    <p><strong>3.</strong> Введите одно из граничных значений параметра, при котором происходит совпадение корней с x = 1/2.</p>
+                    <input type="text" id="q3" placeholder="Например: 1/2" />
+                </div>
+                <button class="btn" id="checkQuizBtn">Проверить мини-квиз</button>
+                <div class="quiz-result" id="quizResult">Ответы пока не проверялись.</div>
+            </article>
+
+            <article class="section panel">
+                <h2>Самопроверка</h2>
+                <ul class="check-list">
+                    <li>Я отдельно проверил область допустимых значений: x &gt; 1/4.</li>
+                    <li>Я понял, почему x = 1/2 возникает именно из ln(4x − 1) = 0.</li>
+                    <li>Я увидел разложение (x − 3)² − (a − 3)² и получил x = a, x = 6 − a.</li>
+                    <li>Я проверил совпадения при a = 1/2, a = 3, a = 11/2.</li>
+                    <li>Я умею объяснить, почему a = 23/4 не входит в ответ.</li>
+                </ul>
+            </article>
+
+            <article class="section panel">
+                <h2>Генератор похожих задач</h2>
+                <p class="soft">Генератор выдаёт 3 корректные задачи того же метода: нуль логарифма + нули подкоренного выражения + счёт числа корней с учётом ОДЗ.</p>
+                <div class="tools">
+                    <button class="btn" id="generateBtn">Сгенерировать 3 задачи</button>
+                    <button class="btn" id="applyFirstBtn">Применить первую к модели</button>
+                </div>
+                <div class="gen-result" id="genResult">Пока задач нет. Нажмите кнопку генерации.</div>
+            </article>
+        </section>
+
+        <aside class="right">
+            <div class="section panel">
+                <h2>Интерактивная модель</h2>
+                <p class="soft">Числовая ось показывает допустимую часть для x и три источника корней: <strong>1/2</strong>, <strong>a</strong>, <strong>6 − a</strong>.</p>
+
+                <div class="control-grid">
+                    <div class="control">
+                        <label for="aSlider">Параметр a</label>
+                        <div class="slider-wrap">
+                            <input id="aSlider" type="range" min="-0.5" max="6.2" step="0.01" value="0.4" />
+                            <div class="value" id="aValue">0.40</div>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label>Быстрые точки</label>
+                        <div class="tools">
+                            <button class="small-btn quickA" data-a="0.3">0.3</button>
+                            <button class="small-btn quickA" data-a="0.5">1/2</button>
+                            <button class="small-btn quickA" data-a="3">3</button>
+                            <button class="small-btn quickA" data-a="5.5">11/2</button>
+                            <button class="small-btn quickA" data-a="5.74">5.74</button>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label>Показывать на схеме</label>
+                        <label class="check"><input type="checkbox" id="showDomain" checked> область x &gt; 1/4</label>
+                        <label class="check"><input type="checkbox" id="showHalf" checked> точку x = 1/2</label>
+                        <label class="check"><input type="checkbox" id="showA" checked> точку x = a</label>
+                        <label class="check"><input type="checkbox" id="showSixMinusA" checked> точку x = 6 − a</label>
+                    </div>
+                    <div class="control">
+                        <label>Масштаб схемы</label>
+                        <div class="tools">
+                            <button class="small-btn" id="zoomOut">−</button>
+                            <button class="small-btn" id="zoomReset">Сброс</button>
+                            <button class="small-btn" id="zoomIn">+</button>
+                        </div>
+                        <div class="slider-wrap" style="margin-top:10px">
+                            <input id="zoomSlider" type="range" min="0.8" max="2.4" step="0.01" value="1" />
+                            <div class="value" id="zoomValue">100%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:14px;overflow:hidden;border-radius:18px;border:1px solid var(--line)">
+                    <svg id="plot" viewBox="0 0 820 360" role="img" aria-label="Числовая модель корней">
+                        <g id="zoomGroup">
+                            <rect x="0" y="0" width="820" height="360" fill="transparent"></rect>
+                            <g id="grid"></g>
+                            <g id="axis"></g>
+                            <g id="intervalLayer"></g>
+                            <g id="domainLayer"></g>
+                            <g id="pointLayer"></g>
+                            <g id="labelLayer"></g>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="sw" style="background:#8ef0b5"></span> зелёным — допустимая часть отрезка [0; 3] с учётом x &gt; 1/4</div>
+                    <div class="legend-item"><span class="sw" style="background:#7cc7ff"></span> синим — точка x = 1/2 от логарифма</div>
+                    <div class="legend-item"><span class="sw" style="background:#ffd36d"></span> жёлтым — точка x = a</div>
+                    <div class="legend-item"><span class="sw" style="background:#ff8d8d"></span> красным — точка x = 6 − a</div>
+                </div>
+
+                <div class="gen-result" id="modelSummary" style="margin-top:12px">
+                    Здесь будет краткая сводка по текущему значению параметра.
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="footer">Автономная страница без внешних библиотек. Подходит для локального открытия, печати и мобильного просмотра.</footer>
+</div>
+
+<script>
+    (() => {
+        const detailContainer = document.getElementById('detailContainer');
+        const detailButtons = [...document.querySelectorAll('[data-detail]')];
+        const stepButtons = [...document.querySelectorAll('[data-step-open]')];
+        const steps = [...document.querySelectorAll('.step')];
+        const showAllBtn = document.getElementById('showAllBtn');
+        const hideAllBtn = document.getElementById('hideAllBtn');
+        const copyMdBtn = document.getElementById('copyMdBtn');
+
+        const aSlider = document.getElementById('aSlider');
+        const aValue = document.getElementById('aValue');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const zoomValue = document.getElementById('zoomValue');
+        const showDomain = document.getElementById('showDomain');
+        const showHalf = document.getElementById('showHalf');
+        const showA = document.getElementById('showA');
+        const showSixMinusA = document.getElementById('showSixMinusA');
+        const modelSummary = document.getElementById('modelSummary');
+        const plot = document.getElementById('plot');
+        const grid = document.getElementById('grid');
+        const axis = document.getElementById('axis');
+        const intervalLayer = document.getElementById('intervalLayer');
+        const domainLayer = document.getElementById('domainLayer');
+        const pointLayer = document.getElementById('pointLayer');
+        const labelLayer = document.getElementById('labelLayer');
+        const zoomGroup = document.getElementById('zoomGroup');
+
+        const quizBtn = document.getElementById('checkQuizBtn');
+        const quizResult = document.getElementById('quizResult');
+        const q3 = document.getElementById('q3');
+
+        const generateBtn = document.getElementById('generateBtn');
+        const applyFirstBtn = document.getElementById('applyFirstBtn');
+        const genResult = document.getElementById('genResult');
+
+        let zoom = 1;
+        let generated = [];
+
+        const mdText = `**3E3293**\n\nНайдите все значения $a$, при каждом из которых уравнение\n\n$$\n\n\\ln(4x-1)\\sqrt{x^{2}-6x+6a-a^{2}}=0\n\n$$\n\nимеет ровно один корень на отрезке $[0;3]$.`;
+
+        function setDetail(mode){
+            detailContainer.classList.remove('detail-brief','detail-standard','detail-full');
+            detailContainer.classList.add(`detail-${mode}`);
+            detailButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.detail === mode));
+        }
+        detailButtons.forEach(btn => btn.addEventListener('click', () => setDetail(btn.dataset.detail)));
+
+        function openStep(n){
+            steps.forEach((step, idx) => step.classList.toggle('open', idx < n));
+            stepButtons.forEach(btn => btn.classList.toggle('active', Number(btn.dataset.stepOpen) === n));
+        }
+        stepButtons.forEach(btn => btn.addEventListener('click', () => openStep(Number(btn.dataset.stepOpen))));
+        showAllBtn.addEventListener('click', () => {
+            steps.forEach(step => step.classList.add('open'));
+            stepButtons.forEach(btn => btn.classList.remove('active'));
+        });
+        hideAllBtn.addEventListener('click', () => {
+            steps.forEach((step, i) => step.classList.toggle('open', i === 0));
+            stepButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.stepOpen === '1'));
+        });
+        document.querySelectorAll('.step-toggle').forEach((btn) => {
+            btn.addEventListener('click', (e) => e.currentTarget.closest('.step').classList.toggle('open'));
+        });
+
+        copyMdBtn.addEventListener('click', async () => {
+            try{
+                await navigator.clipboard.writeText(mdText);
+                copyMdBtn.textContent = 'Скопировано';
+                setTimeout(() => copyMdBtn.textContent = 'Скопировать условие в Markdown', 1500);
+            }catch{
+                copyMdBtn.textContent = 'Не удалось скопировать';
+                setTimeout(() => copyMdBtn.textContent = 'Скопировать условие в Markdown', 1500);
+            }
+        });
+
+        function fmt(n){
+            const rounded = Math.round(n * 100) / 100;
+            return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+        }
+        function almostEq(x,y){ return Math.abs(x-y) < 1e-9; }
+        function inSegment(x,l,r){ return x >= l - 1e-9 && x <= r + 1e-9; }
+        function logRootAllowed(a){ return a >= 0.5 - 1e-9 && a <= 5.5 + 1e-9; }
+        function aRootAllowed(a){ return a > 0.25 + 1e-9 && a <= 3 + 1e-9; }
+        function sixMinusARootAllowed(a){ return a >= 3 - 1e-9 && a < 5.75 - 1e-9; }
+
+        function getDistinctRoots(a){
+            const roots = [];
+            if(logRootAllowed(a)) roots.push({x:0.5, name:'x = 1/2', source:'log'});
+            if(aRootAllowed(a)) roots.push({x:a, name:'x = a', source:'a'});
+            if(sixMinusARootAllowed(a)) roots.push({x:6-a, name:'x = 6 − a', source:'six-a'});
+            const distinct = [];
+            roots.forEach(item => {
+                const same = distinct.find(d => Math.abs(d.x - item.x) < 1e-7);
+                if(same) same.source += ` + ${item.source}`;
+                else distinct.push({...item});
+            });
+            distinct.sort((p,q) => p.x - q.x);
+            return distinct;
+        }
+
+        function getCaseText(a, roots){
+            if(a <= 0.25) return 'Случай a ≤ 1/4: корней нет.';
+            if(a > 0.25 && a < 0.5) return 'Случай 1/4 < a < 1/2: единственный корень x = a.';
+            if(almostEq(a,0.5)) return 'Случай a = 1/2: точки x = a и x = 1/2 совпадают, корень один.';
+            if(a > 0.5 && a < 3) return 'Случай 1/2 < a < 3: два корня, x = 1/2 и x = a.';
+            if(almostEq(a,3)) return 'Случай a = 3: два корня, x = 1/2 и x = 3.';
+            if(a > 3 && a < 5.5) return 'Случай 3 < a < 11/2: два корня, x = 1/2 и x = 6 − a.';
+            if(almostEq(a,5.5)) return 'Случай a = 11/2: точки x = 1/2 и x = 6 − a совпадают, корень один.';
+            if(a > 5.5 && a < 5.75) return 'Случай 11/2 < a < 23/4: единственный корень x = 6 − a.';
+            return 'Случай a ≥ 23/4: корней нет. При a = 23/4 точка x = 1/4 не допускается из-за логарифма.';
+        }
+
+        function xToSvg(x){
+            const left = 70, right = 770;
+            return left + (x/6) * (right-left);
+        }
+
+        function draw(){
+            const a = Number(aSlider.value);
+            aValue.textContent = fmt(a);
+            zoomValue.textContent = Math.round(zoom*100) + '%';
+            zoomGroup.setAttribute('transform', `scale(${zoom})`);
+
+            grid.innerHTML = '';
+            axis.innerHTML = '';
+            intervalLayer.innerHTML = '';
+            domainLayer.innerHTML = '';
+            pointLayer.innerHTML = '';
+            labelLayer.innerHTML = '';
+
+            const yAxis = 220;
+            for(let i=0;i<=6;i++){
+                const x = xToSvg(i);
+                grid.insertAdjacentHTML('beforeend', `<line x1="${x}" y1="60" x2="${x}" y2="300" stroke="rgba(255,255,255,.08)" stroke-width="1"/>`);
+                labelLayer.insertAdjacentHTML('beforeend', `<text x="${x}" y="320" fill="#dce8ff" font-size="18" text-anchor="middle">${i}</text>`);
+            }
+            axis.insertAdjacentHTML('beforeend', `<line x1="50" y1="${yAxis}" x2="780" y2="${yAxis}" stroke="#dce8ff" stroke-width="3"/>`);
+            axis.insertAdjacentHTML('beforeend', `<polygon points="780,${yAxis} 765,212 765,228" fill="#dce8ff"/>`);
+            labelLayer.insertAdjacentHTML('beforeend', `<text x="792" y="226" fill="#dce8ff" font-size="18">x</text>`);
+
+            const seg0 = xToSvg(0), seg3 = xToSvg(3), segQuarter = xToSvg(0.25);
+            intervalLayer.insertAdjacentHTML('beforeend', `<line x1="${seg0}" y1="${yAxis}" x2="${seg3}" y2="${yAxis}" stroke="#6f7ea7" stroke-width="10" stroke-linecap="round" opacity=".45"/>`);
+            labelLayer.insertAdjacentHTML('beforeend', `<text x="${(seg0+seg3)/2}" y="85" fill="#aeb9d6" font-size="17" text-anchor="middle">отрезок [0; 3]</text>`);
+
+            if(showDomain.checked){
+                domainLayer.insertAdjacentHTML('beforeend', `
+        <line x1="${segQuarter+2}" y1="${yAxis}" x2="${seg3}" y2="${yAxis}" stroke="#8ef0b5" stroke-width="18" stroke-linecap="round" opacity=".72"/>
+        <circle cx="${segQuarter}" cy="${yAxis}" r="9" fill="#091225" stroke="#8ef0b5" stroke-width="3"/>
+      `);
+                labelLayer.insertAdjacentHTML('beforeend', `<text x="${segQuarter+14}" y="185" fill="#8ef0b5" font-size="17">x &gt; 1/4</text>`);
+            }
+
+            function addPoint(x,color,text,visible,linkId){
+                const validRange = inSegment(x,0,6);
+                if(!visible || !validRange) return;
+                const sx = xToSvg(x);
+                const good = x > 0.25 && x <= 3;
+                pointLayer.insertAdjacentHTML('beforeend', `
+        <line x1="${sx}" y1="110" x2="${sx}" y2="${yAxis}" stroke="${color}" stroke-width="3" stroke-dasharray="${good ? '0' : '8 8'}" opacity=".9"/>
+        <circle cx="${sx}" cy="${yAxis}" r="9" fill="${good ? color : '#091225'}" stroke="${color}" stroke-width="3"/>
+      `);
+                labelLayer.insertAdjacentHTML('beforeend', `<text x="${sx}" y="${good ? 103 : 96}" fill="${color}" font-size="18" text-anchor="middle">${text}</text>`);
+                if(linkId){
+                    const el = document.querySelector(`[data-link="${linkId}"]`);
+                    if(el){
+                        const marker = document.createElementNS('http://www.w3.org/2000/svg','rect');
+                        marker.setAttribute('x', sx - 18);
+                        marker.setAttribute('y', 128);
+                        marker.setAttribute('width', 36);
+                        marker.setAttribute('height', 100);
+                        marker.setAttribute('fill', 'transparent');
+                        marker.style.cursor = 'pointer';
+                        marker.addEventListener('mouseenter', () => el.classList.add('highlight'));
+                        marker.addEventListener('mouseleave', () => el.classList.remove('highlight'));
+                        pointLayer.appendChild(marker);
+                    }
+                }
+            }
+
+            addPoint(0.5, '#7cc7ff', '1/2', showHalf.checked, 'logroot');
+            addPoint(a, '#ffd36d', 'a', showA.checked, 'sqrtroots');
+            addPoint(6-a, '#ff8d8d', '6−a', showSixMinusA.checked, 'sqrtroots');
+
+            const roots = getDistinctRoots(a);
+            const rootText = roots.length ? roots.map(r => `${r.name} = ${fmt(r.x)}`).join('; ') : 'нет допустимых корней';
+            const color = roots.length === 1 ? 'var(--good)' : (roots.length === 0 ? 'var(--bad)' : 'var(--warn)');
+            modelSummary.innerHTML = `
+      <div><strong>Текущее a = ${fmt(a)}</strong></div>
+      <div style="margin-top:6px">${getCaseText(a, roots)}</div>
+      <div style="margin-top:6px">Допустимые различные корни: <strong style="color:${color}">${rootText}</strong>.</div>
+      <div style="margin-top:6px">Количество корней: <strong>${roots.length}</strong>.</div>
+    `;
+        }
+
+        function bindHoverLinks(){
+            document.querySelectorAll('.hover-target[data-link]').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const link = el.dataset.link;
+                    if(link === 'domain') showDomain.closest('.control').classList.add('highlight');
+                });
+                el.addEventListener('mouseleave', () => {
+                    const link = el.dataset.link;
+                    if(link === 'domain') showDomain.closest('.control').classList.remove('highlight');
+                });
+            });
+        }
+
+        aSlider.addEventListener('input', draw);
+        [showDomain,showHalf,showA,showSixMinusA].forEach(el => el.addEventListener('change', draw));
+        document.querySelectorAll('.quickA').forEach(btn => btn.addEventListener('click', () => {
+            aSlider.value = btn.dataset.a;
+            draw();
+        }));
+
+        function setZoom(v){
+            zoom = Math.max(0.8, Math.min(2.4, v));
+            zoomSlider.value = zoom;
+            draw();
+        }
+        zoomSlider.addEventListener('input', () => setZoom(Number(zoomSlider.value)));
+        document.getElementById('zoomIn').addEventListener('click', () => setZoom(zoom + 0.1));
+        document.getElementById('zoomOut').addEventListener('click', () => setZoom(zoom - 0.1));
+        document.getElementById('zoomReset').addEventListener('click', () => setZoom(1));
+        plot.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            setZoom(zoom + (e.deltaY < 0 ? 0.08 : -0.08));
+        }, {passive:false});
+
+        quizBtn.addEventListener('click', () => {
+            let score = 0;
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            if(q1 && q1.value === '1') score++;
+            if(q2 && q2.value === '1') score++;
+            const norm = q3.value.replace(/\s/g,'').replace(',', '.');
+            if(['1/2','0.5','11/2','5.5'].includes(norm)) score++;
+            const texts = [
+                'Надо ещё раз пройти шаги 2–6 и особенно проверить ОДЗ.',
+                'Есть база, но некоторые места ещё плавают.',
+                'Хорошо! Логика почти собрана.',
+                'Отлично! Главная идея задачи у вас уже в руках.'
+            ];
+            quizResult.innerHTML = `<strong>Результат: ${score}/3.</strong> ${texts[score]}`;
+        });
+
+        const templates = [
+            {
+                task:'Найдите все значения a, при каждом из которых уравнение ln(3x + 1) · √(x² − 4x + 4a − a²) = 0 имеет ровно один корень на отрезке [0; 2].',
+                answer:'a ∈ (−1/3; 1/3] ∪ [11/3; 15/4).',
+                idea:'Нуль логарифма даёт x = 0. Корневой множитель даёт x = a и x = 4 − a. Затем считаем допустимые точки на [0; 2] при условии x > −1/3.'
+            },
+            {
+                task:'Найдите все значения a, при каждом из которых уравнение ln(2x + 1) · √(x² − 2x + 2a − a²) = 0 имеет ровно один корень на отрезке [0; 1].',
+                answer:'a ∈ (−1/2; 0] ∪ [2; 9/4).',
+                idea:'Логарифм обнуляется при x = 0. Подкоренное выражение раскладывается как (x − 1)² − (a − 1)², откуда x = a и x = 2 − a.'
+            },
+            {
+                task:'Найдите все значения a, при каждом из которых уравнение ln(5x − 4) · √(x² − 8x + 8a − a²) = 0 имеет ровно один корень на отрезке [1; 4].',
+                answer:'a ∈ (4/5; 1] ∪ [39/5; 31/4).',
+                idea:'Логарифм даёт x = 1. Корневой множитель даёт x = a и x = 8 − a. Считаем точки в допустимой части [1; 4] при x > 4/5.'
+            },
+            {
+                task:'Найдите все значения a, при каждом из которых уравнение ln(4x + 1) · √(x² − 6x + 6a − a²) = 0 имеет ровно один корень на отрезке [0; 3].',
+                answer:'a ∈ (−1/4; 0] ∪ [6; 23/4).',
+                idea:'Здесь логарифм обнуляется в точке x = 0, а корневой множитель снова даёт симметричные корни x = a и x = 6 − a.'
+            },
+            {
+                task:'Найдите все значения a, при каждом из которых уравнение ln(6x − 5) · √(x² − 10x + 10a − a²) = 0 имеет ровно один корень на отрезке [1; 5].',
+                answer:'a ∈ (5/6; 1] ∪ [59/6; 39/4).',
+                idea:'Нуль логарифма даёт x = 1. Корневой множитель: (x − 5)² − (a − 5)² = 0, поэтому x = a и x = 10 − a.'
+            },
+            {
+                task:'Найдите все значения a, при каждом из которых уравнение ln(2x − 1) · √(x² − 4x + 4a − a²) = 0 имеет ровно один корень на отрезке [0; 2].',
+                answer:'a ∈ (1/2; 1] ∪ [7/2; 15/4).',
+                idea:'Точка от логарифма: x = 1. Подкоренное выражение: x = a и x = 4 − a. Дальше считаем допустимые различные корни.'
+            }
+        ];
+
+        function shuffle(arr){
+            return arr.map(v => ({v, s: Math.random()})).sort((a,b) => a.s-b.s).map(({v}) => v);
+        }
+        function renderGenerated(){
+            if(!generated.length){
+                genResult.textContent = 'Пока задач нет. Нажмите кнопку генерации.';
+                return;
+            }
+            genResult.innerHTML = generated.map((item, idx) => `
+      <div class="generated-card">
+        <div><strong>${idx+1}.</strong> ${item.task}</div>
+        <div style="margin-top:8px"><span class="ok">Ответ:</span> ${item.answer}</div>
+        <div style="margin-top:6px"><span class="key">Идея:</span> ${item.idea}</div>
+      </div>
+    `).join('');
+        }
+        generateBtn.addEventListener('click', () => {
+            generated = shuffle(templates).slice(0,3);
+            renderGenerated();
+        });
+        applyFirstBtn.addEventListener('click', () => {
+            if(!generated.length){
+                generated = shuffle(templates).slice(0,3);
+                renderGenerated();
+            }
+            const first = generated[0];
+            if(first.task.includes('ln(2x + 1)')) aSlider.value = 0;
+            else if(first.task.includes('ln(3x + 1)')) aSlider.value = 0.2;
+            else if(first.task.includes('ln(2x − 1)')) aSlider.value = 0.8;
+            else if(first.task.includes('ln(5x − 4)')) aSlider.value = 0.9;
+            else if(first.task.includes('ln(6x − 5)')) aSlider.value = 0.95;
+            else aSlider.value = 5.6;
+            draw();
+            modelSummary.innerHTML += `<div style="margin-top:8px"><span class="key">Сейчас модель использована как тренажёр для первой сгенерированной задачи:</span><br>${first.task}</div>`;
+        });
+
+        setDetail('standard');
+        openStep(1);
+        bindHoverLinks();
+        draw();
+    })();
+</script>
+</body>
+</html>
