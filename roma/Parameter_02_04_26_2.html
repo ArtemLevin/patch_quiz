@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Наглядная математика с генерацией — параметр и число решений системы</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --bg2:#121935;
+            --panel:#10172b;
+            --panel2:#16203d;
+            --text:#ecf1ff;
+            --muted:#a9b6d3;
+            --line:#2c3963;
+            --accent:#78b7ff;
+            --accent2:#8ff0c1;
+            --warn:#ffd479;
+            --danger:#ff8d8d;
+            --good:#8ff0c1;
+            --shadow:0 12px 32px rgba(0,0,0,.35);
+            --radius:18px;
+            --stepHidden: none;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:linear-gradient(180deg,#08101f,#0c1426 24%,#0b1020);color:var(--text);font:16px/1.55 Inter,Segoe UI,Arial,sans-serif;scroll-behavior:smooth}
+        body{min-height:100vh}
+        .page{max-width:1500px;margin:0 auto;padding:18px}
+        .hero{background:linear-gradient(135deg,rgba(120,183,255,.13),rgba(143,240,193,.08));border:1px solid var(--line);border-radius:24px;padding:22px 22px 18px;box-shadow:var(--shadow)}
+        .eyebrow{display:inline-block;padding:6px 10px;border-radius:999px;background:#13203f;color:var(--accent2);font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+        h1{margin:12px 0 10px;font-size:clamp(28px,4vw,44px);line-height:1.12}
+        .subtitle{color:var(--muted);max-width:980px}
+        .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px}
+        .meta div{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+        .meta b{display:block;color:#fff;margin-bottom:2px}
+
+        .layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:18px;margin-top:18px;align-items:start}
+        .leftcol{min-width:0}
+        .rightcol{min-width:0;position:relative}
+        .sticky{position:sticky;top:14px;display:flex;flex-direction:column;gap:14px}
+
+        .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+        .card h2,.card h3{margin:0 0 10px}
+        .small{font-size:14px;color:var(--muted)}
+        .muted{color:var(--muted)}
+        .lead{font-size:18px}
+        .idea-list{margin:8px 0 0;padding-left:22px}
+        .idea-list li{margin:6px 0}
+
+        .system{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;background:#0d152c;border:1px solid var(--line);padding:14px;border-radius:16px;margin-top:12px}
+        .brace{font-size:40px;line-height:1.05;transform:translateY(2px);color:var(--accent2)}
+        .system-lines{font-family:"Segoe UI",Arial,sans-serif;font-size:18px;line-height:1.65}
+
+        .controls{display:flex;flex-wrap:wrap;gap:10px}
+        .controlGroup{background:#0d152c;border:1px solid var(--line);padding:10px 12px;border-radius:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+        button,.btn,select,input[type="range"]{accent-color:var(--accent)}
+        button,.btn{
+            border:none;border-radius:12px;padding:10px 12px;background:#1b2950;color:#fff;cursor:pointer;font-weight:700;
+            transition:.18s transform,.18s background,.18s opacity;
+        }
+        button:hover,.btn:hover{transform:translateY(-1px);background:#20305d}
+        button.secondary{background:#13203f;color:#dbe8ff}
+        button.ghost{background:transparent;border:1px solid var(--line)}
+        .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#13203f;border:1px solid var(--line);font-size:13px}
+
+        .step{padding:14px;border-radius:16px;border:1px solid var(--line);background:#0d152c;margin:12px 0;transition:.18s border-color,.18s transform,.18s background}
+        .step:hover{border-color:#4663a3;background:#101b36}
+        .step h3{margin:0 0 8px;font-size:20px}
+        .step .tag{display:inline-block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent2);margin-bottom:6px;font-weight:800}
+        .step[data-step]{display:none}
+        .step.show{display:block}
+        .step.activeLink{outline:2px solid rgba(120,183,255,.55);background:#122042}
+        .subbox{margin:10px 0;padding:12px;border-radius:14px;background:#0b1327;border:1px solid #273659}
+        .resultBox{border:1px solid rgba(143,240,193,.28);background:rgba(143,240,193,.08)}
+        .warnBox{border:1px solid rgba(255,212,121,.32);background:rgba(255,212,121,.07)}
+        .dangerBox{border:1px solid rgba(255,141,141,.25);background:rgba(255,141,141,.06)}
+
+        .formula{font-family:"Cambria Math","DejaVu Sans",serif;font-size:1.04em}
+        .kbd{padding:1px 6px;border-radius:8px;background:#10172b;border:1px solid var(--line);font-family:monospace;font-size:12px}
+
+        .vizWrap{background:radial-gradient(circle at top,rgba(120,183,255,.12),transparent 55%),#0b1122;border:1px solid var(--line);border-radius:20px;padding:14px}
+        .vizTop{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+        .vizStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+        .stat{background:#10182f;border:1px solid var(--line);padding:10px;border-radius:14px}
+        .stat b{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+
+        .svgHolder{position:relative;border-radius:18px;overflow:hidden;border:1px solid #2a3658;background:
+        linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01)),
+        linear-gradient(90deg,rgba(120,183,255,.05),transparent 60%);
+            min-height:460px;
+        }
+        svg{display:block;width:100%;height:auto;touch-action:none}
+        .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+        .legend span{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;background:#0f1831;border:1px solid var(--line);border-radius:999px;font-size:13px}
+        .sw{width:14px;height:14px;border-radius:50%}
+        .lineSw{width:18px;height:0;border-top:3px solid #fff}
+
+        .toggleGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+        label.switch{display:flex;gap:10px;align-items:flex-start;background:#0f1831;border:1px solid var(--line);padding:10px;border-radius:14px;cursor:pointer}
+        label.switch input{margin-top:4px}
+
+        .quizQ,.checkQ{padding:12px;border:1px solid var(--line);background:#0c1427;border-radius:14px;margin:10px 0}
+        .quizQ button,.checkQ button{margin-top:8px}
+        .answer{display:none;margin-top:8px;padding:10px;border-radius:12px;background:#122042;border:1px solid #2f4f8f}
+        .answer.show{display:block}
+
+        .similar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+        .taskCard{border:1px solid var(--line);background:#0d152c;border-radius:16px;padding:14px}
+        .taskCard h4{margin:0 0 8px}
+
+        .footer{margin:22px 0 10px;color:var(--muted);text-align:center;font-size:13px}
+
+        .printOnly{display:none}
+        .detail{display:block}
+        .detail[data-level="2"], .detail[data-level="3"]{display:block}
+
+        @media (max-width:1080px){
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative;top:auto}
+            .svgHolder{min-height:380px}
+        }
+        @media (max-width:720px){
+            .page{padding:12px}
+            .hero{padding:18px}
+            .controls{flex-direction:column;align-items:stretch}
+            .controlGroup{width:100%}
+            .vizStats{grid-template-columns:1fr}
+            .toggleGrid{grid-template-columns:1fr}
+            .system-lines{font-size:16px}
+        }
+        @media print {
+            :root{--bg:#fff;--bg2:#fff;--panel:#fff;--panel2:#fff;--text:#111;--muted:#333;--line:#aaa;--accent:#000;--accent2:#000;--shadow:none}
+            body{background:#fff;color:#111;font-size:12pt}
+            .layout{grid-template-columns:1fr}
+            .sticky{position:relative}
+            .noPrint{display:none !important}
+            .printOnly{display:block}
+            .card,.hero,.step,.taskCard{box-shadow:none;background:#fff}
+            a{color:#000}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="hero">
+        <span class="eyebrow">Наглядная математика с генерацией</span>
+        <h1>Система с параметром: когда решений ровно четыре?</h1>
+        <div class="subtitle lead">
+            Разберём задачу через <b>геометрическую идею</b>: первое уравнение задаёт ромб, второе — окружность с тем же центром.
+            Тогда вопрос про число решений превращается в вопрос про число точек пересечения границы ромба и окружности.
+        </div>
+        <div class="system">
+            <div class="brace">⎧</div>
+            <div class="system-lines">
+                4|y − 3| = 12 − 3|x|,<br>
+                y² − a² = 3(2y − 3) − x²
+            </div>
+        </div>
+        <div class="meta">
+            <div><b>Тема</b> параметр</div>
+            <div><b>Цель</b> подготовка к ЕГЭ</div>
+            <div><b>Уровень</b> уверенный</div>
+            <div><b>Стиль</b> как репетитор</div>
+            <div><b>Фокус</b> геометрическая идея</div>
+            <div><b>Режим</b> пошаговое раскрытие</div>
+        </div>
+    </section>
+
+    <div class="layout">
+        <main class="leftcol">
+            <section class="card">
+                <h2>Идея решения</h2>
+                <ol class="idea-list">
+                    <li>Первое уравнение приводим к виду <span class="formula">3|x| + 4|y − 3| = 12</span>. Это ромб с центром в точке <span class="formula">(0, 3)</span>.</li>
+                    <li>Второе уравнение приводим к виду <span class="formula">x² + (y − 3)² = a²</span>. Это окружность того же центра, радиус <span class="formula">r = |a|</span>.</li>
+                    <li>Значит, число решений системы — это число точек пересечения окружности и границы ромба.</li>
+                    <li>Нужно понять, при каких радиусах окружность касается ромба или пересекает его так, чтобы получить ровно 4 точки.</li>
+                </ol>
+            </section>
+
+            <section class="card noPrint">
+                <h2>Управление разбором</h2>
+                <div class="controls">
+                    <div class="controlGroup">
+                        <b>Подробность:</b>
+                        <button class="secondary" data-detail-btn="1">Кратко</button>
+                        <button class="secondary" data-detail-btn="2">Стандартно</button>
+                        <button class="secondary" data-detail-btn="3">Очень подробно</button>
+                    </div>
+                    <div class="controlGroup">
+                        <b>Шаги:</b>
+                        <button id="prevStep" class="secondary">◀ Назад</button>
+                        <span class="pill">Открыто шагов: <span id="stepCounter">1</span> / 7</span>
+                        <button id="nextStep">Вперёд ▶</button>
+                        <button id="showAll" class="ghost">Показать всё</button>
+                    </div>
+                </div>
+                <div class="small" style="margin-top:10px">Наведи курсор на шаг решения — на чертеже подсветится соответствующая идея.</div>
+            </section>
+
+            <section class="step show" data-step="1" data-highlight="system diamond circle center">
+                <div class="tag">Шаг 1</div>
+                <h3>Что дано</h3>
+                <p>Нужно найти все значения параметра <span class="formula">a</span>, при которых система имеет <b>ровно четыре решения</b>.</p>
+                <div class="subbox">
+                    <div><b>Первое уравнение:</b> <span class="formula">4|y − 3| = 12 − 3|x|</span></div>
+                    <div><b>Второе уравнение:</b> <span class="formula">y² − a² = 3(2y − 3) − x²</span></div>
+                </div>
+                <div class="detail" data-level="2">
+                    Самое важное: здесь удобно не решать систему «в лоб», а перевести оба уравнения на язык фигур на координатной плоскости.
+                </div>
+                <div class="detail" data-level="3">
+                    В задачах на параметр часто побеждает именно такой ход: вместо длинной алгебры мы исследуем, как меняется взаимное положение графиков при изменении параметра.
+                </div>
+            </section>
+
+            <section class="step" data-step="2" data-highlight="diamond vertices">
+                <div class="tag">Шаг 2</div>
+                <h3>Что означает первое условие</h3>
+                <p>Переносим слагаемые:</p>
+                <div class="subbox formula">4|y − 3| = 12 − 3|x| &nbsp;⇔&nbsp; 3|x| + 4|y − 3| = 12.</div>
+                <p>Это стандартный вид ромба. Его центр — <span class="formula">(0, 3)</span>.</p>
+                <div class="detail" data-level="2">
+                    Вершины получаем из простых подстановок:
+                    <ul>
+                        <li>если <span class="formula">x = 0</span>, то <span class="formula">4|y − 3| = 12</span>, значит <span class="formula">y = 0</span> или <span class="formula">y = 6</span>;</li>
+                        <li>если <span class="formula">y = 3</span>, то <span class="formula">3|x| = 12</span>, значит <span class="formula">x = ±4</span>.</li>
+                    </ul>
+                </div>
+                <div class="detail" data-level="3">
+                    Поэтому вершины ромба: <span class="formula">(0,0), (0,6), (−4,3), (4,3)</span>.
+                    На рисунке это очень важно: две вертикальные вершины находятся на расстоянии 3 от центра, а две горизонтальные — на расстоянии 4.
+                </div>
+            </section>
+
+            <section class="step" data-step="3" data-highlight="circle center">
+                <div class="tag">Шаг 3</div>
+                <h3>Что означает второе условие</h3>
+                <p>Преобразуем второе уравнение:</p>
+                <div class="subbox formula">y² − a² = 6y − 9 − x²</div>
+                <div class="subbox formula">x² + y² − 6y + 9 = a²</div>
+                <div class="subbox formula">x² + (y − 3)² = a²</div>
+                <p>Это окружность с центром <span class="formula">(0,3)</span> и радиусом <span class="formula">r = |a|</span>.</p>
+                <div class="detail" data-level="2">
+                    Значит, параметр влияет только на радиус окружности. Центр у окружности и у ромба совпадает — это сильно упрощает задачу.
+                </div>
+                <div class="detail" data-level="3">
+                    Поэтому вся задача сводится к одному вопросу: при каких радиусах окружность с центром в точке <span class="formula">(0,3)</span> пересекает границу ромба ровно в четырёх точках?
+                </div>
+            </section>
+
+            <section class="step" data-step="4" data-highlight="distance tangent vertices">
+                <div class="tag">Шаг 4</div>
+                <h3>Ключевая геометрическая идея</h3>
+                <p>Теперь ищем критические расстояния от центра <span class="formula">(0,3)</span> до границы ромба.</p>
+                <div class="subbox resultBox">
+                    <b>Первое критическое расстояние</b> — расстояние от центра до стороны ромба.
+                    Если окружность имеет именно такой радиус, она касается всех четырёх сторон и даёт 4 решения.
+                </div>
+                <div class="subbox formula">Для стороны 3x + 4(y − 3) = 12 расстояние от (0,3):</div>
+                <div class="subbox formula">d = 12 / √(3² + 4²) = 12 / 5</div>
+                <div class="detail" data-level="2">
+                    Это радиус вписанной окружности ромба.
+                </div>
+                <div class="subbox warnBox">
+                    <b>Второе критическое расстояние</b> — расстояние до ближайших вершин.
+                    До верхней и нижней вершины оно равно <span class="formula">3</span>, до левой и правой — <span class="formula">4</span>.
+                </div>
+                <div class="detail" data-level="3">
+                    Значит, по мере роста радиуса картина меняется только в точках
+                    <span class="formula">r = 12/5</span>, <span class="formula">r = 3</span> и <span class="formula">r = 4</span>.
+                    Между ними число пересечений постоянно.
+                </div>
+            </section>
+
+            <section class="step" data-step="5" data-highlight="cases intersections">
+                <div class="tag">Шаг 5</div>
+                <h3>Разбор случаев по радиусу <span class="formula">r = |a|</span></h3>
+                <div class="subbox">
+                    <b>1)</b> <span class="formula">0 ≤ r &lt; 12/5</span>: окружность целиком внутри ромба, пересечений нет.<br>
+                    <b>2)</b> <span class="formula">r = 12/5</span>: окружность касается всех 4 сторон, получаем <b>4 решения</b>.<br>
+                    <b>3)</b> <span class="formula">12/5 &lt; r &lt; 3</span>: каждая сторона пересекается в двух точках, всего <b>8 решений</b>.<br>
+                    <b>4)</b> <span class="formula">r = 3</span>: окружность проходит через верхнюю и нижнюю вершины, всего <b>6 решений</b>.<br>
+                    <b>5)</b> <span class="formula">3 &lt; r &lt; 4</span>: на каждой стороне остаётся по одной точке, всего <b>4 решения</b>.<br>
+                    <b>6)</b> <span class="formula">r = 4</span>: окружность проходит через левую и правую вершины, всего <b>2 решения</b>.<br>
+                    <b>7)</b> <span class="formula">r &gt; 4</span>: пересечений нет.
+                </div>
+                <div class="detail" data-level="2">
+                    Особенно важны два промежутка, где получается ровно 4 точки:
+                    <span class="formula">r = 12/5</span> и <span class="formula">3 &lt; r &lt; 4</span>.
+                </div>
+                <div class="detail" data-level="3">
+                    Почему при <span class="formula">12/5 &lt; r &lt; 3</span> получается 8?
+                    Потому что окружность на каждой из четырёх сторон успевает пересечь сторону дважды: до точки касания и после неё.
+                    А при <span class="formula">3 &lt; r &lt; 4</span> верхняя и нижняя «ветви» уже ушли выше/ниже ближних вершин, поэтому на каждой стороне остаётся только одно пересечение.
+                </div>
+            </section>
+
+            <section class="step" data-step="6" data-highlight="answer final">
+                <div class="tag">Шаг 6</div>
+                <h3>Получаем значения параметра</h3>
+                <p>Так как <span class="formula">r = |a|</span>, то условие «ровно 4 решения» означает:</p>
+                <div class="subbox formula resultBox">|a| = 12/5 &nbsp; или &nbsp; 3 &lt; |a| &lt; 4</div>
+                <p>Следовательно,</p>
+                <div class="subbox formula resultBox">a = ±12/5, &nbsp; a ∈ (−4, −3) ∪ (3, 4).</div>
+                <div class="detail" data-level="2">
+                    Это и есть полный ответ.
+                </div>
+            </section>
+
+            <section class="step" data-step="7" data-highlight="check final">
+                <div class="tag">Шаг 7</div>
+                <h3>Проверка ответа и почему других значений нет</h3>
+                <div class="subbox resultBox">
+                    <b>Подходят:</b>
+                    <ul>
+                        <li><span class="formula">|a| = 12/5</span> — окружность касается каждой стороны ромба, значит 4 точки;</li>
+                        <li><span class="formula">3 &lt; |a| &lt; 4</span> — окружность пересекает каждую сторону по одному разу, значит 4 точки.</li>
+                    </ul>
+                </div>
+                <div class="subbox dangerBox">
+                    <b>Не подходят:</b>
+                    <ul>
+                        <li><span class="formula">|a| &lt; 12/5</span> — пересечений нет;</li>
+                        <li><span class="formula">12/5 &lt; |a| &lt; 3</span> — пересечений 8;</li>
+                        <li><span class="formula">|a| = 3</span> — пересечений 6;</li>
+                        <li><span class="formula">|a| = 4</span> — пересечений 2;</li>
+                        <li><span class="formula">|a| &gt; 4</span> — пересечений нет.</li>
+                    </ul>
+                </div>
+                <div class="subbox formula resultBox"><b>Ответ:</b> a = ±12/5, (−4, −3), (3, 4).</div>
+                <div class="detail" data-level="3">
+                    Мы не пропустили никаких значений, потому что число пересечений может измениться только тогда, когда окружность проходит через вершину ромба или касается стороны. Именно эти критические радиусы и были рассмотрены полностью.
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Типичные ошибки</h2>
+                <ol>
+                    <li>Считать, что <span class="formula">x² + (y − 3)² = a²</span> — это окружность радиуса <span class="formula">a</span>, а не <span class="formula">|a|</span>.</li>
+                    <li>Не заметить, что первое уравнение задаёт именно <b>границу</b> ромба, а не всю его внутренность.</li>
+                    <li>Потерять случай касания <span class="formula">|a| = 12/5</span>, где решений ровно 4.</li>
+                    <li>Ошибочно думать, что при <span class="formula">|a| = 3</span> решений 4; на самом деле их 6.</li>
+                    <li>Не проверить критический случай <span class="formula">|a| = 4</span>, где остаются только две боковые вершины.</li>
+                </ol>
+            </section>
+
+            <section class="card noPrint">
+                <h2>Мини-квиз</h2>
+                <div class="quizQ">
+                    <b>1.</b> Какой геометрический объект задаёт уравнение <span class="formula">3|x| + 4|y − 3| = 12</span>?
+                    <div><button class="secondary" data-toggle-answer="qa1">Показать ответ</button></div>
+                    <div class="answer" id="qa1">Ромб с центром в точке (0, 3).</div>
+                </div>
+                <div class="quizQ">
+                    <b>2.</b> Чему равно расстояние от центра ромба до его стороны?
+                    <div><button class="secondary" data-toggle-answer="qa2">Показать ответ</button></div>
+                    <div class="answer" id="qa2">12/5. Это радиус вписанной окружности ромба.</div>
+                </div>
+                <div class="quizQ">
+                    <b>3.</b> Почему при <span class="formula">3 &lt; |a| &lt; 4</span> решений ровно 4?
+                    <div><button class="secondary" data-toggle-answer="qa3">Показать ответ</button></div>
+                    <div class="answer" id="qa3">Потому что окружность пересекает каждую из четырёх сторон ромба ровно в одной точке.</div>
+                </div>
+            </section>
+
+            <section class="card noPrint">
+                <h2>Самопроверка</h2>
+                <div class="checkQ">
+                    Заполни пропуск: если окружность имеет радиус <span class="formula">r = 12/5</span>, то она ________ ромба и система имеет ________ решения.
+                    <div><button class="secondary" data-toggle-answer="ca1">Проверить</button></div>
+                    <div class="answer" id="ca1">касается всех четырёх сторон; 4 решения.</div>
+                </div>
+                <div class="checkQ">
+                    Верно или нет: при <span class="formula">|a| = 4</span> система имеет 4 решения.
+                    <div><button class="secondary" data-toggle-answer="ca2">Проверить</button></div>
+                    <div class="answer" id="ca2">Неверно. При |a| = 4 остаются только две боковые вершины, значит 2 решения.</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>3 похожие задачи того же типа</h2>
+                <p class="small">Все задачи ниже построены на той же идее: «ромб + окружность с общим центром». У каждой есть ответ и короткая идея.</p>
+                <div class="controls noPrint" style="margin-bottom:12px">
+                    <button id="regenTasks">Сгенерировать другой набор</button>
+                </div>
+                <div class="similar-grid" id="similarTasks"></div>
+            </section>
+
+            <section class="card printOnly">
+                <h2>Краткий печатный итог</h2>
+                <p>Первое уравнение задаёт ромб <span class="formula">3|x| + 4|y − 3| = 12</span> с центром <span class="formula">(0,3)</span>, второе — окружность <span class="formula">x² + (y − 3)² = a²</span> того же центра и радиуса <span class="formula">|a|</span>.</p>
+                <p>Критические радиусы: <span class="formula">12/5</span> (касание сторон), <span class="formula">3</span> (верхняя и нижняя вершины), <span class="formula">4</span> (левая и правая вершины).</p>
+                <p><b>Ровно 4 решения:</b> при <span class="formula">|a| = 12/5</span> и при <span class="formula">3 &lt; |a| &lt; 4</span>.</p>
+                <p><b>Ответ:</b> <span class="formula">a = ±12/5, &nbsp; a ∈ (−4, −3) ∪ (3, 4)</span>.</p>
+            </section>
+        </main>
+
+        <aside class="rightcol">
+            <div class="sticky">
+                <section class="card vizWrap">
+                    <div class="vizTop">
+                        <div>
+                            <h2 style="margin:0 0 2px">Интерактивная модель</h2>
+                            <div class="small">Двигай параметр <span class="formula">a</span>, чтобы увидеть, как меняется число решений.</div>
+                        </div>
+                        <span class="pill">Центр: (0, 3)</span>
+                    </div>
+
+                    <div class="controls noPrint" style="margin-bottom:10px">
+                        <div class="controlGroup" style="flex:1 1 250px">
+                            <label for="aSlider"><b>Параметр a:</b></label>
+                            <input id="aSlider" type="range" min="-4.5" max="4.5" step="0.01" value="2.4" style="flex:1">
+                            <span class="pill"><span id="aValue">2.40</span></span>
+                        </div>
+                        <div class="controlGroup">
+                            <b>Зум:</b>
+                            <button id="zoomOut" class="secondary">−</button>
+                            <input id="zoomSlider" type="range" min="0.6" max="2.4" step="0.05" value="1">
+                            <button id="zoomIn" class="secondary">+</button>
+                            <button id="zoomReset" class="ghost">Сброс</button>
+                        </div>
+                    </div>
+
+                    <div class="toggleGrid noPrint" style="margin-bottom:10px">
+                        <label class="switch"><input type="checkbox" id="tgGrid" checked><span><b>Сетка и оси</b><br><span class="small">Удобно видеть координаты.</span></span></label>
+                        <label class="switch"><input type="checkbox" id="tgLabels" checked><span><b>Подписи вершин</b><br><span class="small">Показать координаты ромба.</span></span></label>
+                        <label class="switch"><input type="checkbox" id="tgPoints" checked><span><b>Точки пересечения</b><br><span class="small">Подсветить решения системы.</span></span></label>
+                        <label class="switch"><input type="checkbox" id="tgFoot" checked><span><b>Точки касания сторон</b><br><span class="small">Полезно для случая |a| = 12/5.</span></span></label>
+                    </div>
+
+                    <div class="svgHolder" id="svgHolder">
+                        <svg id="plot" viewBox="0 0 640 540" aria-label="Координатная плоскость с ромбом и окружностью"></svg>
+                    </div>
+
+                    <div class="legend">
+                        <span><i class="sw" style="background:#78b7ff"></i>ромб</span>
+                        <span><i class="lineSw" style="border-top-color:#8ff0c1"></i>окружность</span>
+                        <span><i class="sw" style="background:#ffd479"></i>точки решения</span>
+                        <span><i class="sw" style="background:#ff8d8d"></i>критические точки</span>
+                    </div>
+
+                    <div class="vizStats">
+                        <div class="stat"><b>Радиус окружности</b><span id="radiusText">|a| = 2.40</span></div>
+                        <div class="stat"><b>Число решений системы</b><span id="countText">4</span></div>
+                        <div class="stat"><b>Режим</b><span id="modeText">Касание всех четырёх сторон</span></div>
+                        <div class="stat"><b>Подсказка</b><span id="hintText">Попробуй |a| = 12/5, 3 и 4.</span></div>
+                    </div>
+                </section>
+
+                <section class="card noPrint">
+                    <h3>Быстрые кнопки</h3>
+                    <div class="controls">
+                        <button data-set-a="2.4">|a| = 12/5</button>
+                        <button data-set-a="2.8" class="secondary">между 12/5 и 3</button>
+                        <button data-set-a="3">|a| = 3</button>
+                        <button data-set-a="3.5" class="secondary">между 3 и 4</button>
+                        <button data-set-a="4">|a| = 4</button>
+                    </div>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <div class="footer">Автор: Лёвин Артём Александрович · Автономная HTML-страница без внешних зависимостей</div>
+</div>
+
+<script>
+    (() => {
+        const svg = document.getElementById('plot');
+        const aSlider = document.getElementById('aSlider');
+        const aValue = document.getElementById('aValue');
+        const radiusText = document.getElementById('radiusText');
+        const countText = document.getElementById('countText');
+        const modeText = document.getElementById('modeText');
+        const hintText = document.getElementById('hintText');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const tgGrid = document.getElementById('tgGrid');
+        const tgLabels = document.getElementById('tgLabels');
+        const tgPoints = document.getElementById('tgPoints');
+        const tgFoot = document.getElementById('tgFoot');
+
+        const state = {
+            step: 1,
+            stepsTotal: 7,
+            detail: 2,
+            zoom: 1,
+            a: 2.4,
+            highlight: '',
+        };
+
+        const vertices = [
+            {x:0,y:0,name:'A(0,0)'},
+            {x:4,y:3,name:'B(4,3)'},
+            {x:0,y:6,name:'C(0,6)'},
+            {x:-4,y:3,name:'D(-4,3)'}
+        ];
+        const foots = [
+            {x: 36/25, y: 48/25 + 3},
+            {x:-36/25, y: 48/25 + 3},
+            {x:-36/25, y: 3 - 48/25},
+            {x: 36/25, y: 3 - 48/25}
+        ];
+        const sides = [
+            [{x:0,y:6},{x:4,y:3}],
+            [{x:0,y:6},{x:-4,y:3}],
+            [{x:0,y:0},{x:-4,y:3}],
+            [{x:0,y:0},{x:4,y:3}],
+        ];
+        const colors = {
+            grid:'#223154', axis:'#3d5387', diamond:'#78b7ff', circle:'#8ff0c1', points:'#ffd479', vertex:'#ff8d8d', center:'#ffffff', foot:'#f39cff', text:'#ecf1ff'
+        };
+
+        function fmt(n){
+            const s = (Math.round(n*100)/100).toFixed(2);
+            return s.replace(/\.00$/,'').replace(/(\.[1-9])0$/,'$1');
+        }
+
+        function uniquePoints(points, eps=1e-6){
+            const res=[];
+            for(const p of points){
+                if(!res.some(q => Math.hypot(q.x-p.x,q.y-p.y) < eps)) res.push(p);
+            }
+            return res;
+        }
+
+        function intersectionsForRadius(r){
+            const all = [];
+            const root = 100*r*r - 576;
+            if(root < -1e-9) return [];
+            const sq = Math.sqrt(Math.max(0, root));
+            const sideDefs = [
+                {sx: 1, sy: 1},
+                {sx:-1, sy: 1},
+                {sx:-1, sy:-1},
+                {sx: 1, sy:-1}
+            ];
+            for(const side of sideDefs){
+                const sols = [ (18 - sq)/50, (18 + sq)/50 ];
+                for(const s of sols){
+                    if(s >= -1e-9 && s <= 1 + 1e-9){
+                        const u = 4*s*side.sx;
+                        const v = 3*(1-s)*side.sy;
+                        all.push({x:u, y:v+3});
+                    }
+                }
+            }
+            return uniquePoints(all, 1e-5);
+        }
+
+        function modeForRadius(r,count){
+            const eps=1e-6;
+            if(r < 12/5 - eps) return 'Окружность внутри ромба';
+            if(Math.abs(r-12/5) <= 0.015) return 'Касание всех четырёх сторон';
+            if(r < 3 - eps) return 'По 2 пересечения на каждой стороне';
+            if(Math.abs(r-3) <= 0.015) return 'Проход через верхнюю и нижнюю вершины';
+            if(r < 4 - eps) return 'По 1 пересечению на каждой стороне';
+            if(Math.abs(r-4) <= 0.015) return 'Проход через левую и правую вершины';
+            return 'Окружность вне ромба';
+        }
+
+        function modelHint(r,count){
+            if(Math.abs(r-12/5)<=0.015) return 'Это один из ответов: касание даёт 4 решения.';
+            if(r>3 && r<4) return 'Это второй тип ответа: ровно по одной точке на каждой стороне.';
+            if(r<12/5) return 'Радиус слишком мал: решений нет.';
+            if(r>12/5 && r<3) return 'Здесь решений слишком много: их 8.';
+            if(Math.abs(r-3)<=0.015) return 'Осторожно: здесь не 4, а 6 решений.';
+            if(Math.abs(r-4)<=0.015) return 'Здесь только две боковые вершины.';
+            return 'Попробуй |a| = 12/5, затем 3.5.';
+        }
+
+        function toScreen(x,y){
+            const w=640,h=540;
+            const ox=w/2, oy=h/2 + 10;
+            const unit=44*state.zoom;
+            return {x: ox + x*unit, y: oy - y*unit};
+        }
+
+        function polyPath(points){
+            return points.map((p,i)=>{
+                const s=toScreen(p.x,p.y);
+                return `${i?'L':'M'}${s.x.toFixed(2)},${s.y.toFixed(2)}`;
+            }).join(' ') + ' Z';
+        }
+
+        function draw(){
+            const a = Number(aSlider.value);
+            state.a = a;
+            const r = Math.abs(a);
+            const pts = intersectionsForRadius(r);
+            const mode = modeForRadius(r, pts.length);
+
+            aValue.textContent = fmt(a);
+            radiusText.textContent = `|a| = ${fmt(r)}`;
+            countText.textContent = String(pts.length);
+            modeText.textContent = mode;
+            hintText.textContent = modelHint(r, pts.length);
+
+            const hi = (key) => state.highlight.split(/\s+/).includes(key);
+
+            let out = '';
+            out += `<rect x="0" y="0" width="640" height="540" fill="transparent"/>`;
+
+            if(tgGrid.checked){
+                for(let x=-6;x<=6;x++){
+                    const a=toScreen(x,-3), b=toScreen(x,9);
+                    out += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${colors.grid}" stroke-width="${x===0?2:1}" opacity="${x===0?0:0.55}"/>`;
+                }
+                for(let y=-1;y<=7;y++){
+                    const a=toScreen(-6,y), b=toScreen(6,y);
+                    out += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${colors.grid}" stroke-width="${y===0?2:1}" opacity="${y===0?0:0.55}"/>`;
+                }
+                const xAxisA=toScreen(-6,0), xAxisB=toScreen(6,0), yAxisA=toScreen(0,-1), yAxisB=toScreen(0,7);
+                out += `<line x1="${xAxisA.x}" y1="${xAxisA.y}" x2="${xAxisB.x}" y2="${xAxisB.y}" stroke="${colors.axis}" stroke-width="2.4"/>`;
+                out += `<line x1="${yAxisA.x}" y1="${yAxisA.y}" x2="${yAxisB.x}" y2="${yAxisB.y}" stroke="${colors.axis}" stroke-width="2.4"/>`;
+                for(let x=-5;x<=5;x++){
+                    const p=toScreen(x,0);
+                    out += `<text x="${p.x+4}" y="${p.y-6}" fill="${colors.text}" font-size="12" opacity="0.8">${x}</text>`;
+                }
+                for(let y=0;y<=6;y++){
+                    const p=toScreen(0,y);
+                    out += `<text x="${p.x+6}" y="${p.y-6}" fill="${colors.text}" font-size="12" opacity="0.8">${y}</text>`;
+                }
+            }
+
+            // Diamond
+            out += `<path d="${polyPath(vertices)}" fill="rgba(120,183,255,0.08)" stroke="${colors.diamond}" stroke-width="${hi('diamond') || hi('vertices') ? 5 : 3.2}"/>`;
+
+            // Circle
+            const c = toScreen(0,3);
+            out += `<circle cx="${c.x}" cy="${c.y}" r="${44*state.zoom*r}" fill="rgba(143,240,193,0.08)" stroke="${colors.circle}" stroke-width="${hi('circle') ? 5 : 3.2}"/>`;
+
+            // Center
+            out += `<circle cx="${c.x}" cy="${c.y}" r="${hi('center') ? 7 : 5}" fill="white" stroke="#0b1020" stroke-width="2"/>`;
+            out += `<text x="${c.x+10}" y="${c.y-10}" fill="white" font-size="14" font-weight="700">O(0,3)</text>`;
+
+            // foot/tangent points
+            if(tgFoot.checked){
+                for(const f of foots){
+                    const p=toScreen(f.x,f.y);
+                    out += `<circle cx="${p.x}" cy="${p.y}" r="${hi('tangent')||hi('distance')?6:4.5}" fill="#f39cff" opacity="0.95"/>`;
+                }
+            }
+
+            // vertices
+            for(const v of vertices){
+                const p=toScreen(v.x,v.y);
+                out += `<circle cx="${p.x}" cy="${p.y}" r="${hi('vertices')?6:5}" fill="${colors.vertex}"/>`;
+                if(tgLabels.checked){
+                    out += `<text x="${p.x + (v.x>=0?10:-86)}" y="${p.y + (v.y>3?-10:18)}" fill="${colors.text}" font-size="13" font-weight="700">${v.name}</text>`;
+                }
+            }
+
+            // intersection points
+            if(tgPoints.checked){
+                for(const p0 of pts){
+                    const p=toScreen(p0.x,p0.y);
+                    out += `<circle cx="${p.x}" cy="${p.y}" r="${hi('intersections')||hi('cases')||hi('check')||hi('answer')?7:5.5}" fill="${colors.points}" stroke="#3e2c00" stroke-width="2"/>`;
+                }
+            }
+
+            // annotations
+            const banner = pts.length===4 ? 'Ровно 4 решения' : `${pts.length} решений`;
+            out += `<rect x="18" y="18" width="230" height="70" rx="16" fill="rgba(8,16,32,0.82)" stroke="#344b7a"/>`;
+            out += `<text x="32" y="45" fill="white" font-size="16" font-weight="800">a = ${fmt(a)}, |a| = ${fmt(r)}</text>`;
+            out += `<text x="32" y="68" fill="${pts.length===4 ? '#8ff0c1' : '#ffd479'}" font-size="19" font-weight="800">${banner}</text>`;
+
+            svg.innerHTML = out;
+        }
+
+        function setDetail(level){
+            state.detail = level;
+            document.querySelectorAll('[data-detail-btn]').forEach(btn => {
+                btn.style.outline = Number(btn.dataset.detailBtn)===level ? '2px solid rgba(120,183,255,.65)' : 'none';
+            });
+            document.querySelectorAll('.detail').forEach(el => {
+                const need = Number(el.dataset.level || 1);
+                el.style.display = need <= level ? 'block' : 'none';
+            });
+        }
+
+        function setStep(n){
+            state.step = Math.max(1, Math.min(state.stepsTotal, n));
+            document.getElementById('stepCounter').textContent = state.step;
+            document.querySelectorAll('.step[data-step]').forEach(el => {
+                el.classList.toggle('show', Number(el.dataset.step) <= state.step);
+            });
+        }
+
+        function setupStepLinks(){
+            document.querySelectorAll('.step[data-highlight]').forEach(step => {
+                step.addEventListener('mouseenter', ()=>{ state.highlight = step.dataset.highlight || ''; step.classList.add('activeLink'); draw(); });
+                step.addEventListener('mouseleave', ()=>{ state.highlight = ''; step.classList.remove('activeLink'); draw(); });
+            });
+        }
+
+        document.querySelectorAll('[data-detail-btn]').forEach(btn => btn.addEventListener('click', ()=>setDetail(Number(btn.dataset.detailBtn))));
+        document.getElementById('nextStep').addEventListener('click', ()=>setStep(state.step+1));
+        document.getElementById('prevStep').addEventListener('click', ()=>setStep(state.step-1));
+        document.getElementById('showAll').addEventListener('click', ()=>setStep(state.stepsTotal));
+
+        [aSlider, zoomSlider, tgGrid, tgLabels, tgPoints, tgFoot].forEach(el => el.addEventListener('input', ()=>{
+            state.zoom = Number(zoomSlider.value);
+            draw();
+        }));
+
+        document.getElementById('zoomIn').addEventListener('click', ()=>{ zoomSlider.value = Math.min(2.4, Number(zoomSlider.value)+0.1).toFixed(2); state.zoom=Number(zoomSlider.value); draw(); });
+        document.getElementById('zoomOut').addEventListener('click', ()=>{ zoomSlider.value = Math.max(0.6, Number(zoomSlider.value)-0.1).toFixed(2); state.zoom=Number(zoomSlider.value); draw(); });
+        document.getElementById('zoomReset').addEventListener('click', ()=>{ zoomSlider.value = 1; state.zoom=1; draw(); });
+
+        document.getElementById('svgHolder').addEventListener('wheel', (e)=>{
+            e.preventDefault();
+            const delta = e.deltaY < 0 ? 0.06 : -0.06;
+            const z = Math.max(0.6, Math.min(2.4, Number(zoomSlider.value)+delta));
+            zoomSlider.value = z.toFixed(2);
+            state.zoom = z;
+            draw();
+        }, {passive:false});
+
+        document.querySelectorAll('[data-toggle-answer]').forEach(btn => btn.addEventListener('click', ()=>{
+            document.getElementById(btn.dataset.toggleAnswer).classList.toggle('show');
+        }));
+
+        document.querySelectorAll('[data-set-a]').forEach(btn => btn.addEventListener('click', ()=>{
+            const val = Number(btn.dataset.setA);
+            aSlider.value = val;
+            draw();
+        }));
+
+        const similarBank = [
+            {
+                title:'Задача A',
+                text:'Найдите все значения параметра b, при каждом из которых система { 5|y − 2| = 10 − 2|x|;  x² + (y − 2)² = b² } имеет ровно четыре решения.',
+                answer:'Ответ: |b| = 10/√29 или 2 &lt; |b| &lt; 5. Значит b = ±10/√29, b ∈ (−5, −2) ∪ (2, 5).',
+                idea:'Ромб: 2|x| + 5|y−2| = 10. Центр (0,2). Расстояние до стороны 10/√29. Ближайшие вершины на расстоянии 2, дальние — 5.'
+            },
+            {
+                title:'Задача C',
+                text:'Найдите все значения параметра p, при каждом из которых система { 2|y − 4| = 8 − |x|;  x² + (y − 4)² = p² } имеет ровно четыре решения.',
+                answer:'Ответ: |p| = 8/√5 или 4 &lt; |p| &lt; 8. Значит p = ±8/√5, p ∈ (−8, −4) ∪ (4, 8).',
+                idea:'Ромб: |x| + 2|y−4| = 8. Центр (0,4). Расстояние до стороны 8/√5. Ближайшие вершины на расстоянии 4, дальние — 8.'
+            },
+            {
+                title:'Задача D',
+                text:'Найдите все значения параметра m, при каждом из которых система { 6|y − 1| = 18 − 3|x|;  x² + (y − 1)² = m² } имеет ровно четыре решения.',
+                answer:'Ответ: |m| = 6/√5 или 3 &lt; |m| &lt; 6. Значит m = ±6/√5, m ∈ (−6, −3) ∪ (3, 6).',
+                idea:'Ромб: 3|x| + 6|y−1| = 18. Центр (0,1). Расстояние до стороны 18/√45 = 6/√5. Ближайшие вершины на расстоянии 3.'
+            },
+            {
+                title:'Задача F',
+                text:'Найдите все значения параметра s, при каждом из которых система { 7|y − 3| = 21 − 3|x|;  x² + (y − 3)² = s² } имеет ровно четыре решения.',
+                answer:'Ответ: |s| = 21/√58 или 3 &lt; |s| &lt; 7. Значит s = ±21/√58, s ∈ (−7, −3) ∪ (3, 7).',
+                idea:'Ромб: 3|x| + 7|y−3| = 21. Центр (0,3). Расстояние до стороны 21/√58. Ближайшие вершины — верхняя и нижняя, расстояние 3.'
+            },
+            {
+                title:'Задача G',
+                text:'Найдите все значения параметра k, при каждом из которых система { 8|y − 2| = 16 − 2|x|;  x² + (y − 2)² = k² } имеет ровно четыре решения.',
+                answer:'Ответ: |k| = 8/√17 или 2 &lt; |k| &lt; 8. Значит k = ±8/√17, k ∈ (−8, −2) ∪ (2, 8).',
+                idea:'Ромб: 2|x| + 8|y−2| = 16. Центр (0,2). Расстояние до стороны 16/√68 = 8/√17. Ближайшие вершины на расстоянии 2.'
+            }
+        ];
+
+        function renderTasks(){
+            const box = document.getElementById('similarTasks');
+            const shuffled = [...similarBank].sort(()=>Math.random()-0.5).slice(0,3);
+            box.innerHTML = shuffled.map((task, idx) => `
+      <article class="taskCard">
+        <h4>${task.title}</h4>
+        <div>${task.text}</div>
+        <div class="controls" style="margin-top:10px">
+          <button class="secondary" data-local-answer="ans${idx}">Показать ответ</button>
+          <button class="ghost" data-local-answer="idea${idx}">Идея</button>
+        </div>
+        <div class="answer" id="ans${idx}">${task.answer}</div>
+        <div class="answer" id="idea${idx}">${task.idea}</div>
+      </article>
+    `).join('');
+            box.querySelectorAll('[data-local-answer]').forEach(btn => btn.addEventListener('click', ()=>{
+                document.getElementById(btn.dataset.localAnswer).classList.toggle('show');
+            }));
+        }
+
+        document.getElementById('regenTasks').addEventListener('click', renderTasks);
+
+        setDetail(2);
+        setStep(1);
+        setupStepLinks();
+        renderTasks();
+        draw();
+    })();
+</script>
+</body>
+</html>
